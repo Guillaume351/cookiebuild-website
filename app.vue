@@ -19,7 +19,7 @@
           class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
         >
           <Button @click="playNow" size="lg" class="w-full sm:w-auto">
-            <GameController class="mr-2 h-5 w-5" />
+            <Gamepad2 class="mr-2 h-5 w-5" />
             Play Now
           </Button>
           <Button
@@ -28,7 +28,7 @@
             variant="outline"
             class="w-full sm:w-auto"
           >
-            <Discord class="mr-2 h-5 w-5" />
+            <Mic class="mr-2 h-5 w-5" />
             Join Discord
           </Button>
         </div>
@@ -69,7 +69,7 @@ import { ref } from "vue";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Copy, GameController, Discord, Mail } from "lucide-vue-next";
+import { Copy, Gamepad2, Mic, Mail } from "lucide-vue-next";
 
 const serverIP = ref("play.cookie-build.com");
 
