@@ -1,38 +1,113 @@
 <template>
   <div class="homepage">
     <div class="hero">
-      <h1>Cookie Build</h1>
-      <p class="tagline">The Ultimate Minecraft Mini-Games Experience</p>
-      <div class="server-info">
-        <p class="ip">play.cookie-build.com</p>
-        <button @click="copyIP" class="copy-button">Copy IP</button>
+      <div class="hero-content">
+        <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
+          Cookie Build
+        </h1>
+        <p class="tagline text-xl md:text-2xl text-white mb-8">
+          The Classic Minecraft Mini-Games Experience
+        </p>
+        <div class="server-info mb-8">
+          <Input v-model="serverIP" readonly class="w-64 md:w-72" />
+          <Button @click="copyIP" variant="secondary">
+            <Copy class="mr-2 h-4 w-4" />
+            Copy IP
+          </Button>
+        </div>
+        <div
+          class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
+        >
+          <Button @click="playNow" size="lg" class="w-full sm:w-auto">
+            <GameController class="mr-2 h-5 w-5" />
+            Play Now
+          </Button>
+          <Button
+            @click="joinDiscord"
+            size="lg"
+            variant="outline"
+            class="w-full sm:w-auto"
+          >
+            <Discord class="mr-2 h-5 w-5" />
+            Join Discord
+          </Button>
+        </div>
       </div>
-      <button class="cta-button">Play Now</button>
     </div>
     <div class="features">
-      <div class="feature">
-        <img src="/unique-games-icon.svg" alt="Unique Games" />
-        <p>Unique Games</p>
-      </div>
-      <div class="feature">
-        <img src="/community-icon.svg" alt="Vibrant Community" />
-        <p>Vibrant Community</p>
-      </div>
-      <div class="feature">
-        <img src="/java-support-icon.svg" alt="Java Support" />
-        <p>Java Support</p>
-      </div>
+      <Card
+        v-for="feature in features"
+        :key="feature.title"
+        class="w-full sm:w-[calc(33.333%-1rem)] mb-6"
+      >
+        <CardHeader>
+          <CardTitle class="flex items-center">
+            <img
+              :src="feature.icon"
+              :alt="feature.title"
+              class="w-8 h-8 mr-3"
+            />
+            {{ feature.title }}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>{{ feature.description }}</p>
+        </CardContent>
+      </Card>
     </div>
-    <button @click="contactSupport" class="support-button">
-      Contact Support
-    </button>
+    <div class="text-center">
+      <Button @click="contactSupport" variant="outline" class="mt-8">
+        <Mail class="mr-2 h-4 w-4" />
+        Contact Support
+      </Button>
+    </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from "vue";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Copy, GameController, Discord, Mail } from "lucide-vue-next";
+
+const serverIP = ref("play.cookie-build.com");
+
+const features = [
+  {
+    title: "Unique Games",
+    icon: "/unique-games-icon.svg",
+    description:
+      "Experience a variety of homemade mini-games found nowhere else.",
+  },
+  {
+    title: "Vibrant Community",
+    icon: "/community-icon.svg",
+    description:
+      "Join a friendly and active player base from around the world.",
+  },
+  {
+    title: "Java Support",
+    icon: "/java-support-icon.svg",
+    description:
+      "In addition to the Bedrock support, Cookie Build is now fully compatible with Minecraft Java Edition for the best experience.",
+  },
+];
+
 const copyIP = () => {
-  navigator.clipboard.writeText("play.cookie-build.com");
+  navigator.clipboard.writeText(serverIP.value);
+  // You might want to use a toast notification here instead of an alert
   alert("IP address copied to clipboard!");
+};
+
+const playNow = () => {
+  // Implement the action for the Play Now button
+  console.log("Play Now clicked");
+};
+
+const joinDiscord = () => {
+  // Replace with your actual Discord invite link
+  window.open("https://discord.gg/ajmPnwh9g8", "_blank");
 };
 
 const contactSupport = () => {
@@ -45,111 +120,52 @@ const contactSupport = () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
-  font-family: "Arial", sans-serif;
 }
 
 .hero {
   text-align: center;
-  padding: 80px 0;
-  background: linear-gradient(rgba(62, 44, 44, 0.7), rgba(62, 44, 44, 0.7)),
-    url("/hero-bg.jpg") center/cover no-repeat;
+  padding: 80px 20px;
+  background: url("/lobby.webp") center/cover no-repeat;
   border-radius: 20px;
   margin-bottom: 60px;
+  position: relative;
+  overflow: hidden;
 }
 
-.hero h1 {
-  font-size: 5rem;
-  color: #e0c097;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  margin-bottom: 20px;
+.hero::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 1;
 }
 
-.tagline {
-  font-size: 1.5rem;
-  color: #fff;
-  margin-bottom: 30px;
+.hero-content {
+  position: relative;
+  z-index: 2;
 }
 
 .server-info {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 30px;
-}
-
-.ip {
-  font-size: 1.2rem;
-  color: #e0c097;
-  background-color: rgba(97, 75, 58, 0.7);
-  padding: 10px 20px;
-  border-radius: 5px 0 0 5px;
-}
-
-.copy-button {
-  background-color: #e0c097;
-  color: #3e2c2c;
-  border: none;
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 0 5px 5px 0;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.copy-button:hover {
-  background-color: #d1a978;
-}
-
-.cta-button {
-  background-color: #e0c097;
-  color: #3e2c2c;
-  border: none;
-  padding: 15px 40px;
-  font-size: 1.2rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.cta-button:hover {
-  background-color: #d1a978;
+  gap: 10px;
 }
 
 .features {
   display: flex;
-  justify-content: space-around;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 60px;
 }
 
-.feature {
-  text-align: center;
-}
-
-.feature img {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 15px;
-}
-
-.feature p {
-  color: #e0c097;
-  font-size: 1.1rem;
-}
-
-.support-button {
-  display: block;
-  margin: 0 auto;
-  background-color: #614b3a;
-  color: #e0c097;
-  border: none;
-  padding: 12px 30px;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.support-button:hover {
-  background-color: #7a5f4a;
+@media (max-width: 640px) {
+  .features {
+    flex-direction: column;
+  }
 }
 </style>
