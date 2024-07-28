@@ -1,5 +1,5 @@
 # Dockerfile
-FROM node:lts-alpine as build-stage
+FROM node:lts-alpine AS build-stage
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:lts-alpine as production-stage
+FROM node:lts-alpine AS production-stage
 
 WORKDIR /app
 
