@@ -83,6 +83,41 @@
         </Card>
       </div>
     </div>
+    <div class="about">
+      <h2 class="text-3xl font-bold text-center mb-8">About Cookie Build</h2>
+      <Card class="mb-6">
+        <CardHeader>
+          <CardTitle>Our Story</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p class="mb-4">
+            Cookie Build has been serving the Minecraft community for over 9
+            years. Originally launched as a Bedrock-only server, we're expanding
+            to support both Bedrock and Java editions in the latest remake of
+            the server, providing a classic mini-games experience to players
+            worldwide.
+          </p>
+          <p class="mb-4">
+            Follow us on Twitter:
+            <a
+              href="https://twitter.com/CookieBuild"
+              target="_blank"
+              class="text-blue-500 hover:underline"
+              >@CookieBuild</a
+            >
+          </p>
+          <p>
+            Server Owner & Developer:
+            <a
+              href="https://github.com/Guillaume351"
+              target="_blank"
+              class="text-blue-500 hover:underline"
+              >Guillaume351</a
+            >
+          </p>
+        </CardContent>
+      </Card>
+    </div>
     <div class="text-center">
       <Button @click="contactSupport" variant="outline" class="mt-8">
         <Mail class="mr-2 h-4 w-4" />
