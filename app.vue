@@ -193,19 +193,8 @@ const copyIP = () => {
 };
 
 const playNow = () => {
-  const isMobile =
-    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-
-  if (isMobile) {
-    // Launch Minecraft Bedrock on mobile
-    window.location.href = "minecraft://";
-  } else {
-    // Launch Minecraft Java on PC
-    // This is a pseudo-protocol that might work on some systems
-    window.location.href = "minecraft:";
-  }
+  window.location.href =
+    "minecraft:?addExternalServer=CookieBuild|play.cookie-build.com";
 };
 
 const joinDiscord = () => {
