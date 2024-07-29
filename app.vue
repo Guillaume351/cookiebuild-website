@@ -55,6 +55,34 @@
         </CardContent>
       </Card>
     </div>
+    <div class="minigames">
+      <h2 class="text-3xl font-bold text-center mb-8">Our Minigames</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card
+          v-for="game in minigames"
+          :key="game.name"
+          class="flex flex-col hover:shadow-lg transition-shadow duration-300"
+        >
+          <CardHeader>
+            <CardTitle class="flex items-center">
+              <img :src="game.icon" :alt="game.name" class="w-8 h-8 mr-3" />
+              {{ game.name }}
+            </CardTitle>
+          </CardHeader>
+          <CardContent class="flex-grow">
+            <p>{{ game.description }}</p>
+          </CardContent>
+          <CardFooter class="flex justify-between items-center">
+            <Badge
+              :variant="game.available ? 'default' : 'secondary'"
+              class="text-sm"
+            >
+              {{ game.available ? "Available Now" : "Coming Soon" }}
+            </Badge>
+          </CardFooter>
+        </Card>
+      </div>
+    </div>
     <div class="text-center">
       <Button @click="contactSupport" variant="outline" class="mt-8">
         <Mail class="mr-2 h-4 w-4" />
@@ -93,6 +121,35 @@ const features = [
       "In addition to the Bedrock support, Cookie Build is now fully compatible with Minecraft Java Edition for the best experience.",
   },
 ];
+const minigames = [
+  {
+    name: "MicroBattles",
+    description:
+      "Fast-paced mini-game where players compete in quick, intense battles.",
+    available: true,
+    icon: "/microbattles-icon.svg",
+  },
+  {
+    name: "Build Battle",
+    description:
+      "Show off your creativity by building amazing structures in a limited time.",
+    available: false,
+    icon: "/buildbattle-icon.svg",
+  },
+  {
+    name: "SkyWars",
+    description: "Battle other players on floating islands in the sky.",
+    available: false,
+    icon: "/skywars-icon.svg",
+  },
+  {
+    name: "TurfWars",
+    description:
+      "Capture territory and defend it from other teams in this exciting game mode.",
+    available: false,
+    icon: "/turfwars-icon.svg",
+  },
+];
 
 const copyIP = () => {
   navigator.clipboard.writeText(serverIP.value);
@@ -101,8 +158,19 @@ const copyIP = () => {
 };
 
 const playNow = () => {
-  // Implement the action for the Play Now button
-  console.log("Play Now clicked");
+  const isMobile =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+  if (isMobile) {
+    // Launch Minecraft Bedrock on mobile
+    window.location.href = "minecraft://";
+  } else {
+    // Launch Minecraft Java on PC
+    // This is a pseudo-protocol that might work on some systems
+    window.location.href = "minecraft:";
+  }
 };
 
 const joinDiscord = () => {
@@ -163,8 +231,13 @@ const contactSupport = () => {
   margin-bottom: 60px;
 }
 
+.minigames {
+  margin-bottom: 60px;
+}
+
 @media (max-width: 640px) {
-  .features {
+  .features,
+  .minigames > div {
     flex-direction: column;
   }
 }
