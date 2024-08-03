@@ -15,6 +15,7 @@
             Copy IP
           </Button>
         </div>
+        <PlayerCounter class="mb-8" />
         <div
           class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
         >
@@ -133,6 +134,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Copy, Gamepad2, Mic, Mail } from "lucide-vue-next";
+import PlayerCounter from "@/components/PlayerCounter.vue";
 
 const serverIP = ref("play.cookie-build.com");
 
