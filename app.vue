@@ -3,10 +3,11 @@
     <div class="hero">
       <div class="hero-content">
         <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
-          Cookie Build
+          Cookie Build 🍪
         </h1>
         <p class="tagline text-xl md:text-2xl text-white mb-8">
-          The Classic Minecraft Mini-Games Experience
+          The Classic Minecraft Mini-Games Experience, for Java & Bedrock
+          Editions 🎮
         </p>
         <div class="server-info mb-8">
           <Input v-model="serverIP" readonly class="w-64 md:w-72" />
@@ -62,8 +63,14 @@
         <Card
           v-for="game in minigames"
           :key="game.name"
-          class="flex flex-col hover:shadow-lg transition-shadow duration-300"
+          class="flex flex-col hover:shadow-lg transition-shadow duration-300 relative"
         >
+          <div
+            v-if="game.new"
+            class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-tr"
+          >
+            NEW
+          </div>
           <CardHeader>
             <CardTitle class="flex items-center">
               <img :src="game.icon" :alt="game.name" class="w-8 h-8 mr-3" />
@@ -165,6 +172,14 @@ const minigames = [
       "Fast-paced mini-game where players compete in quick, intense battles.",
     available: true,
     icon: "/microbattles-icon.svg",
+  },
+  {
+    name: "Pitchout",
+    description:
+      "Knock your opponents out of the map 5 times to eliminate them!",
+    available: true,
+    icon: "/pitchout-icon.svg",
+    new: true,
   },
   {
     name: "Build Battle",
