@@ -136,12 +136,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Copy, Gamepad2, Mic, Mail } from "lucide-vue-next";
 import PlayerCounter from "@/components/PlayerCounter.vue";
+import Badge from "@/components/ui/badge/Badge.vue";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Copy, Gamepad2, Mail, Mic } from "lucide-vue-next";
+import { ref } from "vue";
 
 const serverIP = ref("play.cookie-build.com");
 
@@ -228,10 +229,21 @@ const contactSupport = () => {
 .homepage {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 0;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
 }
 
 .hero {
+  margin-top: 76px; /* Hauteur de la navbar */
   text-align: center;
   padding: 80px 20px;
   background: url("/lobby.webp") center/cover no-repeat;
@@ -280,6 +292,15 @@ const contactSupport = () => {
   .features,
   .minigames > div {
     flex-direction: column;
+  }
+
+  .navbar .container {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .navbar .hidden {
+    display: none;
   }
 }
 </style>

@@ -4,6 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
   app: {
+    layoutTransition: { name: "layout", mode: "out-in" },
     head: {
       title: "Cookie Build : Minecraft Mini-Games Server",
       meta: [
