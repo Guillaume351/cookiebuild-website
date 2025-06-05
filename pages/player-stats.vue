@@ -204,7 +204,7 @@ interface PlayerStat {
   playtime?: bigint;
 }
 
-const selectedGamemode = ref<string | null>(null);
+const selectedGamemode = ref<string | null>("");
 const selectedPeriod = ref("week");
 
 const gamemodes = [
