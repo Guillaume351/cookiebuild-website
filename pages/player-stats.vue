@@ -11,16 +11,48 @@
       </div>
 
       <div class="bg-white rounded-lg shadow-md p-6">
-        <div class="mb-6 flex items-center justify-between">
-          <Input
-            v-model="searchQuery"
-            placeholder="Search players..."
-            class="w-full max-w-md"
-          />
+        <div class="mb-6 flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <Input
+              v-model="searchQuery"
+              placeholder="Search players..."
+              class="w-full"
+            />
+          </div>
+
+          <div class="flex gap-2">
+            <select
+              v-model="selectedGamemode"
+              class="border rounded px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">All Gamemodes</option>
+              <option value="MicroBattles">Microbattles</option>
+              <option value="Pitchout">Pitchout</option>
+            </select>
+
+            <select
+              v-model="selectedPeriod"
+              class="border rounded px-3 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">All Time</option>
+              <option value="week">Last Week</option>
+              <option value="month">Last Month</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mb-6 flex justify-between items-center">
           <div class="text-sm text-gray-600">
             Showing {{ startIndex + 1 }} - {{ endIndex }} of
             {{ filteredStats.length }} players
           </div>
+          <button
+            v-if="selectedGamemode || selectedPeriod !== 'all'"
+            @click="resetFilters"
+            class="text-sm text-blue-500 hover:underline"
+          >
+            Reset Filters
+          </button>
         </div>
 
         <div v-if="pending" class="text-center py-10">
@@ -52,20 +84,20 @@
                     Platform
                   </th>
                   <th class="py-3 px-4 text-left font-semibold text-gray-700">
-                    Kills
+                    Wins
                   </th>
                   <th class="py-3 px-4 text-left font-semibold text-gray-700">
-                    Deaths
+                    Losses
                   </th>
                   <th class="py-3 px-4 text-left font-semibold text-gray-700">
-                    Assists
+                    Win Rate
                   </th>
                   <th class="py-3 px-4 text-left font-semibold text-gray-极7">
-                    K/D Ratio
-                  </th>
-                  <th class="py-3 px-4 text-left font-semibold text-gray-700">
                     Playtime
                   </th>
+                  <th
+                    class="py-3 px-4 text-left font-semibold text-gray-700"
+                  ></th>
                 </tr>
               </thead>
               <tbody>
@@ -100,16 +132,17 @@
                     >
                     <span v-else class="text-green-500">Java</span>
                   </td>
-                  <td class="py-3 px-4">{{ stat.kills || 0 }}</td>
-                  <td class="py-3 px-4">{{ stat.deaths || 0 }}</td>
-                  <td class="py-3 px-4">{{ stat.assists || 0 }}</td>
+                  <td class="py-3 px-4">{{ stat.wins || 0 }}</td>
+                  <td class="py-3 px-4">{{ stat.losses || 0 }}</td>
                   <td class="py-3 px-4">
                     {{
-                      stat.deaths
-                        ? (stat.kills / stat.deaths).toFixed(2)
-                        : stat.kills
-                        ? "∞"
-                        : "0.00"
+                      Number(stat.wins) + Number(stat.losses) > 0
+                        ? (
+                            (Number(stat.wins) /
+                              (Number(stat.wins) + Number(stat.losses))) *
+                            100
+                          ).toFixed(1) + "%"
+                        : "0%"
                     }}
                   </td>
                   <td class="py-3 px-4">{{ formatPlaytime(stat.playtime) }}</td>
@@ -166,14 +199,32 @@ import { Input } from "@/components/ui/input";
 interface PlayerStat {
   id: string;
   name?: string;
-  kills: number;
-  deaths: number;
-  assists: number;
+  wins: number;
+  losses: number;
   playtime?: bigint;
 }
 
-const { data, pending, error } = await useFetch<{ data: PlayerStat[] }>(
-  "/api/player-stats"
+const selectedGamemode = ref<string | null>(null);
+const selectedPeriod = ref("week");
+
+const gamemodes = [
+  { value: "MICROBATTLES", label: "Microbattles" },
+  { value: "PITCHOUT", label: "Pitchout" },
+];
+const periods = [
+  { value: "week", label: "This Week" },
+  { value: "month", label: "This Month" },
+  { value: "all", label: "All Time" },
+];
+
+const { data, pending, error, refresh } = useFetch<{ data: PlayerStat[] }>(
+  "/api/player-stats",
+  {
+    query: {
+      gamemode: selectedGamemode,
+      period: selectedPeriod,
+    },
+  }
 );
 const stats = computed(() => data.value?.data || []);
 const searchQuery = ref("");
@@ -190,8 +241,8 @@ const filteredStats = computed(() => {
     result = result.filter((stat) => stat.name?.toLowerCase().includes(query));
   }
 
-  // Sort by kills descending
-  return result.sort((a, b) => b.kills - a.kills);
+  // Sort by wins descending
+  return result.sort((a, b) => b.wins - a.wins);
 });
 
 // Pagination
@@ -232,6 +283,11 @@ function nextPage() {
   if (currentPage.value < totalPages.value) currentPage.value++;
 }
 
+function resetFilters() {
+  selectedGamemode.value = null;
+  selectedPeriod.value = "week";
+}
+
 // Format player name
 function formatPlayerName(name?: string) {
   if (!name) return "Unknown Player";
@@ -258,8 +314,9 @@ function formatPlaytime(playtime?: bigint) {
 }
 
 // Reset pagination when search changes
-watch(searchQuery, () => {
+watch([searchQuery, selectedGamemode, selectedPeriod], () => {
   currentPage.value = 1;
+  refresh();
 });
 </script>
 
