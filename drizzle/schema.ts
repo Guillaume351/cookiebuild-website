@@ -1,4 +1,4 @@
-import { pgTable, bigint, varchar, uuid, timestamp, foreignKey, unique, integer, jsonb, primaryKey, pgSequence } from "drizzle-orm/pg-core"
+import { pgTable, bigint, varchar, uuid, timestamp, foreignKey, unique, integer, jsonb, boolean, primaryKey, pgSequence } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 
@@ -49,6 +49,22 @@ export const playerMatchPerformances = pgTable("player_match_performances", {
 			name: "fklni8aav3fe2p6ep8fq4sc9i94"
 		}),
 	unique("uk26u03l3ifflmyiat5l43emltl").on(table.matchId, table.playerId),
+]);
+
+export const playerSessions = pgTable("player_sessions", {
+	id: uuid().primaryKey().notNull(),
+	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
+	duration: bigint({ mode: "number" }),
+	endTime: timestamp("end_time", { precision: 6, mode: 'string' }),
+	serverCrash: boolean("server_crash"),
+	startTime: timestamp("start_time", { precision: 6, mode: 'string' }).notNull(),
+	playerId: uuid("player_id").notNull(),
+}, (table) => [
+	foreignKey({
+			columns: [table.playerId],
+			foreignColumns: [playerdata.id],
+			name: "fkmx7yne41o6g4e8xs06d3s3hkg"
+		}),
 ]);
 
 export const matchPlayers = pgTable("match_players", {

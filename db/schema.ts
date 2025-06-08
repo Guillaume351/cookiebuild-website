@@ -1,5 +1,6 @@
 import {
   bigint,
+  boolean,
   foreignKey,
   integer,
   jsonb,
@@ -41,7 +42,18 @@ export const playerdata = pgTable("playerdata", {
   createdat: timestamp({ precision: 6, mode: "string" }),
   lastlogin: timestamp({ precision: 6, mode: "string" }),
   name: varchar({ length: 255 }),
-  playtime: bigint({ mode: "number" }),
+  // playtime: bigint({ mode: "number" }), // Supprimé, sera calculé à partir des sessions
+});
+
+export const playerSessions = pgTable("player_sessions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  playerId: uuid("player_id")
+    .notNull()
+    .references(() => playerdata.id),
+  startTime: timestamp("start_time", { precision: 6, mode: "date" }).notNull(),
+  endTime: timestamp("end_time", { precision: 6, mode: "date" }),
+  duration: bigint("duration", { mode: "number" }), // en millisecondes
+  serverCrash: boolean("server_crash").default(false),
 });
 
 export const playerMatchPerformances = pgTable(

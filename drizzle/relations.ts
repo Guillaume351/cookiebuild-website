@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { matches, playerMatchPerformances, playerdata, matchPlayers, matchWinners } from "./schema";
+import { matches, playerMatchPerformances, playerdata, playerSessions, matchPlayers, matchWinners } from "./schema";
 
 export const playerMatchPerformancesRelations = relations(playerMatchPerformances, ({one}) => ({
 	match: one(matches, {
@@ -20,8 +20,16 @@ export const matchesRelations = relations(matches, ({many}) => ({
 
 export const playerdataRelations = relations(playerdata, ({many}) => ({
 	playerMatchPerformances: many(playerMatchPerformances),
+	playerSessions: many(playerSessions),
 	matchPlayers: many(matchPlayers),
 	matchWinners: many(matchWinners),
+}));
+
+export const playerSessionsRelations = relations(playerSessions, ({one}) => ({
+	playerdatum: one(playerdata, {
+		fields: [playerSessions.playerId],
+		references: [playerdata.id]
+	}),
 }));
 
 export const matchPlayersRelations = relations(matchPlayers, ({one}) => ({

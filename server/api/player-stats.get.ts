@@ -32,41 +32,52 @@ export default defineEventHandler(async (event) => {
         wins: sql<number>`(
           SELECT COUNT(*)
           FROM match_winners mw
+          JOIN matches m ON mw.match_id = m.id
           WHERE mw.player_id = playerdata.id
-          AND mw.match_id IN (
-            SELECT id FROM matches
-            WHERE
-              ${gamemode ? sql`gametype = ${gamemode}` : sql`TRUE`}
-              AND ${
-                period && period !== "all"
-                  ? sql`starttime >= ${dateRange}`
-                  : sql`TRUE`
-              }
-          )
+          AND (${gamemode ? sql`m.gametype = ${gamemode}` : sql`TRUE`})
+          AND (${
+            period && period !== "all"
+              ? sql`m.starttime >= ${dateRange}`
+              : sql`TRUE`
+          })
         )`.as("wins"),
         losses: sql<number>`(
           SELECT COUNT(*)
           FROM match_players mp
+          JOIN matches m ON mp.match_id = m.id
           WHERE mp.player_id = playerdata.id
-          AND mp.match_id IN (
-            SELECT id FROM matches
-            WHERE
-              ${gamemode ? sql`gametype = ${gamemode}` : sql`TRUE`}
-              AND ${
-                period && period !== "all"
-                  ? sql`starttime >= ${dateRange}`
-                  : sql`TRUE`
-              }
-          )
+          AND (${gamemode ? sql`m.gametype = ${gamemode}` : sql`TRUE`})
+          AND (${
+            period && period !== "all"
+              ? sql`m.starttime >= ${dateRange}`
+              : sql`TRUE`
+          })
           AND NOT EXISTS (
-            SELECT 1 FROM match_winners mw
-            WHERE mw.match_id = mp.match_id AND mw.player_id = playerdata.id
+            SELECT 1 FROM match_winners mw_loss
+            WHERE mw_loss.match_id = mp.match_id AND mw_loss.player_id = playerdata.id
           )
         )`.as("losses"),
-        playtime: playerdata.playtime,
+        playtime: sql<number>`COALESCE(
+          (
+            SELECT SUM(
+              CASE
+                WHEN ps.end_time IS NULL AND ps.server_crash = TRUE THEN
+                  EXTRACT(EPOCH FROM (NOW() - ps.start_time)) * 1000
+                ELSE ps.duration
+              END
+            )
+            FROM player_sessions ps
+            WHERE ps.player_id = playerdata.id
+            AND (${
+              period && period !== "all"
+                ? sql`ps.start_time >= ${dateRange}`
+                : sql`TRUE`
+            })
+          ), 0
+        )`.as("playtime"),
       })
       .from(playerdata)
-      .orderBy(sql`wins DESC`);
+      .orderBy(sql`wins DESC, playtime DESC`);
 
     return { data: stats };
   } catch (error) {
