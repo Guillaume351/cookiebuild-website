@@ -61,9 +61,12 @@ export default defineEventHandler(async (event) => {
           (
             SELECT SUM(
               CASE
-                WHEN ps.end_time IS NULL AND ps.server_crash = TRUE THEN
+                WHEN ps.duration IS NOT NULL THEN ps.duration
+                WHEN ps.end_time IS NOT NULL AND ps.start_time IS NOT NULL THEN
+                  EXTRACT(EPOCH FROM (ps.end_time - ps.start_time)) * 1000
+                WHEN ps.start_time IS NOT NULL THEN
                   EXTRACT(EPOCH FROM (NOW() - ps.start_time)) * 1000
-                ELSE ps.duration
+                ELSE 0
               END
             )
             FROM player_sessions ps
@@ -75,9 +78,28 @@ export default defineEventHandler(async (event) => {
             })
           ), 0
         )`.as("playtime"),
+        sessionCount: sql<number>`(
+          SELECT COUNT(*)
+          FROM player_sessions ps
+          WHERE ps.player_id = playerdata.id
+          AND (${
+            period && period !== "all"
+              ? sql`ps.start_time >= ${dateRange}`
+              : sql`TRUE`
+          })
+        )`.as("sessionCount"),
       })
       .from(playerdata)
       .orderBy(sql`wins DESC, playtime DESC`);
+
+    // Log détaillé pour les joueurs avec des stats suspectes
+    stats.forEach((player) => {
+      if ((player.wins > 0 || player.losses > 0) && player.playtime === 0) {
+        console.warn(
+          `[SUSPICIOUS STATS] Player ${player.name} (ID: ${player.id}): ${player.wins} wins, ${player.losses} losses, ${player.playtime}ms playtime, ${player.sessionCount} sessions`
+        );
+      }
+    });
 
     return { data: stats };
   } catch (error) {
