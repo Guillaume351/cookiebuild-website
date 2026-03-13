@@ -1,137 +1,207 @@
 <template>
-  <div class="homepage">
-    <div class="hero">
-      <div class="hero-content">
-        <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
-          Cookie Build 🍪
-        </h1>
-        <p class="tagline text-xl md:text-2xl text-white mb-8">
-          The Classic Minecraft Mini-Games Experience, for Java & Bedrock
-          Editions 🎮
-        </p>
-        <div class="server-info mb-8">
-          <Input v-model="serverIP" readonly class="w-64 md:w-72" />
-          <Button @click="copyIP" variant="secondary">
-            <Copy class="mr-2 h-4 w-4" />
-            Copy IP
-          </Button>
-        </div>
-        <PlayerCounter class="mb-8" />
-        <div
-          class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4"
+  <div class="space-y-20">
+    <!-- Hero Section -->
+    <section
+      class="relative overflow-hidden rounded-3xl bg-gray-900 text-center text-white shadow-2xl"
+    >
+      <div
+        class="absolute inset-0 z-0 bg-[url('/lobby.webp')] bg-cover bg-center opacity-50 transition-transform duration-1000 hover:scale-105"
+      ></div>
+      <div
+        class="absolute inset-0 z-10 bg-gradient-to-t from-gray-900 via-transparent to-black/30"
+      ></div>
+
+      <div class="relative z-20 px-6 py-24 md:py-32">
+        <h1
+          class="mb-6 text-5xl font-extrabold tracking-tight md:text-7xl drop-shadow-lg"
         >
-          <Button @click="playNow" size="lg" class="w-full sm:w-auto">
-            <Gamepad2 class="mr-2 h-5 w-5" />
+          Cookie Build <span class="text-orange-500">🍪</span>
+        </h1>
+        <p
+          class="mx-auto mb-10 max-w-2xl text-xl font-medium text-gray-200 md:text-2xl drop-shadow-md"
+        >
+          The Classic Minecraft Mini-Games Experience. <br />
+          <span class="text-orange-400">Java</span> &
+          <span class="text-green-400">Bedrock</span> Editions Supported.
+        </p>
+
+        <div
+          class="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+        >
+          <div class="flex items-center gap-2 rounded-lg bg-black/50 p-1 pl-4 backdrop-blur">
+            <input
+              type="text"
+              readonly
+              :value="serverIP"
+              class="w-48 bg-transparent text-sm font-mono text-white focus:outline-none md:w-64"
+            />
+            <Button
+              @click="copyIP"
+              variant="secondary"
+              size="sm"
+              class="hover:bg-white hover:text-black"
+            >
+              <Copy class="mr-2 h-4 w-4" />
+              Copy
+            </Button>
+          </div>
+        </div>
+
+        <PlayerCounter class="mb-10 justify-center" />
+
+        <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Button
+            @click="playNow"
+            size="lg"
+            class="w-full bg-orange-600 px-8 text-lg font-bold hover:bg-orange-700 sm:w-auto animate-pulse hover:animate-none"
+          >
+            <Gamepad2 class="mr-2 h-6 w-6" />
             Play Now
           </Button>
           <Button
             @click="joinDiscord"
             size="lg"
             variant="outline"
-            class="w-full sm:w-auto"
+            class="w-full border-white/20 bg-white/10 text-white hover:bg-white/20 sm:w-auto backdrop-blur-sm"
           >
-            <Mic class="mr-2 h-5 w-5" />
+            <Mic class="mr-2 h-6 w-6" />
             Join Discord
           </Button>
         </div>
       </div>
-    </div>
-    <div class="features">
-      <Card
-        v-for="feature in features"
-        :key="feature.title"
-        class="w-full sm:w-[calc(33.333%-1rem)] mb-6"
-      >
-        <CardHeader>
-          <CardTitle class="flex items-center">
-            <img
-              :src="feature.icon"
-              :alt="feature.title"
-              class="w-8 h-8 mr-3"
-            />
-            {{ feature.title }}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p>{{ feature.description }}</p>
-        </CardContent>
-      </Card>
-    </div>
-    <div class="minigames">
-      <h2 class="text-3xl font-bold text-center mb-8">Our Minigames</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    </section>
+
+    <!-- Legacy / History Section -->
+    <section class="text-center">
+      <div class="mx-auto max-w-4xl border-t border-zinc-800 pt-16 mt-10">
+        <h2 class="mb-6 text-2xl font-bold text-white">
+          History
+        </h2>
+        <p class="mb-8 text-lg text-zinc-400 leading-relaxed">
+          Cookie Build started in 2014 as a small project. Over the years, it developed into a mini-games server for the Minecraft PE community. Today, the project is still maintained and has been updated to support both Java and Bedrock editions.
+        </p>
+        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div class="rounded-xl bg-zinc-900 p-4 border border-zinc-800">
+            <div class="text-zinc-500 text-[10px] font-bold uppercase mb-1">Launched</div>
+            <div class="text-xl font-bold text-white">2014</div>
+          </div>
+          <div class="rounded-xl bg-zinc-900 p-4 border border-zinc-800">
+            <div class="text-zinc-500 text-[10px] font-bold uppercase mb-1">Peak Scale</div>
+            <div class="text-xl font-bold text-white">2,000+ Players</div>
+          </div>
+          <div class="rounded-xl bg-zinc-900 p-4 border border-zinc-800">
+            <div class="text-zinc-500 text-[10px] font-bold uppercase mb-1">Project Status</div>
+            <div class="text-xl font-bold text-white">Active</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section>
+      <div class="grid gap-8 md:grid-cols-3">
+        <Card
+          v-for="feature in features"
+          :key="feature.title"
+          class="border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+        >
+          <CardHeader>
+            <CardTitle class="flex items-center gap-3 text-xl">
+              <div class="rounded-lg bg-secondary p-2">
+                <img
+                  :src="feature.icon"
+                  :alt="feature.title"
+                  class="h-6 w-6"
+                />
+              </div>
+              {{ feature.title }}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p class="text-muted-foreground">{{ feature.description }}</p>
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+
+    <!-- Minigames Grid -->
+    <section>
+      <h2 class="mb-10 text-center text-3xl font-bold tracking-tight md:text-4xl text-foreground">
+        Our Minigames
+      </h2>
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
         <Card
           v-for="game in minigames"
           :key="game.name"
-          class="flex flex-col hover:shadow-lg transition-shadow duration-300 relative"
+          class="group relative overflow-hidden border-border bg-card transition-all duration-300 hover:border-orange-500/50 hover:shadow-2xl"
         >
           <div
             v-if="game.new"
-            class="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-tr"
+            class="absolute right-0 top-0 rounded-bl-xl bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-sm"
           >
             NEW
           </div>
           <CardHeader>
-            <CardTitle class="flex items-center">
-              <img :src="game.icon" :alt="game.name" class="w-8 h-8 mr-3" />
+            <CardTitle class="flex items-center gap-3 text-2xl">
+              <img :src="game.icon" :alt="game.name" class="h-8 w-8 transition-transform group-hover:scale-110" />
               {{ game.name }}
             </CardTitle>
           </CardHeader>
-          <CardContent class="flex-grow">
-            <p>{{ game.description }}</p>
-          </CardContent>
-          <CardFooter class="flex justify-between items-center">
+          <CardContent>
+            <p class="mb-4 text-muted-foreground">{{ game.description }}</p>
             <Badge
               :variant="game.available ? 'default' : 'secondary'"
-              class="text-sm"
+              :class="game.available ? 'bg-green-600 hover:bg-green-700' : ''"
             >
               {{ game.available ? "Available Now" : "Coming Soon" }}
             </Badge>
-          </CardFooter>
+          </CardContent>
         </Card>
       </div>
-    </div>
-    <div class="about">
-      <h2 class="text-3xl font-bold text-center mb-8">About Cookie Build</h2>
-      <Card class="mb-6">
-        <CardHeader>
-          <CardTitle>Our Story</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p class="mb-4">
-            Cookie Build has been serving the Minecraft community for over 9
-            years. Originally launched as a Bedrock-only server, we're expanding
-            to support both Bedrock and Java editions in the latest remake of
-            the server, providing a classic mini-games experience to players
-            worldwide.
-          </p>
-          <p class="mb-4">
-            Follow us on Twitter:
-            <a
-              href="https://twitter.com/CookieBuild"
-              target="_blank"
-              class="text-blue-500 hover:underline"
-              >@CookieBuild</a
-            >
-          </p>
-          <p>
-            Server Owner & Developer:
-            <a
-              href="https://github.com/Guillaume351"
-              target="_blank"
-              class="text-blue-500 hover:underline"
-              >Guillaume351</a
-            >
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-    <div class="text-center">
-      <Button @click="contactSupport" variant="outline" class="mt-8">
-        <Mail class="mr-2 h-4 w-4" />
-        Contact Support
-      </Button>
-    </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="mx-auto max-w-4xl">
+      <h2 class="mb-10 text-center text-3xl font-bold tracking-tight md:text-4xl text-foreground">
+        Frequently Asked Questions
+      </h2>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div v-for="(faq, index) in faqs" :key="index" class="rounded-xl border border-border bg-card p-6 shadow-sm">
+          <h3 class="mb-3 text-lg font-bold text-foreground">{{ faq.question }}</h3>
+          <p class="text-muted-foreground">{{ faq.answer }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="rounded-3xl bg-secondary/30 p-8 md:p-12">
+      <div class="flex flex-col items-center gap-8 md:flex-row">
+        <div class="flex-1">
+            <h2 class="mb-6 text-3xl font-bold tracking-tight text-foreground">About the Project</h2>
+            <div class="space-y-4 text-muted-foreground">
+                <p>
+                    Cookie Build is a passion project maintained by <strong>Guillaume351</strong>.
+                    It aims to preserve the spirit of classic Minecraft mini-games while leveraging modern technology.
+                </p>
+                <p>
+                    Whether you are playing on a phone, tablet, console, or PC, everyone plays together on the same server.
+                </p>
+            </div>
+            <div class="mt-8 flex gap-4">
+                <a href="https://twitter.com/CookieBuild" target="_blank" class="flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-600">
+                    Follow on Twitter
+                </a>
+                <a href="https://github.com/Guillaume351" target="_blank" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+        <div class="flex-1 text-center md:text-right">
+            <!-- Placeholder for an image or graphic if needed -->
+            <img src="/android-chrome-192x192.png" alt="Cookie Build" class="inline-block h-32 w-32 opacity-20 grayscale md:h-48 md:w-48" />
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -140,8 +210,7 @@ import PlayerCounter from "@/components/PlayerCounter.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Copy, Gamepad2, Mail, Mic } from "lucide-vue-next";
+import { Copy, Gamepad2, Mic } from "lucide-vue-next";
 import { ref } from "vue";
 
 const serverIP = ref("play.cookie-build.com");
@@ -151,33 +220,33 @@ const features = [
     title: "Unique Games",
     icon: "/unique-games-icon.svg",
     description:
-      "Experience a variety of homemade mini-games found nowhere else.",
+      "Experience a variety of homemade mini-games found nowhere else, built from scratch.",
   },
   {
-    title: "Vibrant Community",
+    title: "Global Community",
     icon: "/community-icon.svg",
     description:
-      "Join a friendly and active player base from around the world.",
+      "Join a friendly and active player base from around the world. Discord is our home.",
   },
   {
-    title: "Java Support",
+    title: "Cross-Platform",
     icon: "/java-support-icon.svg",
     description:
-      "In addition to the Bedrock support, Cookie Build is now fully compatible with Minecraft Java Edition for the best experience.",
+      "Full support for both Java & Bedrock Editions. Play with your friends on any device.",
   },
 ];
 const minigames = [
   {
     name: "MicroBattles",
     description:
-      "Fast-paced mini-game where players compete in quick, intense battles.",
+      "Fast-paced 4-team battles. Gather resources, build defenses, and be the last team standing.",
     available: true,
     icon: "/microbattles-icon.svg",
   },
   {
     name: "Pitchout",
     description:
-      "Knock your opponents out of the map 5 times to eliminate them!",
+      "A chaotic sumo-style game. Knock opponents into the void 5 times to eliminate them. Power-ups included!",
     available: true,
     icon: "/pitchout-icon.svg",
     new: true,
@@ -185,28 +254,54 @@ const minigames = [
   {
     name: "Build Battle",
     description:
-      "Show off your creativity by building amazing structures in a limited time.",
+      "Show off your creativity. Build amazing structures based on a theme in a limited time.",
     available: false,
     icon: "/buildbattle-icon.svg",
   },
   {
     name: "SkyWars",
-    description: "Battle other players on floating islands in the sky.",
+    description: "Battle other players on floating islands. Loot chests, bridge to mid, and survive.",
     available: false,
     icon: "/skywars-icon.svg",
   },
   {
     name: "TurfWars",
     description:
-      "Capture territory and defend it from other teams in this exciting game mode.",
+      "Capture territory by shooting opponents. The team with the most turf wins.",
     available: false,
     icon: "/turfwars-icon.svg",
   },
 ];
 
+const faqs = [
+  {
+    question: "Can I join from Minecraft Bedrock Edition?",
+    answer: "Yes! Cookie Build is fully compatible with Bedrock Edition (PE, Xbox, PlayStation, Switch). Use the IP play.cookie-build.com and port 19132.",
+  },
+  {
+    question: "Is the server free to play?",
+    answer: "Absolutely. All our mini-games are free to play for everyone. We focus on a classic, fair experience for all players.",
+  },
+  {
+    question: "How do I play on Java Edition?",
+    answer: "Open Minecraft Java Edition, go to Multiplayer > Add Server, and enter play.cookie-build.com. We support version 1.8 up to the latest!",
+  },
+  {
+    question: "Is there a Discord community?",
+    answer: "Yes, we have a very active Discord where you can find teammates, report bugs, and suggest new features. Click the 'Join Discord' button above!",
+  },
+  {
+    question: "What is the history of Cookie Build?",
+    answer: "It is a long-standing project that started in 2014. At its peak, it supported over 2,000 players at once. We have maintained and updated the project consistently over the years.",
+  },
+  {
+    question: "Are there any rank systems?",
+    answer: "We have a global leaderboard and seasonal stats. You can track your progress on our Player Stats page!",
+  },
+];
+
 const copyIP = () => {
   navigator.clipboard.writeText(serverIP.value);
-  // You might want to use a toast notification here instead of an alert
   alert("IP address copied to clipboard!");
 };
 
@@ -216,91 +311,52 @@ const playNow = () => {
 };
 
 const joinDiscord = () => {
-  // Replace with your actual Discord invite link
   window.open("https://discord.gg/ajmPnwh9g8", "_blank");
 };
 
-const contactSupport = () => {
-  window.location.href = "mailto:support@cookie-build.com";
-};
+useHead({
+  script: [
+    {
+      type: "application/ld+json",
+      children: JSON.stringify([
+        {
+          "@context": "https://schema.org",
+          "@type": "VideoGame",
+          name: "Cookie Build",
+          description:
+            "Cookie Build is a Minecraft Mini-Games Server supporting both Java and Bedrock Editions. Featuring original games like Pitchout and MicroBattles.",
+          genre: ["Multiplayer", "Mini-games", "Action"],
+          gamePlatform: ["PC", "Mobile", "Console"],
+          applicationCategory: "Game",
+          operatingSystem: "Windows, macOS, Linux, iOS, Android, Xbox, PlayStation, Switch",
+          url: "https://cookie-build.com",
+          image: "https://cookie-build.com/lobby.webp",
+          author: {
+            "@type": "Person",
+            name: "Guillaume351",
+            url: "https://github.com/Guillaume351",
+          },
+          offers: {
+            "@type": "Offer",
+            price: "0",
+            priceCurrency: "USD",
+            category: "Free",
+          },
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: faqs.map((f) => ({
+            "@type": "Question",
+            name: f.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: f.answer,
+            },
+          })),
+        },
+      ]),
+    },
+  ],
+});
 </script>
-
-<style scoped>
-.homepage {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0;
-}
-
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(10px);
-}
-
-.hero {
-  margin-top: 76px; /* Hauteur de la navbar */
-  text-align: center;
-  padding: 80px 20px;
-  background: url("/lobby.webp") center/cover no-repeat;
-  border-radius: 20px;
-  margin-bottom: 60px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.2);
-  z-index: 1;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-}
-
-.server-info {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-.features {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 60px;
-}
-
-.minigames {
-  margin-bottom: 60px;
-}
-
-@media (max-width: 640px) {
-  .features,
-  .minigames > div {
-    flex-direction: column;
-  }
-
-  .navbar .container {
-    flex-direction: column;
-    padding: 10px;
-  }
-
-  .navbar .hidden {
-    display: none;
-  }
-}
-</style>
