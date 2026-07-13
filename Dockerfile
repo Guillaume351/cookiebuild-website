@@ -1,5 +1,5 @@
 # Dockerfile
-FROM node:lts-alpine AS build-stage
+FROM node:24.18.0-alpine AS build-stage
 
 # Set working directory
 WORKDIR /app
@@ -13,19 +13,22 @@ RUN npm ci
 # Copy project files
 COPY . .
 
-# Build the app
-RUN npm run build
+# Validate types before producing the server bundle.
+ENV NODE_ENV=production
+RUN npm run typecheck && npm run build
 
 # Production stage
-FROM node:lts-alpine AS production-stage
+FROM node:24.18.0-alpine AS production-stage
 
 WORKDIR /app
 
 # Copy built assets from build-stage
-COPY --from=build-stage /app/.output ./
+COPY --from=build-stage --chown=node:node /app/.output ./
 
 # Expose the listening port
 EXPOSE 3000
+
+USER node
 
 # Run the app
 CMD ["node", "server/index.mjs"]

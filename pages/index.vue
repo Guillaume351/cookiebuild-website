@@ -210,7 +210,7 @@ import PlayerCounter from "@/components/PlayerCounter.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Gamepad2, Mic } from "lucide-vue-next";
+import { Copy, Gamepad2, Mic } from "@lucide/vue";
 import { ref } from "vue";
 
 const serverIP = ref("play.cookie-build.com");

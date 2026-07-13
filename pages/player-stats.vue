@@ -232,7 +232,7 @@ import {
   ChevronRight, 
   AlertTriangle,
   Ghost 
-} from "lucide-vue-next";
+} from "@lucide/vue";
 
 interface PlayerStat {
   id: string;

@@ -8,7 +8,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from "vue";
-import { Users } from "lucide-vue-next";
+import { Users } from "@lucide/vue";
 
 const playerCount = ref(null);
 let intervalId;

@@ -7,25 +7,29 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck",
+    "audit:prod": "npm audit --omit=dev"
   },
   "dependencies": {
-    "@vueuse/core": "^10.11.0",
-    "class-variance-authority": "^0.7.0",
+    "@lucide/vue": "^1.24.0",
+    "@vueuse/core": "^14.3.0",
+    "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "drizzle-orm": "^0.44.2",
-    "lucide-vue-next": "^0.417.0",
-    "nuxt": "^3.12.4",
-    "postgres": "^3.4.7",
-    "radix-vue": "^1.9.2",
-    "shadcn-nuxt": "^0.10.4",
-    "tailwind-merge": "^2.4.0",
-    "tailwindcss-animate": "^1.0.7",
-    "vue": "latest"
+    "drizzle-orm": "^0.45.2",
+    "postgres": "^3.4.9",
+    "radix-vue": "^1.9.17",
+    "tailwind-merge": "^2.6.0",
+    "vue": "^3.5.39"
   },
   "devDependencies": {
-    "@nuxtjs/tailwindcss": "^6.12.1",
-    "drizzle-kit": "^0.31.1",
-    "typescript": "^5.5.4"
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/node": "^24.13.3",
+    "drizzle-kit": "^0.31.10",
+    "nuxt": "^4.4.8",
+    "shadcn-nuxt": "^2.7.4",
+    "tailwindcss-animate": "^1.0.7",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.3.7"
   }
 }
