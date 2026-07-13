@@ -2,7 +2,12 @@
 .github
 .env
 .env.*
+.git
 .nuxt
 .output
 node_modules
+monitor/node_modules
+monitor/state
+monitor/test
+*.log
 npm-debug.log*
