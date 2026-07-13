@@ -42,8 +42,30 @@ export const playerdata = pgTable("playerdata", {
   createdat: timestamp({ precision: 6, mode: "string" }),
   lastlogin: timestamp({ precision: 6, mode: "string" }),
   name: varchar({ length: 255 }),
+  coins: integer().default(0).notNull(),
   // playtime: bigint({ mode: "number" }), // Supprimé, sera calculé à partir des sessions
 });
+
+export const minigameProgression = pgTable(
+  "minigame_progression",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id),
+    minigame: varchar({ length: 255 }).notNull(),
+    level: integer().default(1).notNull(),
+    experience: integer().default(0).notNull(),
+    unlockedKits: varchar("unlocked_kits"),
+    lastSelectedKitName: varchar("last_selected_kit_name", { length: 255 }),
+    lastSelectedKitLevel: integer("last_selected_kit_level").default(0).notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.playerId, table.minigame],
+      name: "minigame_progression_pkey",
+    }),
+  ],
+);
 
 export const playerSessions = pgTable("player_sessions", {
   id: uuid("id").primaryKey().defaultRandom(),

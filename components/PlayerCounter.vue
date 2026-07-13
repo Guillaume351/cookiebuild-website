@@ -1,39 +1,17 @@
 <template>
   <div class="player-counter">
     <Users class="mr-2 h-5 w-5" />
-    <span v-if="playerCount !== null">{{ playerCount }} players online</span>
-    <span v-else>Loading...</span>
+    <span v-if="pending">Checking server...</span>
+    <span v-else-if="status?.online && status.players > 0">{{ status.players }} {{ status.players === 1 ? 'player' : 'players' }} online</span>
+    <span v-else-if="status?.online">Server online · Quick Play ready</span>
+    <span v-else>Server status unavailable</span>
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted } from "vue";
+<script setup lang="ts">
 import { Users } from "@lucide/vue";
 
-const playerCount = ref(null);
-let intervalId;
-
-const fetchPlayerCount = async () => {
-  try {
-    const response = await fetch(
-      "https://api.mcstatus.io/v2/status/java/play.cookie-build.com"
-    );
-    const data = await response.json();
-    playerCount.value = data.players.online;
-  } catch (error) {
-    console.error("Failed to fetch player count:", error);
-    playerCount.value = null;
-  }
-};
-
-onMounted(() => {
-  fetchPlayerCount();
-  intervalId = setInterval(fetchPlayerCount, 60000); // Update every minute
-});
-
-onUnmounted(() => {
-  clearInterval(intervalId);
-});
+const { data: status, pending } = useFetch<{ online: boolean; players: number }>("/api/server-status");
 </script>
 
 <style scoped>

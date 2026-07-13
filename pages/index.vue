@@ -51,7 +51,7 @@
 
         <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button
-            @click="playNow"
+            @click="showJoinGuide = true"
             size="lg"
             class="w-full bg-orange-600 px-8 text-lg font-bold hover:bg-orange-700 sm:w-auto animate-pulse hover:animate-none"
           >
@@ -70,6 +70,92 @@
         </div>
       </div>
     </section>
+
+    <Teleport to="body">
+      <div
+        v-if="showJoinGuide"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="join-title"
+        @click.self="showJoinGuide = false"
+      >
+        <div class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-zinc-700 bg-zinc-950 p-6 text-left shadow-2xl md:p-8">
+          <div class="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 id="join-title" class="text-2xl font-black text-white">Join Cookie Build</h2>
+              <p class="mt-1 text-sm text-zinc-400">Choose your edition for the correct setup.</p>
+            </div>
+            <button
+              type="button"
+              class="rounded-lg p-2 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+              aria-label="Close join guide"
+              @click="showJoinGuide = false"
+            >
+              <X class="h-5 w-5" />
+            </button>
+          </div>
+
+          <div class="mb-6 grid grid-cols-3 gap-2" role="tablist" aria-label="Minecraft edition">
+            <button
+              v-for="edition in editions"
+              :key="edition.id"
+              type="button"
+              role="tab"
+              :aria-selected="selectedEdition === edition.id"
+              class="rounded-xl border px-3 py-3 text-sm font-bold transition-colors"
+              :class="selectedEdition === edition.id ? 'border-orange-400 bg-orange-500 text-white' : 'border-zinc-800 bg-zinc-900 text-zinc-400 hover:border-zinc-600'"
+              @click="selectedEdition = edition.id"
+            >
+              {{ edition.label }}
+            </button>
+          </div>
+
+          <div v-if="selectedEdition === 'java'" class="space-y-5 text-zinc-300">
+            <ol class="list-decimal space-y-2 pl-5">
+              <li>Open Minecraft Java Edition and select <strong>Multiplayer</strong>.</li>
+              <li>Select <strong>Add Server</strong>.</li>
+              <li>Paste the address below and join.</li>
+            </ol>
+            <JoinAddress :address="serverIP" label="Java server address" @copy="copyText(serverIP, 'Java address')" />
+          </div>
+
+          <div v-else-if="selectedEdition === 'bedrock'" class="space-y-5 text-zinc-300">
+            <ol class="list-decimal space-y-2 pl-5">
+              <li>On Windows, Android, or iOS, open <strong>Play → Servers → Add Server</strong>.</li>
+              <li>Use <strong>{{ serverIP }}</strong> with port <strong>{{ bedrockPort }}</strong>.</li>
+              <li>The button below can add it automatically when your device supports Minecraft links.</li>
+            </ol>
+            <div class="grid gap-3 sm:grid-cols-2">
+              <JoinAddress :address="serverIP" label="Address" @copy="copyText(serverIP, 'Bedrock address')" />
+              <JoinAddress :address="bedrockPort" label="Port" @copy="copyText(bedrockPort, 'Bedrock port')" />
+            </div>
+            <Button class="w-full bg-green-600 font-bold hover:bg-green-700" @click="openBedrockLink">
+              <Gamepad2 class="mr-2 h-5 w-5" />
+              Add to Bedrock
+            </Button>
+            <p class="text-xs text-zinc-500">If Minecraft does not open, add the address and port manually.</p>
+          </div>
+
+          <div v-else class="space-y-5 text-zinc-300">
+            <p>
+              Xbox, PlayStation, and Nintendo Switch do not normally expose an editable custom-server list.
+              Joining Cookie Build therefore requires a LAN-proxy or BedrockConnect-style workaround.
+            </p>
+            <a
+              href="https://geysermc.org/wiki/geyser/using-geyser-with-consoles/"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center rounded-lg bg-blue-600 px-4 py-3 font-bold text-white hover:bg-blue-700"
+            >
+              Open the console setup guide
+              <ExternalLink class="ml-2 h-4 w-4" />
+            </a>
+            <p class="text-sm text-zinc-500">These methods are community workarounds and are not operated by Cookie Build.</p>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- Legacy / History Section -->
     <section class="text-center">
@@ -207,13 +293,22 @@
 
 <script setup>
 import PlayerCounter from "@/components/PlayerCounter.vue";
+import JoinAddress from "@/components/JoinAddress.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Copy, Gamepad2, Mic } from "@lucide/vue";
+import { Copy, ExternalLink, Gamepad2, Mic, X } from "@lucide/vue";
 import { ref } from "vue";
 
 const serverIP = ref("play.cookie-build.com");
+const bedrockPort = "19132";
+const showJoinGuide = ref(false);
+const selectedEdition = ref("java");
+const editions = [
+  { id: "java", label: "Java" },
+  { id: "bedrock", label: "Bedrock" },
+  { id: "console", label: "Console" },
+];
 
 const features = [
   {
@@ -226,7 +321,7 @@ const features = [
     title: "Global Community",
     icon: "/community-icon.svg",
     description:
-      "Join a friendly and active player base from around the world. Discord is our home.",
+      "Meet a friendly cross-platform community and use Discord to find teammates and scheduled play sessions.",
   },
   {
     title: "Cross-Platform",
@@ -246,7 +341,7 @@ const minigames = [
   {
     name: "Pitchout",
     description:
-      "A chaotic sumo-style game. Knock opponents into the void 5 times to eliminate them. Power-ups included!",
+      "A chaotic sumo-style game. Use snowballs, arrows, and clever movement to knock opponents into the void five times.",
     available: true,
     icon: "/pitchout-icon.svg",
     new: true,
@@ -276,7 +371,7 @@ const minigames = [
 const faqs = [
   {
     question: "Can I join from Minecraft Bedrock Edition?",
-    answer: "Yes! Cookie Build is fully compatible with Bedrock Edition (PE, Xbox, PlayStation, Switch). Use the IP play.cookie-build.com and port 19132.",
+    answer: "Yes. Windows, Android, and iOS players can add play.cookie-build.com with port 19132. Consoles require a BedrockConnect or LAN-proxy workaround because they do not normally expose a custom-server list.",
   },
   {
     question: "Is the server free to play?",
@@ -288,7 +383,7 @@ const faqs = [
   },
   {
     question: "Is there a Discord community?",
-    answer: "Yes, we have a very active Discord where you can find teammates, report bugs, and suggest new features. Click the 'Join Discord' button above!",
+    answer: "Yes. Discord is the best place to find teammates, coordinate a play session, report bugs, and suggest improvements.",
   },
   {
     question: "What is the history of Cookie Build?",
@@ -296,18 +391,21 @@ const faqs = [
   },
   {
     question: "Are there any rank systems?",
-    answer: "We have a global leaderboard and seasonal stats. You can track your progress on our Player Stats page!",
+    answer: "We have all-time, quarterly season, and calendar-period leaderboards. The Player Stats page shows wins, matches, playtime, coins, levels, and recent progress.",
   },
 ];
 
 const copyIP = () => {
-  navigator.clipboard.writeText(serverIP.value);
-  alert("IP address copied to clipboard!");
+  copyText(serverIP.value, "IP address");
 };
 
-const playNow = () => {
-  window.location.href =
-    "minecraft:?addExternalServer=CookieBuild|play.cookie-build.com";
+const copyText = async (value, label) => {
+  await navigator.clipboard.writeText(value);
+  alert(`${label} copied to clipboard!`);
+};
+
+const openBedrockLink = () => {
+  window.location.href = `minecraft://?addExternalServer=CookieBuild|${serverIP.value}:${bedrockPort}`;
 };
 
 const joinDiscord = () => {

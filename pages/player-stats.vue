@@ -8,7 +8,7 @@
           Leaderboard
         </h1>
         <p class="text-sm md:text-base text-zinc-400 max-w-xl mx-auto">
-          Ranking of the top players on Cookie Build. Seasonal and all-time statistics.
+          Completed-match rankings with calendar-period filters and personal progression.
         </p>
       </div>
     </section>
@@ -39,8 +39,8 @@
                 class="w-full bg-zinc-950 border border-zinc-800 rounded-md px-3 py-2 text-sm text-white focus:ring-2 focus:ring-orange-500 transition-all outline-none"
               >
                 <option value="">All Games</option>
-                <option value="MICROBATTLES">Microbattles</option>
-                <option value="PITCHOUT">Pitchout</option>
+                <option value="MicroBattles">MicroBattles</option>
+                <option value="Pitchout">Pitchout</option>
               </select>
             </div>
 
@@ -74,7 +74,46 @@
       </aside>
 
       <!-- Main Leaderboard -->
-      <div class="lg:col-span-3">
+      <div class="min-w-0 lg:col-span-3 space-y-6">
+        <section
+          v-if="selectedPlayer"
+          class="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-zinc-900 p-6"
+        >
+          <div class="mb-5 flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-black uppercase tracking-widest text-orange-500">Player profile</p>
+              <h2 class="mt-1 text-2xl font-black text-white">{{ formatPlayerName(selectedPlayer.name) }}</h2>
+              <p class="mt-1 text-sm text-zinc-500">
+                {{ selectedPlayer.lastMatchAt ? `Last completed match ${formatDate(selectedPlayer.lastMatchAt)}` : 'No completed match yet' }}
+              </p>
+            </div>
+            <button class="rounded-lg p-2 text-zinc-500 hover:bg-white/10 hover:text-white" aria-label="Close player profile" @click="selectedPlayer = null">
+              <X class="h-5 w-5" />
+            </button>
+          </div>
+          <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <ProfileMetric label="Matches" :value="selectedPlayer.matches" />
+            <ProfileMetric label="Kills" :value="selectedPlayer.kills" />
+            <ProfileMetric label="Coins" :value="selectedPlayer.coins" />
+            <ProfileMetric label="Playtime" :value="formatPlaytime(selectedPlayer.playtime)" />
+          </div>
+          <div v-if="selectedPlayer.progression.length" class="mt-5 grid gap-3 sm:grid-cols-2">
+            <div v-for="progress in selectedPlayer.progression" :key="progress.minigame" class="rounded-xl border border-zinc-800 bg-zinc-950/70 p-4">
+              <div class="flex items-center justify-between">
+                <strong class="text-white">{{ progress.minigame }}</strong>
+                <span class="text-sm font-black text-orange-500">Level {{ progress.level }}</span>
+              </div>
+              <div class="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
+                <div class="h-full rounded-full bg-orange-500" :style="{ width: `${progressPercent(progress)}%` }"></div>
+              </div>
+              <p class="mt-2 text-xs text-zinc-500">
+                {{ progress.experience }} XP · {{ experienceRemaining(progress) }} XP to next level
+                <span v-if="progress.selectedKit"> · {{ progress.selectedKit }} {{ progress.selectedKitLevel ? `T${progress.selectedKitLevel}` : '' }}</span>
+              </p>
+            </div>
+          </div>
+        </section>
+
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
           <!-- Table Header -->
           <div class="p-6 border-b border-zinc-800 flex justify-between items-center bg-zinc-900">
@@ -83,7 +122,7 @@
                <p class="text-sm text-zinc-500">Ranking by total wins</p>
             </div>
             <div class="text-xs font-mono text-zinc-500 bg-zinc-950 px-3 py-1 rounded-full border border-zinc-800">
-               {{ filteredStats.length }} PLAYERS FOUND
+               {{ pagination?.total ?? 0 }} PLAYERS FOUND
             </div>
           </div>
 
@@ -109,7 +148,7 @@
                   <th class="px-6 py-4 font-black">Player</th>
                   <th class="px-6 py-4 font-black">Edition</th>
                   <th class="px-6 py-4 font-black text-right">Wins</th>
-                  <th class="px-6 py-4 font-black text-right">W/L Rate</th>
+                  <th class="px-6 py-4 font-black text-right">Win Rate</th>
                   <th class="px-6 py-4 font-black text-right">Time Played</th>
                 </tr>
               </thead>
@@ -117,7 +156,10 @@
                 <tr 
                   v-for="(stat, index) in paginatedStats" 
                   :key="stat.id"
-                  class="group hover:bg-orange-500/5 transition-colors"
+                  class="group cursor-pointer hover:bg-orange-500/5 transition-colors"
+                  tabindex="0"
+                  @click="selectedPlayer = stat"
+                  @keydown.enter="selectedPlayer = stat"
                 >
                   <td class="px-6 py-4">
                     <div class="flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm shadow-inner"
@@ -171,7 +213,7 @@
             </table>
 
             <!-- Empty -->
-            <div v-if="filteredStats.length === 0" class="py-20 text-center">
+            <div v-if="paginatedStats.length === 0" class="py-20 text-center">
                <Ghost class="w-12 h-12 mx-auto mb-4 text-zinc-800" />
                <p class="text-zinc-500 font-medium">No players found.</p>
             </div>
@@ -180,7 +222,7 @@
           <!-- Pagination -->
           <div class="p-6 bg-zinc-950 border-t border-zinc-800 flex flex-col sm:flex-row gap-4 items-center justify-between">
             <p class="text-[10px] text-zinc-600 font-black uppercase tracking-[0.2em]">
-              Showing {{ startIndex + 1 }} to {{ endIndex }} of {{ filteredStats.length }}
+              Showing {{ pagination?.total ? startIndex + 1 : 0 }} to {{ endIndex }} of {{ pagination?.total ?? 0 }}
             </p>
             <div class="flex items-center gap-2">
               <Button 
@@ -225,64 +267,82 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge/Badge.vue";
+import ProfileMetric from "@/components/ProfileMetric.vue";
+import { refDebounced } from "@vueuse/core";
 import { 
   Filter, 
   User, 
   ChevronLeft, 
   ChevronRight, 
   AlertTriangle,
-  Ghost 
+  Ghost,
+  X,
 } from "@lucide/vue";
+
+interface ProgressionSummary {
+  minigame: string;
+  level: number;
+  experience: number;
+  selectedKit: string | null;
+  selectedKitLevel: number;
+}
 
 interface PlayerStat {
   id: string;
   name?: string;
   wins: number;
   losses: number;
-  playtime?: bigint;
+  matches: number;
+  kills: number;
+  deaths: number;
+  coins: number;
+  playtime?: number;
+  lastMatchAt: string | null;
+  progression: ProgressionSummary[];
 }
 
 const selectedGamemode = ref<string | null>("");
 const selectedPeriod = ref("all");
+const searchQuery = ref("");
+const debouncedSearch = refDebounced(searchQuery, 300);
+const currentPage = ref(1);
+const pageSize = 10;
+const selectedPlayer = ref<PlayerStat | null>(null);
 
 const periods = [
   { value: "all", label: "All Time" },
+  { value: "season", label: "Current Season" },
   { value: "month", label: "This Month" },
   { value: "week", label: "This Week" },
 ];
 
-const { data, pending, error, refresh } = useFetch<{ data: PlayerStat[] }>(
+const { data, pending, error } = useFetch<{
+  data: PlayerStat[];
+  pagination: { page: number; pageSize: number; total: number; totalPages: number };
+}>(
   "/api/player-stats",
   {
     query: {
       gamemode: selectedGamemode,
       period: selectedPeriod,
+      search: debouncedSearch,
+      page: currentPage,
+      pageSize,
     },
   }
 );
 
 const stats = computed(() => data.value?.data || []);
-const searchQuery = ref("");
-const currentPage = ref(1);
-const pageSize = 10;
+const pagination = computed(() => data.value?.pagination);
 
 const hasFilters = computed(() => {
   return selectedGamemode.value !== "" || selectedPeriod.value !== "all" || searchQuery.value !== "";
 });
 
-const filteredStats = computed(() => {
-  let result = [...stats.value];
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase();
-    result = result.filter((stat) => stat.name?.toLowerCase().includes(query));
-  }
-  return result.sort((a, b) => Number(b.wins) - Number(a.wins));
-});
-
-const totalPages = computed(() => Math.ceil(filteredStats.value.length / pageSize));
+const totalPages = computed(() => pagination.value?.totalPages ?? 1);
 const startIndex = computed(() => (currentPage.value - 1) * pageSize);
-const endIndex = computed(() => Math.min(startIndex.value + pageSize, filteredStats.value.length));
-const paginatedStats = computed(() => filteredStats.value.slice(startIndex.value, endIndex.value));
+const endIndex = computed(() => Math.min(startIndex.value + stats.value.length, pagination.value?.total ?? 0));
+const paginatedStats = computed(() => stats.value);
 
 const visiblePages = computed(() => {
   const pages = [];
@@ -323,7 +383,7 @@ function getRankClass(rank: number) {
   return "bg-zinc-950 text-zinc-500 border border-zinc-800";
 }
 
-function formatPlaytime(playtime?: bigint) {
+function formatPlaytime(playtime?: number) {
   if (!playtime) return "0h";
   try {
     const hours = Math.floor(Number(playtime) / 3600000);
@@ -331,8 +391,30 @@ function formatPlaytime(playtime?: bigint) {
   } catch { return "0h"; }
 }
 
-watch([searchQuery, selectedGamemode, selectedPeriod], () => {
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(value));
+}
+
+function nextLevelExperience(progress: ProgressionSummary) {
+  return progress.level * progress.level * 100;
+}
+
+function currentLevelExperience(progress: ProgressionSummary) {
+  return Math.max(0, progress.level - 1) ** 2 * 100;
+}
+
+function experienceRemaining(progress: ProgressionSummary) {
+  return Math.max(0, nextLevelExperience(progress) - progress.experience);
+}
+
+function progressPercent(progress: ProgressionSummary) {
+  const floor = currentLevelExperience(progress);
+  const range = nextLevelExperience(progress) - floor;
+  return Math.max(0, Math.min(100, ((progress.experience - floor) / range) * 100));
+}
+
+watch([debouncedSearch, selectedGamemode, selectedPeriod], () => {
   currentPage.value = 1;
-  refresh();
+  selectedPlayer.value = null;
 });
 </script>
