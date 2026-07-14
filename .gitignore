@@ -22,3 +22,7 @@ logs
 .env
 .env.*
 !.env.example
+
+# Local Firebase Admin credentials (production uses a mounted or environment secret)
+*firebase-admin*.json
+*service-account*.json

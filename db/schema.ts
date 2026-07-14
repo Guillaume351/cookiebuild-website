@@ -1,17 +1,22 @@
 import {
   bigint,
   boolean,
+  check,
   foreignKey,
+  index,
   integer,
   jsonb,
   pgSequence,
   pgTable,
   primaryKey,
+  text,
   timestamp,
   unique,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const chatmessageSeq = pgSequence("chatmessage_seq", {
   startWith: "1",
@@ -150,4 +155,179 @@ export const matchWinners = pgTable(
       name: "match_winners_pkey",
     }),
   ]
+);
+
+export const mobileUsers = pgTable(
+  "mobile_users",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    firebaseUid: varchar("firebase_uid", { length: 128 }).notNull(),
+    deletedFirebaseUidHash: varchar("deleted_firebase_uid_hash", { length: 64 }),
+    email: varchar({ length: 320 }),
+    displayName: varchar("display_name", { length: 80 }),
+    avatarUrl: varchar("avatar_url", { length: 2048 }),
+    locale: varchar({ length: 16 }),
+    timezone: varchar({ length: 64 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    uniqueIndex("mobile_users_firebase_uid_uq").on(table.firebaseUid),
+    uniqueIndex("mobile_users_deleted_firebase_uid_hash_uq").on(table.deletedFirebaseUidHash),
+  ],
+);
+
+export const mobilePlayerLinks = pgTable(
+  "mobile_player_links",
+  {
+    firebaseUid: text("firebase_uid").notNull(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    edition: varchar({ length: 16 }).notNull(),
+    isPrimary: boolean("is_primary").default(false).notNull(),
+    linkedAt: timestamp("linked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.firebaseUid, table.playerId, table.edition] }),
+    index("mobile_player_links_firebase_uid_idx").on(table.firebaseUid),
+    uniqueIndex("mobile_player_links_active_player_uq")
+      .on(table.playerId, table.edition)
+      .where(sql`${table.revokedAt} IS NULL`),
+    uniqueIndex("mobile_player_links_active_primary_uq")
+      .on(table.firebaseUid)
+      .where(sql`${table.isPrimary} AND ${table.revokedAt} IS NULL`),
+    check("mobile_player_links_edition_ck", sql`${table.edition} IN ('java', 'bedrock')`),
+  ],
+);
+
+export const playerLinkChallenges = pgTable(
+  "player_link_challenges",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    edition: varchar({ length: 16 }).notNull(),
+    codeHmac: varchar("code_hmac", { length: 64 }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("player_link_challenges_code_hmac_uq").on(table.codeHmac),
+    uniqueIndex("player_link_challenges_active_player_uq")
+      .on(table.playerId)
+      .where(sql`${table.consumedAt} is null`),
+    index("player_link_challenges_expiry_idx").on(table.expiresAt),
+    check("player_link_challenges_edition_ck", sql`${table.edition} IN ('java', 'bedrock')`),
+  ],
+);
+
+export const mobileDevices = pgTable(
+  "mobile_devices",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    mobileUserId: uuid("mobile_user_id")
+      .notNull()
+      .references(() => mobileUsers.id, { onDelete: "cascade" }),
+    installationId: varchar("installation_id", { length: 128 }).notNull(),
+    platform: varchar({ length: 16 }).notNull(),
+    fcmToken: varchar("fcm_token", { length: 4096 }).notNull(),
+    appVersion: varchar("app_version", { length: 32 }),
+    locale: varchar({ length: 16 }),
+    timezone: varchar({ length: 64 }),
+    notificationsAuthorized: boolean("notifications_authorized").default(false).notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    uniqueIndex("mobile_devices_installation_id_uq").on(table.installationId),
+    uniqueIndex("mobile_devices_fcm_token_uq").on(table.fcmToken),
+    index("mobile_devices_user_idx").on(table.mobileUserId),
+    check("mobile_devices_platform_ck", sql`${table.platform} IN ('ios', 'android')`),
+  ],
+);
+
+export const mobileNotificationPreferences = pgTable("mobile_notification_preferences", {
+  mobileUserId: uuid("mobile_user_id")
+    .primaryKey()
+    .references(() => mobileUsers.id, { onDelete: "cascade" }),
+  announcementsEnabled: boolean("announcements_enabled").default(true).notNull(),
+  eventsEnabled: boolean("events_enabled").default(true).notNull(),
+  serverStatusEnabled: boolean("server_status_enabled").default(true).notNull(),
+  socialEnabled: boolean("social_enabled").default(true).notNull(),
+  weeklyDigestEnabled: boolean("weekly_digest_enabled").default(true).notNull(),
+  quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
+  quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+});
+
+export const mobileNotificationOutbox = pgTable(
+  "mobile_notification_outbox",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    kind: varchar({ length: 64 }).notNull(),
+    audience: jsonb().notNull(),
+    payload: jsonb().notNull(),
+    status: varchar({ length: 16 }).default("pending").notNull(),
+    attempts: integer().default(0).notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }),
+    lockToken: uuid("lock_token"),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: "date" }),
+    lastError: text("last_error"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("mobile_notification_outbox_pending_idx").on(table.status, table.availableAt),
+    check("mobile_notification_outbox_status_ck", sql`${table.status} IN ('pending', 'processing', 'delivered', 'dead')`),
+  ],
+);
+
+export const mobileNewsPosts = pgTable(
+  "mobile_news_posts",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    slug: varchar({ length: 120 }).notNull(),
+    title: varchar({ length: 160 }).notNull(),
+    summary: varchar({ length: 500 }).notNull(),
+    body: text().notNull(),
+    coverImageUrl: varchar("cover_image_url", { length: 2048 }),
+    status: varchar({ length: 16 }).default("draft").notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("mobile_news_posts_slug_uq").on(table.slug),
+    index("mobile_news_posts_published_idx").on(table.status, table.publishedAt),
+    check("mobile_news_posts_status_ck", sql`${table.status} IN ('draft', 'published', 'archived')`),
+  ],
+);
+
+export const mobileEvents = pgTable(
+  "mobile_events",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    slug: varchar({ length: 120 }).notNull(),
+    title: varchar({ length: 160 }).notNull(),
+    description: text().notNull(),
+    gameType: varchar("game_type", { length: 64 }),
+    imageUrl: varchar("image_url", { length: 2048 }),
+    startsAt: timestamp("starts_at", { withTimezone: true, mode: "date" }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true, mode: "date" }),
+    status: varchar({ length: 16 }).default("scheduled").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("mobile_events_slug_uq").on(table.slug),
+    index("mobile_events_schedule_idx").on(table.status, table.startsAt),
+    check("mobile_events_status_ck", sql`${table.status} IN ('draft', 'scheduled', 'cancelled', 'completed')`),
+  ],
 );

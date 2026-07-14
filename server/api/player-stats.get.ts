@@ -35,9 +35,7 @@ function beginningOfPeriod(period: string | undefined) {
   return undefined;
 }
 
-export default defineEventHandler(async (event) => {
-  try {
-    const query = getQuery(event);
+export async function loadPlayerStats(query: Record<string, unknown>) {
     const requestedGamemode = String(query.gamemode ?? "");
     const progressionGamemode = PROGRESSION_GAMEMODES.get(requestedGamemode);
     const gamemode = progressionGamemode ? requestedGamemode : undefined;
@@ -188,8 +186,6 @@ export default defineEventHandler(async (event) => {
       .limit(pageSize)
       .offset(offset);
 
-    setHeader(event, "Cache-Control", "public, max-age=30, s-maxage=60, stale-while-revalidate=120");
-
     return {
       data: stats,
       pagination: {
@@ -199,6 +195,13 @@ export default defineEventHandler(async (event) => {
         totalPages: Math.max(1, Math.ceil(total / pageSize)),
       },
     };
+}
+
+export default defineEventHandler(async (event) => {
+  try {
+    const result = await loadPlayerStats(getQuery(event) as Record<string, unknown>);
+    setHeader(event, "Cache-Control", "public, max-age=30, s-maxage=60, stale-while-revalidate=120");
+    return result;
   } catch (error) {
     console.error("Error fetching player stats:", error);
     throw createError({ statusCode: 500, statusMessage: "Unable to load player statistics" });

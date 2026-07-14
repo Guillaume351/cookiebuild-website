@@ -11,3 +11,7 @@ monitor/state
 monitor/test
 *.log
 npm-debug.log*
+*firebase-admin*.json
+*service-account*.json
+GoogleService-Info.plist
+google-services.json

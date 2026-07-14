@@ -427,8 +427,8 @@ useHead({
           gamePlatform: ["PC", "Mobile", "Console"],
           applicationCategory: "Game",
           operatingSystem: "Windows, macOS, Linux, iOS, Android, Xbox, PlayStation, Switch",
-          url: "https://cookie-build.com",
-          image: "https://cookie-build.com/lobby.webp",
+          url: "https://www.cookie-build.com",
+          image: "https://www.cookie-build.com/lobby.webp",
           author: {
             "@type": "Person",
             name: "Guillaume351",

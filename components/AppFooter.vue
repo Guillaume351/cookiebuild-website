@@ -22,6 +22,21 @@
                 >Player Stats</NuxtLink
               >
             </li>
+            <li>
+              <NuxtLink to="/account/delete" class="text-gray-400 hover:text-white transition-colors"
+                >Delete App Account</NuxtLink
+              >
+            </li>
+            <li>
+              <NuxtLink to="/privacy" class="text-gray-400 hover:text-white transition-colors"
+                >Privacy</NuxtLink
+              >
+            </li>
+            <li>
+              <NuxtLink to="/terms" class="text-gray-400 hover:text-white transition-colors"
+                >Terms</NuxtLink
+              >
+            </li>
           </ul>
         </div>
         <div>

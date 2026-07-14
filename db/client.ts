@@ -9,12 +9,12 @@ if (!connectionString) {
 }
 
 // Create the PostgreSQL client with proper configuration
-const client = postgres(connectionString, {
+export const postgresClient = postgres(connectionString, {
   prepare: false, // Disable prepared statements to avoid schema issues
 });
 
 // Create Drizzle ORM instance with schema
-const db = drizzle(client, {
+const db = drizzle(postgresClient, {
   schema,
   logger: process.env.NODE_ENV !== "production",
 });

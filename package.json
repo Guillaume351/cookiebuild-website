@@ -8,6 +8,8 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare",
+    "test": "vitest run",
+    "test:integration:mobile": "vitest run test/mobile-account-concurrency.test.ts",
     "typecheck": "nuxt typecheck",
     "audit:prod": "npm audit --omit=dev"
   },
@@ -17,6 +19,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
+    "firebase-admin": "^14.1.0",
     "postgres": "^3.4.9",
     "radix-vue": "^1.9.17",
     "tailwind-merge": "^2.6.0",
@@ -30,6 +33,10 @@
     "shadcn-nuxt": "^2.7.4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
+    "vitest": "^4.1.10",
     "vue-tsc": "^3.3.7"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }
