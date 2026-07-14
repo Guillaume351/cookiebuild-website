@@ -3,7 +3,11 @@ import { getQuery } from "h3";
 import db from "../../db/client";
 import { playerdata } from "../../db/schema";
 
-const ALLOWED_GAMEMODES = new Set(["MicroBattles", "Pitchout"]);
+const PROGRESSION_GAMEMODES = new Map([
+  ["MicroBattles", "microbattles"],
+  ["Pitchout", "pitchout"],
+  ["SkyWars", "skywars"],
+]);
 const OUTER_PLAYER_ID = sql.raw('"playerdata"."id"');
 
 function positiveInteger(value: unknown, fallback: number, maximum: number) {
@@ -34,7 +38,8 @@ export default defineEventHandler(async (event) => {
   try {
     const query = getQuery(event);
     const requestedGamemode = String(query.gamemode ?? "");
-    const gamemode = ALLOWED_GAMEMODES.has(requestedGamemode) ? requestedGamemode : undefined;
+    const progressionGamemode = PROGRESSION_GAMEMODES.get(requestedGamemode);
+    const gamemode = progressionGamemode ? requestedGamemode : undefined;
     const period = ["week", "month", "season"].includes(String(query.period))
       ? String(query.period)
       : undefined;
@@ -163,7 +168,7 @@ export default defineEventHandler(async (event) => {
           ) ORDER BY mp.minigame)
           FROM minigame_progression mp
           WHERE mp.player_id = ${OUTER_PLAYER_ID}
-          AND (${gamemode ? sql`mp.minigame = ${gamemode}` : sql`TRUE`})
+          AND (${progressionGamemode ? sql`mp.minigame = ${progressionGamemode}` : sql`TRUE`})
         ), '[]'::jsonb)`.as("progression"),
       })
       .from(playerdata)

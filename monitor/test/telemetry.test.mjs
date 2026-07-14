@@ -12,12 +12,14 @@ test("counts bounded funnel dimensions without player identifiers", () => {
   const result = recordFunnelTelemetry([
     "[CookieDough] [funnel] event=joined player=private edition=bedrock protocol=827 mspt=4.25",
     "[CookieDough] [funnel] event=queue_joined player=private edition=bedrock game=MicroBattles players=1",
+    "[CookieDough] [funnel] event=match_started player=private edition=java game=SkyWars players=8",
     "[CookieDough] [funnel] event=unknown player=private edition=bedrock game=user-controlled",
   ].join("\n"), counters);
 
   assert.equal(result.counters[funnelCounterKey("joined", "bedrock", "none")], 1);
   assert.equal(result.counters[funnelCounterKey("queue_joined", "bedrock", "MicroBattles")], 1);
-  assert.equal(Object.keys(result.counters).length, 2);
+  assert.equal(result.counters[funnelCounterKey("match_started", "java", "SkyWars")], 1);
+  assert.equal(Object.keys(result.counters).length, 3);
   assert.equal(result.latestMspt, 4.25);
   assert.deepEqual(parseFunnelCounterKey(Object.keys(result.counters)[0]), ["joined", "bedrock", "none"]);
 });

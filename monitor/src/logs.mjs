@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 import { open, stat } from "node:fs/promises";
 
 const FATAL_PATTERNS = [
-  /\[(?:CookieDough|MicroBattles|Pitchout)\].*(?:failed|failure|fatal|exception|could not)/i,
-  /Failed to load map for (?:MicroBattles|Pitchout)/i,
-  /Could not pass event .* to (?:CookieDough|MicroBattles|Pitchout)/i,
-  /Error occurred while enabling (?:CookieDough|MicroBattles|Pitchout)/i,
+  /\[(?:CookieDough|MicroBattles|Pitchout|SkyWars)\].*(?:failed|failure|fatal|exception|could not)/i,
+  /Failed to load map for (?:MicroBattles|Pitchout|SkyWars)/i,
+  /Could not pass event .* to (?:CookieDough|MicroBattles|Pitchout|SkyWars)/i,
+  /Error occurred while enabling (?:CookieDough|MicroBattles|Pitchout|SkyWars)/i,
   /Exception in server tick loop/i,
   /Encountered an unexpected exception/i,
   /OutOfMemoryError/i,

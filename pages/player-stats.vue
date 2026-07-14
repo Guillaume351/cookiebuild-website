@@ -41,6 +41,7 @@
                 <option value="">All Games</option>
                 <option value="MicroBattles">MicroBattles</option>
                 <option value="Pitchout">Pitchout</option>
+                <option value="SkyWars">SkyWars</option>
               </select>
             </div>
 
@@ -100,7 +101,7 @@
           <div v-if="selectedPlayer.progression.length" class="mt-5 grid gap-3 sm:grid-cols-2">
             <div v-for="progress in selectedPlayer.progression" :key="progress.minigame" class="rounded-xl border border-zinc-800 bg-zinc-950/70 p-4">
               <div class="flex items-center justify-between">
-                <strong class="text-white">{{ progress.minigame }}</strong>
+                <strong class="text-white">{{ formatGamemode(progress.minigame) }}</strong>
                 <span class="text-sm font-black text-orange-500">Level {{ progress.level }}</span>
               </div>
               <div class="mt-3 h-2 overflow-hidden rounded-full bg-zinc-800">
@@ -365,6 +366,15 @@ function resetFilters() {
 function formatPlayerName(name?: string) {
   if (!name) return "Anonymous";
   return name.startsWith(".") ? name.substring(1) : name;
+}
+
+function formatGamemode(gamemode: string) {
+  const labels: Record<string, string> = {
+    microbattles: "MicroBattles",
+    pitchout: "Pitchout",
+    skywars: "SkyWars",
+  };
+  return labels[gamemode.toLowerCase()] ?? gamemode;
 }
 
 function isBedrockPlayer(name?: string) {
