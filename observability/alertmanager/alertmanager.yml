@@ -1,0 +1,18 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: discord
+  group_by: [alertname, component]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 6h
+
+receivers:
+  - name: discord
+    discord_configs:
+      - send_resolved: true
+        webhook_url_file: /run/secrets/discord_webhook
+        username: Cookie Build Observability
+        title: "{{ .Status | toUpper }}: {{ .CommonLabels.alertname }}"
+        message: "{{ range .Alerts }}**{{ .Annotations.summary }}**\n{{ .Annotations.description }}\nSeverity: `{{ .Labels.severity }}` · Component: `{{ .Labels.component }}`\n{{ end }}"

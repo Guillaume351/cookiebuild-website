@@ -5,6 +5,7 @@ import { dirname } from "node:path";
 import { AlertState, sendDiscord } from "./alerts.mjs";
 import { checkBedrock, checkDatabaseApi, checkJava, checkWebsite } from "./checks.mjs";
 import { readNewLogChunk, selectNewFatalLines } from "./logs.mjs";
+import { parseFunnelCounterKey, recordFunnelTelemetry } from "./telemetry.mjs";
 
 const config = {
   host: process.env.MINECRAFT_HOST || "play.cookie-build.com",
@@ -32,6 +33,7 @@ let running = false;
 let state = await loadState(config.stateFile);
 state.checks ||= {};
 state.logFingerprints ||= {};
+state.funnelCounters ||= {};
 state.alertsSent ||= 0;
 
 function numberEnv(name, fallback) {
@@ -116,6 +118,12 @@ async function scanLogs() {
     if (Date.now() - startedAt < config.startupGraceMs) return;
     const chunk = await readNewLogChunk(config.logFile, state.logOffset);
     state.logOffset = chunk.offset;
+    const telemetry = recordFunnelTelemetry(chunk.text, state.funnelCounters);
+    state.funnelCounters = telemetry.counters;
+    if (telemetry.latestMspt != null) {
+      state.latestMspt = telemetry.latestMspt;
+      state.latestMsptObservedAt = Date.now();
+    }
     if (state.maintenance) return;
     const fatalLines = selectNewFatalLines(chunk.text, state.logFingerprints);
     if (fatalLines.length > 0) {
@@ -185,6 +193,26 @@ function prometheusMetrics() {
   lines.push(`cookiebuild_monitor_alerts_sent_total ${Number(state.alertsSent ?? 0)}`);
   lines.push(`cookiebuild_monitor_maintenance ${state.maintenance ? 1 : 0}`);
   lines.push(`cookiebuild_monitor_last_run_timestamp_seconds ${Math.floor(Number(state.lastRunAt ?? 0) / 1_000)}`);
+  lines.push("# HELP cookiebuild_funnel_events_total Aggregate Cookie Build funnel events parsed from structured logs.");
+  lines.push("# TYPE cookiebuild_funnel_events_total counter");
+  for (const [key, value] of Object.entries(state.funnelCounters)) {
+    try {
+      const [event, edition, game] = parseFunnelCounterKey(key).map((label) => String(label).replaceAll('"', '\\"'));
+      lines.push(`cookiebuild_funnel_events_total{event="${event}",edition="${edition}",game="${game}"} ${Math.max(0, Number(value) || 0)}`);
+    } catch {
+      // Ignore malformed persisted keys rather than breaking the metrics endpoint.
+    }
+  }
+  if (Number.isFinite(state.latestMspt)) {
+    lines.push("# HELP cookiebuild_minecraft_mspt Latest average milliseconds per tick observed in funnel telemetry.");
+    lines.push("# TYPE cookiebuild_minecraft_mspt gauge");
+    lines.push(`cookiebuild_minecraft_mspt ${state.latestMspt}`);
+  }
+  if (Number.isFinite(state.latestMsptObservedAt)) {
+    lines.push("# HELP cookiebuild_minecraft_mspt_observed_timestamp_seconds Unix timestamp of the latest MSPT observation.");
+    lines.push("# TYPE cookiebuild_minecraft_mspt_observed_timestamp_seconds gauge");
+    lines.push(`cookiebuild_minecraft_mspt_observed_timestamp_seconds ${Math.floor(state.latestMsptObservedAt / 1000)}`);
+  }
   return `${lines.join("\n")}\n`;
 }
 

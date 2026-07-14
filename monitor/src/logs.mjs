@@ -56,7 +56,7 @@ export async function readNewLogChunk(filePath, previousOffset, initialBytes = 5
   const metadata = await stat(filePath);
   const offset = previousOffset == null
     ? Math.max(0, metadata.size - initialBytes)
-    : Math.min(previousOffset, metadata.size);
+    : previousOffset > metadata.size ? 0 : previousOffset;
   if (metadata.size === offset) return { text: "", offset: metadata.size };
   const length = metadata.size - offset;
   const buffer = Buffer.alloc(length);

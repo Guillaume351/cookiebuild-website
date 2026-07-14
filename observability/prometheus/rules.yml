@@ -1,0 +1,52 @@
+groups:
+  - name: cookiebuild
+    rules:
+      - alert: CookieBuildMonitorStale
+        expr: time() - cookiebuild_monitor_last_run_timestamp_seconds > 180
+        for: 2m
+        labels: { severity: critical, component: monitor }
+        annotations:
+          summary: Cookie Build monitor has stopped refreshing
+          description: The external Java, Bedrock, website and database canary is stale.
+      - alert: CookieBuildObservabilityTargetDown
+        expr: up{job=~"prometheus|cookiebuild-monitor|node|cadvisor|postgres|rabbitmq|alertmanager|loki|alloy"} == 0
+        for: 5m
+        labels: { severity: warning, component: observability }
+        annotations:
+          summary: Cookie Build observability target is down
+          description: "{{ $labels.job }} / {{ $labels.instance }} has been unreachable for five minutes."
+      - alert: CookieBuildDiskLow
+        expr: node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} < 0.15
+        for: 10m
+        labels: { severity: critical, component: host }
+        annotations:
+          summary: Cookie Build host disk is below 15 percent free
+          description: World saves and backups are at risk if disk usage continues growing.
+      - alert: CookieBuildMemoryLow
+        expr: node_memory_MemAvailable_bytes < 2 * 1024 * 1024 * 1024
+        for: 10m
+        labels: { severity: warning, component: host }
+        annotations:
+          summary: Cookie Build host has less than 2 GiB available memory
+          description: Check Minecraft heap, container memory and swap activity.
+      - alert: CookieBuildHighMSPT
+        expr: cookiebuild_minecraft_mspt > 50 and time() - cookiebuild_minecraft_mspt_observed_timestamp_seconds < 300 and cookiebuild_monitor_online_players{edition="java"} > 0
+        for: 5m
+        labels: { severity: warning, component: minecraft }
+        annotations:
+          summary: Cookie Build is running above 50 MSPT
+          description: Gameplay is likely below 20 TPS while players are online.
+      - alert: CookieBuildJoinFunnelStalled
+        expr: sum(increase(cookiebuild_funnel_events_total{event="joined"}[1h])) >= 3 and (sum(increase(cookiebuild_funnel_events_total{event="queue_joined"}[1h])) or vector(0)) == 0
+        for: 10m
+        labels: { severity: warning, component: gameplay }
+        annotations:
+          summary: Players join Cookie Build but none reach a queue
+          description: Inspect lobby readiness, selectors, NPC interaction and game availability.
+      - alert: CookieBuildMatchFunnelStalled
+        expr: sum(increase(cookiebuild_funnel_events_total{event="queue_joined"}[2h])) >= 4 and (sum(increase(cookiebuild_funnel_events_total{event="match_started"}[2h])) or vector(0)) == 0
+        for: 10m
+        labels: { severity: warning, component: gameplay }
+        annotations:
+          summary: Cookie Build queues are not producing matches
+          description: Inspect capacity, team admission, countdowns and map loading.

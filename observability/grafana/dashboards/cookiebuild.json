@@ -1,0 +1,162 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "max(cookiebuild_monitor_online_players{edition=\"java\"})", "refId": "A"}],
+      "title": "Players online",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT active_24h AS \"Active 24h\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "Active players · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT active_7d AS \"Active 7d\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "Active players · 7d",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT new_7d AS \"New 7d\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "New players · 7d",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 4},
+      "id": 5,
+      "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "cookiebuild_monitor_online_players", "legendFormat": "{{edition}}", "refId": "A"}],
+      "title": "Online players over time",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 4},
+      "id": 6,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"format": "time_series", "rawSql": "SELECT time AS \"time\", active_players AS \"Active players\", sessions AS \"Sessions\" FROM metrics.usage_hourly WHERE $__timeFilter(time) ORDER BY 1", "refId": "A"}],
+      "title": "Sessions and active players",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 4},
+      "id": 7,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum(increase(cookiebuild_funnel_events_total{event=~\"joined|player_data_ready|queue_joined|match_started|match_completed\"}[$__rate_interval])) by (event)", "legendFormat": "{{event}}", "refId": "A"}],
+      "title": "Live activation funnel",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 12},
+      "id": 8,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT matches_24h AS \"Matches 24h\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "Completed matches · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 12},
+      "id": 9,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT matches_7d AS \"Matches 7d\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "Completed matches · 7d",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"decimals": 1, "unit": "m"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 12},
+      "id": 10,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT session_p50_minutes AS \"P50\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "Session duration · P50 7d",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"decimals": 1, "unit": "m"}, "overrides": []},
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 12},
+      "id": 11,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"format": "table", "rawSql": "SELECT session_p90_minutes AS \"P90\" FROM metrics.usage_summary", "refId": "A"}],
+      "title": "Session duration · P90 7d",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 16},
+      "id": 12,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"format": "time_series", "rawSql": "SELECT time AS \"time\", gametype AS \"metric\", completed_matches AS \"value\" FROM metrics.matches_hourly WHERE $__timeFilter(time) ORDER BY 1", "refId": "A"}],
+      "title": "Completed matches by game",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "ms"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 16},
+      "id": 13,
+      "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "cookiebuild_monitor_check_latency_milliseconds", "legendFormat": "{{check}}", "refId": "A"}, {"expr": "cookiebuild_minecraft_mspt", "legendFormat": "Minecraft MSPT", "refId": "B"}],
+      "title": "Latency and MSPT",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "percentunit"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 16},
+      "id": 14,
+      "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))", "legendFormat": "CPU", "refId": "A"}, {"expr": "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes", "legendFormat": "Memory", "refId": "B"}, {"expr": "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}", "legendFormat": "Disk", "refId": "C"}],
+      "title": "Host resource usage",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 41,
+  "tags": ["cookie-build", "minecraft"],
+  "templating": {"list": []},
+  "time": {"from": "now-24h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Cookie Build · Players and Reliability",
+  "uid": "cookiebuild-overview",
+  "version": 1,
+  "weekStart": "monday"
+}

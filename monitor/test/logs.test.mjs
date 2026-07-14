@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import test from "node:test";
 
-import { isFatalLogLine, selectNewFatalLines } from "../src/logs.mjs";
+import { isFatalLogLine, readNewLogChunk, selectNewFatalLines } from "../src/logs.mjs";
 
 test("detects game and Paper fatal errors without authentication noise", () => {
   assert.equal(isFatalLogLine("[Server thread/ERROR]: [MicroBattles] Failed to load map for MicroBattlesGame: bad zip"), true);
@@ -16,4 +19,17 @@ test("deduplicates equivalent fatal log lines during the cooldown", () => {
   const duplicate = selectNewFatalLines("[12:00:01] [Server thread/ERROR]: [MicroBattles] Failed to load map for MicroBattlesGame: x", fingerprints, 2_000, 10_000);
   assert.equal(first.length, 1);
   assert.equal(duplicate.length, 0);
+});
+
+test("reads a rotated log from the beginning when the saved offset is beyond its size", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "cookiebuild-monitor-"));
+  const file = join(directory, "latest.log");
+  try {
+    await writeFile(file, "new log\n", "utf8");
+    const result = await readNewLogChunk(file, 10_000);
+    assert.equal(result.text, "new log\n");
+    assert.equal(result.offset, 8);
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
