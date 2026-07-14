@@ -115,7 +115,13 @@ services:
 
   cadvisor:
     image: ghcr.io/google/cadvisor:v0.57.0
-    command: ["--docker_only=true", "--housekeeping_interval=30s"]
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=30s
+      - --max_housekeeping_interval=1m
+      - --disable_metrics=app,cpuLoad,disk,diskIO,network,oom_event,percpu,perf_event,pressure
+      - --store_container_labels=false
+      - --whitelisted_container_labels=com.docker.swarm.service.name
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -127,7 +133,7 @@ services:
       mode: global
       restart_policy: { condition: any, delay: 5s }
       resources:
-        limits: { cpus: "0.25", memory: 256M }
+        limits: { cpus: "0.25", memory: 512M }
         reservations: { memory: 32M }
 
   postgres-exporter:
