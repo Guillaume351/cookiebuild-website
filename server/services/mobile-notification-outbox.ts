@@ -164,6 +164,7 @@ function preferenceCondition(kind: NotificationPreferenceKind) {
     case "event": return sql`coalesce(${mobileNotificationPreferences.eventsEnabled}, true)`;
     case "server_status": return sql`coalesce(${mobileNotificationPreferences.serverStatusEnabled}, true)`;
     case "social": return sql`coalesce(${mobileNotificationPreferences.socialEnabled}, true)`;
+    case "rally": return sql`coalesce(${mobileNotificationPreferences.rallyEnabled}, false)`;
     case "weekly_digest": return sql`coalesce(${mobileNotificationPreferences.weeklyDigestEnabled}, true)`;
   }
 }
@@ -265,8 +266,8 @@ async function deliverNotification(
 ): Promise<DeliveryResult> {
   const preference = preferenceKind(row.kind);
   if (!preference) throw new PermanentOutboxError(`Unsupported notification kind: ${row.kind}`);
-  const audience = parseNotificationAudience(row.audience);
-  const payload = parseNotificationPayload(row.payload);
+  const audience = parseNotificationAudience(row.audience, row.kind, row.attempts > 1);
+  const payload = parseNotificationPayload(row.payload, row.kind);
   const now = new Date();
   const selected = await recipientsFor(audience, preference);
   let suppressed = 0;

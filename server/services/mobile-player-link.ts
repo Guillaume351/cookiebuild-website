@@ -7,6 +7,10 @@ import {
   playerLinkChallenges,
 } from "../../db/schema";
 import { linkCodeHmac } from "../utils/mobile-validation";
+import {
+  beginMobileAccountDeletionInTransaction,
+  lockMobileAccountForDeletion,
+} from "./mobile-account";
 import { lockActiveMobileUser } from "./mobile-user";
 
 function isUniqueViolation(error: unknown) {
@@ -198,5 +202,118 @@ export async function revokePlayerLinks(
     }
 
     return revoked;
+  });
+}
+
+/**
+ * Consumes a fresh in-game link challenge and resolves the already linked
+ * mobile identity for no-app account deletion. Possession of the short-lived
+ * code proves current control of the Minecraft player without exposing the
+ * Firebase identifier to the browser.
+ */
+export async function beginMobileAccountDeletionByLinkCode(code: string) {
+  const pepper = process.env.MOBILE_LINK_PEPPER;
+  if (!pepper) {
+    throw createError({ statusCode: 503, statusMessage: "Player linking is not configured" });
+  }
+  const codeHmac = linkCodeHmac(code, pepper);
+
+  return db.transaction(async (tx) => {
+    const candidates = await tx
+      .select()
+      .from(playerLinkChallenges)
+      .where(and(
+        eq(playerLinkChallenges.codeHmac, codeHmac),
+        isNull(playerLinkChallenges.consumedAt),
+      ))
+      .limit(1);
+    const candidate = candidates[0];
+    if (!candidate || candidate.expiresAt <= new Date()) {
+      throw createError({ statusCode: 400, statusMessage: "Invalid or expired link code" });
+    }
+
+    const initialLinks = await tx
+      .select({ firebaseUid: mobilePlayerLinks.firebaseUid })
+      .from(mobilePlayerLinks)
+      .where(and(
+        eq(mobilePlayerLinks.playerId, candidate.playerId),
+        eq(mobilePlayerLinks.edition, candidate.edition),
+        isNull(mobilePlayerLinks.revokedAt),
+      ))
+      .limit(1);
+    const firebaseUid = initialLinks[0]?.firebaseUid;
+    if (!firebaseUid) {
+      throw createError({ statusCode: 404, statusMessage: "No linked mobile account" });
+    }
+
+    // Match the regular account/link mutation lock order before taking the Minecraft player row.
+    // Keeping challenge consumption and local account deletion in this transaction means a
+    // transient deletion failure cannot burn the user's only ten-minute verification code.
+    const mobileUser = await lockMobileAccountForDeletion(tx, firebaseUid);
+
+    const players = await tx
+      .select({ id: playerdata.id })
+      .from(playerdata)
+      .where(eq(playerdata.id, candidate.playerId))
+      .limit(1)
+      .for("update");
+    if (!players[0]) {
+      throw createError({ statusCode: 400, statusMessage: "Invalid or expired link code" });
+    }
+
+    const challenges = await tx
+      .select()
+      .from(playerLinkChallenges)
+      .where(and(
+        eq(playerLinkChallenges.id, candidate.id),
+        eq(playerLinkChallenges.codeHmac, codeHmac),
+        isNull(playerLinkChallenges.consumedAt),
+      ))
+      .limit(1)
+      .for("update");
+    const challenge = challenges[0];
+    if (!challenge || challenge.expiresAt <= new Date()) {
+      throw createError({ statusCode: 400, statusMessage: "Invalid or expired link code" });
+    }
+
+    const links = await tx
+      .select({ firebaseUid: mobilePlayerLinks.firebaseUid })
+      .from(mobilePlayerLinks)
+      .where(and(
+        eq(mobilePlayerLinks.playerId, challenge.playerId),
+        eq(mobilePlayerLinks.edition, challenge.edition),
+        eq(mobilePlayerLinks.firebaseUid, firebaseUid),
+        isNull(mobilePlayerLinks.revokedAt),
+      ))
+      .limit(1);
+    if (!links[0]) {
+      throw createError({ statusCode: 404, statusMessage: "No linked mobile account" });
+    }
+
+    const deletion = await beginMobileAccountDeletionInTransaction(
+      tx,
+      firebaseUid,
+      mobileUser,
+    );
+
+    const consumedAt = new Date();
+    const consumed = await tx
+      .update(playerLinkChallenges)
+      .set({ consumedAt })
+      .where(and(
+        eq(playerLinkChallenges.id, challenge.id),
+        isNull(playerLinkChallenges.consumedAt),
+      ))
+      .returning({ id: playerLinkChallenges.id });
+    if (!consumed.length) {
+      throw createError({ statusCode: 400, statusMessage: "Invalid or expired link code" });
+    }
+
+    return {
+      ...deletion,
+      firebaseUid,
+      playerId: challenge.playerId,
+      edition: challenge.edition,
+    };
   });
 }

@@ -1,57 +1,203 @@
 <template>
-  <article class="mx-auto max-w-3xl space-y-8 py-12 text-gray-300">
-    <header>
-      <h1 class="mb-3 text-4xl font-bold text-white">Terms of Service</h1>
-      <p>Last updated: July 14, 2026</p>
-    </header>
+  <article class="mx-auto max-w-3xl space-y-10 py-12 text-gray-300">
+    <nav class="flex gap-3 text-sm" aria-label="Language">
+      <a class="rounded-md bg-orange-600 px-3 py-2 font-semibold text-white" href="#english">English</a>
+      <a class="rounded-md border border-gray-700 px-3 py-2 font-semibold text-white" href="#francais">Français</a>
+    </nav>
 
-    <section>
-      <h2 class="mb-3 text-2xl font-semibold text-white">Using Cookie Build</h2>
-      <p>
-        Cookie Build provides a community Minecraft server, website, and companion app. You must use
-        them lawfully, follow published server rules, respect other players, and keep your sign-in
-        methods secure. Do not cheat, harass players, evade moderation, exploit bugs, automate abuse,
-        or attempt to access another person's account or linked Minecraft identity.
-      </p>
+    <section id="english" lang="en" class="space-y-8 scroll-mt-8">
+      <header>
+        <h1 class="mb-3 text-4xl font-bold text-white">Terms of Service</h1>
+        <p>Effective and last updated: July 14, 2026</p>
+      </header>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Operator and acceptance</h2>
+        <p>
+          Cookie Build is an independently operated Minecraft server, website, and companion app
+          provided by Guillaume Claverie. By using the service, you agree to these terms and the
+          published server rules. Contact
+          <a class="text-orange-400" href="mailto:support@cookie-build.com">support@cookie-build.com</a>
+          with questions. Cookie Build is not affiliated with or endorsed by Mojang, Microsoft,
+          Apple, or Google.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Eligibility and accounts</h2>
+        <p>
+          The companion app is intended for people aged 13 or older. If local law requires parental
+          consent for an online service, a parent or guardian must approve use. The app creates a
+          pseudonymous device account and can be linked to a Minecraft player with a short-lived
+          in-game code. Keep access to your device and Minecraft account secure. Never share a link code.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Acceptable use</h2>
+        <p>You must not:</p>
+        <ul class="mt-3 list-disc space-y-2 pl-6">
+          <li>cheat, exploit bugs, automate abuse, evade moderation, or disrupt the network;</li>
+          <li>harass, threaten, impersonate, discriminate against, or expose another person;</li>
+          <li>attempt to access another account, link another player, or bypass security controls;</li>
+          <li>submit knowingly false reports or misuse invitations, player calls, blocks, or support channels;</li>
+          <li>copy, resell, or misrepresent Cookie Build services or branding.</li>
+        </ul>
+        <p class="mt-3">
+          Friends, parties, and player calls use preset actions and Minecraft names only. Player
+          calls are rate-limited and recipients can disable them. This app version has no public
+          posting or free-form live chat.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Moderation, suspension, and appeal</h2>
+        <p>
+          Cookie Build may remove content, restrict a feature, suspend a player, or terminate access
+          when reasonably necessary for safety, fair play, service integrity, legal compliance, or a
+          material breach of these terms. Serious or repeated abuse may lead to immediate action.
+          To challenge a decision, email support with the Minecraft name, edition, approximate date,
+          and relevant context. Appeals are reviewed by a person.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Availability and changes</h2>
+        <p>
+          Games, maps, statistics, friends, parties, events, and notification delivery may change or
+          be temporarily unavailable for maintenance, security, software compatibility, or third-party
+          outages. Features that depend on missing maps are kept unavailable rather than exposed in a
+          broken state. We may update these terms for legal, safety, or product changes. Material changes
+          will be posted with a new effective date before they apply where required.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Purchases and ownership</h2>
+        <p>
+          The current app contains no shop, checkout, subscription, or paid digital entitlement.
+          Cookie Build code, artwork, and branding remain owned by their respective owners. Minecraft
+          names, marks, and game assets belong to Mojang or Microsoft and are used under applicable
+          usage guidelines. You retain rights in content you own and grant Cookie Build only the rights
+          needed to operate the service.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Liability and governing law</h2>
+        <p>
+          The service is provided with reasonable care, but uninterrupted availability and perfect
+          accuracy cannot be guaranteed. To the extent permitted by law, Cookie Build is not liable
+          for indirect loss, lost virtual progress caused by a documented outage, or third-party
+          platform failures. Nothing in these terms limits mandatory consumer rights or liability that
+          cannot legally be excluded. French law applies, without depriving consumers of mandatory
+          protections in their country. The parties should first try to resolve disputes through support;
+          competent courts and statutory consumer-mediation rights remain available.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Stopping use</h2>
+        <p>
+          You can stop at any time, unlink Minecraft identities, leave friendships or parties, disable
+          notifications, and delete the mobile account in Settings. Data handling after deletion is
+          described in the <NuxtLink class="text-orange-400" to="/privacy">Privacy Policy</NuxtLink>.
+        </p>
+      </section>
     </section>
 
-    <section>
-      <h2 class="mb-3 text-2xl font-semibold text-white">Accounts and moderation</h2>
-      <p>
-        You are responsible for activity through your account. We may restrict or remove access when
-        reasonably necessary to protect players, service integrity, or comply with law. You can stop
-        using the service at any time and delete the companion-app account from its settings.
-      </p>
-    </section>
+    <hr class="border-gray-800" />
 
-    <section>
-      <h2 class="mb-3 text-2xl font-semibold text-white">Availability and changes</h2>
-      <p>
-        Games, statistics, events, and app features may change as the server evolves. We work to keep
-        Cookie Build available and player data accurate, but maintenance, software updates, outages,
-        or third-party platform changes can interrupt the service. Report defects responsibly instead
-        of exploiting them.
-      </p>
-    </section>
+    <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
+      <header>
+        <h1 class="mb-3 text-4xl font-bold text-white">Conditions d’utilisation</h1>
+        <p>Applicables et mises à jour le 14 juillet 2026</p>
+      </header>
 
-    <section>
-      <h2 class="mb-3 text-2xl font-semibold text-white">Ownership and purchases</h2>
-      <p>
-        Cookie Build content and branding remain the property of their respective owners. Minecraft,
-        Mojang, Microsoft, Apple, Google, and Firebase are not sponsors of Cookie Build. No app shop
-        is currently offered. Any future digital purchases will have separate pricing, refund, and
-        platform-payment disclosures before purchase.
-      </p>
-    </section>
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Exploitant et acceptation</h2>
+        <p>
+          Cookie Build est un serveur Minecraft, un site et une app compagnon indépendants exploités
+          par Guillaume Claverie. En utilisant le service, vous acceptez ces conditions et les règles
+          publiées du serveur. Contact :
+          <a class="text-orange-400" href="mailto:support@cookie-build.com">support@cookie-build.com</a>.
+          Cookie Build n’est ni affilié ni approuvé par Mojang, Microsoft, Apple ou Google.
+        </p>
+      </section>
 
-    <section>
-      <h2 class="mb-3 text-2xl font-semibold text-white">Contact</h2>
-      <p>
-        Questions about these terms can be sent to
-        <a class="text-orange-400 hover:text-orange-300" href="mailto:support@cookie-build.com">
-          support@cookie-build.com
-        </a>.
-      </p>
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Âge et compte</h2>
+        <p>
+          L’app est destinée aux personnes de 13 ans ou plus. Lorsque la loi locale exige un accord
+          parental, un parent ou responsable légal doit autoriser l’utilisation. L’app crée un compte
+          pseudonyme et l’associe au joueur grâce à un code temporaire généré en jeu. Protégez votre
+          appareil et votre compte Minecraft et ne partagez jamais ce code.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Utilisation autorisée</h2>
+        <p>Il est interdit de :</p>
+        <ul class="mt-3 list-disc space-y-2 pl-6">
+          <li>tricher, exploiter un bug, automatiser un abus, contourner une sanction ou perturber le réseau ;</li>
+          <li>harceler, menacer, usurper, discriminer ou divulguer les données d’une personne ;</li>
+          <li>accéder au compte d’autrui, associer un autre joueur ou contourner une protection ;</li>
+          <li>envoyer sciemment de faux signalements ou détourner invitations, appels de joueurs, blocages et support ;</li>
+          <li>revendre, copier ou présenter faussement le service ou la marque Cookie Build.</li>
+        </ul>
+        <p class="mt-3">Les amis, groupes et appels de joueurs utilisent uniquement des actions prédéfinies et pseudos Minecraft. Les appels sont limités et chaque destinataire peut les désactiver. Cette version ne propose ni publication publique ni chat libre.</p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Modération et recours</h2>
+        <p>
+          Cookie Build peut retirer un contenu, limiter une fonction, suspendre ou fermer un accès
+          pour la sécurité, l’équité, l’intégrité, une obligation légale ou une violation importante.
+          Un abus grave ou répété peut entraîner une mesure immédiate. Pour contester, écrivez au
+          support avec le pseudo, l’édition, la date approximative et le contexte. Un humain examine le recours.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Disponibilité et modifications</h2>
+        <p>
+          Jeux, maps, statistiques, amis, groupes, événements et notifications peuvent évoluer ou
+          être interrompus pour maintenance, sécurité, compatibilité ou panne d’un tiers. Une fonction
+          dépendant d’une map manquante reste fermée plutôt que cassée. Les changements importants de
+          ces conditions seront publiés avec une nouvelle date d’effet.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Achats et propriété</h2>
+        <p>
+          Cette version ne contient aucune boutique, paiement, souscription ou avantage numérique
+          payant. Les codes, créations et marques restent la propriété de leurs titulaires. Les noms,
+          marques et éléments Minecraft appartiennent à Mojang ou Microsoft et sont utilisés selon
+          leurs règles d’usage applicables.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Responsabilité et droit applicable</h2>
+        <p>
+          Le service est fourni avec un soin raisonnable, sans garantie d’une disponibilité continue
+          ou d’une exactitude parfaite. Dans les limites légales, Cookie Build n’est pas responsable
+          des pertes indirectes ou pannes de plateformes tierces. Aucun droit impératif du consommateur
+          ni responsabilité légalement incontournable n’est exclu. Le droit français s’applique sans
+          retirer les protections impératives du pays du consommateur. Le support doit être contacté
+          d’abord ; les tribunaux compétents et droits légaux de médiation restent disponibles.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Arrêt du service</h2>
+        <p>
+          Vous pouvez arrêter à tout moment, dissocier les joueurs, quitter les amis ou groupes,
+          désactiver les notifications et supprimer le compte mobile dans les réglages. Consultez la
+          <NuxtLink class="text-orange-400" to="/privacy">Politique de confidentialité</NuxtLink>.
+        </p>
+      </section>
     </section>
   </article>
 </template>

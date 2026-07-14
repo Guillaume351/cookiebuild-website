@@ -8,6 +8,7 @@ import {
   anonymizedFirebaseUid,
   firebaseUidHash,
 } from "../server/utils/mobile-identity";
+import { linkCodeHmac } from "../server/utils/mobile-validation";
 
 const databaseUrl = process.env.MOBILE_INTEGRATION_DATABASE_URL;
 const integration = databaseUrl ? describe : describe.skip;
@@ -293,6 +294,108 @@ integration("mobile account deletion concurrency", () => {
       audience: {},
       lockToken: null,
     }]);
+  });
+
+  it("consumes a link code and starts local deletion in one transaction", async () => {
+    const uid = "link-code-deletion-user";
+    const playerId = "54cb88eb-6942-4ea4-a714-a5e543587b58";
+    const challengeId = "03a6f929-7f74-4376-b2a3-984632b37c74";
+    const code = "CD45EF67";
+    const codeHmac = linkCodeHmac(code, process.env.MOBILE_LINK_PEPPER!);
+    await users.requireMobileUser(eventFor(uid));
+    await setupSql`
+      INSERT INTO playerdata (id, name) VALUES (${playerId}, 'DeleteByCode')
+    `;
+    await setupSql`
+      INSERT INTO mobile_player_links
+        (firebase_uid, player_id, edition, is_primary)
+      VALUES (${uid}, ${playerId}, 'java', true)
+    `;
+    await setupSql`
+      INSERT INTO player_link_challenges
+        (id, player_id, edition, code_hmac, expires_at, created_at)
+      VALUES
+        (${challengeId}, ${playerId}, 'java', ${codeHmac}, now() + interval '10 minutes', now())
+    `;
+
+    const deletion = await playerLinks.beginMobileAccountDeletionByLinkCode(code);
+    expect(deletion).toMatchObject({ firebaseUid: uid, playerId, edition: "java" });
+
+    const records = await setupSql<{
+      consumed: boolean;
+      deleted: boolean;
+      links: number;
+      preferences: number;
+      outboxId: string;
+      status: string;
+      audience: Record<string, unknown>;
+    }[]>`
+      SELECT challenge.consumed_at IS NOT NULL AS consumed,
+             mobile_user.deleted_at IS NOT NULL AS deleted,
+             (SELECT count(*)::int FROM mobile_player_links WHERE firebase_uid = ${uid}) AS links,
+             (SELECT count(*)::int
+                FROM mobile_notification_preferences
+               WHERE mobile_user_id = mobile_user.id) AS preferences,
+             outbox.id AS "outboxId",
+             outbox.status,
+             outbox.audience
+        FROM player_link_challenges challenge
+        JOIN mobile_users mobile_user ON mobile_user.firebase_uid = ${uid}
+        JOIN mobile_notification_outbox outbox ON outbox.id = ${deletion.outboxId}
+       WHERE challenge.id = ${challengeId}
+    `;
+    expect(records).toEqual([{
+      consumed: true,
+      deleted: true,
+      links: 0,
+      preferences: 0,
+      outboxId: deletion.outboxId,
+      status: "pending",
+      audience: { firebaseUid: uid },
+    }]);
+  });
+
+  it("does not burn a link code when local account deletion cannot start", async () => {
+    const orphanUid = "orphan-link-code-user";
+    const playerId = "849c187d-6253-425d-9ea0-3ff0b0ed0c35";
+    const challengeId = "af1fca90-6824-4baa-9266-a96ea18feb6d";
+    const code = "GH67JK89";
+    const codeHmac = linkCodeHmac(code, process.env.MOBILE_LINK_PEPPER!);
+    await setupSql`
+      INSERT INTO playerdata (id, name) VALUES (${playerId}, 'OrphanDelete')
+    `;
+    await setupSql`
+      INSERT INTO mobile_player_links
+        (firebase_uid, player_id, edition, is_primary)
+      VALUES (${orphanUid}, ${playerId}, 'bedrock', true)
+    `;
+    await setupSql`
+      INSERT INTO player_link_challenges
+        (id, player_id, edition, code_hmac, expires_at, created_at)
+      VALUES
+        (${challengeId}, ${playerId}, 'bedrock', ${codeHmac}, now() + interval '10 minutes', now())
+    `;
+
+    await expect(playerLinks.beginMobileAccountDeletionByLinkCode(code))
+      .rejects.toMatchObject({ statusCode: 410, statusMessage: "Account deleted" });
+
+    const records = await setupSql<{
+      consumed: boolean;
+      links: number;
+      authDeletions: number;
+    }[]>`
+      SELECT challenge.consumed_at IS NOT NULL AS consumed,
+             (SELECT count(*)::int
+                FROM mobile_player_links
+               WHERE firebase_uid = ${orphanUid} AND revoked_at IS NULL) AS links,
+             (SELECT count(*)::int
+                FROM mobile_notification_outbox
+               WHERE kind = 'firebase_auth_delete'
+                 AND audience ->> 'firebaseUid' = ${orphanUid}) AS "authDeletions"
+        FROM player_link_challenges challenge
+       WHERE challenge.id = ${challengeId}
+    `;
+    expect(records).toEqual([{ consumed: false, links: 1, authDeletions: 0 }]);
   });
 
   it("cannot claim a challenge concurrently revoked under the player lock", async () => {

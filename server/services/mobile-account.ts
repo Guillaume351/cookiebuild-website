@@ -11,16 +11,28 @@ import {
   accountDeletedError,
   lockActiveMobileUser,
   lockFirebaseIdentity,
+  type MobileDbTransaction,
 } from "./mobile-user";
 import {
   anonymizedFirebaseUid,
   firebaseUidHash,
 } from "../utils/mobile-identity";
 
-export async function beginMobileAccountDeletion(firebaseUid: string) {
-  return db.transaction(async (tx) => {
-    await lockFirebaseIdentity(tx, firebaseUid);
-    const user = await lockActiveMobileUser(tx, firebaseUid);
+type LockedMobileUser = Awaited<ReturnType<typeof lockActiveMobileUser>>;
+
+export async function lockMobileAccountForDeletion(
+  tx: MobileDbTransaction,
+  firebaseUid: string,
+) {
+  await lockFirebaseIdentity(tx, firebaseUid);
+  return lockActiveMobileUser(tx, firebaseUid);
+}
+
+export async function beginMobileAccountDeletionInTransaction(
+  tx: MobileDbTransaction,
+  firebaseUid: string,
+  user: LockedMobileUser,
+) {
     const now = new Date();
     const deleted = await tx
       .update(mobileUsers)
@@ -52,6 +64,12 @@ export async function beginMobileAccountDeletion(firebaseUid: string) {
       .returning({ id: mobileNotificationOutbox.id });
 
     return { userId: user.id, outboxId: queued[0]!.id };
+}
+
+export async function beginMobileAccountDeletion(firebaseUid: string) {
+  return db.transaction(async (tx) => {
+    const user = await lockMobileAccountForDeletion(tx, firebaseUid);
+    return beginMobileAccountDeletionInTransaction(tx, firebaseUid, user);
   });
 }
 

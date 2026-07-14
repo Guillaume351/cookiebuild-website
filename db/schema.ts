@@ -260,6 +260,7 @@ export const mobileNotificationPreferences = pgTable("mobile_notification_prefer
   eventsEnabled: boolean("events_enabled").default(true).notNull(),
   serverStatusEnabled: boolean("server_status_enabled").default(true).notNull(),
   socialEnabled: boolean("social_enabled").default(true).notNull(),
+  rallyEnabled: boolean("rally_enabled").default(false).notNull(),
   weeklyDigestEnabled: boolean("weekly_digest_enabled").default(true).notNull(),
   quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
   quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
@@ -284,6 +285,9 @@ export const mobileNotificationOutbox = pgTable(
   },
   (table) => [
     index("mobile_notification_outbox_pending_idx").on(table.status, table.availableAt),
+    uniqueIndex("mobile_notification_outbox_player_rally_id_uq")
+      .on(sql`(${table.payload} ->> 'rallyId')`)
+      .where(sql`${table.kind} = 'player_rally'`),
     check("mobile_notification_outbox_status_ck", sql`${table.status} IN ('pending', 'processing', 'delivered', 'dead')`),
   ],
 );
@@ -329,5 +333,172 @@ export const mobileEvents = pgTable(
     uniqueIndex("mobile_events_slug_uq").on(table.slug),
     index("mobile_events_schedule_idx").on(table.status, table.startsAt),
     check("mobile_events_status_ck", sql`${table.status} IN ('draft', 'scheduled', 'cancelled', 'completed')`),
+  ],
+);
+
+export const playerFriendships = pgTable(
+  "player_friendships",
+  {
+    playerLowId: uuid("player_low_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    playerHighId: uuid("player_high_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    requestedByPlayerId: uuid("requested_by_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    status: varchar({ length: 16 }).default("pending").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerLowId, table.playerHighId] }),
+    index("player_friendships_low_status_idx").on(table.playerLowId, table.status),
+    index("player_friendships_high_status_idx").on(table.playerHighId, table.status),
+    check("player_friendships_order_ck", sql`${table.playerLowId} < ${table.playerHighId}`),
+    check(
+      "player_friendships_requester_ck",
+      sql`${table.requestedByPlayerId} IN (${table.playerLowId}, ${table.playerHighId})`,
+    ),
+    check("player_friendships_status_ck", sql`${table.status} IN ('pending', 'accepted')`),
+    check(
+      "player_friendships_accepted_at_ck",
+      sql`(${table.status} = 'pending' AND ${table.acceptedAt} IS NULL)
+        OR (${table.status} = 'accepted' AND ${table.acceptedAt} IS NOT NULL)`,
+    ),
+  ],
+);
+
+export const playerBlocks = pgTable(
+  "player_blocks",
+  {
+    blockerPlayerId: uuid("blocker_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    blockedPlayerId: uuid("blocked_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.blockerPlayerId, table.blockedPlayerId] }),
+    index("player_blocks_blocked_idx").on(table.blockedPlayerId),
+    check("player_blocks_self_ck", sql`${table.blockerPlayerId} <> ${table.blockedPlayerId}`),
+  ],
+);
+
+export const playerReports = pgTable(
+  "player_reports",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    reporterPlayerId: uuid("reporter_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    reportedPlayerId: uuid("reported_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    reason: varchar({ length: 32 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("player_reports_reporter_created_idx").on(table.reporterPlayerId, table.createdAt),
+    index("player_reports_reported_created_idx").on(table.reportedPlayerId, table.createdAt),
+    check("player_reports_self_ck", sql`${table.reporterPlayerId} <> ${table.reportedPlayerId}`),
+    check(
+      "player_reports_reason_ck",
+      sql`${table.reason} IN ('spam', 'harassment', 'hate_or_discrimination', 'sexual_content', 'threats', 'impersonation', 'cheating', 'inappropriate_name')`,
+    ),
+  ],
+);
+
+export const playerParties = pgTable(
+  "player_parties",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    leaderPlayerId: uuid("leader_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    state: varchar({ length: 16 }).default("active").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    disbandedAt: timestamp("disbanded_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    uniqueIndex("player_parties_active_leader_uq")
+      .on(table.leaderPlayerId)
+      .where(sql`${table.state} = 'active'`),
+    check("player_parties_state_ck", sql`${table.state} IN ('active', 'disbanded')`),
+    check(
+      "player_parties_disbanded_at_ck",
+      sql`(${table.state} = 'active' AND ${table.disbandedAt} IS NULL)
+        OR (${table.state} = 'disbanded' AND ${table.disbandedAt} IS NOT NULL)`,
+    ),
+  ],
+);
+
+export const playerPartyMembers = pgTable(
+  "player_party_members",
+  {
+    partyId: uuid("party_id")
+      .notNull()
+      .references(() => playerParties.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    role: varchar({ length: 16 }).default("member").notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    leftAt: timestamp("left_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.partyId, table.playerId] }),
+    uniqueIndex("player_party_members_active_player_uq")
+      .on(table.playerId)
+      .where(sql`${table.leftAt} IS NULL`),
+    index("player_party_members_active_party_idx")
+      .on(table.partyId)
+      .where(sql`${table.leftAt} IS NULL`),
+    check("player_party_members_role_ck", sql`${table.role} IN ('leader', 'member')`),
+  ],
+);
+
+export const playerPartyInvites = pgTable(
+  "player_party_invites",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    partyId: uuid("party_id")
+      .notNull()
+      .references(() => playerParties.id, { onDelete: "cascade" }),
+    inviterPlayerId: uuid("inviter_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    inviteePlayerId: uuid("invitee_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    status: varchar({ length: 16 }).default("pending").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    respondedAt: timestamp("responded_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    uniqueIndex("player_party_invites_pending_party_invitee_uq")
+      .on(table.partyId, table.inviteePlayerId)
+      .where(sql`${table.status} = 'pending'`),
+    index("player_party_invites_invitee_status_idx")
+      .on(table.inviteePlayerId, table.status, table.expiresAt),
+    index("player_party_invites_party_status_idx")
+      .on(table.partyId, table.status, table.expiresAt),
+    check("player_party_invites_self_ck", sql`${table.inviterPlayerId} <> ${table.inviteePlayerId}`),
+    check(
+      "player_party_invites_status_ck",
+      sql`${table.status} IN ('pending', 'accepted', 'declined', 'cancelled', 'expired')`,
+    ),
+    check(
+      "player_party_invites_response_ck",
+      sql`(${table.status} = 'pending' AND ${table.respondedAt} IS NULL)
+        OR (${table.status} <> 'pending' AND ${table.respondedAt} IS NOT NULL)`,
+    ),
+    check("player_party_invites_expiry_ck", sql`${table.expiresAt} > ${table.createdAt}`),
   ],
 );

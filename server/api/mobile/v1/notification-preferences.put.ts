@@ -14,6 +14,7 @@ interface PreferenceBody {
   eventsEnabled?: unknown;
   serverStatusEnabled?: unknown;
   socialEnabled?: unknown;
+  rallyEnabled?: unknown;
   weeklyDigestEnabled?: unknown;
   quietHoursStart?: unknown;
   quietHoursEnd?: unknown;
@@ -56,6 +57,7 @@ export default defineEventHandler(async (event) => {
       serverStatusEnabled: optionalBoolean(body?.serverStatusEnabled, "serverStatusEnabled")
         ?? existing.serverStatusEnabled,
       socialEnabled: optionalBoolean(body?.socialEnabled, "socialEnabled") ?? existing.socialEnabled,
+      rallyEnabled: optionalBoolean(body?.rallyEnabled, "rallyEnabled") ?? existing.rallyEnabled,
       weeklyDigestEnabled: optionalBoolean(body?.weeklyDigestEnabled, "weeklyDigestEnabled")
         ?? existing.weeklyDigestEnabled,
       quietHoursStart,

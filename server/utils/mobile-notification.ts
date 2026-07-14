@@ -3,6 +3,7 @@ export const NOTIFICATION_KINDS = [
   "event",
   "server_status",
   "social",
+  "rally",
   "weekly_digest",
 ] as const;
 
@@ -25,6 +26,23 @@ export interface NotificationPayload {
 }
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const PLAYER_RALLY_FIELDS = new Set([
+  "schemaVersion",
+  "rallyId",
+  "source",
+  "gamemode",
+  "edition",
+  "queuedCount",
+  "neededCount",
+  "actorDisplayName",
+]);
+const PLAYER_RALLY_GAMEMODES = {
+  microbattles: "MicroBattles",
+  pitchout: "Pitchout",
+  skywars: "SkyWars",
+  buildbattles: "BuildBattles",
+} as const;
+const PLAYER_RALLY_ACTOR_PATTERN = /^[\p{L}\p{N}_. -]{1,32}$/u;
 
 export class PermanentOutboxError extends Error {
   override name = "PermanentOutboxError";
@@ -57,11 +75,16 @@ export function preferenceKind(kind: string): NotificationPreferenceKind | undef
     return "server_status";
   }
   if (["social", "friend_request", "party_invite"].includes(kind)) return "social";
+  if (kind === "player_rally") return "rally";
   if (kind === "weekly_digest") return "weekly_digest";
   return undefined;
 }
 
-export function parseNotificationAudience(value: unknown): NotificationAudience {
+export function parseNotificationAudience(
+  value: unknown,
+  kind?: string,
+  allowInternalDeviceRetry = false,
+): NotificationAudience {
   const input = record(value);
   if (!input) throw new PermanentOutboxError("audience must be an object");
 
@@ -91,6 +114,10 @@ export function parseNotificationAudience(value: unknown): NotificationAudience 
   }
   if (selectors !== 1) {
     throw new PermanentOutboxError("audience must contain exactly one selector");
+  }
+  const internalRallyRetry = allowInternalDeviceRetry && Boolean(audience.deviceIds);
+  if (kind === "player_rally" && audience.all !== true && !internalRallyRetry) {
+    throw new PermanentOutboxError("player_rally audience must be all");
   }
   return audience;
 }
@@ -123,7 +150,98 @@ function safeImageUrl(value: unknown) {
   return text;
 }
 
-export function parseNotificationPayload(value: unknown): NotificationPayload {
+export function parseNotificationPayload(
+  value: unknown,
+  kind?: string,
+): NotificationPayload {
+  return parseNotificationPayloadForKind(value, kind);
+}
+
+function rallyInteger(value: unknown, field: string, minimum: number) {
+  if (
+    typeof value !== "number"
+    || !Number.isInteger(value)
+    || value < minimum
+    || value > 1_000
+  ) {
+    throw new PermanentOutboxError(`payload.${field} must be an integer from ${minimum} to 1000`);
+  }
+  return value;
+}
+
+export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
+  const input = record(value);
+  if (!input) throw new PermanentOutboxError("payload must be an object");
+  const fields = Object.keys(input);
+  if (
+    fields.length !== PLAYER_RALLY_FIELDS.size
+    || fields.some((field) => !PLAYER_RALLY_FIELDS.has(field))
+  ) {
+    throw new PermanentOutboxError("player_rally payload fields are invalid");
+  }
+  if (input.schemaVersion !== 1) {
+    throw new PermanentOutboxError("payload.schemaVersion must be 1");
+  }
+  if (typeof input.rallyId !== "string" || !UUID_PATTERN.test(input.rallyId)) {
+    throw new PermanentOutboxError("payload.rallyId must be a UUID");
+  }
+  if (input.source !== "player" && input.source !== "automatic") {
+    throw new PermanentOutboxError("payload.source must be player or automatic");
+  }
+  if (
+    typeof input.gamemode !== "string"
+    || !(input.gamemode in PLAYER_RALLY_GAMEMODES)
+  ) {
+    throw new PermanentOutboxError("payload.gamemode is unsupported");
+  }
+  if (input.edition !== "crossplay") {
+    throw new PermanentOutboxError("payload.edition must be crossplay");
+  }
+  const queuedCount = rallyInteger(input.queuedCount, "queuedCount", 0);
+  const neededCount = rallyInteger(input.neededCount, "neededCount", 1);
+  let actorDisplayName: string | null = null;
+  if (input.source === "player") {
+    if (typeof input.actorDisplayName !== "string") {
+      throw new PermanentOutboxError("payload.actorDisplayName is required for player rallies");
+    }
+    actorDisplayName = input.actorDisplayName.trim().normalize("NFKC");
+    if (!PLAYER_RALLY_ACTOR_PATTERN.test(actorDisplayName)) {
+      throw new PermanentOutboxError("payload.actorDisplayName is not a public player name");
+    }
+  } else if (input.actorDisplayName !== null) {
+    throw new PermanentOutboxError("payload.actorDisplayName must be null for automatic rallies");
+  }
+
+  const gamemode = input.gamemode as keyof typeof PLAYER_RALLY_GAMEMODES;
+  const title = `Players needed for ${PLAYER_RALLY_GAMEMODES[gamemode]}`;
+  const countSummary = `${queuedCount} queued, ${neededCount} more needed`;
+  const body = actorDisplayName
+    ? `${actorDisplayName} is rallying players: ${countSummary}.`
+    : `${countSummary} to start.`;
+  return {
+    title,
+    body,
+    deepLink: `cookiebuild://play?gamemode=${gamemode}`,
+    data: {
+      type: "player_rally",
+      schemaVersion: "1",
+      rallyId: input.rallyId,
+      source: input.source,
+      gamemode,
+      edition: "crossplay",
+      queuedCount: String(queuedCount),
+      neededCount: String(neededCount),
+      ...(actorDisplayName ? { actorDisplayName } : {}),
+    },
+    urgent: false,
+  };
+}
+
+export function parseNotificationPayloadForKind(
+  value: unknown,
+  kind?: string,
+): NotificationPayload {
+  if (kind === "player_rally") return parsePlayerRallyPayload(value);
   const input = record(value);
   if (!input) throw new PermanentOutboxError("payload must be an object");
   const nested = record(input.notification);

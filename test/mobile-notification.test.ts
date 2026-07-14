@@ -4,6 +4,7 @@ import {
   isInQuietHours,
   parseNotificationAudience,
   parseNotificationPayload,
+  parseNotificationPayloadForKind,
   PermanentOutboxError,
   preferenceKind,
   retryDelayMs,
@@ -23,6 +24,20 @@ describe("mobile notification validation", () => {
       .toThrow(PermanentOutboxError);
     expect(() => parseNotificationAudience({ deviceIds: ["not-a-uuid"] }))
       .toThrow(PermanentOutboxError);
+  });
+
+  it("requires the global audience for player rallies", () => {
+    expect(parseNotificationAudience({ all: true }, "player_rally")).toEqual({ all: true });
+    expect(() => parseNotificationAudience({ firebaseUid: "user" }, "player_rally"))
+      .toThrow(PermanentOutboxError);
+    const retryDevice = "0772c75e-d8a7-4e9d-98a1-f1744dde448e";
+    expect(() => parseNotificationAudience({ deviceIds: [retryDevice] }, "player_rally"))
+      .toThrow(PermanentOutboxError);
+    expect(parseNotificationAudience(
+      { deviceIds: [retryDevice] },
+      "player_rally",
+      true,
+    )).toEqual({ deviceIds: [retryDevice] });
   });
 
   it("normalizes a safe notification payload", () => {
@@ -49,6 +64,63 @@ describe("mobile notification validation", () => {
     expect(() => parseNotificationPayload({ title: "No", body: "é".repeat(2_000) }))
       .toThrow(PermanentOutboxError);
   });
+
+  it("synthesizes player rally notifications from a strict structured payload", () => {
+    expect(parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "0772c75e-d8a7-4e9d-98a1-f1744dde448e",
+      source: "player",
+      gamemode: "microbattles",
+      edition: "crossplay",
+      queuedCount: 2,
+      neededCount: 6,
+      actorDisplayName: "Cookie_Player",
+    }, "player_rally")).toEqual({
+      title: "Players needed for MicroBattles",
+      body: "Cookie_Player is rallying players: 2 queued, 6 more needed.",
+      deepLink: "cookiebuild://play?gamemode=microbattles",
+      data: {
+        type: "player_rally",
+        schemaVersion: "1",
+        rallyId: "0772c75e-d8a7-4e9d-98a1-f1744dde448e",
+        source: "player",
+        gamemode: "microbattles",
+        edition: "crossplay",
+        queuedCount: "2",
+        neededCount: "6",
+        actorDisplayName: "Cookie_Player",
+      },
+      urgent: false,
+    });
+  });
+
+  it("rejects free text and inconsistent player rally fields", () => {
+    const valid = {
+      schemaVersion: 1,
+      rallyId: "0772c75e-d8a7-4e9d-98a1-f1744dde448e",
+      source: "automatic",
+      gamemode: "pitchout",
+      edition: "crossplay",
+      queuedCount: 1,
+      neededCount: 3,
+      actorDisplayName: null,
+    };
+    expect(() => parseNotificationPayloadForKind({ ...valid, body: "free text" }, "player_rally"))
+      .toThrow(PermanentOutboxError);
+    expect(() => parseNotificationPayloadForKind({
+      ...valid,
+      source: "player",
+      actorDisplayName: "hello\nplayers",
+    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() => parseNotificationPayloadForKind({
+      ...valid,
+      edition: "java",
+    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() => parseNotificationPayloadForKind({
+      ...valid,
+      neededCount: 0,
+    }, "player_rally")).toThrow(PermanentOutboxError);
+  });
 });
 
 describe("mobile notification policy", () => {
@@ -56,6 +128,7 @@ describe("mobile notification policy", () => {
     expect(preferenceKind("news_published")).toBe("announcement");
     expect(preferenceKind("event_reminder")).toBe("event");
     expect(preferenceKind("server_offline")).toBe("server_status");
+    expect(preferenceKind("player_rally")).toBe("rally");
     expect(preferenceKind("unknown")).toBeUndefined();
   });
 
