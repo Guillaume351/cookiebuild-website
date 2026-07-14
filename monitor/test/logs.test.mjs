@@ -10,6 +10,9 @@ test("detects game and Paper fatal errors without authentication noise", () => {
   assert.equal(isFatalLogLine("[Server thread/ERROR]: [MicroBattles] Failed to load map for MicroBattlesGame: bad zip"), true);
   assert.equal(isFatalLogLine("[Server thread/ERROR]: Could not pass event PlayerMoveEvent to Pitchout"), true);
   assert.equal(isFatalLogLine("[Server thread/ERROR]: [SkyWars] Failed to load map for SkyWarsGame: missing archive"), true);
+  assert.equal(isFatalLogLine("[Server thread/ERROR]: Could not pass event PlayerInteractEvent to BuildBattles"), true);
+  assert.equal(isFatalLogLine("[Server thread/WARN]: [BuildBattles] BuildBattles unavailable until a valid map archive is installed: BuildBattles preparation failed: missing archive"), false);
+  assert.equal(isFatalLogLine("[Server thread/WARN]: [SkyWars] SkyWars remains unavailable until a valid map archive is installed: SkyWars map preparation failed: missing archive"), false);
   assert.equal(isFatalLogLine("[User Authenticator #1/ERROR]: Username 'bot' tried to join with an invalid session"), false);
   assert.equal(isFatalLogLine("[Server thread/WARN]: [ProtocolLib] Version has not yet been tested! Proceed with caution."), false);
 });

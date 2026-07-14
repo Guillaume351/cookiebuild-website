@@ -8,7 +8,7 @@ failures that need an operator response:
 - Bedrock RakNet availability and latency;
 - website availability and expected page content;
 - a real `SELECT 1` database query through `/api/health` (not just a TCP port);
-- new Paper, CookieDough, MicroBattles, Pitchout and SkyWars fatal log lines.
+- new Paper, CookieDough, MicroBattles, Pitchout, SkyWars and BuildBattles fatal log lines.
 
 It sends a Discord alert only after three consecutive failed checks (three
 minutes by default), sends one reminder every six hours while an outage remains,

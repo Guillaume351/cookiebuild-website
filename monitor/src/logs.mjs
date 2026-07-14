@@ -2,10 +2,10 @@ import { createHash } from "node:crypto";
 import { open, stat } from "node:fs/promises";
 
 const FATAL_PATTERNS = [
-  /\[(?:CookieDough|MicroBattles|Pitchout|SkyWars)\].*(?:failed|failure|fatal|exception|could not)/i,
-  /Failed to load map for (?:MicroBattles|Pitchout|SkyWars)/i,
-  /Could not pass event .* to (?:CookieDough|MicroBattles|Pitchout|SkyWars)/i,
-  /Error occurred while enabling (?:CookieDough|MicroBattles|Pitchout|SkyWars)/i,
+  /\[(?:CookieDough|MicroBattles|Pitchout|SkyWars|BuildBattles)\].*(?:failed|failure|fatal|exception|could not)/i,
+  /Failed to load map for (?:MicroBattles|Pitchout|SkyWars|BuildBattles)/i,
+  /Could not pass event .* to (?:CookieDough|MicroBattles|Pitchout|SkyWars|BuildBattles)/i,
+  /Error occurred while enabling (?:CookieDough|MicroBattles|Pitchout|SkyWars|BuildBattles)/i,
   /Exception in server tick loop/i,
   /Encountered an unexpected exception/i,
   /OutOfMemoryError/i,
@@ -18,6 +18,7 @@ const IGNORED_PATTERNS = [
   /Failed to verify username/i,
   /tried to join with an invalid session/i,
   /has not yet been tested.*Proceed with caution/i,
+  /\[(?:SkyWars|BuildBattles)\].*(?:remains )?unavailable until a valid map archive is installed/i,
 ];
 
 export function isFatalLogLine(line) {

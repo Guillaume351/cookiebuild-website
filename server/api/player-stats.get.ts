@@ -7,6 +7,7 @@ const PROGRESSION_GAMEMODES = new Map([
   ["MicroBattles", "microbattles"],
   ["Pitchout", "pitchout"],
   ["SkyWars", "skywars"],
+  ["BuildBattles", "buildbattles"],
 ]);
 const OUTER_PLAYER_ID = sql.raw('"playerdata"."id"');
 
@@ -113,6 +114,16 @@ export default defineEventHandler(async (event) => {
           AND (${gamemode ? sql`m.gametype = ${gamemode}` : sql`TRUE`})
           AND (${dateRange ? sql`m.starttime >= ${dateRange}` : sql`TRUE`})
         ), 0)`.as("kills"),
+        score: sql<number>`COALESCE((
+          SELECT SUM(COALESCE((pmp.game_specific_metrics ->> 'score')::integer, 0))
+          FROM player_match_performances pmp
+          JOIN matches m ON pmp.match_id = m.id
+          WHERE pmp.player_id = ${OUTER_PLAYER_ID}
+          AND m.endtime IS NOT NULL
+          AND m.gametype = 'BuildBattles'
+          AND (${gamemode ? sql`m.gametype = ${gamemode}` : sql`TRUE`})
+          AND (${dateRange ? sql`m.starttime >= ${dateRange}` : sql`TRUE`})
+        ), 0)`.as("score"),
         deaths: sql<number>`COALESCE((
           SELECT SUM(pmp.deathsinmatch)
           FROM player_match_performances pmp

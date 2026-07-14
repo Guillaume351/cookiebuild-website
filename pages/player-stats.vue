@@ -42,6 +42,7 @@
                 <option value="MicroBattles">MicroBattles</option>
                 <option value="Pitchout">Pitchout</option>
                 <option value="SkyWars">SkyWars</option>
+                <option value="BuildBattles">Build Battles</option>
               </select>
             </div>
 
@@ -94,7 +95,10 @@
           </div>
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <ProfileMetric label="Matches" :value="selectedPlayer.matches" />
-            <ProfileMetric label="Kills" :value="selectedPlayer.kills" />
+            <ProfileMetric
+              :label="selectedGamemode === 'BuildBattles' ? 'Build score' : 'Kills'"
+              :value="selectedGamemode === 'BuildBattles' ? selectedPlayer.score : selectedPlayer.kills"
+            />
             <ProfileMetric label="Coins" :value="selectedPlayer.coins" />
             <ProfileMetric label="Playtime" :value="formatPlaytime(selectedPlayer.playtime)" />
           </div>
@@ -295,6 +299,7 @@ interface PlayerStat {
   losses: number;
   matches: number;
   kills: number;
+  score: number;
   deaths: number;
   coins: number;
   playtime?: number;
@@ -373,6 +378,7 @@ function formatGamemode(gamemode: string) {
     microbattles: "MicroBattles",
     pitchout: "Pitchout",
     skywars: "SkyWars",
+    buildbattles: "Build Battles",
   };
   return labels[gamemode.toLowerCase()] ?? gamemode;
 }
