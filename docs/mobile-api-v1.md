@@ -54,8 +54,9 @@ through Dokploy; it must never be committed or sent to clients.
 
 ## Release order
 
-1. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`, then
-   `drizzle/0003_player_rally.sql`, with PostgreSQL `ON_ERROR_STOP`.
+1. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`,
+   `drizzle/0003_player_rally.sql`, then `drizzle/0004_player_changelog.sql`, with
+   PostgreSQL `ON_ERROR_STOP`.
 2. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
    `MOBILE_LINK_PEPPER` for the website.
 3. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.

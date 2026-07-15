@@ -314,6 +314,26 @@ export const mobileNewsPosts = pgTable(
   ],
 );
 
+export const playerChangelogState = pgTable(
+  "player_changelog_state",
+  {
+    playerId: uuid("player_id")
+      .primaryKey()
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    lastSeenPublishedAt: timestamp("last_seen_published_at", { withTimezone: true, mode: "date" }),
+    lastSeenPostId: uuid("last_seen_post_id"),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("player_changelog_state_cursor_idx").on(table.lastSeenPublishedAt, table.lastSeenPostId),
+    check(
+      "player_changelog_state_cursor_ck",
+      sql`(${table.lastSeenPublishedAt} IS NULL) = (${table.lastSeenPostId} IS NULL)`,
+    ),
+  ],
+);
+
 export const mobileEvents = pgTable(
   "mobile_events",
   {

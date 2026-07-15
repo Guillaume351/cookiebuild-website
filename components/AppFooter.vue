@@ -23,6 +23,11 @@
               >
             </li>
             <li>
+              <NuxtLink to="/changelog" class="text-gray-400 hover:text-white transition-colors"
+                >What’s New</NuxtLink
+              >
+            </li>
+            <li>
               <NuxtLink to="/account/delete" class="text-gray-400 hover:text-white transition-colors"
                 >Delete App Account</NuxtLink
               >

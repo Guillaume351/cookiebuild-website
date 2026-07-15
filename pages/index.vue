@@ -157,6 +157,30 @@
       </div>
     </Teleport>
 
+    <section class="overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-orange-950/30 p-8 shadow-xl md:p-12">
+      <div class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
+        <div>
+          <Badge class="mb-4 bg-orange-600 hover:bg-orange-600">Mobile 2.0</Badge>
+          <h2 class="text-3xl font-black tracking-tight text-white md:text-4xl">Cookie Build in your pocket</h2>
+          <p class="mt-4 max-w-2xl text-lg leading-relaxed text-zinc-300">
+            Check Java and Bedrock status, browse leaderboards and events, link your player securely, manage Friends and Parties, and opt in when a game needs more players.
+          </p>
+          <div class="mt-7">
+            <AppStoreButtons />
+          </div>
+        </div>
+        <div class="rounded-2xl border border-zinc-800 bg-black/30 p-6">
+          <h3 class="text-xl font-bold text-white">Never miss an update</h3>
+          <p class="mt-3 text-zinc-400">
+            The new changelog keeps the website, mobile apps, and in-game welcome summary aligned.
+          </p>
+          <Button as-child variant="outline" class="mt-6 border-orange-500/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20">
+            <NuxtLink to="/changelog">See what’s new</NuxtLink>
+          </Button>
+        </div>
+      </div>
+    </section>
+
     <!-- Legacy / History Section -->
     <section class="text-center">
       <div class="mx-auto max-w-4xl border-t border-zinc-800 pt-16 mt-10">
