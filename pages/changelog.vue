@@ -55,7 +55,7 @@ interface ChangelogResponse {
 }
 
 const { data, pending, error } = await useFetch<ChangelogResponse>("/api/mobile/v1/news", {
-  query: { limit: 50 },
+  query: { limit: 50, contentType: "changelog" },
 });
 const posts = computed(() => data.value?.data ?? []);
 

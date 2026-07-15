@@ -1,0 +1,34 @@
+services:
+  cookiebuild-operator:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    volumes:
+      - operator-state:/state
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      OPERATOR_HOST: 0.0.0.0
+      OPERATOR_HMAC_SECRET: ${OPERATOR_HMAC_SECRET:?set a distinct 32+ character secret}
+      OPERATOR_MINECRAFT_SERVICE: ${OPERATOR_MINECRAFT_SERVICE:?set the discovered Swarm service name}
+      OPERATOR_MONITOR_STATUS_URL: ${OPERATOR_MONITOR_STATUS_URL:?set the internal monitor status URL}
+      OPERATOR_MONITOR_PLAYERS_POINTER: ${OPERATOR_MONITOR_PLAYERS_POINTER:-/checks/Java server/details/players}
+      OPERATOR_CANARIES_JSON: ${OPERATOR_CANARIES_JSON:?configure at least one HTTP or TCP canary}
+    # Keep the image's non-root UID while using the host Docker socket's group as
+    # the primary GID. `group_add` is rejected by Docker Stack/Swarm.
+    user: "operator:${DOCKER_SOCKET_GID:?set the numeric group owner of the Docker socket}"
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - cookiebuild-admin
+
+volumes:
+  operator-state:
+
+networks:
+  cookiebuild-admin:
+    external: true
+    name: cookiebuild-admin

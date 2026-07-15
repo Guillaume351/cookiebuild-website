@@ -1,0 +1,11 @@
+scrape_configs:
+  - job_name: cookiebuild-update-monitor
+    metrics_path: /metrics
+    scrape_interval: 60s
+    scrape_timeout: 10s
+    static_configs:
+      - targets:
+          - cookiebuild-update-monitor:9420
+        labels:
+          environment: production
+          subsystem: admin-ops

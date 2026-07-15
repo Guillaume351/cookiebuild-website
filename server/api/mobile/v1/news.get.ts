@@ -6,6 +6,10 @@ import { positiveInteger } from "../../../utils/mobile-validation";
 
 export default defineEventHandler(async (event) => {
   const limit = positiveInteger(getQuery(event).limit, 20, 50);
+  const contentType = getQuery(event).contentType;
+  if (contentType !== undefined && contentType !== "news" && contentType !== "changelog") {
+    throw createError({ statusCode: 400, statusMessage: "Invalid content type" });
+  }
   const now = new Date();
   const posts = await db
     .select({
@@ -20,6 +24,7 @@ export default defineEventHandler(async (event) => {
     .from(mobileNewsPosts)
     .where(and(
       eq(mobileNewsPosts.status, "published"),
+      ...(contentType ? [eq(mobileNewsPosts.contentType, contentType)] : []),
       lte(mobileNewsPosts.publishedAt, now),
       or(isNull(mobileNewsPosts.expiresAt), gt(mobileNewsPosts.expiresAt, now)),
     ))

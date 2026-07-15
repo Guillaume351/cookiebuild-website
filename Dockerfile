@@ -24,6 +24,7 @@ WORKDIR /app
 
 # Copy built assets from build-stage
 COPY --from=build-stage --chown=node:node /app/.output ./
+COPY --from=build-stage --chown=node:node /app/scripts/provision-admin.mjs ./scripts/provision-admin.mjs
 
 # Expose the listening port
 EXPOSE 3000

@@ -347,6 +347,7 @@ export const mobileNewsPosts = pgTable(
     title: varchar({ length: 160 }).notNull(),
     summary: varchar({ length: 500 }).notNull(),
     body: text().notNull(),
+    contentType: varchar("content_type", { length: 16 }).default("news").notNull(),
     coverImageUrl: varchar("cover_image_url", { length: 2048 }),
     status: varchar({ length: 16 }).default("draft").notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
@@ -358,6 +359,201 @@ export const mobileNewsPosts = pgTable(
     uniqueIndex("mobile_news_posts_slug_uq").on(table.slug),
     index("mobile_news_posts_published_idx").on(table.status, table.publishedAt),
     check("mobile_news_posts_status_ck", sql`${table.status} IN ('draft', 'published', 'archived')`),
+  ],
+);
+
+export const adminUsers = pgTable(
+  "admin_users",
+  {
+    firebaseUid: varchar("firebase_uid", { length: 128 }).primaryKey(),
+    email: varchar({ length: 320 }).notNull(),
+    displayName: varchar("display_name", { length: 80 }),
+    role: varchar({ length: 16 }).notNull(),
+    enabled: boolean().default(true).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    uniqueIndex("admin_users_email_uq").on(sql`lower(${table.email})`),
+    index("admin_users_enabled_role_idx").on(table.enabled, table.role),
+    check("admin_users_role_ck", sql`${table.role} IN ('viewer', 'moderator', 'editor', 'operator', 'owner')`),
+  ],
+);
+
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    actorUid: varchar("actor_uid", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    actorRole: varchar("actor_role", { length: 16 }).notNull(),
+    action: varchar({ length: 96 }).notNull(),
+    resourceType: varchar("resource_type", { length: 64 }).notNull(),
+    resourceId: varchar("resource_id", { length: 255 }),
+    requestId: varchar("request_id", { length: 64 }),
+    ipAddress: varchar("ip_address", { length: 64 }),
+    userAgent: varchar("user_agent", { length: 512 }),
+    metadata: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("admin_audit_log_created_idx").on(table.createdAt),
+    index("admin_audit_log_actor_created_idx").on(table.actorUid, table.createdAt),
+    index("admin_audit_log_resource_created_idx").on(table.resourceType, table.resourceId, table.createdAt),
+  ],
+);
+
+export const adminReportCases = pgTable(
+  "admin_report_cases",
+  {
+    reportId: uuid("report_id").primaryKey().references(() => playerReports.id, { onDelete: "cascade" }),
+    status: varchar({ length: 16 }).default("open").notNull(),
+    assignedTo: varchar("assigned_to", { length: 128 }).references(() => adminUsers.firebaseUid),
+    resolutionNote: text("resolution_note"),
+    updatedBy: varchar("updated_by", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    index("admin_report_cases_status_updated_idx").on(table.status, table.updatedAt),
+    check("admin_report_cases_status_ck", sql`${table.status} IN ('open', 'reviewing', 'resolved', 'dismissed')`),
+  ],
+);
+
+export const adminNotificationCampaigns = pgTable(
+  "admin_notification_campaigns",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    createdBy: varchar("created_by", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    kind: varchar({ length: 32 }).notNull(),
+    title: varchar({ length: 120 }).notNull(),
+    body: varchar({ length: 500 }),
+    imageUrl: varchar("image_url", { length: 2048 }),
+    deepLink: varchar("deep_link", { length: 2048 }),
+    audience: jsonb().$type<Record<string, unknown>>().notNull(),
+    recipientEstimate: integer("recipient_estimate").default(0).notNull(),
+    status: varchar({ length: 16 }).default("queued").notNull(),
+    scheduledAt: timestamp("scheduled_at", { withTimezone: true, mode: "date" }).notNull(),
+    outboxId: uuid("outbox_id").unique().references(() => mobileNotificationOutbox.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: "date" }),
+    cancelledBy: varchar("cancelled_by", { length: 128 }).references(() => adminUsers.firebaseUid),
+  },
+  (table) => [
+    index("admin_notification_campaigns_created_idx").on(table.createdAt),
+    index("admin_notification_campaigns_schedule_idx").on(table.status, table.scheduledAt),
+  ],
+);
+
+export const adminCommands = pgTable(
+  "admin_commands",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    type: varchar({ length: 64 }).notNull(),
+    targetType: varchar("target_type", { length: 32 }).notNull(),
+    targetId: varchar("target_id", { length: 255 }),
+    payload: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    status: varchar({ length: 16 }).default("pending").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true, mode: "date" }),
+    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    result: jsonb().$type<Record<string, unknown>>(),
+    error: text(),
+    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull().unique(),
+  },
+  (table) => [
+    index("admin_commands_target_idx").on(table.targetType, table.targetId, table.createdAt),
+    check("admin_commands_status_ck", sql`${table.status} IN ('pending', 'running', 'succeeded', 'failed', 'expired', 'cancelled')`),
+  ],
+);
+
+export const moderationActions = pgTable(
+  "moderation_actions",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    playerName: varchar("player_name", { length: 255 }).notNull(),
+    actionType: varchar("action_type", { length: 16 }).notNull(),
+    reason: varchar({ length: 500 }).notNull(),
+    actorId: varchar("actor_id", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    actorDisplayName: varchar("actor_display_name", { length: 80 }).notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+    revokedBy: varchar("revoked_by", { length: 128 }).references(() => adminUsers.firebaseUid),
+    sourceCommandId: uuid("source_command_id").unique().references(() => adminCommands.id, { onDelete: "set null" }),
+    metadata: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("moderation_actions_player_created_idx").on(table.playerId, table.createdAt),
+    check("moderation_actions_type_ck", sql`${table.actionType} IN ('ban', 'mute')`),
+  ],
+);
+
+export const adminRuntimeSnapshots = pgTable("admin_runtime_snapshots", {
+  serverId: varchar("server_id", { length: 64 }).primaryKey(),
+  sequence: bigint({ mode: "number" }).default(0).notNull(),
+  payload: jsonb().$type<Record<string, unknown>>().notNull(),
+  observedAt: timestamp("observed_at", { withTimezone: true, mode: "date" }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+});
+
+export const adminRuntimeEvents = pgTable(
+  "admin_runtime_events",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    eventId: uuid("event_id").notNull().unique(),
+    serverId: varchar("server_id", { length: 64 }).notNull(),
+    kind: varchar({ length: 64 }).notNull(),
+    payload: jsonb().$type<Record<string, unknown>>().notNull(),
+    observedAt: timestamp("observed_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("admin_runtime_events_created_idx").on(table.createdAt),
+    index("admin_runtime_events_server_observed_idx").on(table.serverId, table.observedAt),
+  ],
+);
+
+export const opsActions = pgTable(
+  "ops_actions",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    action: varchar({ length: 64 }).notNull(),
+    requestedBy: varchar("requested_by", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    reason: varchar({ length: 500 }).notNull(),
+    payload: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    status: varchar({ length: 16 }).default("pending").notNull(),
+    requestedAt: timestamp("requested_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true, mode: "date" }),
+    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    result: jsonb().$type<Record<string, unknown>>(),
+    error: text(),
+  },
+  (table) => [
+    index("ops_actions_requested_idx").on(table.requestedAt),
+    check("ops_actions_status_ck", sql`${table.status} IN ('pending', 'running', 'succeeded', 'failed', 'cancelled')`),
+  ],
+);
+
+export const updateCheckRuns = pgTable(
+  "update_check_runs",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    status: varchar({ length: 16 }).notNull(),
+    summary: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    reportMarkdown: text("report_markdown"),
+    promptMarkdown: text("prompt_markdown"),
+    checkedAt: timestamp("checked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    error: text(),
+  },
+  (table) => [
+    index("update_check_runs_checked_idx").on(table.checkedAt),
+    check("update_check_runs_status_ck", sql`${table.status} IN ('running', 'current', 'updates_available', 'failed')`),
   ],
 );
 

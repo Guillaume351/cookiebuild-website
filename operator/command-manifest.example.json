@@ -1,0 +1,22 @@
+{
+  "status": {
+    "executable": "/opt/cookiebuild/bin/minecraft-status",
+    "args": ["--json"],
+    "timeoutMs": 15000
+  },
+  "restart-minecraft": {
+    "executable": "/opt/cookiebuild/bin/restart-minecraft",
+    "args": ["--wait"],
+    "timeoutMs": 180000
+  },
+  "maintenance-on": {
+    "executable": "/opt/cookiebuild/bin/maintenance",
+    "args": ["on"],
+    "timeoutMs": 15000
+  },
+  "maintenance-off": {
+    "executable": "/opt/cookiebuild/bin/maintenance",
+    "args": ["off"],
+    "timeoutMs": 15000
+  }
+}

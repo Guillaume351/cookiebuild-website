@@ -1,0 +1,32 @@
+services:
+  cookiebuild-update-monitor:
+    build: .
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    volumes:
+      - update-monitor-state:/state
+      - ./installed-versions.json:/config/installed-versions.json:ro
+      - ./discord-webhook:/run/secrets/update-monitor-webhook:ro
+    environment:
+      UPDATE_MONITOR_HOST: 0.0.0.0
+      UPDATE_MONITOR_HMAC_SECRET: ${UPDATE_MONITOR_HMAC_SECRET:?set a distinct 32+ character secret}
+      UPDATE_MONITOR_INSTALLED_FILE: /config/installed-versions.json
+      UPDATE_MONITOR_WEBHOOK_FILE: /run/secrets/update-monitor-webhook
+      UPDATE_MONITOR_GITHUB_TOKEN: ${UPDATE_MONITOR_GITHUB_TOKEN:-}
+      UPDATE_MONITOR_USER_AGENT: ${UPDATE_MONITOR_USER_AGENT:-CookieBuild-UpdateMonitor/1.0 (https://cookie-build.com)}
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    networks:
+      - cookiebuild-admin
+
+volumes:
+  update-monitor-state:
+
+networks:
+  cookiebuild-admin:
+    external: true
+    name: cookiebuild-admin

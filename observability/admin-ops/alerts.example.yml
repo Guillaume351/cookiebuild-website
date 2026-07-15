@@ -1,0 +1,42 @@
+groups:
+  - name: cookiebuild-admin-ops
+    interval: 60s
+    rules:
+      - alert: CookieBuildUpdateSourceUnavailable
+        expr: cookiebuild_update_monitor_source_up == 0
+        for: 30m
+        labels:
+          severity: warning
+          subsystem: admin-ops
+        annotations:
+          summary: "Update source {{ $labels.component }} is unavailable"
+          description: "The Cookie Build update monitor has not reached this upstream source successfully for 30 minutes."
+
+      - alert: CookieBuildUpdateMonitorStale
+        expr: absent(cookiebuild_update_monitor_last_success_timestamp_seconds) or (time() - cookiebuild_update_monitor_last_success_timestamp_seconds > 43200)
+        for: 15m
+        labels:
+          severity: warning
+          subsystem: admin-ops
+        annotations:
+          summary: "Cookie Build update monitoring is stale"
+          description: "The monitor metric is absent or no partially/fully successful update check has completed in more than 12 hours."
+
+      - alert: CookieBuildUpstreamUpdateAvailable
+        expr: cookiebuild_update_available == 1
+        for: 15m
+        labels:
+          severity: info
+          subsystem: admin-ops
+        annotations:
+          summary: "Upstream update available for {{ $labels.component }}"
+          description: "Review the generated report and changelog; this alert never triggers an automatic update."
+
+      - alert: CookieBuildUpdateMonitorRunFailed
+        expr: increase(cookiebuild_update_monitor_run_failures_total[1h]) > 0
+        labels:
+          severity: warning
+          subsystem: admin-ops
+        annotations:
+          summary: "Cookie Build update check failed"
+          description: "At least one complete update-monitor run failed during the last hour."
