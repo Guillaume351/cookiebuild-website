@@ -37,11 +37,11 @@ groups:
           summary: Cookie Build is running above 50 MSPT
           description: Gameplay is likely below 20 TPS while players are online.
       - alert: CookieBuildSevereTickDelay
-        expr: cookiebuild_minecraft_server_tick_delay_milliseconds > 1000 and time() - cookiebuild_minecraft_server_tick_delay_observed_timestamp_seconds < 120
+        expr: (cookiebuild_minecraft_server_tick_delay_milliseconds > 1000 and time() - cookiebuild_minecraft_server_tick_delay_observed_timestamp_seconds < 120) and on() (cookiebuild_monitor_online_players{edition="java"} > 0)
         labels: { severity: warning, component: minecraft }
         annotations:
           summary: Cookie Build main thread stalled for more than one second
-          description: "The latest measured scheduler delay was {{ $value }} ms. Inspect map preparation and slow-game-tick diagnostics."
+          description: "The latest measured scheduler delay exceeded one second while players were online. Inspect map preparation and slow-game-tick diagnostics."
       - alert: CookieBuildJoinFunnelStalled
         expr: sum(increase(cookiebuild_funnel_events_total{event="joined"}[1h])) >= 3 and (sum(increase(cookiebuild_funnel_events_total{event="queue_joined"}[1h])) or vector(0)) == 0
         for: 10m
