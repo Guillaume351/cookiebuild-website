@@ -57,7 +57,7 @@ describe("mobile social API gates", () => {
       expect.objectContaining({ id: "pitchout", available: true }),
       expect.objectContaining({ id: "skywars", available: true }),
       expect.objectContaining({ id: "buildbattles", available: true }),
-      expect.objectContaining({ id: "turfwars", available: false }),
+      expect.objectContaining({ id: "turfwars", available: true }),
     ]));
   });
 });

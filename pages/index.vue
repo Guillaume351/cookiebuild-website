@@ -387,7 +387,7 @@ const minigames = [
     name: "TurfWars",
     description:
       "Capture territory by shooting opponents. The team with the most turf wins.",
-    available: false,
+    available: true,
     icon: "/turfwars-icon.svg",
   },
 ];

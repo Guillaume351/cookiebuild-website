@@ -27,7 +27,7 @@ export default defineCachedEventHandler(
         { id: "pitchout", name: "Pitchout", icon: "/pitchout-icon.svg", available: true },
         { id: "skywars", name: "SkyWars", icon: "/skywars-icon.svg", available: true },
         { id: "buildbattles", name: "BuildBattles", icon: "/buildbattle-icon.svg", available: true },
-        { id: "turfwars", name: "TurfWars", icon: "/turfwars-icon.svg", available: false },
+        { id: "turfwars", name: "TurfWars", icon: "/turfwars-icon.svg", available: true },
       ],
       accountDeletionUrl: "https://www.cookie-build.com/account/delete",
       privacyUrl: "https://www.cookie-build.com/privacy",
