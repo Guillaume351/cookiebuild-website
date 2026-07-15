@@ -129,6 +129,9 @@ describe("mobile notification policy", () => {
     expect(preferenceKind("event_reminder")).toBe("event");
     expect(preferenceKind("server_offline")).toBe("server_status");
     expect(preferenceKind("player_rally")).toBe("rally");
+    expect(preferenceKind("daily_goal_reminder")).toBe("daily_reminder");
+    expect(preferenceKind("weekly_goal_reminder")).toBe("weekly_reminder");
+    expect(preferenceKind("friend_online")).toBe("friend_online");
     expect(preferenceKind("unknown")).toBeUndefined();
   });
 

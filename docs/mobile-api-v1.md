@@ -15,11 +15,16 @@ Admin before touching account data.
 
 ## Authenticated routes
 
-- `GET /me`: app identity and active Java/Bedrock player links.
+- `GET /me`: app identity, active Java/Bedrock player links, and `primaryPlayer` with the linked
+  player's personal seasonal rank, aggregate XP, exact PostgreSQL-backed daily/weekly goal state,
+  achievements, UTC resets, and `nextBestAction`.
 - `POST /player-link/claim` with `{ "code": "AB23CD45" }`.
 - `DELETE /player-link`, optionally filtered with `playerId` and/or `edition` query parameters.
 - `POST /devices` and `DELETE /devices/:installationId` for FCM token lifecycle.
 - `GET|PUT /notification-preferences`.
+- `GET /presence` returns accepted friends and current party members only. It never returns a
+  public/global online-player list. `PUT /friends/:playerId/online-alert` with `{ "enabled": true }`
+  opts into an online alert for one accepted friend; arbitrary-player following is not supported.
 - `GET /players/lookup?name=<exact name>` returns a case-insensitive exact player-name match without
   presence or wildcard search.
 - `GET /friends`, `POST /friend-requests`, `POST /friend-requests/:playerId/accept`, and
@@ -55,8 +60,8 @@ through Dokploy; it must never be committed or sent to clients.
 ## Release order
 
 1. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`,
-   `drizzle/0003_player_rally.sql`, `drizzle/0004_player_changelog.sql`, then
-   `drizzle/0005_correct_2026_update_wording.sql`, with
+   `drizzle/0003_player_rally.sql`, `drizzle/0004_player_changelog.sql`,
+   `drizzle/0005_correct_2026_update_wording.sql`, then `drizzle/0006_mobile_engagement.sql`, with
    PostgreSQL `ON_ERROR_STOP`.
 2. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
    `MOBILE_LINK_PEPPER` for the website.
@@ -105,6 +110,56 @@ transaction.
 `GET|PUT /notification-preferences` exposes `rallyEnabled` for player-call notifications. It is
 `false` by default and must be explicitly enabled by the user.
 
+Mobile 2.1 additionally exposes `dailyReminderEnabled`, `weeklyReminderEnabled`, and
+`friendOnlineEnabled`; all three default to `false`. Friend-online delivery also requires an
+enabled per-friend alert on an accepted friendship. `onlineVisibility` is one of
+`friends_and_party`, `friends`, or `hidden`. Blocking removes the friendship and suppresses both
+presence and queued online-alert production. Quiet hours are applied only when
+`quietHoursEnabled` is true; numeric hour values sent by the mobile app are normalized to the
+existing `HH:00` storage format.
+
+## Goal and personal-rank contract
+
+CookieDough stores `player_goal_progress` after every match. The legacy `goals.yml` file is imported
+once for players without a database row, while existing database rows remain authoritative. Daily
+goals reset at 00:00 UTC and weekly goals at Monday 00:00 UTC. Reward claims remain idempotent in the
+coin-transaction ledger; daily/weekly rewards now grant both minigame XP and coins.
+
+`GET /me` adds:
+
+```json
+{
+  "data": {
+    "primaryPlayer": {
+      "playerId": "uuid",
+      "playerName": "CookiePlayer",
+      "edition": "java",
+      "online": true,
+      "rank": { "position": 12, "total": 845, "period": "season", "gamemode": "all" },
+      "progression": {
+        "level": 3,
+        "xp": 520,
+        "xpIntoLevel": 120,
+        "xpForNextLevel": 500,
+        "resetTimezone": "UTC",
+        "daily": {},
+        "dailyQuests": [],
+        "weeklyQuests": [],
+        "achievements": { "completed": 2, "total": 3 },
+        "nextBestAction": null
+      }
+    }
+  }
+}
+```
+
+Each goal has `id`, `title`, `description`, `progress`, `target`, `completed`, `rewardXp`,
+`rewardCoins`, `claimRequired: false`, `rewardDelivery: "automatic"`, and `resetsAt`. CookieDough
+credits completed rewards through the idempotent transaction ledger; the app must not show a
+manual claim button. `GET /presence` returns
+`{ "data": { "friends": [], "partyMembers": [] } }`; entries have `playerId`, `playerName`,
+`online`, `lastSeenAt`, and `onlineAlertEnabled`.
+
 ## Notification delivery worker
 
 After the migration is installed, set `MOBILE_NOTIFICATION_WORKER_ENABLED=true` on every website
@@ -125,12 +180,18 @@ The worker recognizes these producer kinds and corresponding user preference swi
 - `social`, `friend_request`, `party_invite`
 - `player_rally` (dedicated `rallyEnabled` preference, disabled by default)
 - `weekly_digest`
+- `daily_goal_reminder` (dedicated opt-in, one row per player/UTC day)
+- `weekly_goal_reminder` (dedicated opt-in, one row per player/ISO week)
+- `friend_online` (global plus accepted-friend opt-ins, one row per session, six-hour pair cooldown)
 
 An audience must have exactly one selector: `{ "all": true }`, a `firebaseUid`, a
 `mobileUserIds` array, or a `deviceIds` array. A visible payload accepts `title`, `body`, optional
 HTTPS `imageUrl`, a `cookiebuild://` or `https://www.cookie-build.com` `deepLink`, scalar `data`, and an
 optional `urgent` boolean. Per-user preferences, notification authorization, revoked devices, and
-quiet hours are applied before sending. Invalid/unregistered tokens are revoked; transient token
+quiet hours are applied before sending. Quiet-hour recipients are intentionally suppressed rather
+than deferred: a stale daily nudge or online-presence alert must not arrive after the moment that
+made it useful. The structured delivery log records the suppression count. Invalid/unregistered
+tokens are revoked; transient token
 failures are retried without re-sending to devices that already succeeded. One row is intentionally
 limited to 5,000 eligible devices; larger campaigns must be segmented by `mobileUserIds`.
 

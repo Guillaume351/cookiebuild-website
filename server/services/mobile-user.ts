@@ -9,6 +9,7 @@ import {
 } from "../../db/schema";
 import { requireMobileAuth } from "../utils/mobile-auth";
 import { firebaseUidHash } from "../utils/mobile-identity";
+import { mobileEngagementSnapshot } from "./mobile-engagement";
 
 export type MobileDbTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
@@ -111,6 +112,10 @@ export async function mobileMe(firebaseUid: string) {
       isNull(mobilePlayerLinks.revokedAt),
     ));
 
+  const primaryPlayer = links.some((link) => link.isPrimary)
+    ? await mobileEngagementSnapshot(firebaseUid)
+    : null;
+
   return {
     id: user.id,
     email: user.email,
@@ -120,5 +125,6 @@ export async function mobileMe(firebaseUid: string) {
     timezone: user.timezone,
     createdAt: user.createdAt,
     playerLinks: links,
+    primaryPlayer,
   };
 }

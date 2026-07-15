@@ -27,14 +27,16 @@
           <li>A pseudonymous Firebase identifier created by anonymous authentication.</li>
           <li>Technical authentication diagnostics automatically processed by Firebase, such as IP address, operating system, device model, brand, form factor, installer, SDK versions, and Firebase app identifier.</li>
           <li>Minecraft UUID, display name, Java or Bedrock edition, link status, and gameplay statistics.</li>
+          <li>Personal seasonal rank, aggregate minigame XP, achievements, and daily and weekly goal progress. Goal resets use UTC.</li>
           <li>Structured friend requests, accepted friendships, blocks, report reason, parties, members, invitations, and fixed-format player calls. The app has no free-form chat.</li>
-          <li>Friend presence derived from active game sessions and disclosed only to accepted friends.</li>
-          <li>For opted-in notifications: installation ID, FCM token, platform, app version, locale, authorization state, and preferences.</li>
+          <li>Presence derived from active game sessions. It is available only to accepted friends and current party members, subject to the player’s friends-and-party, friends-only, or hidden setting and all blocks.</li>
+          <li>For opted-in notifications: installation ID, FCM token, platform, app version, locale, authorization state, quiet hours, daily/weekly reminder choices, and an optional online alert selected for an accepted friend. Cookie Build does not support silently following arbitrary players.</li>
+          <li>A limited in-game app-reminder counter and last-display date, used to avoid repeatedly promoting the app to an unlinked player.</li>
           <li>While legacy version 1.2.3 remains available to older Android devices: Minecraft nickname, Google Play product and purchase history, purchase token and signature, and app-view interactions used by the former shop and Google App Indexing integration.</li>
           <li>Short-lived security information such as IP-based rate-limit counters and operational logs.</li>
         </ul>
         <p class="mt-3">
-          Version 2.0 does not use advertising identifiers, cross-app tracking, Firebase Analytics,
+          Version 2.1 does not use advertising identifiers, cross-app tracking, Firebase Analytics,
           Crashlytics, precise location, contacts, microphone, camera, or payment data. Legacy
           version 1.2.3 transmitted its shop requests over an unencrypted connection; the update
           replaces that implementation on compatible devices.
@@ -45,8 +47,8 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Purposes and legal bases</h2>
         <ul class="list-disc space-y-2 pl-6">
-          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, friends, parties, events, and requested account controls.</li>
-          <li><strong>Consent:</strong> send push notifications, including separately configurable player calls, only after an in-app opt-in. Consent can be withdrawn in Settings.</li>
+          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, rank, goal progression, privacy-scoped presence, friends, parties, events, and requested account controls.</li>
+          <li><strong>Consent:</strong> send push notifications, including separately configurable player calls, goal reminders, and selected accepted-friend online alerts, only after the corresponding in-app opt-in. Consent can be withdrawn in Settings. Quiet hours suppress these notifications.</li>
           <li><strong>Legitimate interests:</strong> secure accounts, prevent abuse, moderate reports, keep games fair, diagnose incidents, and protect service availability.</li>
           <li><strong>Legal obligations:</strong> respond to lawful requests and preserve evidence when required.</li>
         </ul>
@@ -78,6 +80,7 @@
           <li>Reports are kept for up to 24 months, or longer while a safety case or legal obligation remains open.</li>
           <li>Delivered notification jobs and deleted-account tombstones are removed after 90 days and 30 days respectively.</li>
           <li>Match results and aggregate gameplay statistics remain for the life of the server for public leaderboards, fair-play, and match integrity, unless law requires earlier deletion.</li>
+          <li>Daily/weekly goal progress, achievements, XP, coins, and the app-promotion limiter are Minecraft gameplay records and follow the game-statistics retention period.</li>
         </ul>
       </section>
 
@@ -87,9 +90,11 @@
           The app works for status, news, events, and leaderboards without linking a player. You can
           disable notifications, unlink a player, copy your app-account data, and delete the mobile
           account from Settings. Deletion removes the pseudonymous mobile profile, devices,
-          preferences, and mobile player links. It does not erase the Minecraft name, friendships,
+          preferences, per-friend online-alert selections, and mobile player links. It does not erase the Minecraft name, friendships,
           blocks, party or safety records keyed to that player, or integrity records from public
-          gameplay history; those use their own controls and retention periods above.
+          gameplay history. It also does not erase rank inputs, XP, coins, achievements, or
+          daily/weekly goal progress, which are gameplay records rather than mobile-account data;
+          those use their own controls and retention periods above.
         </p>
         <p class="mt-3">
           Depending on your location, you may request access, correction, deletion, restriction,
@@ -133,14 +138,16 @@
           <li>Identifiant Firebase pseudonyme créé par l’authentification anonyme.</li>
           <li>Diagnostics techniques d’authentification traités automatiquement par Firebase, notamment adresse IP, système, modèle, marque, format de l’appareil, installateur, versions des SDK et identifiant d’app Firebase.</li>
           <li>UUID, pseudo, édition Java ou Bedrock, association et statistiques Minecraft.</li>
+          <li>Rang saisonnier personnel, XP agrégée des mini-jeux, succès et progression des objectifs quotidiens et hebdomadaires. Les remises à zéro utilisent UTC.</li>
           <li>Demandes et listes d’amis, blocages, motif de signalement, groupes, membres, invitations et appels de joueurs structurés. L’app ne contient aucun chat libre.</li>
-          <li>Présence en jeu visible uniquement par les amis acceptés.</li>
-          <li>Après accord pour les notifications : identifiant d’installation, jeton FCM, plateforme, version, langue, autorisation et préférences.</li>
+          <li>Présence déduite des sessions actives, visible uniquement par les amis acceptés et membres du groupe actuel, selon le réglage amis et groupe, amis uniquement ou masqué, et dans le respect des blocages.</li>
+          <li>Après accord pour les notifications : identifiant d’installation, jeton FCM, plateforme, version, langue, autorisation, heures calmes, rappels quotidiens/hebdomadaires et alerte activée pour un ami accepté. Il n’existe aucun suivi silencieux d’un joueur arbitraire.</li>
+          <li>Compteur limité et date du dernier rappel de l’app en jeu, afin de ne pas répéter sa promotion auprès d’un joueur non associé.</li>
           <li>Tant que l’ancienne version 1.2.3 reste disponible sur de vieux appareils Android : pseudo Minecraft, produit et historique d’achat Google Play, jeton et signature d’achat, ainsi que les interactions de consultation utilisées par l’ancienne boutique et Google App Indexing.</li>
           <li>Données de sécurité temporaires, notamment les compteurs de limitation par IP et journaux techniques.</li>
         </ul>
         <p class="mt-3">
-          La version 2.0 n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics,
+          La version 2.1 n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics,
           ni Crashlytics, ni localisation précise, contacts, caméra, microphone ou paiement.
           L’ancienne version 1.2.3 transmettait ses demandes de boutique sans chiffrement ; la mise
           à jour remplace cette implémentation sur les appareils compatibles.
@@ -150,9 +157,10 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Finalités et bases légales</h2>
         <p>
-          Le contrat permet de fournir le compte, l’association, les statistiques, amis, groupes et
-          événements. Le consentement couvre uniquement les notifications facultatives, dont les
-          appels de joueurs configurables séparément. L’intérêt
+          Le contrat permet de fournir le compte, l’association, les statistiques, le rang, les
+          objectifs, la présence restreinte, les amis, groupes et événements. Le consentement couvre
+          uniquement les notifications facultatives, dont les appels de joueurs, rappels d’objectifs
+          et alertes d’amis acceptés configurables séparément. Les heures calmes les suppriment. L’intérêt
           légitime couvre la sécurité, l’anti-abus, la modération, l’équité et les incidents. Les
           obligations légales peuvent imposer la conservation ou la communication de certains éléments.
           Aucune donnée n’est vendue ni utilisée pour de la publicité ciblée.
@@ -182,6 +190,7 @@
           <li>Signalements : 24 mois, davantage uniquement pour un dossier encore ouvert ou une obligation légale.</li>
           <li>Tâches de notification livrées : 90 jours ; marqueur de compte supprimé : 30 jours.</li>
           <li>Résultats et statistiques agrégées : pendant la durée de vie du serveur pour le classement, l’équité et l’intégrité des matchs.</li>
+          <li>Objectifs quotidiens/hebdomadaires, succès, XP, pièces et limiteur de promotion de l’app : données de jeu conservées selon la même durée que les statistiques Minecraft.</li>
         </ul>
       </section>
 
@@ -195,6 +204,12 @@
           l’adresse ci-dessus ou utilisez la
           <NuxtLink class="text-orange-400" to="/account/delete">page de suppression</NuxtLink>.
           Vous pouvez saisir votre autorité locale ; en France, la CNIL.
+        </p>
+        <p class="mt-3">
+          La suppression du compte mobile efface le profil mobile pseudonyme, les appareils,
+          préférences, alertes d’amis et associations mobiles. Elle n’efface pas le rang, l’XP, les
+          pièces, succès ou objectifs quotidiens/hebdomadaires : ces éléments sont des données de jeu
+          Minecraft, avec les contrôles et durées indiqués ci-dessus.
         </p>
       </section>
 

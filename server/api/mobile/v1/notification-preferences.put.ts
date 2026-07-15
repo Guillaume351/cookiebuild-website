@@ -16,6 +16,12 @@ interface PreferenceBody {
   socialEnabled?: unknown;
   rallyEnabled?: unknown;
   weeklyDigestEnabled?: unknown;
+  dailyReminderEnabled?: unknown;
+  weeklyReminderEnabled?: unknown;
+  friendOnlineEnabled?: unknown;
+  quietHoursEnabled?: unknown;
+  timezoneOffsetMinutes?: unknown;
+  onlineVisibility?: unknown;
   quietHoursStart?: unknown;
   quietHoursEnd?: unknown;
 }
@@ -37,16 +43,40 @@ export default defineEventHandler(async (event) => {
 
     const hasStart = Object.hasOwn(body ?? {}, "quietHoursStart");
     const hasEnd = Object.hasOwn(body ?? {}, "quietHoursEnd");
+    const normalizeHour = (value: unknown) => typeof value === "number"
+      ? `${String(value).padStart(2, "0")}:00`
+      : value;
     const quietHoursStart = hasStart
-      ? optionalQuietHour(body.quietHoursStart, "quietHoursStart")
+      ? optionalQuietHour(normalizeHour(body.quietHoursStart), "quietHoursStart")
       : existing.quietHoursStart;
     const quietHoursEnd = hasEnd
-      ? optionalQuietHour(body.quietHoursEnd, "quietHoursEnd")
+      ? optionalQuietHour(normalizeHour(body.quietHoursEnd), "quietHoursEnd")
       : existing.quietHoursEnd;
     if ((quietHoursStart === null) !== (quietHoursEnd === null)) {
       throw createError({
         statusCode: 400,
         statusMessage: "quietHoursStart and quietHoursEnd must both be set or cleared",
+      });
+    }
+
+    const offset = Object.hasOwn(body ?? {}, "timezoneOffsetMinutes")
+      ? Number(body.timezoneOffsetMinutes)
+      : existing.timezoneOffsetMinutes;
+    if (!Number.isInteger(offset) || offset < -840 || offset > 840) {
+      throw createError({ statusCode: 400, statusMessage: "Invalid timezoneOffsetMinutes" });
+    }
+    const visibility = Object.hasOwn(body ?? {}, "onlineVisibility")
+      ? String(body.onlineVisibility)
+      : existing.onlineVisibility;
+    if (!["friends_and_party", "friends", "hidden"].includes(visibility)) {
+      throw createError({ statusCode: 400, statusMessage: "Invalid onlineVisibility" });
+    }
+    const quietHoursEnabled = optionalBoolean(body?.quietHoursEnabled, "quietHoursEnabled")
+      ?? existing.quietHoursEnabled;
+    if (quietHoursEnabled && (quietHoursStart === null || quietHoursEnd === null)) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Quiet hours require both a start and end",
       });
     }
 
@@ -60,6 +90,15 @@ export default defineEventHandler(async (event) => {
       rallyEnabled: optionalBoolean(body?.rallyEnabled, "rallyEnabled") ?? existing.rallyEnabled,
       weeklyDigestEnabled: optionalBoolean(body?.weeklyDigestEnabled, "weeklyDigestEnabled")
         ?? existing.weeklyDigestEnabled,
+      dailyReminderEnabled: optionalBoolean(body?.dailyReminderEnabled, "dailyReminderEnabled")
+        ?? existing.dailyReminderEnabled,
+      weeklyReminderEnabled: optionalBoolean(body?.weeklyReminderEnabled, "weeklyReminderEnabled")
+        ?? existing.weeklyReminderEnabled,
+      friendOnlineEnabled: optionalBoolean(body?.friendOnlineEnabled, "friendOnlineEnabled")
+        ?? existing.friendOnlineEnabled,
+      quietHoursEnabled,
+      timezoneOffsetMinutes: offset,
+      onlineVisibility: visibility,
       quietHoursStart,
       quietHoursEnd,
       updatedAt: new Date(),

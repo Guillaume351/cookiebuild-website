@@ -166,6 +166,9 @@ function preferenceCondition(kind: NotificationPreferenceKind) {
     case "social": return sql`coalesce(${mobileNotificationPreferences.socialEnabled}, true)`;
     case "rally": return sql`coalesce(${mobileNotificationPreferences.rallyEnabled}, false)`;
     case "weekly_digest": return sql`coalesce(${mobileNotificationPreferences.weeklyDigestEnabled}, true)`;
+    case "daily_reminder": return sql`coalesce(${mobileNotificationPreferences.dailyReminderEnabled}, false)`;
+    case "weekly_reminder": return sql`coalesce(${mobileNotificationPreferences.weeklyReminderEnabled}, false)`;
+    case "friend_online": return sql`coalesce(${mobileNotificationPreferences.friendOnlineEnabled}, false)`;
   }
 }
 
@@ -185,8 +188,10 @@ async function recipientsFor(audience: NotificationAudience, preference: Notific
       deviceId: mobileDevices.id,
       fcmToken: mobileDevices.fcmToken,
       timezone: sql<string | null>`coalesce(${mobileDevices.timezone}, ${mobileUsers.timezone})`,
-      quietHoursStart: mobileNotificationPreferences.quietHoursStart,
-      quietHoursEnd: mobileNotificationPreferences.quietHoursEnd,
+      quietHoursStart: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
+        THEN ${mobileNotificationPreferences.quietHoursStart} ELSE NULL END`,
+      quietHoursEnd: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
+        THEN ${mobileNotificationPreferences.quietHoursEnd} ELSE NULL END`,
     })
     .from(mobileDevices)
     .innerJoin(mobileUsers, eq(mobileUsers.id, mobileDevices.mobileUserId))

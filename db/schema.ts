@@ -2,6 +2,7 @@ import {
   bigint,
   boolean,
   check,
+  date,
   foreignKey,
   index,
   integer,
@@ -262,6 +263,12 @@ export const mobileNotificationPreferences = pgTable("mobile_notification_prefer
   socialEnabled: boolean("social_enabled").default(true).notNull(),
   rallyEnabled: boolean("rally_enabled").default(false).notNull(),
   weeklyDigestEnabled: boolean("weekly_digest_enabled").default(true).notNull(),
+  dailyReminderEnabled: boolean("daily_reminder_enabled").default(false).notNull(),
+  weeklyReminderEnabled: boolean("weekly_reminder_enabled").default(false).notNull(),
+  friendOnlineEnabled: boolean("friend_online_enabled").default(false).notNull(),
+  quietHoursEnabled: boolean("quiet_hours_enabled").default(false).notNull(),
+  timezoneOffsetMinutes: integer("timezone_offset_minutes").default(0).notNull(),
+  onlineVisibility: varchar("online_visibility", { length: 24 }).default("friends_and_party").notNull(),
   quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
   quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
   updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
@@ -272,6 +279,7 @@ export const mobileNotificationOutbox = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     kind: varchar({ length: 64 }).notNull(),
+    dedupeKey: varchar("dedupe_key", { length: 255 }),
     audience: jsonb().notNull(),
     payload: jsonb().notNull(),
     status: varchar({ length: 16 }).default("pending").notNull(),
@@ -288,7 +296,46 @@ export const mobileNotificationOutbox = pgTable(
     uniqueIndex("mobile_notification_outbox_player_rally_id_uq")
       .on(sql`(${table.payload} ->> 'rallyId')`)
       .where(sql`${table.kind} = 'player_rally'`),
+    uniqueIndex("mobile_notification_outbox_dedupe_key_uq")
+      .on(table.dedupeKey)
+      .where(sql`${table.dedupeKey} IS NOT NULL`),
     check("mobile_notification_outbox_status_ck", sql`${table.status} IN ('pending', 'processing', 'delivered', 'dead')`),
+  ],
+);
+
+export const playerGoalProgress = pgTable("player_goal_progress", {
+  playerId: uuid("player_id").primaryKey().references(() => playerdata.id, { onDelete: "cascade" }),
+  day: date({ mode: "string" }).notNull(),
+  dailyMatches: integer("daily_matches").default(0).notNull(),
+  dailyWins: integer("daily_wins").default(0).notNull(),
+  firstWinDate: date("first_win_date", { mode: "string" }),
+  week: varchar({ length: 8 }).notNull(),
+  weeklyMatches: integer("weekly_matches").default(0).notNull(),
+  weeklyWins: integer("weekly_wins").default(0).notNull(),
+  weeklyKills: integer("weekly_kills").default(0).notNull(),
+  achievements: jsonb().$type<string[]>().default([]).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+});
+
+export const playerAppPromotionState = pgTable("player_app_promotion_state", {
+  playerId: uuid("player_id").primaryKey().references(() => playerdata.id, { onDelete: "cascade" }),
+  lastShownAt: timestamp("last_shown_at", { withTimezone: true, mode: "date" }).notNull(),
+  showCount: integer("show_count").default(1).notNull(),
+});
+
+export const mobileFriendOnlineAlerts = pgTable(
+  "mobile_friend_online_alerts",
+  {
+    ownerPlayerId: uuid("owner_player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    targetPlayerId: uuid("target_player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    enabled: boolean().default(false).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.ownerPlayerId, table.targetPlayerId] }),
+    index("mobile_friend_online_alerts_target_idx")
+      .on(table.targetPlayerId)
+      .where(sql`${table.enabled}`),
   ],
 );
 

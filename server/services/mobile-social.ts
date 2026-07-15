@@ -282,6 +282,11 @@ export async function removeFriend(firebaseUid: string, otherPlayerId: string) {
       RETURNING player_low_id
     `);
     if (!deleted.length) throw notFound("Friend not found");
+    await tx.execute(sql`
+      DELETE FROM mobile_friend_online_alerts
+       WHERE (owner_player_id = ${actor.playerId} AND target_player_id = ${otherPlayerId})
+          OR (owner_player_id = ${otherPlayerId} AND target_player_id = ${actor.playerId})
+    `);
     return { deleted: true };
   });
 }
@@ -294,18 +299,33 @@ export async function friendsSnapshot(firebaseUid: string) {
       playerName: string | null;
       online: boolean;
       lastSeenAt: Date | string | null;
+      onlineAlertEnabled: boolean;
     }>(sql`
       SELECT other.id AS "playerId",
              other.name AS "playerName",
-             EXISTS (
-               SELECT 1 FROM player_sessions session
-                WHERE session.player_id = other.id AND session.end_time IS NULL
-             ) AS online,
-             (
+             CASE WHEN NOT EXISTS (
+               SELECT 1 FROM mobile_player_links privacy_link
+               JOIN mobile_users privacy_user ON privacy_user.firebase_uid = privacy_link.firebase_uid AND privacy_user.deleted_at IS NULL
+               JOIN mobile_notification_preferences privacy_pref ON privacy_pref.mobile_user_id = privacy_user.id
+                WHERE privacy_link.player_id = other.id AND privacy_link.is_primary AND privacy_link.revoked_at IS NULL
+                  AND privacy_pref.online_visibility = 'hidden'
+             )
+               THEN EXISTS (
+                 SELECT 1 FROM player_sessions session
+                  WHERE session.player_id = other.id AND session.end_time IS NULL
+               ) ELSE false END AS online,
+             CASE WHEN NOT EXISTS (
+               SELECT 1 FROM mobile_player_links privacy_link
+               JOIN mobile_users privacy_user ON privacy_user.firebase_uid = privacy_link.firebase_uid AND privacy_user.deleted_at IS NULL
+               JOIN mobile_notification_preferences privacy_pref ON privacy_pref.mobile_user_id = privacy_user.id
+                WHERE privacy_link.player_id = other.id AND privacy_link.is_primary AND privacy_link.revoked_at IS NULL
+                  AND privacy_pref.online_visibility = 'hidden'
+             ) THEN (
                SELECT max(coalesce(session.end_time, session.start_time))
                  FROM player_sessions session
                 WHERE session.player_id = other.id
-             ) AS "lastSeenAt"
+             ) ELSE NULL END AS "lastSeenAt",
+             COALESCE(alert.enabled, false) AS "onlineAlertEnabled"
         FROM player_friendships friendship
         JOIN playerdata other
           ON other.id = CASE
@@ -313,6 +333,8 @@ export async function friendsSnapshot(firebaseUid: string) {
               THEN friendship.player_high_id
             ELSE friendship.player_low_id
           END
+        LEFT JOIN mobile_friend_online_alerts alert
+          ON alert.owner_player_id = ${actor.playerId} AND alert.target_player_id = other.id
        WHERE friendship.status = 'accepted'
          AND (${actor.playerId} IN (friendship.player_low_id, friendship.player_high_id))
        ORDER BY lower(other.name), other.id
@@ -350,6 +372,7 @@ export async function friendsSnapshot(firebaseUid: string) {
         playerName: row.playerName ?? "Unknown player",
         online: row.online,
         lastSeenAt: iso(row.lastSeenAt),
+        onlineAlertEnabled: row.onlineAlertEnabled,
       })),
       incoming: pending.filter((row) => row.requestedByPlayerId !== actor.playerId).map(request),
       outgoing: pending.filter((row) => row.requestedByPlayerId === actor.playerId).map(request),
@@ -397,6 +420,11 @@ export async function blockPlayer(firebaseUid: string, targetPlayerId: string) {
       DELETE FROM player_friendships
        WHERE player_low_id = ${pair.playerLowId}
          AND player_high_id = ${pair.playerHighId}
+    `);
+    await tx.execute(sql`
+      DELETE FROM mobile_friend_online_alerts
+       WHERE (owner_player_id = ${actor.playerId} AND target_player_id = ${target.playerId})
+          OR (owner_player_id = ${target.playerId} AND target_player_id = ${actor.playerId})
     `);
     await tx.execute(sql`
       UPDATE player_party_invites
@@ -605,12 +633,24 @@ export async function partySnapshot(firebaseUid: string) {
         SELECT player.id AS "playerId",
                player.name AS "playerName",
                member.role,
-               CASE WHEN EXISTS (
+               CASE WHEN NOT EXISTS (
+                 SELECT 1 FROM mobile_player_links privacy_link
+                 JOIN mobile_users privacy_user ON privacy_user.firebase_uid = privacy_link.firebase_uid AND privacy_user.deleted_at IS NULL
+                 JOIN mobile_notification_preferences privacy_pref ON privacy_pref.mobile_user_id = privacy_user.id
+                  WHERE privacy_link.player_id = player.id AND privacy_link.is_primary AND privacy_link.revoked_at IS NULL
+                    AND privacy_pref.online_visibility = 'hidden'
+               ) AND (NOT EXISTS (
+                 SELECT 1 FROM mobile_player_links privacy_link
+                 JOIN mobile_users privacy_user ON privacy_user.firebase_uid = privacy_link.firebase_uid AND privacy_user.deleted_at IS NULL
+                 JOIN mobile_notification_preferences privacy_pref ON privacy_pref.mobile_user_id = privacy_user.id
+                  WHERE privacy_link.player_id = player.id AND privacy_link.is_primary AND privacy_link.revoked_at IS NULL
+                    AND privacy_pref.online_visibility = 'friends'
+               ) OR EXISTS (
                  SELECT 1 FROM player_friendships friendship
                   WHERE friendship.status = 'accepted'
                     AND friendship.player_low_id = least(${actor.playerId}::uuid, player.id)
                     AND friendship.player_high_id = greatest(${actor.playerId}::uuid, player.id)
-               ) THEN EXISTS (
+               )) THEN EXISTS (
                  SELECT 1 FROM player_sessions session
                   WHERE session.player_id = player.id AND session.end_time IS NULL
                ) ELSE false END AS online

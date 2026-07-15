@@ -5,6 +5,9 @@ export const NOTIFICATION_KINDS = [
   "social",
   "rally",
   "weekly_digest",
+  "daily_reminder",
+  "weekly_reminder",
+  "friend_online",
 ] as const;
 
 export type NotificationPreferenceKind = typeof NOTIFICATION_KINDS[number];
@@ -77,6 +80,9 @@ export function preferenceKind(kind: string): NotificationPreferenceKind | undef
   if (["social", "friend_request", "party_invite"].includes(kind)) return "social";
   if (kind === "player_rally") return "rally";
   if (kind === "weekly_digest") return "weekly_digest";
+  if (kind === "daily_goal_reminder") return "daily_reminder";
+  if (kind === "weekly_goal_reminder") return "weekly_reminder";
+  if (kind === "friend_online") return "friend_online";
   return undefined;
 }
 

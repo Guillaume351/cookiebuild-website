@@ -157,13 +157,13 @@
       </div>
     </Teleport>
 
-    <section class="overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-orange-950/30 p-8 shadow-xl md:p-12">
+    <section id="mobile-app" class="scroll-mt-24 overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-orange-950/30 p-8 shadow-xl md:p-12">
       <div class="grid items-center gap-10 lg:grid-cols-[1.15fr_0.85fr]">
         <div>
-          <Badge class="mb-4 bg-orange-600 hover:bg-orange-600">Mobile 2.0</Badge>
+          <Badge class="mb-4 bg-orange-600 hover:bg-orange-600">Mobile 2.1</Badge>
           <h2 class="text-3xl font-black tracking-tight text-white md:text-4xl">Cookie Build in your pocket</h2>
           <p class="mt-4 max-w-2xl text-lg leading-relaxed text-zinc-300">
-            Check Java and Bedrock status, browse leaderboards and events, link your player securely, manage Friends and Parties, and opt in when a game needs more players.
+            Check Java and Bedrock status, see your personal rank and goals, find online Friends and Party members, and opt in to player calls and progress reminders.
           </p>
           <div class="mt-7">
             <AppStoreButtons />

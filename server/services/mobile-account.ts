@@ -1,4 +1,4 @@
-import { and, eq, isNotNull, isNull, or } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, or, sql } from "drizzle-orm";
 import db from "../../db/client";
 import {
   mobileDevices,
@@ -49,6 +49,18 @@ export async function beginMobileAccountDeletionInTransaction(
       .returning({ id: mobileUsers.id });
     if (!deleted.length) throw accountDeletedError();
 
+    await tx.execute(sql`
+      DELETE FROM mobile_friend_online_alerts alert
+       WHERE alert.owner_player_id IN (
+         SELECT link.player_id FROM mobile_player_links link
+          WHERE link.firebase_uid = ${firebaseUid} AND link.revoked_at IS NULL
+       )
+    `);
+    await tx.execute(sql`
+      DELETE FROM mobile_notification_outbox outbox
+       WHERE outbox.kind <> 'firebase_auth_delete'
+         AND outbox.audience ->> 'firebaseUid' = ${firebaseUid}
+    `);
     await tx.delete(mobilePlayerLinks).where(eq(mobilePlayerLinks.firebaseUid, firebaseUid));
     await tx.delete(mobileDevices).where(eq(mobileDevices.mobileUserId, user.id));
     await tx

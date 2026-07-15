@@ -72,3 +72,19 @@ export function optionalBoolean(value: unknown, field: string) {
   }
   return value;
 }
+
+export function requiredBoolean(value: unknown, field: string) {
+  const result = optionalBoolean(value, field);
+  if (result === undefined) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  return result;
+}
+
+export function requiredUuid(value: unknown, field: string) {
+  const result = String(value ?? "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(result)) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  return result;
+}
