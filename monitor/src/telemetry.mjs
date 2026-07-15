@@ -24,7 +24,24 @@ export function parseFunnelCounterKey(key) {
 
 export function recordFunnelTelemetry(text, counters = {}) {
   let latestMspt = null;
+  let latestServerTickDelayMillis = null;
+  let latestSlowGameTick = null;
   for (const line of text.split(/\r?\n/)) {
+    if (line.includes("[performance]")) {
+      const event = field(line, "event");
+      if (event === "server_tick_delay") {
+        const delay = Number(field(line, "delay_ms"));
+        if (Number.isFinite(delay) && delay >= 0 && delay < 60_000) {
+          latestServerTickDelayMillis = delay;
+        }
+      } else if (event === "slow_game_tick") {
+        const elapsed = Number(field(line, "elapsed_ms"));
+        const game = field(line, "game");
+        if (GAMES.has(game) && Number.isFinite(elapsed) && elapsed >= 0 && elapsed < 60_000) {
+          latestSlowGameTick = { game, elapsedMillis: elapsed };
+        }
+      }
+    }
     if (!line.includes("[funnel]")) continue;
     const event = field(line, "event");
     if (!FUNNEL_EVENTS.has(event)) continue;
@@ -39,5 +56,5 @@ export function recordFunnelTelemetry(text, counters = {}) {
     const mspt = Number(field(line, "mspt"));
     if (Number.isFinite(mspt) && mspt >= 0 && mspt < 60_000) latestMspt = mspt;
   }
-  return { counters, latestMspt };
+  return { counters, latestMspt, latestServerTickDelayMillis, latestSlowGameTick };
 }

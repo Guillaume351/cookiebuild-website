@@ -10,10 +10,11 @@ services:
       MINECRAFT_JAVA_PORT: "25565"
       MINECRAFT_BEDROCK_PORT: "19132"
       WEBSITE_URL: https://www.cookie-build.com
-      DISCORD_PLAYER_STATUS_WEBHOOK_URL: ${DISCORD_PLAYER_STATUS_WEBHOOK_URL}
+      DISCORD_ALERT_WEBHOOK_FILE: /run/secrets/discord_alert_webhook
     volumes:
       - cookiebuild_monitor_state:/state
       - /home/ubuntu/Volumes/cookiebuild/papermc_data/logs:/minecraft-logs:ro
+      - /home/ubuntu/Volumes/cookiebuild/observability/secrets/discord_webhook:/run/secrets/discord_alert_webhook:ro
 
 volumes:
   cookiebuild_monitor_state:

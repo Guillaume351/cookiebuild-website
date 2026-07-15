@@ -204,9 +204,12 @@ export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
     throw new PermanentOutboxError("payload.edition must be crossplay");
   }
   const queuedCount = rallyInteger(input.queuedCount, "queuedCount", 0);
-  const neededCount = rallyInteger(input.neededCount, "neededCount", 1);
+  const neededCount = rallyInteger(input.neededCount, "neededCount", 0);
   let actorDisplayName: string | null = null;
   if (input.source === "player") {
+    if (neededCount < 1) {
+      throw new PermanentOutboxError("payload.neededCount must be positive for player rallies");
+    }
     if (typeof input.actorDisplayName !== "string") {
       throw new PermanentOutboxError("payload.actorDisplayName is required for player rallies");
     }
@@ -217,11 +220,19 @@ export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
   } else if (input.actorDisplayName !== null) {
     throw new PermanentOutboxError("payload.actorDisplayName must be null for automatic rallies");
   }
+  if (neededCount === 0 && queuedCount === 0) {
+    throw new PermanentOutboxError("payload.queuedCount must be positive for a starting game");
+  }
 
   const gamemode = input.gamemode as keyof typeof PLAYER_RALLY_GAMEMODES;
-  const title = `Players needed for ${PLAYER_RALLY_GAMEMODES[gamemode]}`;
+  const starting = neededCount === 0;
+  const title = starting
+    ? `${PLAYER_RALLY_GAMEMODES[gamemode]} is starting soon`
+    : `Players needed for ${PLAYER_RALLY_GAMEMODES[gamemode]}`;
   const countSummary = `${queuedCount} queued, ${neededCount} more needed`;
-  const body = actorDisplayName
+  const body = starting
+    ? `${queuedCount} ${queuedCount === 1 ? "player is" : "players are"} ready. Join now before the match starts.`
+    : actorDisplayName
     ? `${actorDisplayName} is rallying players: ${countSummary}.`
     : `${countSummary} to start.`;
   return {
@@ -301,6 +312,19 @@ function localMinutes(date: Date, timezone: string) {
   }
 }
 
+function offsetMinutes(date: Date, timezoneOffsetMinutes: number | null) {
+  if (
+    timezoneOffsetMinutes === null
+    || !Number.isInteger(timezoneOffsetMinutes)
+    || timezoneOffsetMinutes < -840
+    || timezoneOffsetMinutes > 840
+  ) {
+    return undefined;
+  }
+  const utcMinutes = (date.getUTCHours() * 60) + date.getUTCMinutes();
+  return ((utcMinutes + timezoneOffsetMinutes) % (24 * 60) + (24 * 60)) % (24 * 60);
+}
+
 function clockMinutes(value: string) {
   if (!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value)) return undefined;
   const [hour, minute] = value.split(":").map(Number);
@@ -312,9 +336,14 @@ export function isInQuietHours(
   timezone: string | null,
   start: string | null,
   end: string | null,
+  timezoneOffsetMinutes: number | null = null,
 ) {
-  if (!timezone || !start || !end || start === end) return false;
-  const now = localMinutes(date, timezone);
+  if (!start || !end || start === end) return false;
+  // Mobile clients always sync their UTC offset, while an IANA timezone is not
+  // available on every Flutter platform. Prefer the DST-aware timezone and
+  // fall back to the validated offset so quiet hours never silently fail open.
+  const now = (timezone ? localMinutes(date, timezone) : undefined)
+    ?? offsetMinutes(date, timezoneOffsetMinutes);
   const startMinutes = clockMinutes(start);
   const endMinutes = clockMinutes(end);
   if (now === undefined || startMinutes === undefined || endMinutes === undefined) return false;

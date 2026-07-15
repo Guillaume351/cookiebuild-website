@@ -188,7 +188,8 @@ An audience must have exactly one selector: `{ "all": true }`, a `firebaseUid`, 
 `mobileUserIds` array, or a `deviceIds` array. A visible payload accepts `title`, `body`, optional
 HTTPS `imageUrl`, a `cookiebuild://` or `https://www.cookie-build.com` `deepLink`, scalar `data`, and an
 optional `urgent` boolean. Per-user preferences, notification authorization, revoked devices, and
-quiet hours are applied before sending. Quiet-hour recipients are intentionally suppressed rather
+quiet hours are applied before sending. Player rallies also exclude users whose linked Minecraft
+account is already online. Quiet-hour recipients are intentionally suppressed rather
 than deferred: a stale daily nudge or online-presence alert must not arrive after the moment that
 made it useful. The structured delivery log records the suppression count. Invalid/unregistered
 tokens are revoked; transient token
@@ -215,11 +216,16 @@ CookieDough inserts a rally into the shared outbox with `kind = 'player_rally'`,
 
 `gamemode` is one of `microbattles`, `pitchout`, `skywars`, or `buildbattles`.
 `neededCount` is the number of additional players needed to reach the minimum start threshold.
+It may be `0` only for an automatic start-imminent rally, in which case `queuedCount` must be
+positive and the generated copy invites players to join before the match starts. Player-requested
+rallies always require at least one missing player.
 `actorDisplayName` is the bounded public Bukkit name for a player request and must be `null` when
 `source = 'automatic'`. No title, body, URL, message, or other free-text field is accepted. The
 website synthesizes the visible notification and deep link. `rallyId` has a partial unique index for
 durable producer deduplication; CookieDough additionally owns transactional global and per-game
-cooldowns.
+cooldowns. The worker sends rallies through a five-minute, high-priority transport window and logs
+selected, eligible, quiet-hour-suppressed, already-online-excluded, and end-to-end queue latency
+counts for operational diagnosis.
 
 Firebase Admin credentials are resolved in this order:
 

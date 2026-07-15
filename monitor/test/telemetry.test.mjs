@@ -32,3 +32,14 @@ test("uses bounded fallback labels for context-free server events", () => {
   );
   assert.equal(result.counters[funnelCounterKey("kit_purchased", "unknown", "none")], 1);
 });
+
+test("records bounded core tick-delay diagnostics", () => {
+  const result = recordFunnelTelemetry([
+    "[CookieDough] [performance] event=server_tick_delay delay_ms=4635",
+    "[CookieDough] [performance] event=slow_game_tick game=SkyWars state=OPEN elapsed_ms=245",
+    "[CookieDough] [performance] event=slow_game_tick game=user-input state=OPEN elapsed_ms=9999",
+  ].join("\n"));
+
+  assert.equal(result.latestServerTickDelayMillis, 4635);
+  assert.deepEqual(result.latestSlowGameTick, { game: "SkyWars", elapsedMillis: 245 });
+});

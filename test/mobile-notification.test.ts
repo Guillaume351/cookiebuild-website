@@ -118,7 +118,36 @@ describe("mobile notification validation", () => {
     }, "player_rally")).toThrow(PermanentOutboxError);
     expect(() => parseNotificationPayloadForKind({
       ...valid,
+      source: "player",
+      actorDisplayName: "CookieFan",
       neededCount: 0,
+    }, "player_rally")).toThrow(PermanentOutboxError);
+  });
+
+  it("synthesizes an automatic start-imminent rally without fake missing players", () => {
+    expect(parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "a53233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "automatic",
+      gamemode: "buildbattles",
+      edition: "crossplay",
+      queuedCount: 3,
+      neededCount: 0,
+      actorDisplayName: null,
+    }, "player_rally")).toMatchObject({
+      title: "BuildBattles is starting soon",
+      body: "3 players are ready. Join now before the match starts.",
+      data: { neededCount: "0", source: "automatic" },
+    });
+    expect(() => parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "a53233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "automatic",
+      gamemode: "buildbattles",
+      edition: "crossplay",
+      queuedCount: 0,
+      neededCount: 0,
+      actorDisplayName: null,
     }, "player_rally")).toThrow(PermanentOutboxError);
   });
 });
@@ -141,6 +170,9 @@ describe("mobile notification policy", () => {
     expect(isInQuietHours(at2300Paris, "Europe/Paris", "22:00", "08:00")).toBe(true);
     expect(isInQuietHours(at0900Paris, "Europe/Paris", "22:00", "08:00")).toBe(false);
     expect(isInQuietHours(at2300Paris, "invalid/timezone", "22:00", "08:00")).toBe(false);
+    expect(isInQuietHours(at2300Paris, null, "22:00", "08:00", 120)).toBe(true);
+    expect(isInQuietHours(at0900Paris, null, "22:00", "08:00", 120)).toBe(false);
+    expect(isInQuietHours(at2300Paris, "invalid/timezone", "22:00", "08:00", 120)).toBe(true);
   });
 
   it("uses capped exponential backoff with bounded jitter", () => {

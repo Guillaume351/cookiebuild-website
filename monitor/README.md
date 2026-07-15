@@ -42,10 +42,12 @@ Create a small Dokploy application from the same website Git repository, using:
 - the Paper log directory mounted read-only at `/minecraft-logs`.
 
 The supplied `docker-compose.example.yml` is an equivalent sidecar definition.
-Pass the already configured `DISCORD_PLAYER_STATUS_WEBHOOK_URL` to the monitor;
-no new account, webhook, database credential, Grafana instance, or user setup is
-required. If a dedicated webhook is added later, the preferred variable is
-`DISCORD_ALERT_WEBHOOK_URL`.
+Mount the already configured observability webhook secret and expose its path as
+`DISCORD_ALERT_WEBHOOK_FILE`; no new account, webhook, database credential,
+Grafana instance, or user setup is required. `DISCORD_ALERT_WEBHOOK_URL` is also
+supported for platforms that cannot mount a secret file. The monitor deliberately
+does not fall back to `DISCORD_PLAYER_STATUS_WEBHOOK_URL`, because that endpoint is
+the player join/leave log channel.
 
 The minimum environment is:
 
@@ -54,10 +56,11 @@ MINECRAFT_HOST=play.cookie-build.com
 MINECRAFT_JAVA_PORT=25565
 MINECRAFT_BEDROCK_PORT=19132
 WEBSITE_URL=https://www.cookie-build.com
-DISCORD_PLAYER_STATUS_WEBHOOK_URL=<existing value>
+DISCORD_ALERT_WEBHOOK_FILE=/run/secrets/discord_alert_webhook
 ```
 
-Defaults are already correct for every value except the webhook. Optional
+Mount the secret read-only at the path above. Defaults are already correct for
+every value except the webhook. Optional
 settings are `MONITOR_INTERVAL_SECONDS`, `MONITOR_FAILURE_THRESHOLD`,
 `MONITOR_REMINDER_HOURS`, `MONITOR_STARTUP_GRACE_SECONDS`,
 `DISCORD_ALERT_MENTION`, `MINECRAFT_LOG_FILE`, and `PORT`.

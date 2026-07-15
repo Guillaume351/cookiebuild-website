@@ -6,6 +6,9 @@ import { AlertState, sendDiscord } from "./alerts.mjs";
 import { checkBedrock, checkDatabaseApi, checkJava, checkWebsite } from "./checks.mjs";
 import { readNewLogChunk, selectNewFatalLines } from "./logs.mjs";
 import { parseFunnelCounterKey, recordFunnelTelemetry } from "./telemetry.mjs";
+import { loadAlertWebhook } from "./webhook.mjs";
+
+const alertWebhook = await loadAlertWebhook(process.env);
 
 const config = {
   host: process.env.MINECRAFT_HOST || "play.cookie-build.com",
@@ -20,10 +23,10 @@ const config = {
   maintenanceFile: process.env.MONITOR_MAINTENANCE_FILE || "/state/maintenance",
   logFile: process.env.MINECRAFT_LOG_FILE || "/minecraft-logs/latest.log",
   httpPort: numberEnv("PORT", 8080),
-  webhook: process.env.DISCORD_ALERT_WEBHOOK_URL
-    || process.env.DISCORD_MODERATION_WEBHOOK_URL
-    || process.env.DISCORD_PLAYER_STATUS_WEBHOOK_URL
-    || "",
+  // Never fall back to the player-status webhook: that endpoint intentionally
+  // feeds Discord join logs and would mix operator incidents with player joins.
+  webhook: alertWebhook.value,
+  webhookSource: alertWebhook.source,
   alertMention: process.env.DISCORD_ALERT_MENTION || "",
 };
 
@@ -124,6 +127,14 @@ async function scanLogs() {
       state.latestMspt = telemetry.latestMspt;
       state.latestMsptObservedAt = Date.now();
     }
+    if (telemetry.latestServerTickDelayMillis != null) {
+      state.latestServerTickDelayMillis = telemetry.latestServerTickDelayMillis;
+      state.latestServerTickDelayObservedAt = Date.now();
+    }
+    if (telemetry.latestSlowGameTick != null) {
+      state.latestSlowGameTick = telemetry.latestSlowGameTick;
+      state.latestSlowGameTickObservedAt = Date.now();
+    }
     if (state.maintenance) return;
     const fatalLines = selectNewFatalLines(chunk.text, state.logFingerprints);
     if (fatalLines.length > 0) {
@@ -213,6 +224,20 @@ function prometheusMetrics() {
     lines.push("# TYPE cookiebuild_minecraft_mspt_observed_timestamp_seconds gauge");
     lines.push(`cookiebuild_minecraft_mspt_observed_timestamp_seconds ${Math.floor(state.latestMsptObservedAt / 1000)}`);
   }
+  if (Number.isFinite(state.latestServerTickDelayMillis)) {
+    lines.push("# HELP cookiebuild_minecraft_server_tick_delay_milliseconds Latest main-thread scheduling delay detected by CookieDough.");
+    lines.push("# TYPE cookiebuild_minecraft_server_tick_delay_milliseconds gauge");
+    lines.push(`cookiebuild_minecraft_server_tick_delay_milliseconds ${state.latestServerTickDelayMillis}`);
+  }
+  if (Number.isFinite(state.latestServerTickDelayObservedAt)) {
+    lines.push(`cookiebuild_minecraft_server_tick_delay_observed_timestamp_seconds ${Math.floor(state.latestServerTickDelayObservedAt / 1_000)}`);
+  }
+  if (state.latestSlowGameTick && Number.isFinite(state.latestSlowGameTick.elapsedMillis)) {
+    const game = String(state.latestSlowGameTick.game).replaceAll('"', '\\"');
+    lines.push("# HELP cookiebuild_minecraft_slow_game_tick_milliseconds Latest slow minigame tick duration.");
+    lines.push("# TYPE cookiebuild_minecraft_slow_game_tick_milliseconds gauge");
+    lines.push(`cookiebuild_minecraft_slow_game_tick_milliseconds{game="${game}"} ${state.latestSlowGameTick.elapsedMillis}`);
+  }
   return `${lines.join("\n")}\n`;
 }
 
@@ -231,7 +256,9 @@ http.createServer((request, response) => {
   response.writeHead(404).end();
 }).listen(config.httpPort, "0.0.0.0", () => {
   console.log(`Cookie Build monitor listening on :${config.httpPort}`);
-  console.log(config.webhook ? "Discord alert webhook configured" : "No Discord alert webhook configured");
+  console.log(config.webhook
+    ? `Discord alert webhook configured via ${config.webhookSource}`
+    : "No dedicated Discord alert webhook configured");
 });
 
 await runCycle();

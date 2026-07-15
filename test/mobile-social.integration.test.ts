@@ -29,6 +29,7 @@ const PLAYERS = {
   third: { id: "10000000-0000-4000-8000-000000000003", name: "Third" },
   fourth: { id: "10000000-0000-4000-8000-000000000004", name: "Fourth" },
   fifth: { id: "10000000-0000-4000-8000-000000000005", name: "Fifth" },
+  rallyOnline: { id: "10000000-0000-4000-8000-000000000006", name: "AlreadyOnline" },
 } as const;
 
 type SocialModule = typeof import("../server/services/mobile-social");
@@ -91,6 +92,7 @@ integration("mobile social service", () => {
       "0001_mobile_foundation.sql",
       "0002_mobile_social.sql",
       "0003_player_rally.sql",
+      "0006_mobile_engagement.sql",
     ]) {
       const migration = await readFile(new URL(`../drizzle/${migrationName}`, import.meta.url), "utf8");
       await setupSql.unsafe(migration);
@@ -311,15 +313,19 @@ integration("mobile social service", () => {
       "rally-disabled-user",
       "rally-device-optout-user",
       "rally-revoked-device-user",
+      "rally-online-user",
     ]) {
-      await provision(uid);
+      await provision(uid, uid === "rally-online-user" ? PLAYERS.rallyOnline.id : undefined);
     }
     await setupSql`
       UPDATE mobile_notification_preferences preferences
          SET rally_enabled = true
         FROM mobile_users mobile_user
        WHERE preferences.mobile_user_id = mobile_user.id
-         AND mobile_user.firebase_uid IN ('rally-enabled-user', 'rally-device-optout-user', 'rally-revoked-device-user')
+         AND mobile_user.firebase_uid IN (
+           'rally-enabled-user', 'rally-device-optout-user',
+           'rally-revoked-device-user', 'rally-online-user'
+         )
     `;
     await setupSql`
       INSERT INTO mobile_devices
@@ -338,6 +344,13 @@ integration("mobile social service", () => {
       UNION ALL
       SELECT id, 'rally-revoked-install', 'android', 'rally-revoked-token', true, now()
         FROM mobile_users WHERE firebase_uid = 'rally-revoked-device-user'
+      UNION ALL
+      SELECT id, 'rally-online-install', 'android', 'rally-online-token', true, NULL::timestamptz
+        FROM mobile_users WHERE firebase_uid = 'rally-online-user'
+    `;
+    await setupSql`
+      INSERT INTO player_sessions (player_id, start_time, end_time)
+      VALUES (${PLAYERS.rallyOnline.id}, now(), NULL)
     `;
     const rallyId = "a53233cd-20d2-4d15-b093-2caaf4cd7774";
     const rallyPayload = {
@@ -367,6 +380,18 @@ integration("mobile social service", () => {
     expect(firebaseMessaging.sendEachForMulticast).toHaveBeenCalledTimes(1);
     expect(firebaseMessaging.sendEachForMulticast).toHaveBeenCalledWith(expect.objectContaining({
       tokens: expect.arrayContaining(["rally-enabled-token", "rally-retry-token"]),
+      android: expect.objectContaining({
+        collapseKey: "player-rally-pitchout",
+        priority: "high",
+        ttl: 300_000,
+        notification: expect.objectContaining({ channelId: "cookiebuild_rallies" }),
+      }),
+      apns: expect.objectContaining({
+        headers: expect.objectContaining({
+          "apns-collapse-id": "player-rally-pitchout",
+          "apns-priority": "10",
+        }),
+      }),
       notification: {
         title: "Players needed for Pitchout",
         body: "1 queued, 3 more needed to start.",
@@ -377,6 +402,8 @@ integration("mobile social service", () => {
         gamemode: "pitchout",
       }),
     }));
+    expect(firebaseMessaging.sendEachForMulticast.mock.calls[0]?.[0].tokens)
+      .not.toContain("rally-online-token");
     const pending = await setupSql<{ status: string; retryDevices: number }[]>`
       SELECT status,
              jsonb_array_length(audience -> 'deviceIds') AS "retryDevices"

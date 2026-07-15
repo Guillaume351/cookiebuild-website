@@ -33,7 +33,19 @@ describe("mobile engagement contract", () => {
       import.meta.url,
     ), "utf8");
     expect(worker).toContain("if (!allowed) suppressed += 1");
-    expect(worker).toContain("return { sent, disabled, retry: [...new Set(retry)], suppressed }");
+    expect(worker).toContain("retry: [...new Set(retry)]");
+    expect(worker).toContain("suppressed,");
+    expect(worker).toContain("excludedOnline,");
+    expect(worker).toContain('preference !== "rally" || !recipient.linkedPlayerOnline');
+  });
+
+  it("polls the outbox frequently enough for time-sensitive player calls", () => {
+    const plugin = readFileSync(new URL(
+      "../server/plugins/mobile-notification-outbox.ts",
+      import.meta.url,
+    ), "utf8");
+    expect(plugin).toContain('value : 5_000');
+    expect(plugin).toContain('value >= 5_000');
   });
 
   it("localizes engagement notifications and describes explicit accepted-friend selection", () => {

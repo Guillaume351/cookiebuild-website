@@ -41,21 +41,28 @@ export interface ClaimedOutboxRow extends Record<string, unknown> {
   payload: unknown;
   attempts: number;
   lockToken: string;
+  availableAt: Date;
+  createdAt: Date;
 }
 
 interface Recipient {
   deviceId: string;
   fcmToken: string;
   timezone: string | null;
+  timezoneOffsetMinutes: number;
   quietHoursStart: string | null;
   quietHoursEnd: string | null;
+  linkedPlayerOnline: boolean;
 }
 
 interface DeliveryResult {
+  selected: number;
+  eligible: number;
   sent: number;
   disabled: string[];
   retry: string[];
   suppressed: number;
+  excludedOnline: number;
 }
 
 function log(level: "info" | "warn" | "error", event: string, details: Record<string, unknown> = {}) {
@@ -142,7 +149,9 @@ export async function claimMobileNotificationOutboxRows(config: MobileNotificati
               outbox.audience,
               outbox.payload,
               outbox.attempts,
-              outbox.lock_token AS "lockToken"
+              outbox.lock_token AS "lockToken",
+              outbox.available_at AS "availableAt",
+              outbox.created_at AS "createdAt"
   `);
   return [...rows];
 }
@@ -188,10 +197,20 @@ async function recipientsFor(audience: NotificationAudience, preference: Notific
       deviceId: mobileDevices.id,
       fcmToken: mobileDevices.fcmToken,
       timezone: sql<string | null>`coalesce(${mobileDevices.timezone}, ${mobileUsers.timezone})`,
+      timezoneOffsetMinutes: mobileNotificationPreferences.timezoneOffsetMinutes,
       quietHoursStart: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
         THEN ${mobileNotificationPreferences.quietHoursStart} ELSE NULL END`,
       quietHoursEnd: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
         THEN ${mobileNotificationPreferences.quietHoursEnd} ELSE NULL END`,
+      linkedPlayerOnline: sql<boolean>`EXISTS (
+        SELECT 1
+          FROM mobile_player_links linked_player
+          JOIN player_sessions active_session
+            ON active_session.player_id = linked_player.player_id
+           AND active_session.end_time IS NULL
+         WHERE linked_player.firebase_uid = ${mobileUsers.firebaseUid}
+           AND linked_player.revoked_at IS NULL
+      )`,
     })
     .from(mobileDevices)
     .innerJoin(mobileUsers, eq(mobileUsers.id, mobileDevices.mobileUserId))
@@ -231,6 +250,10 @@ function multicastMessage(
   payload: ReturnType<typeof parseNotificationPayload>,
 ): MulticastMessage {
   const urgent = payload.urgent && preferenceKind(row.kind) === "server_status";
+  const rally = preferenceKind(row.kind) === "rally";
+  const collapseId = rally && payload.data.gamemode
+    ? `player-rally-${payload.data.gamemode}`
+    : row.id;
   const data = {
     ...payload.data,
     outboxId: row.id,
@@ -246,18 +269,24 @@ function multicastMessage(
     },
     data,
     android: {
-      collapseKey: row.id,
-      priority: urgent ? "high" : "normal",
+      collapseKey: collapseId,
+      priority: urgent || rally ? "high" : "normal",
+      ...(rally ? { ttl: 5 * 60_000 } : {}),
       notification: {
-        channelId: urgent ? "cookiebuild_status" : "cookiebuild_updates",
+        channelId: urgent
+          ? "cookiebuild_status"
+          : rally ? "cookiebuild_rallies" : "cookiebuild_updates",
         clickAction: "FLUTTER_NOTIFICATION_CLICK",
         ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
       },
     },
     apns: {
       headers: {
-        "apns-collapse-id": row.id,
+        "apns-collapse-id": collapseId,
         "apns-priority": "10",
+        ...(rally ? {
+          "apns-expiration": String(Math.floor(Date.now() / 1_000) + (5 * 60)),
+        } : {}),
       },
       payload: { aps: { sound: "default", ...(payload.imageUrl ? { mutableContent: true } : {}) } },
       ...(payload.imageUrl ? { fcmOptions: { imageUrl: payload.imageUrl } } : {}),
@@ -275,13 +304,23 @@ async function deliverNotification(
   const payload = parseNotificationPayload(row.payload, row.kind);
   const now = new Date();
   const selected = await recipientsFor(audience, preference);
+  // A rally is intended to bring absent players back. Do not interrupt users
+  // whose linked Minecraft account is already online, and never expose queue
+  // activity through a notification they do not need.
+  let excludedOnline = 0;
+  const privacyEligible = selected.filter((recipient) => {
+    const allowed = preference !== "rally" || !recipient.linkedPlayerOnline;
+    if (!allowed) excludedOnline += 1;
+    return allowed;
+  });
   let suppressed = 0;
-  const recipients = selected.filter((recipient) => {
+  const recipients = privacyEligible.filter((recipient) => {
     const allowed = !isInQuietHours(
       now,
       recipient.timezone,
       recipient.quietHoursStart,
       recipient.quietHoursEnd,
+      recipient.timezoneOffsetMinutes,
     );
     if (!allowed) suppressed += 1;
     return allowed;
@@ -318,7 +357,15 @@ async function deliverNotification(
       break;
     }
   }
-  return { sent, disabled, retry: [...new Set(retry)], suppressed };
+  return {
+    selected: selected.length,
+    eligible: recipients.length,
+    sent,
+    disabled,
+    retry: [...new Set(retry)],
+    suppressed,
+    excludedOnline,
+  };
 }
 
 async function disableDevices(deviceIds: string[]) {
@@ -438,9 +485,14 @@ async function processRow(row: ClaimedOutboxRow, config: MobileNotificationWorke
         outboxId: row.id,
         kind: row.kind,
         attempts: row.attempts,
+        selected: result.selected,
+        eligible: result.eligible,
         sent: result.sent,
         disabled: result.disabled.length,
         suppressed: result.suppressed,
+        excludedOnline: result.excludedOnline,
+        queueLatencyMs: Math.max(0, Date.now() - new Date(row.createdAt).getTime()),
+        readyLatencyMs: Math.max(0, Date.now() - new Date(row.availableAt).getTime()),
       });
     }
   } catch (error) {
