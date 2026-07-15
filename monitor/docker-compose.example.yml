@@ -14,7 +14,7 @@ services:
     volumes:
       - cookiebuild_monitor_state:/state
       - /home/ubuntu/Volumes/cookiebuild/papermc_data/logs:/minecraft-logs:ro
-      - /home/ubuntu/Volumes/cookiebuild/observability/secrets/discord_webhook:/run/secrets/discord_alert_webhook:ro
+      - /home/ubuntu/Volumes/cookiebuild/monitor_secrets/discord_alert_webhook:/run/secrets/discord_alert_webhook:ro
 
 volumes:
   cookiebuild_monitor_state:

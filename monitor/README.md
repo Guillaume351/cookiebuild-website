@@ -42,12 +42,15 @@ Create a small Dokploy application from the same website Git repository, using:
 - the Paper log directory mounted read-only at `/minecraft-logs`.
 
 The supplied `docker-compose.example.yml` is an equivalent sidecar definition.
-Mount the already configured observability webhook secret and expose its path as
+Install a monitor-readable copy of the already configured observability webhook
+under `/home/ubuntu/Volumes/cookiebuild/monitor_secrets/discord_alert_webhook`
+(owned by the container user, UID/GID 1000, mode `0400`) and expose its path as
 `DISCORD_ALERT_WEBHOOK_FILE`; no new account, webhook, database credential,
-Grafana instance, or user setup is required. `DISCORD_ALERT_WEBHOOK_URL` is also
-supported for platforms that cannot mount a secret file. The monitor deliberately
-does not fall back to `DISCORD_PLAYER_STATUS_WEBHOOK_URL`, because that endpoint is
-the player join/leave log channel.
+Grafana instance, or user setup is required. Keep the source observability secret
+root-only. `DISCORD_ALERT_WEBHOOK_URL` is also supported for platforms that cannot
+mount a secret file. The monitor deliberately does not fall back to
+`DISCORD_PLAYER_STATUS_WEBHOOK_URL`, because that endpoint is the player
+join/leave log channel.
 
 The minimum environment is:
 
