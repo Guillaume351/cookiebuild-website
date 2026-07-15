@@ -1,4 +1,4 @@
-import { eq, lt, sql } from "drizzle-orm";
+import { eq, lt, lte, sql } from "drizzle-orm";
 import db from "../../db/client";
 import { adminCommands, adminRuntimeEvents, adminRuntimeSnapshots } from "../../db/schema";
 import { adminRuntimeBus } from "../services/admin-runtime-bus";
@@ -39,7 +39,7 @@ async function persistRuntimeEvent(_routingKey: string, envelope: Record<string,
         observedAt,
         updatedAt: new Date(),
       },
-      setWhere: sql`${adminRuntimeSnapshots.observedAt} <= ${observedAt}`,
+      setWhere: lte(adminRuntimeSnapshots.observedAt, observedAt),
     });
     return;
   }
