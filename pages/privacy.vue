@@ -8,7 +8,7 @@
     <section id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Privacy Policy</h1>
-        <p>Effective and last updated: July 14, 2026</p>
+        <p>Effective and last updated: July 15, 2026</p>
       </header>
 
       <section>
@@ -25,15 +25,19 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Data we process</h2>
         <ul class="list-disc space-y-2 pl-6">
           <li>A pseudonymous Firebase identifier created by anonymous authentication.</li>
+          <li>Technical authentication diagnostics automatically processed by Firebase, such as IP address, operating system, device model, brand, form factor, installer, SDK versions, and Firebase app identifier.</li>
           <li>Minecraft UUID, display name, Java or Bedrock edition, link status, and gameplay statistics.</li>
           <li>Structured friend requests, accepted friendships, blocks, report reason, parties, members, invitations, and fixed-format player calls. The app has no free-form chat.</li>
           <li>Friend presence derived from active game sessions and disclosed only to accepted friends.</li>
-          <li>For opted-in notifications: installation ID, FCM token, platform, app version, locale, timezone, authorization state, and preferences.</li>
+          <li>For opted-in notifications: installation ID, FCM token, platform, app version, locale, authorization state, and preferences.</li>
+          <li>While legacy version 1.2.3 remains available to older Android devices: Minecraft nickname, Google Play product and purchase history, purchase token and signature, and app-view interactions used by the former shop and Google App Indexing integration.</li>
           <li>Short-lived security information such as IP-based rate-limit counters and operational logs.</li>
         </ul>
         <p class="mt-3">
-          The current app does not use advertising identifiers, cross-app tracking, Firebase
-          Analytics, Crashlytics, precise location, contacts, microphone, camera, or payment data.
+          Version 2.0 does not use advertising identifiers, cross-app tracking, Firebase Analytics,
+          Crashlytics, precise location, contacts, microphone, camera, or payment data. Legacy
+          version 1.2.3 transmitted its shop requests over an unencrypted connection; the update
+          replaces that implementation on compatible devices.
           Public Minecraft names and gameplay statistics can appear in leaderboards.
         </p>
       </section>
@@ -52,8 +56,10 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Recipients and international transfers</h2>
         <p>
-          Google Firebase provides anonymous authentication and push delivery. Apple and Google
-          distribute the app. EU-based infrastructure providers host the website, API, database,
+          Google Firebase provides anonymous authentication and push delivery. The legacy app also
+          shared app-view interactions with Google App Indexing. Apple and Google distribute the
+          app. Player avatars are loaded from mc-heads.net, which receives the public Minecraft
+          display name and the requesting device's IP address. EU-based infrastructure providers host the website, API, database,
           monitoring, and Minecraft server. These providers process only the data needed for their
           services under their own terms and data-processing safeguards. Firebase or store services
           may process data outside the EEA using applicable transfer mechanisms such as adequacy
@@ -109,7 +115,7 @@
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
-        <p>Applicable et mise à jour le 14 juillet 2026</p>
+        <p>Applicable et mise à jour le 15 juillet 2026</p>
       </header>
 
       <section>
@@ -125,15 +131,19 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Données traitées</h2>
         <ul class="list-disc space-y-2 pl-6">
           <li>Identifiant Firebase pseudonyme créé par l’authentification anonyme.</li>
+          <li>Diagnostics techniques d’authentification traités automatiquement par Firebase, notamment adresse IP, système, modèle, marque, format de l’appareil, installateur, versions des SDK et identifiant d’app Firebase.</li>
           <li>UUID, pseudo, édition Java ou Bedrock, association et statistiques Minecraft.</li>
           <li>Demandes et listes d’amis, blocages, motif de signalement, groupes, membres, invitations et appels de joueurs structurés. L’app ne contient aucun chat libre.</li>
           <li>Présence en jeu visible uniquement par les amis acceptés.</li>
-          <li>Après accord pour les notifications : identifiant d’installation, jeton FCM, plateforme, version, langue, fuseau, autorisation et préférences.</li>
+          <li>Après accord pour les notifications : identifiant d’installation, jeton FCM, plateforme, version, langue, autorisation et préférences.</li>
+          <li>Tant que l’ancienne version 1.2.3 reste disponible sur de vieux appareils Android : pseudo Minecraft, produit et historique d’achat Google Play, jeton et signature d’achat, ainsi que les interactions de consultation utilisées par l’ancienne boutique et Google App Indexing.</li>
           <li>Données de sécurité temporaires, notamment les compteurs de limitation par IP et journaux techniques.</li>
         </ul>
         <p class="mt-3">
-          L’app n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics, ni
-          Crashlytics, ni localisation précise, contacts, caméra, microphone ou paiement.
+          La version 2.0 n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics,
+          ni Crashlytics, ni localisation précise, contacts, caméra, microphone ou paiement.
+          L’ancienne version 1.2.3 transmettait ses demandes de boutique sans chiffrement ; la mise
+          à jour remplace cette implémentation sur les appareils compatibles.
         </p>
       </section>
 
@@ -152,8 +162,10 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Destinataires et transferts</h2>
         <p>
-          Google Firebase fournit l’authentification anonyme et les notifications. Apple et Google
-          distribuent l’app. Des prestataires d’infrastructure européens hébergent le site, l’API,
+          Google Firebase fournit l’authentification anonyme et les notifications. L’ancienne app
+          partageait aussi les interactions de consultation avec Google App Indexing. Apple et Google
+          distribuent l’app. Les avatars sont chargés depuis mc-heads.net, qui reçoit le pseudo
+          Minecraft public et l’adresse IP de l’appareil. Des prestataires d’infrastructure européens hébergent le site, l’API,
           la base, le monitoring et le serveur. Certains services peuvent traiter des données hors
           EEE avec les garanties applicables, notamment décision d’adéquation ou clauses contractuelles types.
         </p>
