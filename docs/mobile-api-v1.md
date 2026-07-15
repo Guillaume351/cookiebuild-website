@@ -214,7 +214,7 @@ CookieDough inserts a rally into the shared outbox with `kind = 'player_rally'`,
 }
 ```
 
-`gamemode` is one of `microbattles`, `pitchout`, `skywars`, or `buildbattles`.
+`gamemode` is one of `microbattles`, `pitchout`, `skywars`, `buildbattles`, or `turfwars`.
 `neededCount` is the number of additional players needed to reach the minimum start threshold.
 It may be `0` only for an automatic start-imminent rally, in which case `queuedCount` must be
 positive and the generated copy invites players to join before the match starts. Player-requested

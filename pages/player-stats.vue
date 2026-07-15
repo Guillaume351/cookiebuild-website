@@ -43,6 +43,7 @@
                 <option value="Pitchout">Pitchout</option>
                 <option value="SkyWars">SkyWars</option>
                 <option value="BuildBattles">Build Battles</option>
+                <option value="TurfWars">TurfWars</option>
               </select>
             </div>
 
@@ -96,7 +97,7 @@
           <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <ProfileMetric label="Matches" :value="selectedPlayer.matches" />
             <ProfileMetric
-              :label="selectedGamemode === 'BuildBattles' ? 'Build score' : 'Kills'"
+              :label="selectedGamemode === 'BuildBattles' ? 'Build score' : selectedGamemode === 'TurfWars' ? 'Arrow hits' : 'Kills'"
               :value="selectedGamemode === 'BuildBattles' ? selectedPlayer.score : selectedPlayer.kills"
             />
             <ProfileMetric label="Coins" :value="selectedPlayer.coins" />
@@ -379,6 +380,7 @@ function formatGamemode(gamemode: string) {
     pitchout: "Pitchout",
     skywars: "SkyWars",
     buildbattles: "Build Battles",
+    turfwars: "TurfWars",
   };
   return labels[gamemode.toLowerCase()] ?? gamemode;
 }

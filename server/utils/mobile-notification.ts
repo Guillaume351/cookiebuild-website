@@ -44,6 +44,7 @@ const PLAYER_RALLY_GAMEMODES = {
   pitchout: "Pitchout",
   skywars: "SkyWars",
   buildbattles: "BuildBattles",
+  turfwars: "TurfWars",
 } as const;
 const PLAYER_RALLY_ACTOR_PATTERN = /^[\p{L}\p{N}_. -]{1,32}$/u;
 

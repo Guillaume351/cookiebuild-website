@@ -14,6 +14,7 @@ test("counts bounded funnel dimensions without player identifiers", () => {
     "[CookieDough] [funnel] event=queue_joined player=private edition=bedrock game=MicroBattles players=1",
     "[CookieDough] [funnel] event=match_started player=private edition=java game=SkyWars players=8",
     "[CookieDough] [funnel] event=queue_joined player=private edition=java game=BuildBattles players=3",
+    "[CookieDough] [funnel] event=match_completed player=private edition=bedrock game=TurfWars players=6",
     "[CookieDough] [funnel] event=unknown player=private edition=bedrock game=user-controlled",
   ].join("\n"), counters);
 
@@ -21,7 +22,8 @@ test("counts bounded funnel dimensions without player identifiers", () => {
   assert.equal(result.counters[funnelCounterKey("queue_joined", "bedrock", "MicroBattles")], 1);
   assert.equal(result.counters[funnelCounterKey("match_started", "java", "SkyWars")], 1);
   assert.equal(result.counters[funnelCounterKey("queue_joined", "java", "BuildBattles")], 1);
-  assert.equal(Object.keys(result.counters).length, 4);
+  assert.equal(result.counters[funnelCounterKey("match_completed", "bedrock", "TurfWars")], 1);
+  assert.equal(Object.keys(result.counters).length, 5);
   assert.equal(result.latestMspt, 4.25);
   assert.deepEqual(parseFunnelCounterKey(Object.keys(result.counters)[0]), ["joined", "bedrock", "none"]);
 });

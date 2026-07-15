@@ -26,5 +26,12 @@
     "summary": "The network now detects failures earlier and gives the team enough context to fix them quickly.",
     "body": "- Health probes continuously cover the Minecraft server, website, PostgreSQL, and RabbitMQ.\n- Prometheus, Grafana, Loki, and Alertmanager track usage, performance, logs, and fatal conditions.\n- Critical failures notify the Cookie Build team through Discord without interrupting gameplay services.\n- Session cleanup and match accounting now guard against stale or duplicated player state.",
     "publishedAt": "2026-07-15T08:00:00Z"
+  },
+  {
+    "slug": "turfwars-return",
+    "title": "TurfWars returns",
+    "summary": "The classic red-versus-blue archery game returns with its recovered arena and a safer cross-platform match lifecycle.",
+    "body": "- The original arena has been converted block-for-block to the current Minecraft format.\n- Teams alternate between a protected 25-second build phase and 90 seconds of ranged combat.\n- Arrow hits advance your turf by two columns; reach the far edge or lead when time expires to win.\n- Balanced teams, reconnect recovery, progression, stats, Parties, Quick Play, and Java/Bedrock controls are built in.",
+    "publishedAt": "2026-07-15T20:45:00Z"
   }
 ]

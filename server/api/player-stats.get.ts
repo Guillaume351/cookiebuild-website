@@ -8,6 +8,7 @@ const PROGRESSION_GAMEMODES = new Map([
   ["Pitchout", "pitchout"],
   ["SkyWars", "skywars"],
   ["BuildBattles", "buildbattles"],
+  ["TurfWars", "turfwars"],
 ]);
 const OUTER_PLAYER_ID = sql.raw('"playerdata"."id"');
 

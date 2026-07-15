@@ -150,6 +150,23 @@ describe("mobile notification validation", () => {
       actorDisplayName: null,
     }, "player_rally")).toThrow(PermanentOutboxError);
   });
+
+  it("accepts TurfWars as a bounded rally game", () => {
+    expect(parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "a63233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "player",
+      gamemode: "turfwars",
+      edition: "crossplay",
+      queuedCount: 1,
+      neededCount: 1,
+      actorDisplayName: "CookieArcher",
+    }, "player_rally")).toMatchObject({
+      title: "Players needed for TurfWars",
+      deepLink: "cookiebuild://play?gamemode=turfwars",
+      data: { gamemode: "turfwars" },
+    });
+  });
 });
 
 describe("mobile notification policy", () => {
