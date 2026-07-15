@@ -14,9 +14,9 @@ CREATE INDEX IF NOT EXISTS "player_changelog_state_cursor_idx"
 
 UPDATE "mobile_news_posts"
 SET
-  "title" = 'The server refresh',
-  "summary" = 'Cookie Build returns on a modern Java and Bedrock stack, with its classic games rebuilt around a smoother player experience.',
-  "body" = E'- Join the same network from modern Minecraft Java or Bedrock editions.\n- Quick Play sends you to the match closest to starting, while Parties keep friends together.\n- MicroBattles now has eight arenas, balanced tiered kits, a weekly free-kit rotation, map voting, assists, and clearer Bedrock menus.\n- Pitchout adds map voting, instant replay, a live scoreboard, personal match summaries, and progression rewards.\n- Weekly goals, achievements, coins, solo practice, feedback, mute, block, and report tools are now available.\n- NPC reconciliation and Bedrock interaction fixes make the lobby reliable again.',
+  "title" = 'The 2026 update',
+  "summary" = 'One year after the Java and Bedrock relaunch, Cookie Build receives new games, progression, social tools, and reliability improvements.',
+  "body" = E'- Java and Bedrock players continue to share the network introduced with the 2025 relaunch.\n- Quick Play sends you to the match closest to starting, while persistent Parties keep friends together.\n- MicroBattles has been expanded with eight arenas, balanced tiered kits, a weekly free-kit rotation, map voting, assists, and clearer Bedrock menus.\n- Pitchout has been upgraded with map voting, instant replay, a live scoreboard, personal match summaries, and progression rewards.\n- Weekly goals, achievements, coins, solo practice, feedback, mute, block, and report tools are now available.\n- NPC reconciliation and Bedrock interaction fixes make the lobby more reliable.',
   "published_at" = '2026-07-13T17:00:00Z',
   "expires_at" = NULL,
   "updated_at" = now()
@@ -29,9 +29,9 @@ INSERT INTO "mobile_news_posts" (
 ) VALUES
 (
   'cookie-build-returns-2026',
-  'The server refresh',
-  'Cookie Build returns on a modern Java and Bedrock stack, with its classic games rebuilt around a smoother player experience.',
-  E'- Join the same network from modern Minecraft Java or Bedrock editions.\n- Quick Play sends you to the match closest to starting, while Parties keep friends together.\n- MicroBattles now has eight arenas, balanced tiered kits, a weekly free-kit rotation, map voting, assists, and clearer Bedrock menus.\n- Pitchout adds map voting, instant replay, a live scoreboard, personal match summaries, and progression rewards.\n- Weekly goals, achievements, coins, solo practice, feedback, mute, block, and report tools are now available.\n- NPC reconciliation and Bedrock interaction fixes make the lobby reliable again.',
+  'The 2026 update',
+  'One year after the Java and Bedrock relaunch, Cookie Build receives new games, progression, social tools, and reliability improvements.',
+  E'- Java and Bedrock players continue to share the network introduced with the 2025 relaunch.\n- Quick Play sends you to the match closest to starting, while persistent Parties keep friends together.\n- MicroBattles has been expanded with eight arenas, balanced tiered kits, a weekly free-kit rotation, map voting, assists, and clearer Bedrock menus.\n- Pitchout has been upgraded with map voting, instant replay, a live scoreboard, personal match summaries, and progression rewards.\n- Weekly goals, achievements, coins, solo practice, feedback, mute, block, and report tools are now available.\n- NPC reconciliation and Bedrock interaction fixes make the lobby more reliable.',
   'published',
   '2026-07-13T17:00:00Z'
 ),

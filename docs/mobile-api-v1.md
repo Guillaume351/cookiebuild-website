@@ -55,7 +55,8 @@ through Dokploy; it must never be committed or sent to clients.
 ## Release order
 
 1. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`,
-   `drizzle/0003_player_rally.sql`, then `drizzle/0004_player_changelog.sql`, with
+   `drizzle/0003_player_rally.sql`, `drizzle/0004_player_changelog.sql`, then
+   `drizzle/0005_correct_2026_update_wording.sql`, with
    PostgreSQL `ON_ERROR_STOP`.
 2. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
    `MOBILE_LINK_PEPPER` for the website.

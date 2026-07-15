@@ -61,7 +61,7 @@ const posts = computed(() => data.value?.data ?? []);
 
 useSeoMeta({
   title: "What’s New | Cookie Build",
-  description: "Cookie Build release notes: returning minigames, Java and Bedrock improvements, mobile apps, Friends, Parties, stats, events, and reliability updates.",
+  description: "Cookie Build 2026 release notes: returning minigames, upgrades to existing games, mobile apps, Friends, Parties, stats, events, and reliability improvements.",
   ogTitle: "What’s New on Cookie Build",
   ogDescription: "See every player-facing Cookie Build update and everything added since your last visit.",
   ogImage: "https://www.cookie-build.com/lobby.webp",
