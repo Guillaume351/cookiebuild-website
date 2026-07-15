@@ -22,8 +22,8 @@ export default defineCachedEventHandler(
       gamemodes: [
         { id: "microbattles", name: "MicroBattles", icon: "/microbattles-icon.svg", available: true },
         { id: "pitchout", name: "Pitchout", icon: "/pitchout-icon.svg", available: true },
-        { id: "skywars", name: "SkyWars", icon: "/skywars-icon.svg", available: false },
-        { id: "buildbattles", name: "BuildBattles", icon: "/buildbattle-icon.svg", available: false },
+        { id: "skywars", name: "SkyWars", icon: "/skywars-icon.svg", available: true },
+        { id: "buildbattles", name: "BuildBattles", icon: "/buildbattle-icon.svg", available: true },
       ],
       accountDeletionUrl: "https://www.cookie-build.com/account/delete",
       privacyUrl: "https://www.cookie-build.com/privacy",

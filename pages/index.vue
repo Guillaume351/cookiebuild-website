@@ -350,13 +350,13 @@ const minigames = [
     name: "Build Battle",
     description:
       "Show off your creativity. Build amazing structures based on a theme in a limited time.",
-    available: false,
+    available: true,
     icon: "/buildbattle-icon.svg",
   },
   {
     name: "SkyWars",
     description: "Battle other players on floating islands. Loot chests, bridge to mid, and survive.",
-    available: false,
+    available: true,
     icon: "/skywars-icon.svg",
   },
   {

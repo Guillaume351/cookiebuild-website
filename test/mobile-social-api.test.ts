@@ -55,8 +55,8 @@ describe("mobile social API gates", () => {
     expect(response.data.gamemodes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "microbattles", available: true }),
       expect.objectContaining({ id: "pitchout", available: true }),
-      expect.objectContaining({ id: "skywars", available: false }),
-      expect.objectContaining({ id: "buildbattles", available: false }),
+      expect.objectContaining({ id: "skywars", available: true }),
+      expect.objectContaining({ id: "buildbattles", available: true }),
     ]));
   });
 });
