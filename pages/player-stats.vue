@@ -2,7 +2,7 @@
   <div class="space-y-12">
     <!-- Stats Hero -->
     <section class="relative overflow-hidden rounded-3xl bg-zinc-900 text-center text-white shadow-xl py-10">
-      <div class="absolute inset-0 z-0 bg-[url('/lobby.webp')] bg-cover bg-center opacity-20 blur-sm"></div>
+      <div class="absolute inset-0 z-0 bg-[url('/lobby-hero-960.webp')] bg-cover bg-center opacity-20 blur-sm"></div>
       <div class="relative z-10 px-6">
         <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2 text-white">
           Leaderboard

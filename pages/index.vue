@@ -4,9 +4,7 @@
     <section
       class="relative overflow-hidden rounded-3xl bg-gray-900 text-center text-white shadow-2xl"
     >
-      <div
-        class="absolute inset-0 z-0 bg-[url('/lobby.webp')] bg-cover bg-center opacity-50 transition-transform duration-1000 hover:scale-105"
-      ></div>
+      <div class="hero-lobby absolute inset-0 z-0 bg-cover bg-center opacity-50 transition-transform duration-1000 hover:scale-105"></div>
       <div
         class="absolute inset-0 z-10 bg-gradient-to-t from-gray-900 via-transparent to-black/30"
       ></div>
@@ -170,30 +168,30 @@
           </div>
         </div>
         <div class="rounded-2xl border border-zinc-800 bg-black/30 p-6">
-          <h3 class="text-xl font-bold text-white">Never miss an update</h3>
+          <h3 class="text-xl font-bold text-white">Stay close to the action</h3>
           <p class="mt-3 text-zinc-400">
-            The new changelog keeps the website, mobile apps, and in-game welcome summary aligned.
+            Updates, events and app alerts help you find the next active play session.
           </p>
           <Button as-child variant="outline" class="mt-6 border-orange-500/40 bg-orange-500/10 text-orange-100 hover:bg-orange-500/20">
-            <NuxtLink to="/changelog">See what’s new</NuxtLink>
+            <NuxtLink to="/updates">See all updates</NuxtLink>
           </Button>
         </div>
       </div>
     </section>
 
-    <section v-if="latestNews.length" aria-labelledby="latest-news-title">
+    <section v-if="latestUpdates.length" aria-labelledby="latest-updates-title">
       <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <Badge class="mb-3 bg-orange-600 hover:bg-orange-600">Live from the backoffice</Badge>
-          <h2 id="latest-news-title" class="text-3xl font-black tracking-tight text-white md:text-4xl">Network news</h2>
-          <p class="mt-3 max-w-2xl text-zinc-400">The latest announcements, shared with the Cookie Build mobile app.</p>
+          <Badge class="mb-3 bg-orange-600 hover:bg-orange-600">Fresh from the network</Badge>
+          <h2 id="latest-updates-title" class="text-3xl font-black tracking-tight text-white md:text-4xl">Latest updates</h2>
+          <p class="mt-3 max-w-2xl text-zinc-400">News and player-facing changes, shared with the Cookie Build app.</p>
         </div>
-        <NuxtLink to="/news" class="inline-flex min-h-11 items-center font-bold text-orange-300 hover:text-orange-200">
-          View all news
+        <NuxtLink to="/updates" class="inline-flex min-h-11 items-center font-bold text-orange-300 hover:text-orange-200">
+          View all updates
         </NuxtLink>
       </div>
       <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        <NewsPostCard v-for="post in latestNews" :key="post.id" :post="post" compact />
+        <UpdatePostCard v-for="post in latestUpdates" :key="post.id" :post="post" compact />
       </div>
     </section>
 
@@ -314,10 +312,10 @@
                 </p>
             </div>
             <div class="mt-8 flex gap-4">
-                <a href="https://twitter.com/CookieBuild" target="_blank" class="flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-600">
-                    Follow on Twitter
+                <a href="https://x.com/CookieBuild" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-600">
+                    Follow on X
                 </a>
-                <a href="https://github.com/Guillaume351" target="_blank" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700">
+                <a href="https://github.com/Guillaume351" target="_blank" rel="noopener noreferrer" class="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700">
                     View on GitHub
                 </a>
             </div>
@@ -334,7 +332,7 @@
 <script setup>
 import PlayerCounter from "@/components/PlayerCounter.vue";
 import JoinAddress from "@/components/JoinAddress.vue";
-import NewsPostCard from "@/components/NewsPostCard.vue";
+import UpdatePostCard from "@/components/UpdatePostCard.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -351,10 +349,10 @@ const editions = [
   { id: "console", label: "Console" },
 ];
 
-const { data: newsData } = await useFetch("/api/mobile/v1/news", {
-  query: { limit: 3, contentType: "news" },
+const { data: updatesData } = await useFetch("/api/mobile/v1/news", {
+  query: { limit: 3 },
 });
-const latestNews = computed(() => newsData.value?.data ?? []);
+const latestUpdates = computed(() => updatesData.value?.data ?? []);
 
 const features = [
   {
@@ -390,10 +388,9 @@ const minigames = [
       "A chaotic sumo-style game. Use snowballs, arrows, and clever movement to knock opponents into the void five times.",
     available: true,
     icon: "/pitchout-icon.svg",
-    new: true,
   },
   {
-    name: "Build Battle",
+    name: "Build Battles",
     description:
       "Show off your creativity. Build amazing structures based on a theme in a limited time.",
     available: true,
@@ -411,6 +408,7 @@ const minigames = [
       "Capture territory by shooting opponents. The team with the most turf wins.",
     available: true,
     icon: "/turfwars-icon.svg",
+    new: true,
   },
 ];
 
@@ -455,10 +453,11 @@ const openBedrockLink = () => {
 };
 
 const joinDiscord = () => {
-  window.open("https://discord.gg/ajmPnwh9g8", "_blank");
+  window.open("https://discord.gg/ajmPnwh9g8", "_blank", "noopener,noreferrer");
 };
 
 useHead({
+  link: [{ rel: "canonical", href: "https://www.cookie-build.com/" }],
   script: [
     {
       type: "application/ld+json",
@@ -474,7 +473,7 @@ useHead({
           applicationCategory: "Game",
           operatingSystem: "Windows, macOS, Linux, iOS, Android, Xbox, PlayStation, Switch",
           url: "https://www.cookie-build.com",
-          image: "https://www.cookie-build.com/lobby.webp",
+          image: "https://www.cookie-build.com/lobby-hero-1600.webp",
           author: {
             "@type": "Person",
             name: "Guillaume351",
@@ -504,3 +503,15 @@ useHead({
   ],
 });
 </script>
+
+<style scoped>
+.hero-lobby {
+  background-image: url("/lobby-hero-960.webp");
+}
+
+@media (min-width: 768px) {
+  .hero-lobby {
+    background-image: url("/lobby-hero-1600.webp");
+  }
+}
+</style>

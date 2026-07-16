@@ -25,6 +25,7 @@ export const playerdata = pgTable("playerdata", {
 	createdat: timestamp({ precision: 6, mode: 'string' }),
 	lastlogin: timestamp({ precision: 6, mode: 'string' }),
 	name: varchar({ length: 255 }),
+	onboardingCompletedAt: timestamp("onboarding_completed_at", { precision: 6, mode: 'string' }),
 	// You can use { mode: "bigint" } if numbers are exceeding js number limitations
 	playtime: bigint({ mode: "number" }),
 });

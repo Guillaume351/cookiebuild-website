@@ -23,13 +23,8 @@
               >
             </li>
             <li>
-              <NuxtLink to="/news" class="text-gray-400 hover:text-white transition-colors"
-                >News</NuxtLink
-              >
-            </li>
-            <li>
-              <NuxtLink to="/changelog" class="text-gray-400 hover:text-white transition-colors"
-                >Changelog</NuxtLink
+              <NuxtLink to="/updates" class="text-gray-400 hover:text-white transition-colors"
+                >Updates</NuxtLink
               >
             </li>
             <li>

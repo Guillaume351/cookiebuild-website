@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
     .select({
       id: mobileNewsPosts.id,
       slug: mobileNewsPosts.slug,
+      contentType: mobileNewsPosts.contentType,
       title: mobileNewsPosts.title,
       summary: mobileNewsPosts.summary,
       body: mobileNewsPosts.body,

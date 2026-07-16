@@ -18,10 +18,7 @@
         <NuxtLink to="/player-stats" class="text-white hover:text-gray-300 transition-colors"
           >Player Stats</NuxtLink
         >
-        <NuxtLink to="/news" class="text-white hover:text-gray-300 transition-colors">News</NuxtLink>
-        <NuxtLink to="/changelog" class="text-white hover:text-gray-300 transition-colors"
-          >Changelog</NuxtLink
-        >
+        <NuxtLink to="/updates" class="text-white hover:text-gray-300 transition-colors">Updates</NuxtLink>
       </div>
       <button
         type="button"
@@ -56,18 +53,11 @@
           Player Stats
         </NuxtLink>
         <NuxtLink
-          to="/news"
+          to="/updates"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
           @click="mobileMenuOpen = false"
         >
-          News
-        </NuxtLink>
-        <NuxtLink
-          to="/changelog"
-          class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
-          @click="mobileMenuOpen = false"
-        >
-          Changelog
+          Updates
         </NuxtLink>
       </div>
     </div>
