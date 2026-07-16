@@ -33,6 +33,10 @@ export async function pruneExpiredMobileData() {
        WHERE status = 'pending' AND created_at < now() - interval '30 days'
     `);
     await tx.execute(sql`
+      DELETE FROM player_friend_request_cooldowns
+       WHERE last_requested_at < now() - interval '90 days'
+    `);
+    await tx.execute(sql`
       DELETE FROM mobile_friend_online_alerts alert
        WHERE NOT EXISTS (
          SELECT 1 FROM player_friendships friendship

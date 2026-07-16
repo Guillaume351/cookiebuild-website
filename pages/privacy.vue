@@ -8,7 +8,7 @@
     <section id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Privacy Policy</h1>
-        <p>Effective and last updated: July 15, 2026</p>
+        <p>Effective and last updated: July 16, 2026</p>
       </header>
 
       <section>
@@ -29,6 +29,7 @@
           <li>Minecraft UUID, display name, Java or Bedrock edition, link status, and gameplay statistics.</li>
           <li>Personal seasonal rank, aggregate minigame XP, achievements, and daily and weekly goal progress. Goal resets use UTC.</li>
           <li>Structured friend requests, accepted friendships, blocks, report reason, parties, members, invitations, and fixed-format player calls. The app has no free-form chat.</li>
+          <li>Friend suggestions calculated on demand from completed matches shared in the last 30 days. Suggestions do not expose the match, time, score, online state, or last-seen time, and exclude existing relationships, blocks, and reports.</li>
           <li>Presence derived from active game sessions. It is available only to accepted friends and current party members, subject to the player’s friends-and-party, friends-only, or hidden setting and all blocks.</li>
           <li>For opted-in notifications: installation ID, FCM token, platform, app version, locale, authorization state, quiet hours, daily/weekly reminder choices, and an optional online alert selected for an accepted friend. Cookie Build does not support silently following arbitrary players.</li>
           <li>A limited in-game app-reminder counter and last-display date, used to avoid repeatedly promoting the app to an unlinked player.</li>
@@ -47,7 +48,7 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Purposes and legal bases</h2>
         <ul class="list-disc space-y-2 pl-6">
-          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, rank, goal progression, privacy-scoped presence, friends, parties, events, and requested account controls.</li>
+          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, rank, goal progression, privacy-scoped presence, friends and recent-player suggestions, parties, events, and requested account controls.</li>
           <li><strong>Consent:</strong> send push notifications, including separately configurable player calls, goal reminders, and selected accepted-friend online alerts, only after the corresponding in-app opt-in. Consent can be withdrawn in Settings. Quiet hours suppress these notifications.</li>
           <li><strong>Legitimate interests:</strong> secure accounts, prevent abuse, moderate reports, keep games fair, diagnose incidents, and protect service availability.</li>
           <li><strong>Legal obligations:</strong> respond to lawful requests and preserve evidence when required.</li>
@@ -75,6 +76,7 @@
           <li>One-time link codes expire after 10 minutes; challenge audit rows are removed after 7 days.</li>
           <li>Active mobile profile, player links, and notification data are kept while needed to provide the app or until mobile-account deletion.</li>
           <li>Friendships, blocks, and active parties are server records keyed to the Minecraft UUID. They remain until removed in the app or game, the party ends, or the published cleanup period applies.</li>
+          <li>A friend-request timestamp prevents repeat contact for 30 days after a request is cancelled or declined; the timestamp is removed after 90 days.</li>
           <li>Revoked devices are removed after 30 days; revoked player links after 12 months.</li>
           <li>Declined/expired requests, invitations, and ended-party records are removed after 90 days.</li>
           <li>Reports are kept for up to 24 months, or longer while a safety case or legal obligation remains open.</li>
@@ -120,7 +122,7 @@
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
-        <p>Applicable et mise à jour le 15 juillet 2026</p>
+        <p>Applicable et mise à jour le 16 juillet 2026</p>
       </header>
 
       <section>
@@ -140,6 +142,7 @@
           <li>UUID, pseudo, édition Java ou Bedrock, association et statistiques Minecraft.</li>
           <li>Rang saisonnier personnel, XP agrégée des mini-jeux, succès et progression des objectifs quotidiens et hebdomadaires. Les remises à zéro utilisent UTC.</li>
           <li>Demandes et listes d’amis, blocages, motif de signalement, groupes, membres, invitations et appels de joueurs structurés. L’app ne contient aucun chat libre.</li>
+          <li>Suggestions d’amis calculées à la demande depuis les parties terminées jouées ensemble pendant les 30 derniers jours. Ni partie, heure, score, présence ou dernière connexion n’est affiché, et les relations, blocages et signalements sont exclus.</li>
           <li>Présence déduite des sessions actives, visible uniquement par les amis acceptés et membres du groupe actuel, selon le réglage amis et groupe, amis uniquement ou masqué, et dans le respect des blocages.</li>
           <li>Après accord pour les notifications : identifiant d’installation, jeton FCM, plateforme, version, langue, autorisation, heures calmes, rappels quotidiens/hebdomadaires et alerte activée pour un ami accepté. Il n’existe aucun suivi silencieux d’un joueur arbitraire.</li>
           <li>Compteur limité et date du dernier rappel de l’app en jeu, afin de ne pas répéter sa promotion auprès d’un joueur non associé.</li>
@@ -158,7 +161,7 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Finalités et bases légales</h2>
         <p>
           Le contrat permet de fournir le compte, l’association, les statistiques, le rang, les
-          objectifs, la présence restreinte, les amis, groupes et événements. Le consentement couvre
+          objectifs, la présence restreinte, les amis et suggestions de joueurs récents, groupes et événements. Le consentement couvre
           uniquement les notifications facultatives, dont les appels de joueurs, rappels d’objectifs
           et alertes d’amis acceptés configurables séparément. Les heures calmes les suppriment. L’intérêt
           légitime couvre la sécurité, l’anti-abus, la modération, l’équité et les incidents. Les
@@ -185,6 +188,7 @@
           <li>Code d’association : 10 minutes ; trace du défi : 7 jours.</li>
           <li>Profil mobile, associations et notifications : pendant l’utilisation ou jusqu’à suppression du compte mobile.</li>
           <li>Amis, blocages et groupes actifs sont liés à l’UUID Minecraft : jusqu’à leur retrait, la fin du groupe ou la durée publiée.</li>
+          <li>La date d’une demande d’ami empêche de recontacter la même personne pendant 30 jours après une annulation ou un refus ; elle est supprimée après 90 jours.</li>
           <li>Appareils révoqués : 30 jours ; associations révoquées : 12 mois.</li>
           <li>Demandes, invitations refusées/expirées et groupes terminés : 90 jours.</li>
           <li>Signalements : 24 mois, davantage uniquement pour un dossier encore ouvert ou une obligation légale.</li>

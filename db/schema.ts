@@ -131,6 +131,7 @@ export const matchPlayers = pgTable(
       columns: [table.matchId, table.playerId],
       name: "match_players_pkey",
     }),
+    index("idx_match_players_player_match").on(table.playerId, table.matchId),
   ]
 );
 
@@ -682,6 +683,9 @@ export const playerFriendships = pgTable(
     primaryKey({ columns: [table.playerLowId, table.playerHighId] }),
     index("player_friendships_low_status_idx").on(table.playerLowId, table.status),
     index("player_friendships_high_status_idx").on(table.playerHighId, table.status),
+    index("player_friendships_requester_pending_idx")
+      .on(table.requestedByPlayerId)
+      .where(sql`${table.status} = 'pending'`),
     check("player_friendships_order_ck", sql`${table.playerLowId} < ${table.playerHighId}`),
     check(
       "player_friendships_requester_ck",
@@ -692,6 +696,30 @@ export const playerFriendships = pgTable(
       "player_friendships_accepted_at_ck",
       sql`(${table.status} = 'pending' AND ${table.acceptedAt} IS NULL)
         OR (${table.status} = 'accepted' AND ${table.acceptedAt} IS NOT NULL)`,
+    ),
+  ],
+);
+
+export const playerFriendRequestCooldowns = pgTable(
+  "player_friend_request_cooldowns",
+  {
+    requesterPlayerId: uuid("requester_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    targetPlayerId: uuid("target_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    lastRequestedAt: timestamp("last_requested_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.requesterPlayerId, table.targetPlayerId] }),
+    index("player_friend_request_cooldowns_target_idx")
+      .on(table.targetPlayerId, table.lastRequestedAt),
+    check(
+      "player_friend_request_cooldowns_self_ck",
+      sql`${table.requesterPlayerId} <> ${table.targetPlayerId}`,
     ),
   ],
 );

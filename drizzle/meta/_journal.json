@@ -71,6 +71,13 @@
       "when": 1784222536000,
       "tag": "0009_player_rally_responses",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1784227002000,
+      "tag": "0010_friend_suggestions",
+      "breakpoints": true
     }
   ]
 }

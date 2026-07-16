@@ -7,6 +7,7 @@ import {
 import { mobileMe, requireMobileUser } from "../../../../services/mobile-user";
 import {
   blocksSnapshot,
+  friendRequestCooldownsSnapshot,
   friendsSnapshot,
   partySnapshot,
 } from "../../../../services/mobile-social";
@@ -37,12 +38,13 @@ export default defineEventHandler(async (event) => {
 
   let social: Record<string, unknown> = {};
   if (account?.playerLinks.some((link) => link.isPrimary)) {
-    const [friends, blocks, party] = await Promise.all([
+    const [friends, blocks, party, friendRequestCooldowns] = await Promise.all([
       friendsSnapshot(auth.uid),
       blocksSnapshot(auth.uid),
       partySnapshot(auth.uid),
+      friendRequestCooldownsSnapshot(auth.uid),
     ]);
-    social = { friends, blocks, party };
+    social = { friends, blocks, party, friendRequestCooldowns };
   }
 
   setHeader(event, "Cache-Control", "no-store");

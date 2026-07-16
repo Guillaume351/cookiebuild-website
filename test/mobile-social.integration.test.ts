@@ -33,6 +33,13 @@ const PLAYERS = {
   rallyTarget: { id: "10000000-0000-4000-8000-000000000007", name: "RallyTarget" },
   rallyResponder: { id: "10000000-0000-4000-8000-000000000008", name: "RallyResponder" },
   rallyBlocked: { id: "10000000-0000-4000-8000-000000000009", name: "RallyBlocked" },
+  suggestionActor: { id: "10000000-0000-4000-8000-000000000010", name: "SuggestionActor" },
+  suggestionBest: { id: "10000000-0000-4000-8000-000000000011", name: "SuggestionBest" },
+  suggestionOther: { id: "10000000-0000-4000-8000-000000000012", name: "SuggestionOther" },
+  suggestionBlocked: { id: "10000000-0000-4000-8000-000000000013", name: "SuggestionBlocked" },
+  suggestionReported: { id: "10000000-0000-4000-8000-000000000014", name: "SuggestionReported" },
+  suggestionPending: { id: "10000000-0000-4000-8000-000000000015", name: "SuggestionPending" },
+  suggestionOld: { id: "10000000-0000-4000-8000-000000000016", name: "SuggestionOld" },
 } as const;
 
 type SocialModule = typeof import("../server/services/mobile-social");
@@ -89,6 +96,17 @@ integration("mobile social service", () => {
         duration bigint,
         server_crash boolean DEFAULT false
       );
+      CREATE TABLE matches (
+        id uuid PRIMARY KEY,
+        endtime timestamp,
+        gametype varchar(255) NOT NULL,
+        starttime timestamp NOT NULL
+      );
+      CREATE TABLE match_players (
+        match_id uuid NOT NULL REFERENCES matches(id),
+        player_id uuid NOT NULL REFERENCES playerdata(id),
+        PRIMARY KEY (match_id, player_id)
+      );
     `);
     for (const player of Object.values(PLAYERS)) {
       await setupSql`INSERT INTO playerdata (id, name) VALUES (${player.id}, ${player.name})`;
@@ -99,6 +117,7 @@ integration("mobile social service", () => {
       "0003_player_rally.sql",
       "0006_mobile_engagement.sql",
       "0009_player_rally_responses.sql",
+      "0010_friend_suggestions.sql",
     ]) {
       const migration = await readFile(new URL(`../drizzle/${migrationName}`, import.meta.url), "utf8");
       await setupSql.unsafe(migration);
@@ -158,6 +177,119 @@ integration("mobile social service", () => {
       online: true,
     })]);
     expect(snapshot.friends.some((friend) => friend.playerId === PLAYERS.third.id)).toBe(false);
+  });
+
+  it("suggests only safe players from completed recent shared matches", async () => {
+    await provision("suggestion-actor-user", PLAYERS.suggestionActor.id);
+    await provision("suggestion-other-user", PLAYERS.suggestionOther.id);
+    const matches = {
+      first: "20000000-0000-4000-8000-000000000001",
+      second: "20000000-0000-4000-8000-000000000002",
+      old: "20000000-0000-4000-8000-000000000003",
+      unfinished: "20000000-0000-4000-8000-000000000004",
+    };
+    await setupSql`
+      INSERT INTO matches (id, starttime, endtime, gametype) VALUES
+        (${matches.first}, now() - interval '2 days', now() - interval '2 days' + interval '5 minutes', 'MicroBattles'),
+        (${matches.second}, now() - interval '5 days', now() - interval '5 days' + interval '5 minutes', 'BuildBattles'),
+        (${matches.old}, now() - interval '31 days', now() - interval '31 days' + interval '5 minutes', 'SkyWars'),
+        (${matches.unfinished}, now() - interval '1 day', NULL, 'TurfWars')
+    `;
+    await setupSql`
+      INSERT INTO match_players (match_id, player_id) VALUES
+        (${matches.first}, ${PLAYERS.suggestionActor.id}),
+        (${matches.first}, ${PLAYERS.suggestionBest.id}),
+        (${matches.first}, ${PLAYERS.suggestionOther.id}),
+        (${matches.first}, ${PLAYERS.suggestionBlocked.id}),
+        (${matches.first}, ${PLAYERS.suggestionReported.id}),
+        (${matches.first}, ${PLAYERS.suggestionPending.id}),
+        (${matches.second}, ${PLAYERS.suggestionActor.id}),
+        (${matches.second}, ${PLAYERS.suggestionBest.id}),
+        (${matches.old}, ${PLAYERS.suggestionActor.id}),
+        (${matches.old}, ${PLAYERS.suggestionOld.id}),
+        (${matches.unfinished}, ${PLAYERS.suggestionActor.id}),
+        (${matches.unfinished}, ${PLAYERS.suggestionOld.id})
+    `;
+    await setupSql`
+      INSERT INTO player_blocks (blocker_player_id, blocked_player_id)
+      VALUES (${PLAYERS.suggestionBlocked.id}, ${PLAYERS.suggestionActor.id})
+    `;
+    await setupSql`
+      INSERT INTO player_reports (reporter_player_id, reported_player_id, reason)
+      VALUES (${PLAYERS.suggestionActor.id}, ${PLAYERS.suggestionReported.id}, 'harassment')
+    `;
+    await setupSql`
+      INSERT INTO player_friendships
+        (player_low_id, player_high_id, requested_by_player_id, status)
+      VALUES (
+        ${PLAYERS.suggestionActor.id},
+        ${PLAYERS.suggestionPending.id},
+        ${PLAYERS.suggestionActor.id},
+        'pending'
+      )
+    `;
+
+    const snapshot = await social.friendsSnapshot("suggestion-actor-user");
+    expect(snapshot.suggestions).toEqual([
+      {
+        playerId: PLAYERS.suggestionBest.id,
+        playerName: PLAYERS.suggestionBest.name,
+        reason: "played_together",
+      },
+      {
+        playerId: PLAYERS.suggestionOther.id,
+        playerName: PLAYERS.suggestionOther.name,
+        reason: "played_together",
+      },
+    ]);
+    expect(Object.keys(snapshot.suggestions[0]!).sort()).toEqual([
+      "playerId",
+      "playerName",
+      "reason",
+    ]);
+
+    await expect(social.sendFriendRequest("suggestion-actor-user", {
+      playerId: PLAYERS.suggestionOld.id,
+    })).rejects.toMatchObject({ statusCode: 404, statusMessage: "Friend suggestion unavailable" });
+    await expect(social.sendFriendRequest("suggestion-actor-user", {
+      playerId: PLAYERS.suggestionReported.id,
+    })).rejects.toMatchObject({ statusCode: 404, statusMessage: "Friend suggestion unavailable" });
+
+    await expect(social.sendFriendRequest("suggestion-actor-user", {
+      playerId: PLAYERS.suggestionOther.id,
+    })).resolves.toMatchObject({ status: "pending" });
+    await expect(social.deleteFriendRequest(
+      "suggestion-other-user",
+      PLAYERS.suggestionActor.id,
+    )).resolves.toEqual({ deleted: true });
+    const afterDecline = await social.friendsSnapshot("suggestion-actor-user");
+    expect(afterDecline.suggestions.some(
+      (suggestion) => suggestion.playerId === PLAYERS.suggestionOther.id,
+    )).toBe(false);
+    await expect(social.sendFriendRequest("suggestion-actor-user", {
+      playerId: PLAYERS.suggestionOther.id,
+    })).rejects.toMatchObject({
+      statusCode: 409,
+      statusMessage: "Please wait before sending this player another friend request",
+    });
+  });
+
+  it("caps simultaneous outgoing friend requests", async () => {
+    const actorId = "10000000-0000-4000-8000-000000000020";
+    await setupSql`INSERT INTO playerdata (id, name) VALUES (${actorId}, 'RequestLimiter')`;
+    await provision("request-limiter-user", actorId);
+    for (let index = 0; index < 11; index += 1) {
+      const id = `10000000-0000-4000-8000-${String(30 + index).padStart(12, "0")}`;
+      const name = `RequestTarget${index}`;
+      await setupSql`INSERT INTO playerdata (id, name) VALUES (${id}, ${name})`;
+      if (index < 10) {
+        await expect(social.sendFriendRequest("request-limiter-user", name))
+          .resolves.toMatchObject({ playerId: id, status: "pending" });
+      } else {
+        await expect(social.sendFriendRequest("request-limiter-user", name))
+          .rejects.toMatchObject({ statusCode: 409, statusMessage: "Too many pending friend requests" });
+      }
+    }
   });
 
   it("makes block and enum-only report operations race-safe and abuse-limited", async () => {
@@ -259,6 +391,13 @@ integration("mobile social service", () => {
         (${userId}, ${uid}, now() - interval '31 days', now() - interval '100 days', now())
     `;
     await setupSql`
+      INSERT INTO player_friend_request_cooldowns
+        (requester_player_id, target_player_id, last_requested_at)
+      VALUES (${PLAYERS.leader.id}, ${PLAYERS.third.id}, now() - interval '100 days')
+      ON CONFLICT (requester_player_id, target_player_id)
+      DO UPDATE SET last_requested_at = excluded.last_requested_at
+    `;
+    await setupSql`
       INSERT INTO mobile_notification_outbox
         (id, kind, audience, payload, status, attempts, created_at)
       VALUES
@@ -287,13 +426,17 @@ integration("mobile social service", () => {
       users: number;
       authRows: number;
       ordinaryRows: number;
+      cooldowns: number;
     }[]>`
       SELECT
         (SELECT count(*)::int FROM mobile_users WHERE id = ${userId}) AS users,
         (SELECT count(*)::int FROM mobile_notification_outbox WHERE id = ${authOutboxId}) AS "authRows",
-        (SELECT count(*)::int FROM mobile_notification_outbox WHERE id = ${ordinaryOutboxId}) AS "ordinaryRows"
+        (SELECT count(*)::int FROM mobile_notification_outbox WHERE id = ${ordinaryOutboxId}) AS "ordinaryRows",
+        (SELECT count(*)::int FROM player_friend_request_cooldowns
+          WHERE requester_player_id = ${PLAYERS.leader.id}
+            AND target_player_id = ${PLAYERS.third.id}) AS cooldowns
     `;
-    expect(preserved[0]).toEqual({ users: 1, authRows: 1, ordinaryRows: 0 });
+    expect(preserved[0]).toEqual({ users: 1, authRows: 1, ordinaryRows: 0, cooldowns: 0 });
 
     await setupSql`
       UPDATE mobile_notification_outbox

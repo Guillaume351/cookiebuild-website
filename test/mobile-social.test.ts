@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   canonicalPlayerPair,
   exactPlayerName,
+  friendRequestTarget,
   mobileFeatureEnabled,
   playerId,
   reportReason,
@@ -48,5 +49,15 @@ describe("mobile social validation", () => {
     expect(() => playerId("not-a-uuid")).toThrowError();
     expect(reportReason("harassment")).toBe("harassment");
     expect(() => reportReason("custom free text")).toThrowError();
+  });
+
+  it("accepts exactly one stable friend-request target", () => {
+    expect(friendRequestTarget({ playerName: "  CookiePlayer  " })).toEqual({
+      playerName: "CookiePlayer",
+    });
+    expect(friendRequestTarget({ playerId: FIRST.toUpperCase() })).toEqual({ playerId: FIRST });
+    expect(() => friendRequestTarget({})).toThrowError();
+    expect(() => friendRequestTarget({ playerId: FIRST, playerName: "CookiePlayer" }))
+      .toThrowError();
   });
 });

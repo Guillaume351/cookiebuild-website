@@ -45,6 +45,23 @@ export function playerId(value: unknown, field = "playerId") {
   return id;
 }
 
+export function friendRequestTarget(body: unknown) {
+  const candidate = body && typeof body === "object"
+    ? body as { playerId?: unknown; playerName?: unknown }
+    : {};
+  const hasPlayerId = candidate.playerId !== undefined && candidate.playerId !== null;
+  const hasPlayerName = candidate.playerName !== undefined && candidate.playerName !== null;
+  if (hasPlayerId === hasPlayerName) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Exactly one of playerId or playerName is required",
+    });
+  }
+  return hasPlayerId
+    ? { playerId: playerId(candidate.playerId) }
+    : { playerName: exactPlayerName(candidate.playerName) };
+}
+
 export function reportReason(value: unknown): PlayerReportReason {
   const reason = String(value ?? "").trim();
   if (!PLAYER_REPORT_REASONS.includes(reason as PlayerReportReason)) {

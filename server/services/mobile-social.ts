@@ -11,6 +11,8 @@ import {
 
 const PARTY_SIZE_LIMIT = 4;
 const PARTY_INVITE_MINUTES = 15;
+const OUTGOING_FRIEND_REQUEST_LIMIT = 10;
+const FRIEND_REQUEST_COOLDOWN_DAYS = 30;
 
 interface PrimaryPlayer {
   playerId: string;
@@ -160,10 +162,61 @@ interface FriendshipRow extends Record<string, unknown> {
   acceptedAt: Date | string | null;
 }
 
-export async function sendFriendRequest(firebaseUid: string, targetPlayerName: string) {
+type FriendRequestTarget = { playerId: string } | { playerName: string } | string;
+
+async function friendRequestOnCooldown(
+  tx: MobileDbTransaction,
+  requesterPlayerId: string,
+  targetPlayerId: string,
+) {
+  const rows = await tx.execute(sql`
+    SELECT 1
+      FROM player_friend_request_cooldowns
+     WHERE requester_player_id = ${requesterPlayerId}
+       AND target_player_id = ${targetPlayerId}
+       AND last_requested_at >= now() - (${FRIEND_REQUEST_COOLDOWN_DAYS} * interval '1 day')
+     LIMIT 1
+  `);
+  return rows.length > 0;
+}
+
+async function isCurrentFriendSuggestion(
+  tx: MobileDbTransaction,
+  actorPlayerId: string,
+  targetPlayerId: string,
+) {
+  const rows = await tx.execute(sql`
+    SELECT 1
+      FROM friend_suggestions_for(${actorPlayerId}, 12)
+     WHERE player_id = ${targetPlayerId}
+     LIMIT 1
+  `);
+  return rows.length > 0;
+}
+
+async function recordFriendRequestCooldown(
+  tx: MobileDbTransaction,
+  requesterPlayerId: string,
+  targetPlayerId: string,
+) {
+  await tx.execute(sql`
+    INSERT INTO player_friend_request_cooldowns
+      (requester_player_id, target_player_id, last_requested_at)
+    VALUES (${requesterPlayerId}, ${targetPlayerId}, now())
+    ON CONFLICT (requester_player_id, target_player_id)
+    DO UPDATE SET last_requested_at = excluded.last_requested_at
+  `);
+}
+
+export async function sendFriendRequest(firebaseUid: string, requestedTarget: FriendRequestTarget) {
   return db.transaction(async (tx) => {
     const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
-    const target = await exactPlayer(tx, targetPlayerName);
+    const suggestionTarget = typeof requestedTarget !== "string" && "playerId" in requestedTarget;
+    const target = typeof requestedTarget === "string"
+      ? await exactPlayer(tx, requestedTarget)
+      : "playerId" in requestedTarget
+        ? await playerById(tx, requestedTarget.playerId)
+        : await exactPlayer(tx, requestedTarget.playerName);
     const pair = await lockPlayerPair(tx, actor.playerId, target.playerId);
     await assertUnblocked(tx, actor.playerId, target.playerId);
 
@@ -203,6 +256,22 @@ export async function sendFriendRequest(firebaseUid: string, targetPlayerName: s
         acceptedAt: iso(accepted[0]!.acceptedAt),
       };
     }
+    if (await friendRequestOnCooldown(tx, actor.playerId, target.playerId)) {
+      throw conflict("Please wait before sending this player another friend request");
+    }
+    if (suggestionTarget && !await isCurrentFriendSuggestion(tx, actor.playerId, target.playerId)) {
+      throw notFound("Friend suggestion unavailable");
+    }
+
+    const pendingCount = await tx.execute<{ count: number }>(sql`
+      SELECT count(*)::integer AS count
+        FROM player_friendships
+       WHERE status = 'pending'
+         AND requested_by_player_id = ${actor.playerId}
+    `);
+    if (Number(pendingCount[0]?.count ?? 0) >= OUTGOING_FRIEND_REQUEST_LIMIT) {
+      throw conflict("Too many pending friend requests");
+    }
 
     const inserted = await tx.execute<{ createdAt: Date | string }>(sql`
       INSERT INTO player_friendships
@@ -210,6 +279,7 @@ export async function sendFriendRequest(firebaseUid: string, targetPlayerName: s
       VALUES (${pair.playerLowId}, ${pair.playerHighId}, ${actor.playerId}, 'pending')
       RETURNING created_at AS "createdAt"
     `);
+    await recordFriendRequestCooldown(tx, actor.playerId, target.playerId);
     await queueSocialNotification(
       tx,
       "friend_request",
@@ -365,6 +435,16 @@ export async function friendsSnapshot(firebaseUid: string) {
       playerName: row.playerName ?? "Unknown player",
       createdAt: iso(row.createdAt),
     });
+    const suggestions = await tx.execute<{
+      playerId: string;
+      playerName: string;
+      reason: "played_together";
+    }>(sql`
+      SELECT player_id AS "playerId",
+             player_name AS "playerName",
+             reason
+        FROM friend_suggestions_for(${actor.playerId}, 6)
+    `);
     return {
       player: actor,
       friends: friends.map((row) => ({
@@ -376,6 +456,11 @@ export async function friendsSnapshot(firebaseUid: string) {
       })),
       incoming: pending.filter((row) => row.requestedByPlayerId !== actor.playerId).map(request),
       outgoing: pending.filter((row) => row.requestedByPlayerId === actor.playerId).map(request),
+      suggestions: suggestions.map((row) => ({
+        playerId: row.playerId,
+        playerName: row.playerName,
+        reason: row.reason,
+      })),
     };
   });
 }
@@ -400,6 +485,38 @@ export async function blocksSnapshot(firebaseUid: string) {
       playerId: row.playerId,
       playerName: row.playerName ?? "Unknown player",
       createdAt: iso(row.createdAt),
+    }));
+  });
+}
+
+export async function friendRequestCooldownsSnapshot(firebaseUid: string) {
+  return db.transaction(async (tx) => {
+    const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    const rows = await tx.execute<{
+      playerId: string;
+      playerName: string | null;
+      direction: "sent" | "received";
+      lastRequestedAt: Date | string;
+    }>(sql`
+      SELECT other.id AS "playerId",
+             other.name AS "playerName",
+             CASE WHEN cooldown.requester_player_id = ${actor.playerId}
+               THEN 'sent' ELSE 'received' END AS direction,
+             cooldown.last_requested_at AS "lastRequestedAt"
+        FROM player_friend_request_cooldowns cooldown
+        JOIN playerdata other ON other.id = CASE
+          WHEN cooldown.requester_player_id = ${actor.playerId}
+            THEN cooldown.target_player_id
+          ELSE cooldown.requester_player_id
+        END
+       WHERE ${actor.playerId} IN (cooldown.requester_player_id, cooldown.target_player_id)
+       ORDER BY cooldown.last_requested_at DESC, other.id
+    `);
+    return rows.map((row) => ({
+      playerId: row.playerId,
+      playerName: row.playerName ?? "Unknown player",
+      direction: row.direction,
+      lastRequestedAt: iso(row.lastRequestedAt),
     }));
   });
 }
