@@ -181,6 +181,22 @@
       </div>
     </section>
 
+    <section v-if="latestNews.length" aria-labelledby="latest-news-title">
+      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <Badge class="mb-3 bg-orange-600 hover:bg-orange-600">Live from the backoffice</Badge>
+          <h2 id="latest-news-title" class="text-3xl font-black tracking-tight text-white md:text-4xl">Network news</h2>
+          <p class="mt-3 max-w-2xl text-zinc-400">The latest announcements, shared with the Cookie Build mobile app.</p>
+        </div>
+        <NuxtLink to="/news" class="inline-flex min-h-11 items-center font-bold text-orange-300 hover:text-orange-200">
+          View all news
+        </NuxtLink>
+      </div>
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        <NewsPostCard v-for="post in latestNews" :key="post.id" :post="post" compact />
+      </div>
+    </section>
+
     <!-- Legacy / History Section -->
     <section class="text-center">
       <div class="mx-auto max-w-4xl border-t border-zinc-800 pt-16 mt-10">
@@ -318,6 +334,7 @@
 <script setup>
 import PlayerCounter from "@/components/PlayerCounter.vue";
 import JoinAddress from "@/components/JoinAddress.vue";
+import NewsPostCard from "@/components/NewsPostCard.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -333,6 +350,11 @@ const editions = [
   { id: "bedrock", label: "Bedrock" },
   { id: "console", label: "Console" },
 ];
+
+const { data: newsData } = await useFetch("/api/mobile/v1/news", {
+  query: { limit: 3, contentType: "news" },
+});
+const latestNews = computed(() => newsData.value?.data ?? []);
 
 const features = [
   {
