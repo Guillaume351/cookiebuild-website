@@ -40,6 +40,7 @@ const PLAYER_RALLY_FIELDS = new Set([
   "actorDisplayName",
 ]);
 const PLAYER_RALLY_GAMEMODES = {
+  network: "Cookie Build",
   microbattles: "MicroBattles",
   pitchout: "Pitchout",
   skywars: "SkyWars",
@@ -192,8 +193,8 @@ export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
   if (typeof input.rallyId !== "string" || !UUID_PATTERN.test(input.rallyId)) {
     throw new PermanentOutboxError("payload.rallyId must be a UUID");
   }
-  if (input.source !== "player" && input.source !== "automatic") {
-    throw new PermanentOutboxError("payload.source must be player or automatic");
+  if (input.source !== "login" && input.source !== "player" && input.source !== "automatic") {
+    throw new PermanentOutboxError("payload.source must be login, player, or automatic");
   }
   if (
     typeof input.gamemode !== "string"
@@ -207,7 +208,23 @@ export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
   const queuedCount = rallyInteger(input.queuedCount, "queuedCount", 0);
   const neededCount = rallyInteger(input.neededCount, "neededCount", 0);
   let actorDisplayName: string | null = null;
-  if (input.source === "player") {
+  if (input.source === "login") {
+    if (input.gamemode !== "network") {
+      throw new PermanentOutboxError("payload.gamemode must be network for login rallies");
+    }
+    if (queuedCount !== 0 || neededCount !== 0) {
+      throw new PermanentOutboxError("login rally queue counts must be zero");
+    }
+    if (typeof input.actorDisplayName !== "string") {
+      throw new PermanentOutboxError("payload.actorDisplayName is required for login rallies");
+    }
+    actorDisplayName = input.actorDisplayName.trim().normalize("NFKC");
+    if (!PLAYER_RALLY_ACTOR_PATTERN.test(actorDisplayName)) {
+      throw new PermanentOutboxError("payload.actorDisplayName is not a public player name");
+    }
+  } else if (input.gamemode === "network") {
+    throw new PermanentOutboxError("payload.gamemode network is reserved for login rallies");
+  } else if (input.source === "player") {
     if (neededCount < 1) {
       throw new PermanentOutboxError("payload.neededCount must be positive for player rallies");
     }
@@ -221,17 +238,22 @@ export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
   } else if (input.actorDisplayName !== null) {
     throw new PermanentOutboxError("payload.actorDisplayName must be null for automatic rallies");
   }
-  if (neededCount === 0 && queuedCount === 0) {
+  if (input.source !== "login" && neededCount === 0 && queuedCount === 0) {
     throw new PermanentOutboxError("payload.queuedCount must be positive for a starting game");
   }
 
   const gamemode = input.gamemode as keyof typeof PLAYER_RALLY_GAMEMODES;
+  const login = input.source === "login";
   const starting = neededCount === 0;
-  const title = starting
+  const title = login
+    ? `${actorDisplayName} is online`
+    : starting
     ? `${PLAYER_RALLY_GAMEMODES[gamemode]} is starting soon`
     : `Players needed for ${PLAYER_RALLY_GAMEMODES[gamemode]}`;
   const countSummary = `${queuedCount} queued, ${neededCount} more needed`;
-  const body = starting
+  const body = login
+    ? `${actorDisplayName} is online and looking for players`
+    : starting
     ? `${queuedCount} ${queuedCount === 1 ? "player is" : "players are"} ready. Join now before the match starts.`
     : actorDisplayName
     ? `${actorDisplayName} is rallying players: ${countSummary}.`
@@ -239,7 +261,7 @@ export function parsePlayerRallyPayload(value: unknown): NotificationPayload {
   return {
     title,
     body,
-    deepLink: `cookiebuild://play?gamemode=${gamemode}`,
+    deepLink: `cookiebuild://rallies/${input.rallyId}`,
     data: {
       type: "player_rally",
       schemaVersion: "1",

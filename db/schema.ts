@@ -303,6 +303,68 @@ export const mobileNotificationOutbox = pgTable(
   ],
 );
 
+export const playerRallies = pgTable(
+  "player_rallies",
+  {
+    id: uuid().primaryKey().notNull(),
+    outboxId: uuid("outbox_id")
+      .notNull()
+      .references(() => mobileNotificationOutbox.id, { onDelete: "cascade" }),
+    serverId: varchar("server_id", { length: 64 }).notNull(),
+    targetPlayerId: uuid("target_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    gameId: uuid("game_id"),
+    source: varchar({ length: 16 }).notNull(),
+    gamemode: varchar({ length: 32 }).notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("player_rallies_outbox_id_uq").on(table.outboxId),
+    index("player_rallies_target_expiry_idx").on(table.targetPlayerId, table.expiresAt),
+    check(
+      "player_rallies_server_id_ck",
+      sql`${table.serverId} ~ '^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$'`,
+    ),
+    check("player_rallies_source_ck", sql`${table.source} IN ('login', 'player', 'automatic')`),
+    check(
+      "player_rallies_context_ck",
+      sql`(${table.source} = 'login' AND ${table.gamemode} = 'network' AND ${table.gameId} IS NULL)
+        OR (${table.source} IN ('player', 'automatic') AND ${table.gamemode} <> 'network' AND ${table.gameId} IS NOT NULL)`,
+    ),
+    check("player_rallies_expiry_ck", sql`${table.expiresAt} > ${table.availableAt}`),
+  ],
+);
+
+export const playerRallyResponses = pgTable(
+  "player_rally_responses",
+  {
+    id: uuid().primaryKey().defaultRandom().notNull(),
+    rallyId: uuid("rally_id")
+      .notNull()
+      .references(() => playerRallies.id, { onDelete: "cascade" }),
+    responderPlayerId: uuid("responder_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    response: varchar({ length: 16 }).notNull(),
+    respondedAt: timestamp("responded_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    unique("player_rally_responses_rally_responder_uq")
+      .on(table.rallyId, table.responderPlayerId),
+    index("player_rally_responses_delivery_idx")
+      .on(table.respondedAt)
+      .where(sql`${table.deliveredAt} IS NULL`),
+    check(
+      "player_rally_responses_response_ck",
+      sql`${table.response} IN ('joining', 'unavailable')`,
+    ),
+  ],
+);
+
 export const playerGoalProgress = pgTable("player_goal_progress", {
   playerId: uuid("player_id").primaryKey().references(() => playerdata.id, { onDelete: "cascade" }),
   day: date({ mode: "string" }).notNull(),

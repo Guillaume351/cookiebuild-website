@@ -30,6 +30,9 @@ const PLAYERS = {
   fourth: { id: "10000000-0000-4000-8000-000000000004", name: "Fourth" },
   fifth: { id: "10000000-0000-4000-8000-000000000005", name: "Fifth" },
   rallyOnline: { id: "10000000-0000-4000-8000-000000000006", name: "AlreadyOnline" },
+  rallyTarget: { id: "10000000-0000-4000-8000-000000000007", name: "RallyTarget" },
+  rallyResponder: { id: "10000000-0000-4000-8000-000000000008", name: "RallyResponder" },
+  rallyBlocked: { id: "10000000-0000-4000-8000-000000000009", name: "RallyBlocked" },
 } as const;
 
 type SocialModule = typeof import("../server/services/mobile-social");
@@ -37,6 +40,7 @@ type UserModule = typeof import("../server/services/mobile-user");
 type DatabaseModule = typeof import("../db/client");
 type RetentionModule = typeof import("../server/services/mobile-data-retention");
 type NotificationOutboxModule = typeof import("../server/services/mobile-notification-outbox");
+type RalliesModule = typeof import("../server/services/mobile-rallies");
 
 function eventFor(uid: string) {
   return {
@@ -51,6 +55,7 @@ integration("mobile social service", () => {
   let users: UserModule;
   let retention: RetentionModule;
   let notificationOutbox: NotificationOutboxModule;
+  let rallies: RalliesModule;
 
   async function provision(uid: string, playerId?: string) {
     await users.requireMobileUser(eventFor(uid));
@@ -93,6 +98,7 @@ integration("mobile social service", () => {
       "0002_mobile_social.sql",
       "0003_player_rally.sql",
       "0006_mobile_engagement.sql",
+      "0009_player_rally_responses.sql",
     ]) {
       const migration = await readFile(new URL(`../drizzle/${migrationName}`, import.meta.url), "utf8");
       await setupSql.unsafe(migration);
@@ -102,6 +108,7 @@ integration("mobile social service", () => {
     social = await import("../server/services/mobile-social");
     retention = await import("../server/services/mobile-data-retention");
     notificationOutbox = await import("../server/services/mobile-notification-outbox");
+    rallies = await import("../server/services/mobile-rallies");
     vi.stubGlobal("defineEventHandler", (handler: unknown) => handler);
     vi.stubGlobal("setHeader", () => undefined);
   }, 30_000);
@@ -452,5 +459,167 @@ integration("mobile social service", () => {
        WHERE mobile_user.firebase_uid = ${uid}
     `;
     expect(records).toEqual([{ rallyEnabled: true }]);
+  });
+
+  it("records safe idempotent rally responses and enforces target, expiry, cancellation, and blocks", async () => {
+    await provision("rally-target-user", PLAYERS.rallyTarget.id);
+    await provision("rally-responder-user", PLAYERS.rallyResponder.id);
+    await provision("rally-blocked-user", PLAYERS.rallyBlocked.id);
+    await provision("rally-unlinked-user");
+
+    const loginRallyId = "20000000-0000-4000-8000-000000000001";
+    const loginOutboxId = "30000000-0000-4000-8000-000000000001";
+    await setupSql`
+      INSERT INTO mobile_notification_outbox (id, kind, audience, payload)
+      VALUES (
+        ${loginOutboxId},
+        'player_rally',
+        '{"all":true}'::jsonb,
+        jsonb_build_object('rallyId', ${loginRallyId}::text)
+      )
+    `;
+    await setupSql`
+      INSERT INTO player_rallies
+        (id, outbox_id, server_id, target_player_id, game_id, source, gamemode,
+         available_at, expires_at)
+      VALUES (
+        ${loginRallyId}, ${loginOutboxId}, 'lobby-1', ${PLAYERS.rallyTarget.id}, NULL,
+        'login', 'network', now() - interval '1 minute', now() + interval '5 minutes'
+      )
+    `;
+
+    await expect(rallies.getPlayerRally("rally-unlinked-user", loginRallyId))
+      .rejects.toMatchObject({ statusCode: 428 });
+    const initial = await rallies.getPlayerRally("rally-responder-user", loginRallyId);
+    expect(initial).toEqual({
+      id: loginRallyId,
+      source: "login",
+      gamemode: "network",
+      targetPlayerName: PLAYERS.rallyTarget.name,
+      expiresAt: expect.any(String),
+      response: null,
+    });
+    expect(initial).not.toHaveProperty("targetPlayerId");
+
+    const first = await rallies.respondToPlayerRally(
+      "rally-responder-user",
+      loginRallyId,
+      "joining",
+    );
+    expect(first).toMatchObject({ created: true, data: { response: "joining" } });
+    const retry = await rallies.respondToPlayerRally(
+      "rally-responder-user",
+      loginRallyId,
+      "joining",
+    );
+    expect(retry).toMatchObject({ created: false, data: { response: "joining" } });
+    await expect(rallies.respondToPlayerRally(
+      "rally-responder-user",
+      loginRallyId,
+      "unavailable",
+    )).rejects.toMatchObject({ statusCode: 409 });
+    await expect(rallies.respondToPlayerRally(
+      "rally-target-user",
+      loginRallyId,
+      "joining",
+    )).rejects.toMatchObject({ statusCode: 409 });
+
+    const responseCount = await setupSql<{ count: number }[]>`
+      SELECT count(*)::int AS count
+        FROM player_rally_responses
+       WHERE rally_id = ${loginRallyId}
+    `;
+    expect(responseCount).toEqual([{ count: 1 }]);
+
+    const automaticRallyId = "20000000-0000-4000-8000-000000000002";
+    const automaticOutboxId = "30000000-0000-4000-8000-000000000002";
+    await setupSql`
+      INSERT INTO mobile_notification_outbox (id, kind, audience, payload)
+      VALUES (
+        ${automaticOutboxId},
+        'player_rally',
+        '{"all":true}'::jsonb,
+        jsonb_build_object('rallyId', ${automaticRallyId}::text)
+      )
+    `;
+    await setupSql`
+      INSERT INTO player_rallies
+        (id, outbox_id, server_id, target_player_id, game_id, source, gamemode,
+         available_at, expires_at)
+      VALUES (
+        ${automaticRallyId}, ${automaticOutboxId}, 'minigames-1', ${PLAYERS.rallyTarget.id},
+        '40000000-0000-4000-8000-000000000001', 'automatic', 'pitchout',
+        now() - interval '1 minute', now() + interval '5 minutes'
+      )
+    `;
+    await expect(rallies.respondToPlayerRally(
+      "rally-blocked-user",
+      automaticRallyId,
+      "unavailable",
+    )).resolves.toMatchObject({ created: true, data: { source: "automatic" } });
+
+    await setupSql`UPDATE player_rallies SET expires_at = now() - interval '1 second'
+                    WHERE id = ${loginRallyId}`;
+    await expect(rallies.getPlayerRally("rally-responder-user", loginRallyId))
+      .rejects.toMatchObject({ statusCode: 410 });
+
+    await setupSql`DELETE FROM mobile_notification_outbox WHERE id = ${automaticOutboxId}`;
+    const cascadeCounts = await setupSql<{ rallies: number; responses: number }[]>`
+      SELECT
+        (SELECT count(*)::int FROM player_rallies WHERE id = ${automaticRallyId}) AS rallies,
+        (SELECT count(*)::int FROM player_rally_responses
+          WHERE rally_id = ${automaticRallyId}) AS responses
+    `;
+    expect(cascadeCounts).toEqual([{ rallies: 0, responses: 0 }]);
+    await expect(rallies.getPlayerRally("rally-blocked-user", automaticRallyId))
+      .rejects.toMatchObject({ statusCode: 404 });
+
+    const blockedRallyId = "20000000-0000-4000-8000-000000000003";
+    const blockedOutboxId = "30000000-0000-4000-8000-000000000003";
+    await setupSql`
+      INSERT INTO mobile_notification_outbox (id, kind, audience, payload)
+      VALUES (
+        ${blockedOutboxId},
+        'player_rally',
+        '{"all":true}'::jsonb,
+        jsonb_build_object('rallyId', ${blockedRallyId}::text)
+      )
+    `;
+    await setupSql`
+      INSERT INTO player_rallies
+        (id, outbox_id, server_id, target_player_id, game_id, source, gamemode,
+         available_at, expires_at)
+      VALUES (
+        ${blockedRallyId}, ${blockedOutboxId}, 'minigames-1', ${PLAYERS.rallyTarget.id},
+        '40000000-0000-4000-8000-000000000002', 'player', 'microbattles',
+        now() - interval '1 minute', now() + interval '5 minutes'
+      )
+    `;
+    await setupSql`
+      INSERT INTO player_blocks (blocker_player_id, blocked_player_id)
+      VALUES (${PLAYERS.rallyTarget.id}, ${PLAYERS.rallyBlocked.id})
+    `;
+    await expect(rallies.getPlayerRally("rally-blocked-user", blockedRallyId))
+      .rejects.toMatchObject({ statusCode: 404 });
+    await expect(rallies.respondToPlayerRally(
+      "rally-blocked-user",
+      blockedRallyId,
+      "joining",
+    )).rejects.toMatchObject({ statusCode: 404 });
+    await setupSql`
+      DELETE FROM player_blocks
+       WHERE blocker_player_id = ${PLAYERS.rallyTarget.id}
+         AND blocked_player_id = ${PLAYERS.rallyBlocked.id}
+    `;
+    await setupSql`
+      INSERT INTO player_blocks (blocker_player_id, blocked_player_id)
+      VALUES (${PLAYERS.rallyBlocked.id}, ${PLAYERS.rallyTarget.id})
+    `;
+    await expect(rallies.getPlayerRally("rally-blocked-user", blockedRallyId))
+      .rejects.toMatchObject({ statusCode: 404 });
+    await expect(rallies.getPlayerRally(
+      "rally-responder-user",
+      "20000000-0000-4000-8000-000000000099",
+    )).rejects.toMatchObject({ statusCode: 404 });
   });
 });

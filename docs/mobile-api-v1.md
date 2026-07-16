@@ -35,6 +35,11 @@ Admin before touching account data.
 - `GET|POST|DELETE /party`, `POST /party/invites`,
   `POST /party/invites/:inviteId/accept`, `DELETE /party/invites/:inviteId`, and
   `DELETE /party/members/:playerId` manage durable four-player parties and expiring invitations.
+- `GET /player-rallies/:rallyId` returns an unexpired player call and the authenticated linked
+  player's current response. `PUT /player-rallies/:rallyId/response` accepts exactly
+  `{ "response": "joining" }` or `{ "response": "unavailable" }`. The first response returns
+  `201`, an identical retry returns `200`, and changing an existing response returns `409`.
+  Neither endpoint returns the target player's UUID.
 - `DELETE /account`: anonymizes mobile profile data, revokes player links, removes notification
   devices, and deletes the Firebase Auth user. A failed Firebase deletion remains in the outbox for
   operator retry while the local account stays disabled.
@@ -61,8 +66,9 @@ through Dokploy; it must never be committed or sent to clients.
 
 1. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`,
    `drizzle/0003_player_rally.sql`, `drizzle/0004_player_changelog.sql`,
-   `drizzle/0005_correct_2026_update_wording.sql`, then `drizzle/0006_mobile_engagement.sql`, with
-   PostgreSQL `ON_ERROR_STOP`.
+   `drizzle/0005_correct_2026_update_wording.sql`, `drizzle/0006_mobile_engagement.sql`,
+   `drizzle/0007_admin_control_center.sql`, `drizzle/0008_player_onboarding.sql`, then
+   `drizzle/0009_player_rally_responses.sql`, with PostgreSQL `ON_ERROR_STOP`.
 2. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
    `MOBILE_LINK_PEPPER` for the website.
 3. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.
@@ -214,16 +220,31 @@ CookieDough inserts a rally into the shared outbox with `kind = 'player_rally'`,
 }
 ```
 
-`gamemode` is one of `microbattles`, `pitchout`, `skywars`, `buildbattles`, or `turfwars`.
+`source` is `login`, `player`, or `automatic`. Login rallies use `gamemode = 'network'`, zero queue
+counts, and a bounded `actorDisplayName`; the website generates
+`<actorDisplayName> is online and looking for players`. Queue rallies use one of `microbattles`,
+`pitchout`, `skywars`, `buildbattles`, or `turfwars` and never use `network`.
 `neededCount` is the number of additional players needed to reach the minimum start threshold.
 It may be `0` only for an automatic start-imminent rally, in which case `queuedCount` must be
 positive and the generated copy invites players to join before the match starts. Player-requested
 rallies always require at least one missing player.
-`actorDisplayName` is the bounded public Bukkit name for a player request and must be `null` when
-`source = 'automatic'`. No title, body, URL, message, or other free-text field is accepted. The
-website synthesizes the visible notification and deep link. `rallyId` has a partial unique index for
-durable producer deduplication; CookieDough additionally owns transactional global and per-game
-cooldowns. The worker sends rallies through a five-minute, high-priority transport window and logs
+`actorDisplayName` is the bounded public Bukkit name for login and player requests and must be
+`null` when `source = 'automatic'`. No title, body, URL, message, or other free-text field is
+accepted. The website synthesizes the visible notification and
+`cookiebuild://rallies/<rallyId>` deep link. `rallyId` has a partial unique index for durable producer
+deduplication; CookieDough additionally owns transactional global and per-game cooldowns. The
+producer also inserts `player_rallies` in the same transaction: its `id` is the payload `rallyId`,
+its unique `outbox_id` references the notification row with cascading deletion, and it records the
+target player, originating server, optional game, availability time, and five-minute expiration.
+
+The response API requires a current primary player link, rejects self-responses, hides rallies when
+either player has blocked the other, returns `410` after `expiresAt`, and records at most one fixed
+response per rally and responder. Login, player-requested, and automatic rallies are actionable
+because each registry row has a `target_player_id`; the public DTO exposes only `id`, `source`,
+`gamemode`, `targetPlayerName`, `expiresAt`, and `response`. Response rows remain pending until
+CookieDough sets `delivered_at` after showing the predefined result in game.
+
+The worker sends rallies through a five-minute, high-priority transport window and logs
 selected, eligible, quiet-hour-suppressed, already-online-excluded, and end-to-end queue latency
 counts for operational diagnosis.
 

@@ -78,7 +78,7 @@ describe("mobile notification validation", () => {
     }, "player_rally")).toEqual({
       title: "Players needed for MicroBattles",
       body: "Cookie_Player is rallying players: 2 queued, 6 more needed.",
-      deepLink: "cookiebuild://play?gamemode=microbattles",
+      deepLink: "cookiebuild://rallies/0772c75e-d8a7-4e9d-98a1-f1744dde448e",
       data: {
         type: "player_rally",
         schemaVersion: "1",
@@ -92,6 +92,56 @@ describe("mobile notification validation", () => {
       },
       urgent: false,
     });
+  });
+
+  it("synthesizes an actionable login rally without accepting producer text", () => {
+    expect(parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "login",
+      gamemode: "network",
+      edition: "crossplay",
+      queuedCount: 0,
+      neededCount: 0,
+      actorDisplayName: "CookieFan",
+    }, "player_rally")).toEqual({
+      title: "CookieFan is online",
+      body: "CookieFan is online and looking for players",
+      deepLink: "cookiebuild://rallies/b53233cd-20d2-4d15-b093-2caaf4cd7774",
+      data: {
+        type: "player_rally",
+        schemaVersion: "1",
+        rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+        source: "login",
+        gamemode: "network",
+        edition: "crossplay",
+        queuedCount: "0",
+        neededCount: "0",
+        actorDisplayName: "CookieFan",
+      },
+      urgent: false,
+    });
+    expect(() => parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "login",
+      gamemode: "network",
+      edition: "crossplay",
+      queuedCount: 0,
+      neededCount: 0,
+      actorDisplayName: "CookieFan",
+      body: "untrusted producer text",
+    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() => parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "login",
+      gamemode: "network",
+      edition: "crossplay",
+      queuedCount: 1,
+      neededCount: 0,
+      actorDisplayName: "CookieFan",
+    }, "player_rally")).toThrow(PermanentOutboxError);
   });
 
   it("rejects free text and inconsistent player rally fields", () => {
@@ -121,6 +171,16 @@ describe("mobile notification validation", () => {
       source: "player",
       actorDisplayName: "CookieFan",
       neededCount: 0,
+    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() => parseNotificationPayloadForKind({
+      ...valid,
+      source: "login",
+      gamemode: "pitchout",
+      actorDisplayName: "CookieFan",
+    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() => parseNotificationPayloadForKind({
+      ...valid,
+      gamemode: "network",
     }, "player_rally")).toThrow(PermanentOutboxError);
   });
 
@@ -163,7 +223,7 @@ describe("mobile notification validation", () => {
       actorDisplayName: "CookieArcher",
     }, "player_rally")).toMatchObject({
       title: "Players needed for TurfWars",
-      deepLink: "cookiebuild://play?gamemode=turfwars",
+      deepLink: "cookiebuild://rallies/a63233cd-20d2-4d15-b093-2caaf4cd7774",
       data: { gamemode: "turfwars" },
     });
   });

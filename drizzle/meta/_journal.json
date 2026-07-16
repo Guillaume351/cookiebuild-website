@@ -64,6 +64,13 @@
       "when": 1784204163000,
       "tag": "0008_player_onboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1784222536000,
+      "tag": "0009_player_rally_responses",
+      "breakpoints": true
     }
   ]
 }
