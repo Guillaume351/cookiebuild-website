@@ -13,9 +13,9 @@ RUN npm ci
 # Copy project files
 COPY . .
 
-# Validate types before producing the server bundle.
+# Validate tests and types before producing the server bundle.
 ENV NODE_ENV=production
-RUN npm run typecheck && npm run build
+RUN npm test && npm run typecheck && npm run build
 
 # Production stage
 FROM node:24.18.0-alpine AS production-stage

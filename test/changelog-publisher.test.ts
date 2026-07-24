@@ -4,6 +4,7 @@ import { validateChangelogEntry } from "../scripts/publish-changelog.mjs";
 describe("changelog publisher validation", () => {
   const valid = {
     slug: "new-game-release",
+    contentType: "changelog",
     title: "New game",
     summary: "A new mode is ready.",
     body: "- First improvement",
@@ -13,6 +14,7 @@ describe("changelog publisher validation", () => {
   it("normalizes a safe publishable entry", () => {
     expect(validateChangelogEntry(valid)).toMatchObject({
       slug: valid.slug,
+      contentType: "changelog",
       title: valid.title,
       coverImageUrl: null,
     });
@@ -20,6 +22,9 @@ describe("changelog publisher validation", () => {
 
   it("rejects invalid slugs, timestamps, and image URLs", () => {
     expect(() => validateChangelogEntry({ ...valid, slug: "Bad Slug" })).toThrow(/slug/);
+    expect(() => validateChangelogEntry({ ...valid, contentType: undefined })).toThrow(/contentType/);
+    expect(validateChangelogEntry({ ...valid, contentType: "news" })).toMatchObject({ contentType: "news" });
+    expect(() => validateChangelogEntry({ ...valid, contentType: "announcement" })).toThrow(/contentType/);
     expect(() => validateChangelogEntry({ ...valid, publishedAt: "2026-07-15" })).toThrow(/publishedAt/);
     expect(() => validateChangelogEntry({ ...valid, coverImageUrl: "http://example.com/image.png" })).toThrow(/HTTPS/);
   });

@@ -1,0 +1,18 @@
+[
+  {
+    "slug": "lobby-and-game-quality-improvements",
+    "contentType": "changelog",
+    "title": "Lobby and game quality improvements",
+    "summary": "Clearer first-join guidance and focused SkyWars and BuildBattles fixes make it easier to choose a game and start playing.",
+    "body": "- The lobby now gives all five games a distinctive selector, a short description and direct access from the Cookie Build menu.\n- New-player guidance highlights Quick Play, direct game selection and the main community links without repeating on every connection.\n- SkyWars now opens the correct kit selector on Java without changing the working Bedrock flow.\n- BuildBattles recovers its spare arenas more reliably and supports a wider safe decoration palette.",
+    "publishedAt": "2026-07-16T19:30:00Z"
+  },
+  {
+    "slug": "clearer-lobby-player-activity",
+    "contentType": "changelog",
+    "title": "Clearer player activity in the lobby",
+    "summary": "Compact game labels and a live activity counter now make it obvious when other players are already in matches.",
+    "body": "- Game NPC labels are split across two shorter lines, with clearer JOIN, STARTING and IN GAME states.\n- A display above the lobby spawn shows both the total number of players online and how many are currently in game queues or matches.\n- Counts refresh every second and deduplicate players across active game rosters.",
+    "publishedAt": "2026-07-24T10:37:00Z"
+  }
+]

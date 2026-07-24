@@ -15,6 +15,10 @@ export function validateChangelogEntry(input) {
   };
   const slug = string("slug", 120);
   if (!slugPattern.test(slug)) throw new Error("slug must use lowercase words separated by hyphens.");
+  const contentType = string("contentType", 16);
+  if (contentType !== "news" && contentType !== "changelog") {
+    throw new Error("contentType must be news or changelog.");
+  }
   const publishedAt = string("publishedAt", 64);
   const date = new Date(publishedAt);
   if (Number.isNaN(date.getTime()) || !/(Z|[+-]\d{2}:\d{2})$/.test(publishedAt)) {
@@ -27,6 +31,7 @@ export function validateChangelogEntry(input) {
   }
   return {
     slug,
+    contentType,
     title: string("title", 160),
     summary: string("summary", 500),
     body: string("body", 10_000),
@@ -52,12 +57,13 @@ async function publish(entries) {
       for (const entry of entries) {
         await transaction`
           INSERT INTO mobile_news_posts (
-            slug, title, summary, body, cover_image_url, status, published_at
+            slug, content_type, title, summary, body, cover_image_url, status, published_at
           ) VALUES (
-            ${entry.slug}, ${entry.title}, ${entry.summary}, ${entry.body},
+            ${entry.slug}, ${entry.contentType}, ${entry.title}, ${entry.summary}, ${entry.body},
             ${entry.coverImageUrl}, 'published', ${entry.publishedAt}
           )
           ON CONFLICT (slug) DO UPDATE SET
+            content_type = EXCLUDED.content_type,
             title = EXCLUDED.title,
             summary = EXCLUDED.summary,
             body = EXCLUDED.body,
@@ -72,6 +78,20 @@ async function publish(entries) {
         `;
       }
     });
+    for (const entry of entries) {
+      const [published] = await sql`
+        SELECT content_type, status, published_at
+        FROM mobile_news_posts
+        WHERE slug = ${entry.slug}
+      `;
+      if (!published
+          || published.content_type !== entry.contentType
+          || published.status !== "published"
+          || !(published.published_at instanceof Date)
+          || published.published_at > new Date()) {
+        throw new Error(`Published changelog verification failed for ${entry.slug}.`);
+      }
+    }
   } finally {
     await sql.end({ timeout: 2 });
   }
