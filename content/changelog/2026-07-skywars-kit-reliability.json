@@ -1,0 +1,8 @@
+{
+  "slug": "skywars-kit-menu-reliability",
+  "contentType": "changelog",
+  "title": "More reliable SkyWars kit menus",
+  "summary": "SkyWars progression now initializes safely when several server tasks load a player's kit data at the same time.",
+  "body": "- Opening the SkyWars kit menu no longer fails when progression data is being created concurrently.\n- The fix applies to both Java and Bedrock players without changing existing kits, coins, XP or selections.\n- Existing progression remains untouched; only first-time initialization is serialized.",
+  "publishedAt": "2026-07-26T16:30:00Z"
+}
