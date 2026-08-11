@@ -18,6 +18,11 @@
               >
             </li>
             <li>
+              <NuxtLink to="/games" class="text-gray-400 hover:text-white transition-colors"
+                >Games</NuxtLink
+              >
+            </li>
+            <li>
               <NuxtLink to="/player-stats" class="text-gray-400 hover:text-white transition-colors"
                 >Player Stats</NuxtLink
               >

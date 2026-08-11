@@ -15,6 +15,7 @@
       </div>
       <div class="hidden md:flex space-x-6">
         <NuxtLink to="/" class="text-white hover:text-gray-300 transition-colors">Home</NuxtLink>
+        <NuxtLink to="/games" class="text-white hover:text-gray-300 transition-colors">Games</NuxtLink>
         <NuxtLink to="/player-stats" class="text-white hover:text-gray-300 transition-colors"
           >Player Stats</NuxtLink
         >
@@ -44,6 +45,13 @@
           @click="mobileMenuOpen = false"
         >
           Home
+        </NuxtLink>
+        <NuxtLink
+          to="/games"
+          class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
+          @click="mobileMenuOpen = false"
+        >
+          Games
         </NuxtLink>
         <NuxtLink
           to="/player-stats"

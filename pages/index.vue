@@ -279,6 +279,13 @@
             >
               {{ game.available ? "Available Now" : "Coming Soon" }}
             </Badge>
+            <NuxtLink
+              v-if="game.href"
+              :to="game.href"
+              class="ml-4 inline-flex min-h-11 items-center text-sm font-bold text-orange-400 hover:text-orange-300"
+            >
+              Play {{ game.name }} on Bedrock &amp; Java
+            </NuxtLink>
           </CardContent>
         </Card>
       </div>
@@ -381,13 +388,15 @@ const minigames = [
       "Fast-paced 4-team battles. Gather resources, build defenses, and be the last team standing.",
     available: true,
     icon: "/microbattles-icon.svg",
+    href: "/microbattles",
   },
   {
     name: "Pitchout",
     description:
-      "A chaotic sumo-style game. Use snowballs, arrows, and clever movement to knock opponents into the void five times.",
+      "A chaotic sumo-style game. Use a knockback shovel, a punch bow, and clever movement to protect your five lives.",
     available: true,
     icon: "/pitchout-icon.svg",
+    href: "/pitchout",
   },
   {
     name: "Build Battles",
@@ -395,12 +404,14 @@ const minigames = [
       "Show off your creativity. Build amazing structures based on a theme in a limited time.",
     available: true,
     icon: "/buildbattle-icon.svg",
+    href: "/build-battle",
   },
   {
     name: "SkyWars",
     description: "Battle other players on floating islands. Loot chests, bridge to mid, and survive.",
     available: true,
     icon: "/skywars-icon.svg",
+    href: "/skywars",
   },
   {
     name: "TurfWars",
@@ -409,6 +420,7 @@ const minigames = [
     available: true,
     icon: "/turfwars-icon.svg",
     new: true,
+    href: "/turfwars",
   },
 ];
 
