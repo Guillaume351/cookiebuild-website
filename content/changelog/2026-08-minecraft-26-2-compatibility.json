@@ -1,0 +1,8 @@
+{
+  "slug": "minecraft-26-2-and-bedrock-compatibility",
+  "contentType": "changelog",
+  "title": "Minecraft 26.2 and refreshed Bedrock compatibility",
+  "summary": "Cookie Build now runs on Paper 26.2 with refreshed Geyser and Floodgate components for current Java and Bedrock clients.",
+  "body": "- The server engine has been upgraded to the latest stable Paper 26.2 build.\n- Geyser and Floodgate have been refreshed together to improve current Bedrock client compatibility and authentication reliability.\n- Existing worlds, player progress, games and gameplay rules are preserved.\n- Java cross-version support remains available through the current stable ViaVersion stack.",
+  "publishedAt": "2026-08-11T09:36:07Z"
+}
