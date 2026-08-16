@@ -1,8 +1,8 @@
 {
   "slug": "build-battle-creative-update",
   "contentType": "changelog",
-  "title": "Faster Build Battle starts and true replays",
-  "summary": "Build Battle now starts sooner, keeps rematches in the right game, makes judging fairer and exposes more creative tools across Java and Bedrock.",
-  "body": "- Once two builders are ready, the pre-game countdown is now 15 seconds instead of 30.\n- The replay button now queues another Build Battle instead of falling back to global Quick Play.\n- Judging is now anonymous until the results, helping every creation get a fairer vote.\n- The `/bbitems` cross-play palette now includes paintings, safe redstone, lava and a wider selection of passive mobs.\n- All existing safety limits for entities, fluids and redstone remain in place.",
+  "title": "True Build Battle replays and fairer judging",
+  "summary": "Build Battle now keeps rematches in the right game, makes judging fairer and exposes more creative tools across Java and Bedrock.",
+  "body": "- The replay button now queues another Build Battle instead of falling back to global Quick Play.\n- Judging is now anonymous until the results, helping every creation get a fairer vote.\n- The `/bbitems` cross-play palette now includes paintings, safe redstone, lava and a wider selection of passive mobs.\n- All existing safety limits for entities, fluids and redstone remain in place.",
   "publishedAt": "2026-08-16T11:15:20Z"
 }
