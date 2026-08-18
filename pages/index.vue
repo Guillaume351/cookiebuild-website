@@ -422,6 +422,14 @@ const minigames = [
     new: true,
     href: "/turfwars",
   },
+  {
+    name: "BedWars",
+    description:
+      "Protect your bed, collect bakery cookies, upgrade your team, and eliminate every rival across the Cookie Colosseum.",
+    available: false,
+    icon: "/bedwars-icon.svg",
+    new: true,
+  },
 ];
 
 const faqs = [
