@@ -13,6 +13,7 @@ describe("mobile social API gates", () => {
   afterAll(async () => {
     delete process.env.MOBILE_FRIENDS_ENABLED;
     delete process.env.MOBILE_PARTIES_ENABLED;
+    delete process.env.COOKIEBUILD_BEDWARS_ENABLED;
     await databaseModule.postgresClient.end({ timeout: 0 });
     vi.unstubAllGlobals();
   });
@@ -39,15 +40,16 @@ describe("mobile social API gates", () => {
     });
   });
 
-  it("keeps unfinished games fail-closed in bootstrap metadata", async () => {
+  it("keeps the BedWars beta fail-closed when its release flag is absent", async () => {
     delete process.env.MOBILE_FRIENDS_ENABLED;
     delete process.env.MOBILE_PARTIES_ENABLED;
+    delete process.env.COOKIEBUILD_BEDWARS_ENABLED;
     const handler = (await import("../server/api/mobile/v1/bootstrap.get")).default as unknown as (
       event: unknown,
     ) => Promise<{
       data: {
         features: { friends: boolean; parties: boolean };
-        gamemodes: Array<{ id: string; available: boolean }>;
+        gamemodes: Array<{ id: string; available: boolean; releaseStage?: string }>;
       };
     }>;
     const response = await handler({});
@@ -58,7 +60,22 @@ describe("mobile social API gates", () => {
       expect.objectContaining({ id: "skywars", available: true }),
       expect.objectContaining({ id: "buildbattles", available: true }),
       expect.objectContaining({ id: "turfwars", available: true }),
-      expect.objectContaining({ id: "bedwars", available: false }),
+      expect.objectContaining({ id: "bedwars", available: false, releaseStage: "beta" }),
+    ]));
+  });
+
+  it("marks the BedWars beta available only when its strict release flag is true", async () => {
+    process.env.COOKIEBUILD_BEDWARS_ENABLED = "true";
+    const handler = (await import("../server/api/mobile/v1/bootstrap.get")).default as unknown as (
+      event: unknown,
+    ) => Promise<{
+      data: { gamemodes: Array<{ id: string; available: boolean; releaseStage?: string }> };
+    }>;
+
+    const response = await handler({});
+
+    expect(response.data.gamemodes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "bedwars", available: true, releaseStage: "beta" }),
     ]));
   });
 });

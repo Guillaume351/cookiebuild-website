@@ -1,8 +1,10 @@
 import { isValidLinkPepper } from "../../../utils/mobile-validation";
 
 export default defineCachedEventHandler(
-  () => ({
-    data: {
+  () => {
+    const bedWarsEnabled = process.env.COOKIEBUILD_BEDWARS_ENABLED?.trim().toLowerCase() === "true";
+    return {
+      data: {
       apiVersion: 1,
       server: {
         java: { host: "play.cookie-build.com", port: 25565 },
@@ -28,13 +30,20 @@ export default defineCachedEventHandler(
         { id: "skywars", name: "SkyWars", icon: "/skywars-icon.svg", available: true },
         { id: "buildbattles", name: "BuildBattles", icon: "/buildbattle-icon.svg", available: true },
         { id: "turfwars", name: "TurfWars", icon: "/turfwars-icon.svg", available: true },
-        { id: "bedwars", name: "BedWars", icon: "/bedwars-icon.svg", available: false },
+        {
+          id: "bedwars",
+          name: "BedWars",
+          icon: "/bedwars-icon.svg",
+          available: bedWarsEnabled,
+          releaseStage: "beta",
+        },
       ],
       accountDeletionUrl: "https://www.cookie-build.com/account/delete",
       privacyUrl: "https://www.cookie-build.com/privacy",
       termsUrl: "https://www.cookie-build.com/terms",
       supportEmail: "support@cookie-build.com",
-    },
-  }),
+      },
+    };
+  },
   { maxAge: 300, name: "cookie-build-mobile-bootstrap-v1" },
 );

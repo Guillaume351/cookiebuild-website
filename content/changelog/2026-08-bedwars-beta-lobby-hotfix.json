@@ -1,0 +1,9 @@
+{
+  "slug": "bedwars-beta-lobby-hotfix",
+  "contentType": "changelog",
+  "title": "BedWars beta lobby countdown stabilized",
+  "summary": "Waiting text now stays visible and a BedWars countdown starts only when at least two opposing teams are represented.",
+  "body": "- The waiting status above the hotbar is now refreshed continuously for every queued player instead of fading between updates.\n- A party placed together on one team no longer triggers a false countdown while no opposing team is present.\n- If a lobby loses a required opponent during the countdown, the timer resets on the next server tick.\n- BedWars is now labelled Beta in the Java and Bedrock game selectors while the strict release environment flag continues to control admission.\n- Please do not hesitate to report beta bugs on Discord or Twitter/X so we can investigate them quickly.",
+  "coverImageUrl": "https://www.cookie-build.com/bedwars-cookie-colosseum-beta.webp",
+  "publishedAt": "2026-08-18T16:55:00+02:00"
+}

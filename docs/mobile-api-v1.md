@@ -74,7 +74,9 @@ through Dokploy; it must never be committed or sent to clients.
 3. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.
 4. Deploy the website, verify public endpoints, then test claim/revoke with a real Firebase test user
    and an in-game link challenge.
-5. Populate published news/events. Set `MOBILE_FRIENDS_ENABLED=true` and/or
+5. Populate published news/events. Set `COOKIEBUILD_BEDWARS_ENABLED=true` on both
+   the Minecraft and website services only while the BedWars beta is open. Set
+   `MOBILE_FRIENDS_ENABLED=true` and/or
    `MOBILE_PARTIES_ENABLED=true` only after the matching website, CookieDough, and app versions are
    deployed. Both flags default to false. Free-form chat and shop remain disabled.
 

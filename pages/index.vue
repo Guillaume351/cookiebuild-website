@@ -263,7 +263,7 @@
             v-if="game.new"
             class="absolute right-0 top-0 rounded-bl-xl bg-red-600 px-3 py-1 text-xs font-bold text-white shadow-sm"
           >
-            NEW
+            {{ game.cornerLabel ?? "NEW" }}
           </div>
           <CardHeader>
             <CardTitle class="flex items-center gap-3 text-2xl">
@@ -277,7 +277,7 @@
               :variant="game.available ? 'default' : 'secondary'"
               :class="game.available ? 'bg-green-600 hover:bg-green-700' : ''"
             >
-              {{ game.available ? "Available Now" : "Coming Soon" }}
+              {{ game.statusLabel ?? (game.available ? "Available Now" : "Coming Soon") }}
             </Badge>
             <NuxtLink
               v-if="game.href"
@@ -360,6 +360,9 @@ const { data: updatesData } = await useFetch("/api/mobile/v1/news", {
   query: { limit: 3 },
 });
 const latestUpdates = computed(() => updatesData.value?.data ?? []);
+const { data: bootstrapData } = await useFetch("/api/mobile/v1/bootstrap");
+const bedWarsAvailable = computed(() => bootstrapData.value?.data?.gamemodes
+  ?.some((game) => game.id === "bedwars" && game.available) ?? false);
 
 const features = [
   {
@@ -381,7 +384,7 @@ const features = [
       "Full support for both Java & Bedrock Editions. Play with your friends on any device.",
   },
 ];
-const minigames = [
+const minigames = computed(() => [
   {
     name: "MicroBattles",
     description:
@@ -426,11 +429,13 @@ const minigames = [
     name: "BedWars",
     description:
       "Protect your bed, collect bakery cookies, upgrade your team, and eliminate every rival across the Cookie Colosseum.",
-    available: false,
+    available: bedWarsAvailable.value,
+    statusLabel: bedWarsAvailable.value ? "Open Beta" : "Beta temporarily unavailable",
     icon: "/bedwars-icon.svg",
     new: true,
+    cornerLabel: "BETA",
   },
-];
+]);
 
 const faqs = [
   {
