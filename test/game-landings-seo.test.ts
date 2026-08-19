@@ -64,6 +64,8 @@ describe("game mode SEO landing pages", () => {
 
     expect(page).toContain("Bedrock IP:");
     expect(page).toContain("Java IP:");
+    expect(page).toContain('import Badge from "@/components/ui/badge/Badge.vue"');
+    expect(page).toContain('import { Button } from "@/components/ui/button"');
     expect(page).toContain("game.heroIntro");
     expect(page).toContain("game.faqs");
     expect(seo).toContain('robots: "index, follow"');

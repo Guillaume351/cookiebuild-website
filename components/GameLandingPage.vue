@@ -134,6 +134,8 @@
 </template>
 
 <script setup lang="ts">
+import Badge from "@/components/ui/badge/Badge.vue";
+import { Button } from "@/components/ui/button";
 import type { GameLanding } from "@/utils/game-landings";
 import { COOKIE_BUILD_BEDROCK_PORT, COOKIE_BUILD_SERVER_IP } from "@/utils/game-landings";
 import { Copy, Gamepad2 } from "@lucide/vue";
