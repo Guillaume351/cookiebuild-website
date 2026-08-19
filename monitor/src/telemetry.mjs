@@ -6,7 +6,7 @@ const FUNNEL_EVENTS = new Set([
 ]);
 
 const EDITIONS = new Set(["java", "bedrock"]);
-const GAMES = new Set(["MicroBattles", "Pitchout", "SkyWars", "BuildBattles", "TurfWars"]);
+const GAMES = new Set(["MicroBattles", "Pitchout", "SkyWars", "BuildBattles", "TurfWars", "BedWars"]);
 
 function field(line, name) {
   return line.match(new RegExp(`(?:^|\\s)${name}=([^\\s]+)`))?.[1];

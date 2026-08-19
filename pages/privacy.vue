@@ -8,7 +8,7 @@
     <section id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Privacy Policy</h1>
-        <p>Effective and last updated: July 16, 2026</p>
+        <p>Effective and last updated: August 18, 2026</p>
       </header>
 
       <section>
@@ -27,7 +27,7 @@
           <li>A pseudonymous Firebase identifier created by anonymous authentication.</li>
           <li>Technical authentication diagnostics automatically processed by Firebase, such as IP address, operating system, device model, brand, form factor, installer, SDK versions, and Firebase app identifier.</li>
           <li>Minecraft UUID, display name, Java or Bedrock edition, link status, and gameplay statistics.</li>
-          <li>Personal seasonal rank, aggregate minigame XP, achievements, and daily and weekly goal progress. Goal resets use UTC.</li>
+          <li>Personal seasonal rank, per-game match history and activity, aggregate minigame XP, achievements, earned coin balance, unlocked and selected kits, and daily and weekly goal progress. Goal resets use UTC.</li>
           <li>Structured friend requests, accepted friendships, blocks, report reason, parties, members, invitations, and fixed-format player calls. The app has no free-form chat.</li>
           <li>Friend suggestions calculated on demand from completed matches shared in the last 30 days. Suggestions do not expose the match, time, score, online state, or last-seen time, and exclude existing relationships, blocks, and reports.</li>
           <li>Presence derived from active game sessions. It is available only to accepted friends and current party members, subject to the player’s friends-and-party, friends-only, or hidden setting and all blocks.</li>
@@ -37,7 +37,7 @@
           <li>Short-lived security information such as IP-based rate-limit counters and operational logs.</li>
         </ul>
         <p class="mt-3">
-          Version 2.1 does not use advertising identifiers, cross-app tracking, Firebase Analytics,
+          The current app does not use advertising identifiers, cross-app tracking, Firebase Analytics,
           Crashlytics, precise location, contacts, microphone, camera, or payment data. Legacy
           version 1.2.3 transmitted its shop requests over an unencrypted connection; the update
           replaces that implementation on compatible devices.
@@ -48,7 +48,7 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Purposes and legal bases</h2>
         <ul class="list-disc space-y-2 pl-6">
-          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, rank, goal progression, privacy-scoped presence, friends and recent-player suggestions, parties, events, and requested account controls.</li>
+          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, history, rank, goal progression, earned-coin kit unlocks and selections, privacy-scoped presence, friends and recent-player suggestions, parties, events, and requested account controls.</li>
           <li><strong>Consent:</strong> send push notifications, including separately configurable player calls, goal reminders, and selected accepted-friend online alerts, only after the corresponding in-app opt-in. Consent can be withdrawn in Settings. Quiet hours suppress these notifications.</li>
           <li><strong>Legitimate interests:</strong> secure accounts, prevent abuse, moderate reports, keep games fair, diagnose incidents, and protect service availability.</li>
           <li><strong>Legal obligations:</strong> respond to lawful requests and preserve evidence when required.</li>
@@ -122,7 +122,7 @@
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
-        <p>Applicable et mise à jour le 16 juillet 2026</p>
+        <p>Applicable et mise à jour le 18 août 2026</p>
       </header>
 
       <section>
@@ -140,7 +140,7 @@
           <li>Identifiant Firebase pseudonyme créé par l’authentification anonyme.</li>
           <li>Diagnostics techniques d’authentification traités automatiquement par Firebase, notamment adresse IP, système, modèle, marque, format de l’appareil, installateur, versions des SDK et identifiant d’app Firebase.</li>
           <li>UUID, pseudo, édition Java ou Bedrock, association et statistiques Minecraft.</li>
-          <li>Rang saisonnier personnel, XP agrégée des mini-jeux, succès et progression des objectifs quotidiens et hebdomadaires. Les remises à zéro utilisent UTC.</li>
+          <li>Rang saisonnier personnel, historique et activité par jeu, XP agrégée des mini-jeux, succès, solde de pièces gagnées, kits débloqués et sélectionnés, et progression des objectifs quotidiens et hebdomadaires. Les remises à zéro utilisent UTC.</li>
           <li>Demandes et listes d’amis, blocages, motif de signalement, groupes, membres, invitations et appels de joueurs structurés. L’app ne contient aucun chat libre.</li>
           <li>Suggestions d’amis calculées à la demande depuis les parties terminées jouées ensemble pendant les 30 derniers jours. Ni partie, heure, score, présence ou dernière connexion n’est affiché, et les relations, blocages et signalements sont exclus.</li>
           <li>Présence déduite des sessions actives, visible uniquement par les amis acceptés et membres du groupe actuel, selon le réglage amis et groupe, amis uniquement ou masqué, et dans le respect des blocages.</li>
@@ -150,7 +150,7 @@
           <li>Données de sécurité temporaires, notamment les compteurs de limitation par IP et journaux techniques.</li>
         </ul>
         <p class="mt-3">
-          La version 2.1 n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics,
+          L’app actuelle n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics,
           ni Crashlytics, ni localisation précise, contacts, caméra, microphone ou paiement.
           L’ancienne version 1.2.3 transmettait ses demandes de boutique sans chiffrement ; la mise
           à jour remplace cette implémentation sur les appareils compatibles.
@@ -160,8 +160,9 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Finalités et bases légales</h2>
         <p>
-          Le contrat permet de fournir le compte, l’association, les statistiques, le rang, les
-          objectifs, la présence restreinte, les amis et suggestions de joueurs récents, groupes et événements. Le consentement couvre
+          Le contrat permet de fournir le compte, l’association, les statistiques, l’historique, le rang,
+          les objectifs, les achats de kits avec les pièces gagnées en jeu, la présence restreinte,
+          les amis et suggestions de joueurs récents, groupes et événements. Le consentement couvre
           uniquement les notifications facultatives, dont les appels de joueurs, rappels d’objectifs
           et alertes d’amis acceptés configurables séparément. Les heures calmes les suppriment. L’intérêt
           légitime couvre la sécurité, l’anti-abus, la modération, l’équité et les incidents. Les

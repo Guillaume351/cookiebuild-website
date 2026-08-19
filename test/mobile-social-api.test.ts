@@ -46,18 +46,31 @@ describe("mobile social API gates", () => {
       event: unknown,
     ) => Promise<{
       data: {
-        features: { friends: boolean; parties: boolean };
+        features: {
+          friends: boolean;
+          parties: boolean;
+          presence: boolean;
+          friendOnlineAlerts: boolean;
+          shop: boolean;
+        };
         gamemodes: Array<{ id: string; available: boolean }>;
       };
     }>;
     const response = await handler({});
-    expect(response.data.features).toMatchObject({ friends: false, parties: false });
+    expect(response.data.features).toMatchObject({
+      friends: false,
+      parties: false,
+      presence: false,
+      friendOnlineAlerts: false,
+      shop: true,
+    });
     expect(response.data.gamemodes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "microbattles", available: true }),
       expect.objectContaining({ id: "pitchout", available: true }),
       expect.objectContaining({ id: "skywars", available: true }),
       expect.objectContaining({ id: "buildbattles", available: true }),
       expect.objectContaining({ id: "turfwars", available: true }),
+      expect.objectContaining({ id: "bedwars", available: false }),
     ]));
   });
 });

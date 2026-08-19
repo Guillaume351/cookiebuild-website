@@ -8,7 +8,7 @@
     <section id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Terms of Service</h1>
-        <p>Effective and last updated: July 14, 2026</p>
+        <p>Effective and last updated: August 18, 2026</p>
       </header>
 
       <section>
@@ -75,11 +75,12 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Purchases and ownership</h2>
         <p>
-          The current app contains no shop, checkout, subscription, or paid digital entitlement.
-          Cookie Build code, artwork, and branding remain owned by their respective owners. Minecraft
-          names, marks, and game assets belong to Mojang or Microsoft and are used under applicable
-          usage guidelines. You retain rights in content you own and grant Cookie Build only the rights
-          needed to operate the service.
+          The app includes a kit shop that uses virtual coins earned through Cookie Build gameplay.
+          It contains no real-money checkout, subscription, paid digital entitlement, or conversion of
+          virtual coins into money. Cookie Build code, artwork, and branding remain owned by their
+          respective owners. Minecraft names, marks, and game assets belong to Mojang or Microsoft and
+          are used under applicable usage guidelines. You retain rights in content you own and grant
+          Cookie Build only the rights needed to operate the service.
         </p>
       </section>
 
@@ -111,7 +112,7 @@
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Conditions d’utilisation</h1>
-        <p>Applicables et mises à jour le 14 juillet 2026</p>
+        <p>Applicables et mises à jour le 18 août 2026</p>
       </header>
 
       <section>
@@ -171,10 +172,11 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Achats et propriété</h2>
         <p>
-          Cette version ne contient aucune boutique, paiement, souscription ou avantage numérique
-          payant. Les codes, créations et marques restent la propriété de leurs titulaires. Les noms,
-          marques et éléments Minecraft appartiennent à Mojang ou Microsoft et sont utilisés selon
-          leurs règles d’usage applicables.
+          L’app contient une boutique de kits utilisant uniquement les pièces virtuelles gagnées en
+          jouant sur Cookie Build. Elle ne contient aucun paiement en argent réel, souscription,
+          avantage numérique payant ni conversion des pièces en argent. Les codes, créations et
+          marques restent la propriété de leurs titulaires. Les noms, marques et éléments Minecraft
+          appartiennent à Mojang ou Microsoft et sont utilisés selon leurs règles d’usage applicables.
         </p>
       </section>
 

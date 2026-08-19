@@ -65,6 +65,17 @@ export function positiveInteger(value: unknown, fallback: number, maximum: numbe
   return Math.min(parsed, maximum);
 }
 
+export function requiredInteger(
+  value: unknown,
+  field: string,
+  { minimum, maximum }: { minimum: number; maximum: number },
+) {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < minimum || value > maximum) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  return value;
+}
+
 export function optionalBoolean(value: unknown, field: string) {
   if (value === undefined) return undefined;
   if (typeof value !== "boolean") {

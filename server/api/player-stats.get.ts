@@ -9,6 +9,7 @@ const PROGRESSION_GAMEMODES = new Map([
   ["SkyWars", "skywars"],
   ["BuildBattles", "buildbattles"],
   ["TurfWars", "turfwars"],
+  ["BedWars", "bedwars"],
 ]);
 const OUTER_PLAYER_ID = sql.raw('"playerdata"."id"');
 

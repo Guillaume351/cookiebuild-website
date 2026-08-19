@@ -6,6 +6,7 @@ import {
   normalizeLinkCode,
   optionalQuietHour,
   positiveInteger,
+  requiredInteger,
 } from "../server/utils/mobile-validation";
 import { enforceLinkClaimRateLimit } from "../server/utils/mobile-rate-limit";
 
@@ -40,6 +41,13 @@ describe("mobile API validation", () => {
     expect(positiveInteger("bad", 20, 50)).toBe(20);
     expect(optionalQuietHour("23:59", "quietHoursStart")).toBe("23:59");
     expect(() => optionalQuietHour("24:00", "quietHoursStart")).toThrowError();
+  });
+
+  it("accepts only exact numeric kit levels within the route bounds", () => {
+    expect(requiredInteger(2, "level", { minimum: 1, maximum: 3 })).toBe(2);
+    expect(() => requiredInteger("2", "level", { minimum: 1, maximum: 3 })).toThrowError();
+    expect(() => requiredInteger(1.5, "level", { minimum: 1, maximum: 3 })).toThrowError();
+    expect(() => requiredInteger(4, "level", { minimum: 1, maximum: 3 })).toThrowError();
   });
 
   it("limits repeated claim attempts and resets the window", () => {

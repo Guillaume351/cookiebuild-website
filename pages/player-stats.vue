@@ -44,6 +44,7 @@
                 <option value="SkyWars">SkyWars</option>
                 <option value="BuildBattles">Build Battles</option>
                 <option value="TurfWars">TurfWars</option>
+                <option value="BedWars">BedWars</option>
               </select>
             </div>
 
@@ -381,6 +382,7 @@ function formatGamemode(gamemode: string) {
     skywars: "SkyWars",
     buildbattles: "Build Battles",
     turfwars: "TurfWars",
+    bedwars: "BedWars",
   };
   return labels[gamemode.toLowerCase()] ?? gamemode;
 }

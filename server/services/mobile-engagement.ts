@@ -7,7 +7,10 @@ interface PrimaryPlayerRow extends Record<string, unknown> {
   playerName: string | null;
 }
 
-async function primaryLinkedPlayer(tx: Parameters<Parameters<typeof db.transaction>[0]>[0], firebaseUid: string) {
+export async function primaryLinkedPlayer(
+  tx: Parameters<Parameters<typeof db.transaction>[0]>[0],
+  firebaseUid: string,
+) {
   const rows = await tx.execute<PrimaryPlayerRow>(sql`
     SELECT link.player_id AS "playerId", player.name AS "playerName"
       FROM mobile_player_links link

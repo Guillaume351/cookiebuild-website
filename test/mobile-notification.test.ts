@@ -227,6 +227,23 @@ describe("mobile notification validation", () => {
       data: { gamemode: "turfwars" },
     });
   });
+
+  it("accepts BedWars as a bounded rally game", () => {
+    expect(parseNotificationPayloadForKind({
+      schemaVersion: 1,
+      rallyId: "b63233cd-20d2-4d15-b093-2caaf4cd7774",
+      source: "player",
+      gamemode: "bedwars",
+      edition: "crossplay",
+      queuedCount: 1,
+      neededCount: 1,
+      actorDisplayName: "CookieBaker",
+    }, "player_rally")).toMatchObject({
+      title: "Players needed for BedWars",
+      deepLink: "cookiebuild://rallies/b63233cd-20d2-4d15-b093-2caaf4cd7774",
+      data: { gamemode: "bedwars" },
+    });
+  });
 });
 
 describe("mobile notification policy", () => {

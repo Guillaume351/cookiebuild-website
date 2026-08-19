@@ -46,6 +46,7 @@ const PLAYER_RALLY_GAMEMODES = {
   skywars: "SkyWars",
   buildbattles: "BuildBattles",
   turfwars: "TurfWars",
+  bedwars: "BedWars",
 } as const;
 const PLAYER_RALLY_ACTOR_PATTERN = /^[\p{L}\p{N}_. -]{1,32}$/u;
 
