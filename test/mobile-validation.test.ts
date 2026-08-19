@@ -4,10 +4,17 @@ import {
   isValidLinkPepper,
   linkCodeHmac,
   normalizeLinkCode,
+  optionalIanaTimezone,
+  optionalInteger,
+  optionalObservedAt,
   optionalQuietHour,
   positiveInteger,
+  requiredInteger,
 } from "../server/utils/mobile-validation";
-import { enforceLinkClaimRateLimit } from "../server/utils/mobile-rate-limit";
+import {
+  enforceLinkClaimRateLimit,
+  enforceMobileRequestRateLimit,
+} from "../server/utils/mobile-rate-limit";
 
 describe("mobile API validation", () => {
   it("extracts only a well-formed bearer token", () => {
@@ -42,6 +49,13 @@ describe("mobile API validation", () => {
     expect(() => optionalQuietHour("24:00", "quietHoursStart")).toThrowError();
   });
 
+  it("accepts only exact numeric kit levels within the route bounds", () => {
+    expect(requiredInteger(2, "level", { minimum: 1, maximum: 3 })).toBe(2);
+    expect(() => requiredInteger("2", "level", { minimum: 1, maximum: 3 })).toThrowError();
+    expect(() => requiredInteger(1.5, "level", { minimum: 1, maximum: 3 })).toThrowError();
+    expect(() => requiredInteger(4, "level", { minimum: 1, maximum: 3 })).toThrowError();
+  });
+
   it("limits repeated claim attempts and resets the window", () => {
     const key = `test:${Math.random()}`;
     for (let index = 0; index < 8; index += 1) {
@@ -49,5 +63,34 @@ describe("mobile API validation", () => {
     }
     expect(() => enforceLinkClaimRateLimit(key, 1_000)).toThrowError();
     expect(() => enforceLinkClaimRateLimit(key, 601_001)).not.toThrow();
+  });
+
+  it("supports bounded per-user limits for private mobile reads", () => {
+    const key = `dashboard-${crypto.randomUUID()}`;
+    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 10)).not.toThrow();
+    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 20)).not.toThrow();
+    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 30)).toThrowError();
+    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 1_011)).not.toThrow();
+  });
+
+  it("validates a bounded and timestamped device timezone snapshot", () => {
+    expect(optionalIanaTimezone("Europe/Paris", "timezone")).toBe("Europe/Paris");
+    expect(optionalIanaTimezone("UTC", "timezone")).toBe("UTC");
+    expect(optionalIanaTimezone(undefined, "timezone")).toBeNull();
+    expect(() => optionalIanaTimezone("GMT+2 unsafe", "timezone")).toThrowError();
+    expect(optionalInteger(-840, "timezoneOffsetMinutes", { minimum: -840, maximum: 840 }))
+      .toBe(-840);
+    expect(() => optionalInteger(841, "timezoneOffsetMinutes", { minimum: -840, maximum: 840 }))
+      .toThrowError();
+    expect(optionalObservedAt(
+      "2026-08-19T10:00:00Z",
+      "timezoneObservedAt",
+      new Date("2026-08-19T10:01:00Z"),
+    )).toEqual(new Date("2026-08-19T10:00:00Z"));
+    expect(() => optionalObservedAt(
+      "2026-08-19T10:07:00Z",
+      "timezoneObservedAt",
+      new Date("2026-08-19T10:01:00Z"),
+    )).toThrowError();
   });
 });

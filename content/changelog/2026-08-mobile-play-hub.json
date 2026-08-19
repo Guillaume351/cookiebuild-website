@@ -1,0 +1,8 @@
+{
+  "slug": "mobile-play-hub-kits-stats-alerts",
+  "contentType": "changelog",
+  "title": "Your Cookie Build play hub comes to mobile",
+  "summary": "The companion app adds an earned-coin kit shop, live linked-player status, focused per-game stats and history, and low-noise tools for finding players.",
+  "body": "- See your verified Minecraft username and current online status from Home and Profile.\n- Spend earned Cookie Build coins on the real MicroBattles and SkyWars kit catalogs, unlock eligible upgrades, and select the kit used in your next match. No real-money purchase is involved.\n- Open a focused Stats submenu for games played, wins, win rate, eliminations, a 30-day activity graph, and recent match history per game mode.\n- Find players by exact username or recent shared matches, see privacy-scoped friend and party presence, and understand when player-call alerts are disabled.\n- Use a low-noise notification setup, category controls, selected-friend alerts, presence privacy, and quiet hours without crowding the main pages.",
+  "publishedAt": "2026-08-18T14:00:00+02:00"
+}

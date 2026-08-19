@@ -241,6 +241,8 @@ export const mobileDevices = pgTable(
     appVersion: varchar("app_version", { length: 32 }),
     locale: varchar({ length: 16 }),
     timezone: varchar({ length: 64 }),
+    timezoneOffsetMinutes: integer("timezone_offset_minutes"),
+    timezoneObservedAt: timestamp("timezone_observed_at", { withTimezone: true, mode: "date" }),
     notificationsAuthorized: boolean("notifications_authorized").default(false).notNull(),
     lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
@@ -251,6 +253,10 @@ export const mobileDevices = pgTable(
     uniqueIndex("mobile_devices_fcm_token_uq").on(table.fcmToken),
     index("mobile_devices_user_idx").on(table.mobileUserId),
     check("mobile_devices_platform_ck", sql`${table.platform} IN ('ios', 'android')`),
+    check(
+      "mobile_devices_timezone_offset_ck",
+      sql`${table.timezoneOffsetMinutes} IS NULL OR ${table.timezoneOffsetMinutes} BETWEEN -840 AND 840`,
+    ),
   ],
 );
 

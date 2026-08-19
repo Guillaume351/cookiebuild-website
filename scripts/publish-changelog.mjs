@@ -47,6 +47,26 @@ export async function readChangelogFile(filePath) {
   return entries.map(validateChangelogEntry);
 }
 
+function timestamp(value) {
+  if (value instanceof Date) return value.getTime();
+  return new Date(value).getTime();
+}
+
+/** A published slug is immutable; an identical retry is the only accepted conflict. */
+export function assertImmutablePublishedEntry(entry, published) {
+  const equal = published
+    && published.contentType === entry.contentType
+    && published.title === entry.title
+    && published.summary === entry.summary
+    && published.body === entry.body
+    && (published.coverImageUrl ?? null) === entry.coverImageUrl
+    && published.status === "published"
+    && timestamp(published.publishedAt) === entry.publishedAt.getTime();
+  if (!equal) {
+    throw new Error(`Immutable changelog conflict for slug ${entry.slug}. Publish a new slug instead.`);
+  }
+}
+
 async function publish(entries) {
   const databaseUrl = process.env.NUXT_DATABASE_URL;
   if (!databaseUrl) throw new Error("NUXT_DATABASE_URL is required with --publish.");
@@ -62,33 +82,34 @@ async function publish(entries) {
             ${entry.slug}, ${entry.contentType}, ${entry.title}, ${entry.summary}, ${entry.body},
             ${entry.coverImageUrl}, 'published', ${entry.publishedAt}
           )
-          ON CONFLICT (slug) DO UPDATE SET
-            content_type = EXCLUDED.content_type,
-            title = EXCLUDED.title,
-            summary = EXCLUDED.summary,
-            body = EXCLUDED.body,
-            cover_image_url = EXCLUDED.cover_image_url,
-            status = 'published',
-            published_at = CASE
-              WHEN mobile_news_posts.status = 'published' THEN mobile_news_posts.published_at
-              ELSE EXCLUDED.published_at
-            END,
-            expires_at = NULL,
-            updated_at = now()
+          ON CONFLICT (slug) DO NOTHING
         `;
+        const [published] = await transaction`
+          SELECT content_type AS "contentType",
+                 title,
+                 summary,
+                 body,
+                 cover_image_url AS "coverImageUrl",
+                 status,
+                 published_at AS "publishedAt"
+            FROM mobile_news_posts
+           WHERE slug = ${entry.slug}
+           FOR SHARE
+        `;
+        assertImmutablePublishedEntry(entry, published);
       }
     });
     for (const entry of entries) {
       const [published] = await sql`
-        SELECT content_type, status, published_at
+        SELECT content_type AS "contentType", status, published_at AS "publishedAt"
         FROM mobile_news_posts
         WHERE slug = ${entry.slug}
       `;
       if (!published
-          || published.content_type !== entry.contentType
+          || published.contentType !== entry.contentType
           || published.status !== "published"
-          || !(published.published_at instanceof Date)
-          || published.published_at > new Date()) {
+          || !(published.publishedAt instanceof Date)
+          || published.publishedAt > new Date()) {
         throw new Error(`Published changelog verification failed for ${entry.slug}.`);
       }
     }

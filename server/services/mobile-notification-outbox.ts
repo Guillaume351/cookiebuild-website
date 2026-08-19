@@ -197,7 +197,11 @@ async function recipientsFor(audience: NotificationAudience, preference: Notific
       deviceId: mobileDevices.id,
       fcmToken: mobileDevices.fcmToken,
       timezone: sql<string | null>`coalesce(${mobileDevices.timezone}, ${mobileUsers.timezone})`,
-      timezoneOffsetMinutes: mobileNotificationPreferences.timezoneOffsetMinutes,
+      timezoneOffsetMinutes: sql<number>`coalesce(
+        ${mobileDevices.timezoneOffsetMinutes},
+        ${mobileNotificationPreferences.timezoneOffsetMinutes},
+        0
+      )`,
       quietHoursStart: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
         THEN ${mobileNotificationPreferences.quietHoursStart} ELSE NULL END`,
       quietHoursEnd: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}

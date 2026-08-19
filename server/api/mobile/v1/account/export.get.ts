@@ -27,6 +27,8 @@ export default defineEventHandler(async (event) => {
         appVersion: mobileDevices.appVersion,
         locale: mobileDevices.locale,
         timezone: mobileDevices.timezone,
+        timezoneOffsetMinutes: mobileDevices.timezoneOffsetMinutes,
+        timezoneObservedAt: mobileDevices.timezoneObservedAt,
         notificationsAuthorized: mobileDevices.notificationsAuthorized,
         lastSeenAt: mobileDevices.lastSeenAt,
         createdAt: mobileDevices.createdAt,

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "gameplaySources": {
+    "microbattles": "MicroBattles/src/main/java/com/cookiebuild/microbattles/kits/KitManager.java",
+    "skywars": "SkyWars/src/main/java/com/cookiebuild/skywars/kit/SkyWarsKit.java"
+  },
+  "microbattles": [
+    { "name": "Default", "price": 0, "requiredLevel": 0, "defaultUnlocked": true },
+    { "name": "Explosive Archer", "price": 500, "requiredLevel": 7, "defaultUnlocked": false },
+    { "name": "Enderman", "price": 1000, "requiredLevel": 16, "defaultUnlocked": false },
+    { "name": "Knockback Warrior", "price": 300, "requiredLevel": 0, "defaultUnlocked": true },
+    { "name": "Tank", "price": 900, "requiredLevel": 15, "defaultUnlocked": false },
+    { "name": "Ninja", "price": 1200, "requiredLevel": 22, "defaultUnlocked": false },
+    { "name": "Archer", "price": 500, "requiredLevel": 0, "defaultUnlocked": true },
+    { "name": "Berserker", "price": 600, "requiredLevel": 8, "defaultUnlocked": false },
+    { "name": "Chemist", "price": 1100, "requiredLevel": 20, "defaultUnlocked": false },
+    { "name": "Assassin", "price": 1400, "requiredLevel": 28, "defaultUnlocked": false },
+    { "name": "Miner", "price": 300, "requiredLevel": 3, "defaultUnlocked": false },
+    { "name": "Vampire", "price": 900, "requiredLevel": 14, "defaultUnlocked": false },
+    { "name": "Frost Mage", "price": 1300, "requiredLevel": 25, "defaultUnlocked": false },
+    { "name": "Juggernaut", "price": 1600, "requiredLevel": 30, "defaultUnlocked": false },
+    { "name": "Trapper", "price": 400, "requiredLevel": 5, "defaultUnlocked": false },
+    { "name": "Alchemist", "price": 800, "requiredLevel": 12, "defaultUnlocked": false },
+    { "name": "Mobility", "price": 400, "requiredLevel": 4, "defaultUnlocked": false }
+  ],
+  "skywars": [
+    { "id": "scout", "name": "Scout", "price": 0, "defaultUnlocked": true },
+    { "id": "armorer", "name": "Armorer", "price": 150, "defaultUnlocked": false },
+    { "id": "builder", "name": "Builder", "price": 100, "defaultUnlocked": false },
+    { "id": "healer", "name": "Healer", "price": 125, "defaultUnlocked": false }
+  ]
+}

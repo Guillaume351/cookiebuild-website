@@ -3,6 +3,7 @@ import { createError } from "h3";
 
 const LINK_CODE_PATTERN = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{8}$/;
 const QUIET_HOUR_PATTERN = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+const IANA_TIMEZONE_PATTERN = /^(?:UTC|Etc\/UTC|[A-Za-z0-9_+-]+(?:\/[A-Za-z0-9_+-]+)+)$/;
 
 export function bearerToken(authorization: string | undefined) {
   if (!authorization) return undefined;
@@ -59,10 +60,56 @@ export function optionalQuietHour(value: unknown, field: string) {
   return result;
 }
 
+export function optionalIanaTimezone(value: unknown, field: string) {
+  const result = optionalString(value, field, 64);
+  if (result === null) return null;
+  if (!IANA_TIMEZONE_PATTERN.test(result)) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: result }).format();
+  } catch {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  return result;
+}
+
+export function optionalInteger(
+  value: unknown,
+  field: string,
+  { minimum, maximum }: { minimum: number; maximum: number },
+) {
+  if (value === undefined || value === null) return null;
+  return requiredInteger(value, field, { minimum, maximum });
+}
+
+export function optionalObservedAt(value: unknown, field: string, now = new Date()) {
+  if (value === undefined || value === null || value === "") return null;
+  if (typeof value !== "string" || !/(?:Z|[+-]\d{2}:\d{2})$/.test(value)) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  const observedAt = new Date(value);
+  if (Number.isNaN(observedAt.getTime()) || observedAt.getTime() > now.getTime() + 5 * 60_000) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  return observedAt;
+}
+
 export function positiveInteger(value: unknown, fallback: number, maximum: number) {
   const parsed = Number.parseInt(String(value ?? ""), 10);
   if (!Number.isFinite(parsed) || parsed < 1) return fallback;
   return Math.min(parsed, maximum);
+}
+
+export function requiredInteger(
+  value: unknown,
+  field: string,
+  { minimum, maximum }: { minimum: number; maximum: number },
+) {
+  if (typeof value !== "number" || !Number.isInteger(value) || value < minimum || value > maximum) {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  return value;
 }
 
 export function optionalBoolean(value: unknown, field: string) {
