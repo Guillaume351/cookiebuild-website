@@ -3,6 +3,9 @@ import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
 
 export function useGameLandingSeo(game: GameLanding) {
   const canonicalUrl = `${COOKIE_BUILD_SITE_URL}${game.path}`;
+  const socialImage = game.heroImage
+    ? `${COOKIE_BUILD_SITE_URL}${game.heroImage}`
+    : `${COOKIE_BUILD_SITE_URL}/cookie-build-social.webp`;
 
   useSeoMeta({
     title: game.seoTitle,
@@ -12,12 +15,15 @@ export function useGameLandingSeo(game: GameLanding) {
     ogDescription: game.socialDescription,
     ogType: "website",
     ogUrl: canonicalUrl,
-    ogImage: `${COOKIE_BUILD_SITE_URL}/cookie-build-social.webp`,
-    ogImageAlt: "Cookie Build Minecraft server lobby",
+    ogImage: socialImage,
+    ogImageAlt: game.heroImageAlt || "Cookie Build Minecraft server lobby",
+    ogImageWidth: String(game.heroImageWidth || 1200),
+    ogImageHeight: String(game.heroImageHeight || 630),
     twitterCard: "summary_large_image",
     twitterTitle: game.seoTitle,
     twitterDescription: game.socialDescription,
-    twitterImage: `${COOKIE_BUILD_SITE_URL}/cookie-build-social.webp`,
+    twitterImage: socialImage,
+    twitterImageAlt: game.heroImageAlt || "Cookie Build Minecraft server lobby",
   });
 
   useHead({

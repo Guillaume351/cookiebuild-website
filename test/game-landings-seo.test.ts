@@ -7,6 +7,7 @@ const readSource = (path: string) => readFile(new URL(path, import.meta.url), "u
 describe("game mode SEO landing pages", () => {
   it("defines a unique, search-focused page for every live game", () => {
     expect(gameLandings.map((game) => game.slug)).toEqual([
+      "bedwars",
       "build-battle",
       "microbattles",
       "pitchout",
@@ -26,6 +27,33 @@ describe("game mode SEO landing pages", () => {
       expect(game.steps).toHaveLength(3);
       expect(game.faqs.length).toBeGreaterThanOrEqual(4);
     }
+  });
+
+  it("publishes the BedWars beta with its Cookie Colosseum artwork and rules", async () => {
+    const bedWars = gameLandings.find((game) => game.slug === "bedwars");
+    const [page, artwork, seo, sitemap] = await Promise.all([
+      readSource("../pages/bedwars.vue"),
+      readFile(new URL("../public/bedwars-cookie-colosseum-beta.webp", import.meta.url)),
+      readSource("../composables/useGameLandingSeo.ts"),
+      readSource("../public/sitemap.xml"),
+    ]);
+
+    expect(bedWars).toMatchObject({
+      path: "/bedwars",
+      badgeLabel: "Beta · Free to play",
+      heroImage: "/bedwars-cookie-colosseum-beta.webp",
+      heroImageCaption: "Cookie Colosseum beta preview — Red team's bakery base.",
+      heroImageWidth: 1200,
+      heroImageHeight: 675,
+    });
+    expect(bedWars?.heroIntro).toContain("Cookie Colosseum");
+    expect(bedWars?.highlightBody).toContain("Bedrock forms");
+    expect(artwork.byteLength).toBeGreaterThan(10_000);
+    expect(page).toContain("gameLandingBySlug.bedwars");
+    expect(page).toContain("useGameLandingSeo(game)");
+    expect(seo).toContain("twitterImageAlt");
+    expect(seo).toContain("ogImageHeight");
+    expect(sitemap.match(/https:\/\/www\.cookie-build\.com\/bedwars/g)).toHaveLength(1);
   });
 
   it("publishes shared connection details and visible matching structured data", async () => {

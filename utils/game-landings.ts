@@ -17,6 +17,12 @@ export interface GameLanding {
   path: string;
   name: string;
   icon: string;
+  badgeLabel?: string;
+  heroImage?: string;
+  heroImageAlt?: string;
+  heroImageCaption?: string;
+  heroImageWidth?: number;
+  heroImageHeight?: number;
   cardDescription: string;
   seoTitle: string;
   metaDescription: string;
@@ -40,6 +46,44 @@ const joinFaq = (gameName: string) => ({
 });
 
 export const gameLandings: GameLanding[] = [
+  {
+    slug: "bedwars",
+    path: "/bedwars",
+    name: "BedWars",
+    icon: "/bedwars-icon.svg",
+    badgeLabel: "Beta · Free to play",
+    heroImage: "/bedwars-cookie-colosseum-beta.webp",
+    heroImageAlt: "Red bakery island in the Cookie Colosseum BedWars map",
+    heroImageCaption: "Cookie Colosseum beta preview — Red team's bakery base.",
+    heroImageWidth: 1200,
+    heroImageHeight: 675,
+    cardDescription: "Protect your bed, collect bakery cookies, upgrade your team, and eliminate every rival.",
+    seoTitle: "BedWars Minecraft Bedrock Server | Cookie Build",
+    metaDescription: `Play BedWars on Cookie Build, a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP} on Bedrock port ${COOKIE_BUILD_BEDROCK_PORT} for Cookie Colosseum.`,
+    h1: "BedWars Minecraft Server for Bedrock & Java",
+    heroIntro: "Play Cookie Build BedWars in the Cookie Colosseum, a bakery-themed floating arena made for Java and Bedrock cross-play. Protect your bed, collect cookies and rare resources, upgrade your team, break enemy beds, and eliminate every rival.",
+    joinHeading: "Play BedWars on Minecraft Bedrock",
+    joinIntro: "BedWars is a beta mode on Cookie Build. Supported Bedrock and Java players join the same four-team matches with native menus adapted for each edition; admission may be paused temporarily while beta bugs are investigated.",
+    lobbyLabel: "BedWars",
+    gameplayEyebrow: "Beds, bridges and bakery cookies",
+    gameplayHeading: "How Cookie Build BedWars works",
+    steps: [
+      { title: "Protect your bed", description: "Join a colored team, defend your bakery island and keep your bed alive so teammates can respawn." },
+      { title: "Collect and upgrade", description: "Gather cookies at your base, contest diamond and emerald islands, then buy gear, blocks and team upgrades." },
+      { title: "Break every rival bed", description: "Bridge across the Cookie Colosseum, destroy enemy beds and secure the final eliminations to win." },
+    ],
+    highlightHeading: "A BedWars shop built for Java and Bedrock",
+    highlightBody: "Java players use familiar inventory shops while Bedrock players get native Bedrock forms with the same items, prices and upgrade rules. Cookie generators power the bakery-themed economy, and the Cookie Colosseum provides four bases, diamond islands and a central emerald objective.",
+    socialDescription: "Protect your bed, collect bakery cookies and conquer the Cookie Colosseum in Cookie Build's Java and Bedrock open beta.",
+    faqs: [
+      { question: "Is BedWars available on Minecraft Bedrock?", answer: `BedWars is a beta mode for Bedrock and Java. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose BedWars in the lobby when beta admission is open.` },
+      joinFaq("BedWars"),
+      { question: "Can Java and Bedrock players play BedWars together?", answer: "Yes. Cookie Build is a cross-play server. Java inventory shops and Bedrock forms use the same catalog, prices and match rules." },
+      { question: "What are cookies used for in Cookie Build BedWars?", answer: "Cookies are the main resource generated at each base. Spend them on early blocks and equipment, then use gold, diamonds and emeralds for stronger purchases and team upgrades." },
+      { question: "How do you win BedWars?", answer: "Protect your own bed, destroy the beds belonging to opposing teams, then eliminate every rival who can no longer respawn." },
+      { question: "How can I report a BedWars beta bug?", answer: "Please send the steps, your Minecraft edition and any screenshot or video on the Cookie Build Discord or Twitter/X so the team can investigate quickly." },
+    ],
+  },
   {
     slug: "build-battle",
     path: "/build-battle",

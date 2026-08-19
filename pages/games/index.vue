@@ -40,7 +40,7 @@ import { COOKIE_BUILD_SERVER_IP, COOKIE_BUILD_SITE_URL, gameLandings } from "@/u
 
 const canonicalUrl = `${COOKIE_BUILD_SITE_URL}/games`;
 const title = "Minecraft Mini-Games for Bedrock & Java | Cookie Build";
-const description = "Explore Build Battle, MicroBattles, Pitchout, SkyWars and Turf Wars on Cookie Build's free Minecraft Bedrock and Java server.";
+const description = "Explore BedWars, Build Battle, MicroBattles, Pitchout, SkyWars and Turf Wars on Cookie Build's free Minecraft Bedrock and Java server.";
 
 useSeoMeta({
   title,

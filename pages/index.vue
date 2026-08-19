@@ -434,6 +434,7 @@ const minigames = computed(() => [
     icon: "/bedwars-icon.svg",
     new: true,
     cornerLabel: "BETA",
+    href: "/bedwars",
   },
 ]);
 

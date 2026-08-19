@@ -1,7 +1,14 @@
 <template>
   <div class="space-y-16">
     <section class="relative overflow-hidden rounded-3xl border border-orange-500/20 bg-zinc-950 text-white shadow-2xl">
-      <div class="hero-lobby absolute inset-0 bg-cover bg-center opacity-30"></div>
+      <img
+        v-if="game.heroImage"
+        :src="game.heroImage"
+        alt=""
+        aria-hidden="true"
+        class="absolute inset-0 h-full w-full object-cover object-center opacity-35"
+      />
+      <div v-else class="hero-lobby absolute inset-0 bg-cover bg-center opacity-30"></div>
       <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-orange-950/60"></div>
 
       <div class="relative px-6 py-16 md:px-12 md:py-24">
@@ -11,7 +18,7 @@
         <div class="max-w-4xl">
           <div class="mb-5 flex items-center gap-3">
             <img :src="game.icon" :alt="`${game.name} icon`" class="h-11 w-11" />
-            <Badge class="bg-green-600 hover:bg-green-600">Available now · Free to play</Badge>
+            <Badge class="bg-green-600 hover:bg-green-600">{{ game.badgeLabel || "Available now · Free to play" }}</Badge>
           </div>
           <h1 class="text-4xl font-black tracking-tight text-white md:text-6xl">{{ game.h1 }}</h1>
           <p class="mt-6 max-w-3xl text-lg leading-relaxed text-zinc-200 md:text-xl">{{ game.heroIntro }}</p>
@@ -35,6 +42,19 @@
         </div>
       </div>
     </section>
+
+    <figure v-if="game.heroImage" class="mx-auto w-full max-w-5xl overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+      <img
+        :src="game.heroImage"
+        :alt="game.heroImageAlt || `${game.name} Minecraft map`"
+        :width="game.heroImageWidth"
+        :height="game.heroImageHeight"
+        class="aspect-video h-auto w-full object-cover"
+      />
+      <figcaption class="border-t border-zinc-800 px-5 py-3 text-sm text-zinc-400">
+        {{ game.heroImageCaption || game.heroImageAlt }}
+      </figcaption>
+    </figure>
 
     <section :aria-labelledby="`${game.slug}-join-title`" class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <div>

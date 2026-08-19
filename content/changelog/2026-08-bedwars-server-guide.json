@@ -1,0 +1,9 @@
+{
+  "slug": "bedwars-server-guide",
+  "contentType": "changelog",
+  "title": "The BedWars server guide is live",
+  "summary": "A dedicated BedWars page now explains the Cookie Colosseum rules, Java and Bedrock cross-play, connection details, shops and cookie economy.",
+  "body": "- The new BedWars guide explains how to protect your bed, collect cookies, buy upgrades and eliminate opposing teams.\n- Java and Bedrock connection details are available directly on the page.\n- The Cookie Colosseum render gives players a first look at the four-team bakery arena.\n- BedWars has been added to the public games directory, homepage and sitemap.\n- BedWars remains in open beta. Please do not hesitate to report bugs on Discord or Twitter/X with your edition and reproduction steps.",
+  "coverImageUrl": "https://www.cookie-build.com/bedwars-cookie-colosseum-beta.webp",
+  "publishedAt": "2026-08-19T08:55:00+02:00"
+}
