@@ -1,75 +1,55 @@
-# Nuxt 3 Minimal Starter
+# Cookie Build website and mobile API
 
-Look at the [Nuxt 3 documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Production Nuxt application for [Cookie Build](https://www.cookie-build.com): public server pages,
+Minecraft Java/Bedrock status, player statistics, changelog content, companion-app APIs, and the
+authenticated administration console.
 
-## Setup
+## Local setup
 
-Make sure to install the dependencies:
-
-```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
+Requirements: Node.js 22+, npm, and PostgreSQL for database-backed routes.
 
 ```bash
-# npm
+npm ci
+cp .env.example .env
 npm run dev
-
-# pnpm
-pnpm run dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+The development server is available at `http://localhost:3000`. Never commit `.env` or production
+credentials. Public pages and build validation can run without a live production database; routes
+that read player or mobile data require the documented environment variables.
 
-Build the application for production:
+## Quality gates
+
+Run the same checks expected before a production release:
 
 ```bash
-# npm
+npm test
+npm run typecheck
 npm run build
-
-# pnpm
-pnpm run build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+npm audit --omit=dev
 ```
 
-Locally preview production build:
+Player-visible releases require an immutable JSON note under `content/changelog/`. Validate the
+selected file before deployment:
 
 ```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm run preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
+npm run changelog:publish -- content/changelog/<release>.json
 ```
 
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+Without `--publish`, the command always validates without writing. Publication requires explicit
+`--publish` plus database configuration and is idempotent for an identical immutable slug.
+
+## Important paths
+
+- `pages/`, `components/`: public and administrative UI
+- `server/api/`: public, mobile, and admin API routes
+- `server/services/`: business and integration logic
+- `drizzle/`: reviewed PostgreSQL migrations
+- `content/changelog/`: versioned player-facing release notes
+- `test/`: Vitest contract, security, and integration coverage
+- `docs/`: deployment and administration documentation
+- `operator/`, `monitor/`, `update-monitor/`: isolated operational services
+
+Production deployment and rollback follow the Cookie Build operations runbook. Do not publish a
+website commit directly without the release preflight, a verified changelog slug, and live HTTP/API
+checks.

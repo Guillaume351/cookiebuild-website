@@ -20,6 +20,7 @@
           >Player Stats</NuxtLink
         >
         <NuxtLink to="/updates" class="text-white hover:text-gray-300 transition-colors">Updates</NuxtLink>
+        <NuxtLink to="/status" class="text-white hover:text-gray-300 transition-colors">Status</NuxtLink>
       </div>
       <button
         type="button"
@@ -66,6 +67,13 @@
           @click="mobileMenuOpen = false"
         >
           Updates
+        </NuxtLink>
+        <NuxtLink
+          to="/status"
+          class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
+          @click="mobileMenuOpen = false"
+        >
+          Status
         </NuxtLink>
       </div>
     </div>

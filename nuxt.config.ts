@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     "/**": { headers: publicSecurityHeaders },
     "/news": { redirect: { to: "/updates", statusCode: 301 } },
     "/changelog": { redirect: { to: "/updates", statusCode: 301 } },
-    "/lobby.webp": { redirect: { to: "/lobby-hero-1600.webp", statusCode: 301 } },
+    "/lobby.webp": { redirect: { to: "/lobby-hero-clean-1600.webp", statusCode: 301 } },
   },
   app: {
     layoutTransition: { name: "layout", mode: "out-in" },
@@ -34,12 +34,12 @@ export default defineNuxtConfig({
         {
           name: "description",
           content:
-            "Join Cookie Build, the classic Minecraft mini-games server for Java & Bedrock Editions. Play Pitchout, MicroBattles, and more with a global community since 2014.",
+            "Join Cookie Build, an independent Minecraft mini-games server for Java and Bedrock. Check live edition status, read the rules, and play free.",
         },
         { name: "theme-color", content: "#f97316" }, // Orange-500
         // Open Graph
         { property: "og:title", content: "Cookie Build | Classic Minecraft Mini-Games Server" },
-        { property: "og:description", content: "Play Pitchout, MicroBattles, and unique mini-games on Cookie Build. Supports Minecraft Java & Bedrock Editions." },
+        { property: "og:description", content: "Play free Minecraft mini-games across Java and Bedrock, with live status, clear rules, and player safety tools." },
         { property: "og:type", content: "website" },
         { property: "og:url", content: "https://www.cookie-build.com/" },
         { property: "og:image", content: "https://www.cookie-build.com/cookie-build-social.webp" },

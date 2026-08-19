@@ -344,7 +344,7 @@ import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, ExternalLink, Gamepad2, Mic, X } from "@lucide/vue";
-import { ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
 const serverIP = ref("play.cookie-build.com");
 const bedrockPort = "19132";
@@ -355,6 +355,23 @@ const editions = [
   { id: "bedrock", label: "Bedrock" },
   { id: "console", label: "Console" },
 ];
+
+onMounted(() => {
+  const remembered = window.localStorage.getItem("cookiebuild-minecraft-edition");
+  if (remembered === "java" || remembered === "bedrock" || remembered === "console") {
+    selectedEdition.value = remembered;
+    return;
+  }
+  if (window.matchMedia("(max-width: 767px)").matches) {
+    selectedEdition.value = "bedrock";
+  }
+});
+
+watch(selectedEdition, (edition) => {
+  if (import.meta.client) {
+    window.localStorage.setItem("cookiebuild-minecraft-edition", edition);
+  }
+});
 
 const { data: updatesData } = await useFetch("/api/mobile/v1/news", {
   query: { limit: 3 },
@@ -499,7 +516,7 @@ useHead({
           applicationCategory: "Game",
           operatingSystem: "Windows, macOS, Linux, iOS, Android, Xbox, PlayStation, Switch",
           url: "https://www.cookie-build.com",
-          image: "https://www.cookie-build.com/lobby-hero-1600.webp",
+          image: "https://www.cookie-build.com/lobby-hero-clean-1600.webp",
           author: {
             "@type": "Person",
             name: "Guillaume351",
@@ -532,12 +549,12 @@ useHead({
 
 <style scoped>
 .hero-lobby {
-  background-image: url("/lobby-hero-960.webp");
+  background-image: url("/lobby-hero-clean-960.webp");
 }
 
 @media (min-width: 768px) {
   .hero-lobby {
-    background-image: url("/lobby-hero-1600.webp");
+    background-image: url("/lobby-hero-clean-1600.webp");
   }
 }
 </style>

@@ -1,0 +1,9 @@
+{
+  "slug": "new-player-experience-polish",
+  "contentType": "changelog",
+  "title": "A clearer first session on Cookie Build",
+  "summary": "New players now get clearer guidance, useful queue controls, faster solo practice, native replay choices, and a more transparent public server experience.",
+  "body": "- The welcome flow is now completed only after an explicit player action, with a shorter scoreboard and first-match rules focused on what to do next.\n- Waiting players can see that they are queued and use clear Java and Bedrock actions to leave, change activity, practise, or call interested players.\n- Solo practice is available without abandoning the queue, and idle waits offer useful alternatives sooner.\n- Post-match controls now make it easy to replay the same game, choose the next activity, or return to the lobby on Java and Bedrock.\n- The core new-player journey is available in English, French, Spanish, and Brazilian Portuguese.\n- The public server identity and MOTD now describe Cookie Build consistently as a Java and Bedrock mini-games network with quests and community events.\n- The website now checks Java and Bedrock separately, reports zero players honestly, and distinguishes an unavailable status check from a confirmed outage.\n- Server rules and safety help are published in English, French, Spanish, and Brazilian Portuguese, including how to mute, block, report, and contact support.\n- Navigation, missing-page guidance, project documentation, metadata, and the lobby artwork have been cleaned up for a more consistent Cookie Build experience.",
+  "coverImageUrl": "https://www.cookie-build.com/lobby-hero-clean-1600.webp",
+  "publishedAt": "2026-08-19T17:30:00+02:00"
+}

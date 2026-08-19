@@ -12,6 +12,6 @@ describe("legacy public links", () => {
   it("redirects the former social image to the optimized replacement", async () => {
     const config = await readFile(new URL("../nuxt.config.ts", import.meta.url), "utf8");
 
-    expect(config).toContain('"/lobby.webp": { redirect: { to: "/lobby-hero-1600.webp", statusCode: 301 } }');
+    expect(config).toContain('"/lobby.webp": { redirect: { to: "/lobby-hero-clean-1600.webp", statusCode: 301 } }');
   });
 });

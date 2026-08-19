@@ -7,7 +7,19 @@ interface McStatusResponse {
   motd?: { clean?: string };
 }
 
-async function statusFor(edition: "java" | "bedrock", address: string) {
+export interface EditionServerStatus {
+  online: boolean;
+  reachable: boolean;
+  players: number;
+  maximumPlayers: number;
+  version: string | null;
+  motd: string | null;
+}
+
+async function statusFor(
+  edition: "java" | "bedrock",
+  address: string,
+): Promise<EditionServerStatus> {
   try {
     const status = await $fetch<McStatusResponse>(
       `https://api.mcstatus.io/v2/status/${edition}/${address}`,
@@ -15,6 +27,7 @@ async function statusFor(edition: "java" | "bedrock", address: string) {
     );
     return {
       online: Boolean(status.online),
+      reachable: true,
       players: Math.max(0, Number(status.players?.online ?? 0)),
       maximumPlayers: Math.max(0, Number(status.players?.max ?? 0)),
       version: status.version?.name_clean ?? status.version?.name ?? null,
@@ -23,6 +36,7 @@ async function statusFor(edition: "java" | "bedrock", address: string) {
   } catch {
     return {
       online: false,
+      reachable: false,
       players: 0,
       maximumPlayers: 0,
       version: null,

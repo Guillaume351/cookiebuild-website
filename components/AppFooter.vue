@@ -33,6 +33,21 @@
               >
             </li>
             <li>
+              <NuxtLink to="/status" class="text-gray-400 hover:text-white transition-colors"
+                >Server Status</NuxtLink
+              >
+            </li>
+            <li>
+              <NuxtLink to="/rules" class="text-gray-400 hover:text-white transition-colors"
+                >Server Rules</NuxtLink
+              >
+            </li>
+            <li>
+              <NuxtLink to="/support" class="text-gray-400 hover:text-white transition-colors"
+                >Support</NuxtLink
+              >
+            </li>
+            <li>
               <NuxtLink to="/account/delete" class="text-gray-400 hover:text-white transition-colors"
                 >Delete App Account</NuxtLink
               >
