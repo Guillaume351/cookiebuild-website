@@ -12,9 +12,10 @@
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
       "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
       "id": 1,
+      "description": "Paper reports one shared online population. Bedrock players connected through Geyser are already included in the Java server-list count.",
       "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
-      "targets": [{"expr": "max(cookiebuild_monitor_online_players{edition=\"java\"})", "refId": "A"}],
-      "title": "Players online",
+      "targets": [{"expr": "max(cookiebuild_monitor_online_players)", "refId": "A"}],
+      "title": "Players online · total",
       "type": "stat"
     },
     {
@@ -52,9 +53,10 @@
       "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
       "gridPos": {"h": 8, "w": 8, "x": 0, "y": 4},
       "id": 5,
+      "description": "Paper and Geyser expose the same shared server population. This panel intentionally shows one total instead of duplicating it as Java and Bedrock.",
       "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
-      "targets": [{"expr": "cookiebuild_monitor_online_players", "legendFormat": "{{edition}}", "refId": "A"}],
-      "title": "Online players over time",
+      "targets": [{"expr": "max(cookiebuild_monitor_online_players)", "legendFormat": "Java + Bedrock total", "refId": "A"}],
+      "title": "Online players over time · total",
       "type": "timeseries"
     },
     {
@@ -157,6 +159,6 @@
   "timezone": "browser",
   "title": "Cookie Build · Players and Reliability",
   "uid": "cookiebuild-overview",
-  "version": 1,
+  "version": 2,
   "weekStart": "monday"
 }
