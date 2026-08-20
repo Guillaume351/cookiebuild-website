@@ -4,6 +4,7 @@ import {
   eventDateTime,
   featuredEvent,
   isEventLive,
+  updateSlugFromHash,
   updateTypeLabel,
   type NetworkEvent,
 } from "../utils/updates";
@@ -26,6 +27,12 @@ describe("public updates presentation", () => {
   it("gives each post type a clear public label", () => {
     expect(updateTypeLabel("news")).toBe("News");
     expect(updateTypeLabel("changelog")).toBe("Release note");
+  });
+
+  it("recognizes legacy update anchors without accepting unsafe slugs", () => {
+    expect(updateSlugFromHash("#update-skywars-release")).toBe("skywars-release");
+    expect(updateSlugFromHash("#news-skywars-release")).toBe("skywars-release");
+    expect(updateSlugFromHash("#update-Bad_Slug")).toBeNull();
   });
 
   it("prioritizes a live event, then the nearest upcoming event", () => {

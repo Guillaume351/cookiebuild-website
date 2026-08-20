@@ -1,0 +1,30 @@
+[
+  {
+    "slug": "mobile-play-hub-store-rollout",
+    "contentType": "changelog",
+    "title": "Mobile play hub availability update",
+    "summary": "The earned-coin kit shop and detailed game history are not included in the app versions currently available from Apple and Google.",
+    "body": "- This clarification replaces our earlier mobile play hub announcement.\n- Live server status, events, friends, parties, privacy controls, and notification settings remain available in the current companion app.\n- We will publish another update when the new play hub is available to download from each store.",
+    "supersedesSlug": "mobile-play-hub-kits-stats-alerts",
+    "publishedAt": "2026-08-19T21:10:00+02:00"
+  },
+  {
+    "slug": "bedwars-open-beta-availability",
+    "contentType": "changelog",
+    "title": "BedWars is now in open beta",
+    "summary": "Cookie Colosseum is open on Java and Bedrock while we continue to tune balance and reliability from player feedback.",
+    "body": "- This update replaces the earlier Coming Soon preview.\n- Protect your bed, collect resources, upgrade your team, and eliminate every opposing team.\n- Java and Bedrock players use the same shop catalog, prices, and match rules.\n- Report a problem at cookie-build.com/support with your edition and a short description of what happened.",
+    "supersedesSlug": "bedwars-cookie-colosseum",
+    "publishedAt": "2026-08-19T21:11:00+02:00"
+  },
+  {
+    "slug": "new-player-experience-clearer-first-session",
+    "contentType": "changelog",
+    "title": "A smoother first session on Cookie Build",
+    "summary": "New players now see a shorter welcome, clearer waiting choices, practice that keeps their place in the queue, and simple replay options on Java and Bedrock.",
+    "body": "- The welcome stays available until the player chooses an activity.\n- While waiting, players can leave the queue, change activity, practice, or call for other players.\n- Practice keeps the player's place in the queue and stops automatically when the match begins.\n- After a match, players can replay the same game, choose another activity, or return to the lobby.\n- The main first-session experience is available in English, French, Spanish, and Brazilian Portuguese.\n- The website now shows Java and Bedrock status separately and provides clear rules, safety help, and service status pages.\n- Navigation and lobby artwork have also been refreshed for a more consistent experience.",
+    "coverImageUrl": "https://www.cookie-build.com/lobby-hero-clean-1600.webp",
+    "supersedesSlug": "new-player-experience-polish",
+    "publishedAt": "2026-08-19T21:12:00+02:00"
+  }
+]

@@ -3,11 +3,24 @@ import { readBody } from "h3";
 import db from "../../../../../db/client";
 import { adminAuditLog, mobileNewsPosts } from "../../../../../db/schema";
 import { adminAuditValues, requireAdminAuth } from "../../../../utils/admin-auth";
-import { parseAdminNews } from "../../../../utils/admin-content";
+import {
+  assertAdminCorrectionTarget,
+  parseAdminNews,
+  rethrowAdminNewsWriteConflict,
+} from "../../../../utils/admin-content";
 
 export default defineEventHandler(async (event) => {
   requireAdminAuth(event, "content:write");
   const input = parseAdminNews(await readBody<Record<string, unknown>>(event));
+  if (input.supersedesSlug) {
+    const [[target], [existingReplacement]] = await Promise.all([
+      db.select({ status: mobileNewsPosts.status, contentType: mobileNewsPosts.contentType })
+        .from(mobileNewsPosts).where(eq(mobileNewsPosts.slug, input.supersedesSlug)).limit(1),
+      db.select({ id: mobileNewsPosts.id }).from(mobileNewsPosts)
+        .where(eq(mobileNewsPosts.supersedesSlug, input.supersedesSlug)).limit(1),
+    ]);
+    assertAdminCorrectionTarget(input, target, existingReplacement);
+  }
   const [duplicate] = await db.select({ id: mobileNewsPosts.id }).from(mobileNewsPosts)
     .where(eq(mobileNewsPosts.slug, input.slug)).limit(1);
   if (duplicate) throw createError({ statusCode: 409, statusMessage: "This slug already exists" });
@@ -21,7 +34,7 @@ export default defineEventHandler(async (event) => {
       { status: input.status, contentType: input.contentType, slug: input.slug },
     ));
     return rows;
-  });
+  }).catch(rethrowAdminNewsWriteConflict);
   setResponseStatus(event, 201);
   return { data: created };
 });

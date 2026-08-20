@@ -4,6 +4,8 @@ export type UpdateContentType = "news" | "changelog";
 
 export interface UpdatePost extends NewsPost {
   contentType: UpdateContentType;
+  supersedesSlug?: string | null;
+  supersededBySlug?: string | null;
 }
 
 export interface NetworkEvent {
@@ -25,6 +27,11 @@ function validDate(value: string | Date | null): Date | null {
 
 export function updateTypeLabel(contentType: UpdateContentType): string {
   return contentType === "news" ? "News" : "Release note";
+}
+
+export function updateSlugFromHash(hash: string): string | null {
+  const match = /^#(?:update|news)-([a-z0-9]+(?:-[a-z0-9]+)*)$/.exec(hash);
+  return match?.[1] ?? null;
 }
 
 export function isEventLive(event: NetworkEvent, now = new Date()): boolean {

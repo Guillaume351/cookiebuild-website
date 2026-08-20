@@ -1,0 +1,8 @@
+{
+  "slug": "smoother-fairer-minigame-matches",
+  "contentType": "changelog",
+  "title": "Smoother matches and a fairer SkyWars",
+  "summary": "Rematches are more reliable across every game, while SkyWars now offers fairer loot, better pacing, and clearer guidance for new players.",
+  "body": "- Arenas now reset in the background while players remain online, making consecutive matches and rematches more reliable across every game.\n- SkyWars island chests guarantee essential equipment, central chests contain stronger rewards, and duplicate unusable gear is avoided.\n- SkyWars now adapts spawn selection for small matches, guides each player toward their next objective, refills chests mid-match, and brings the border in earlier.\n- Player tracking helps conclude close SkyWars matches, which now finish within six minutes with clear and fair tiebreaks.\n- MicroBattles, Pitchout, and Turf Wars now have shorter match limits, fair draw handling, and clearer end-game pacing.\n- Core menus, scoreboards, shops, and match messages are available in English, French, Spanish, and Brazilian Portuguese across Java and Bedrock.",
+  "publishedAt": "2026-08-19T22:05:00+02:00"
+}

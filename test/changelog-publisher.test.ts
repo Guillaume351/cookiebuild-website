@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertPlayerFacingEditorialStyle,
+  assertPublishableBatch,
   assertImmutablePublishedEntry,
+  assertValidSupersession,
+  publish,
   validateChangelogEntry,
 } from "../scripts/publish-changelog.mjs";
 
@@ -20,7 +24,76 @@ describe("changelog publisher validation", () => {
       contentType: "changelog",
       title: valid.title,
       coverImageUrl: null,
+      supersedesSlug: null,
     });
+  });
+
+  it("validates immutable supersession links", () => {
+    const entry = validateChangelogEntry({
+      ...valid,
+      slug: "clearer-new-game-release",
+      supersedesSlug: valid.slug,
+      publishedAt: "2026-08-19T21:00:00+02:00",
+    });
+    expect(() => assertValidSupersession(entry, {
+      contentType: "changelog",
+      status: "published",
+      publishedAt: new Date(valid.publishedAt),
+    }, null)).not.toThrow();
+    expect(() => assertValidSupersession(entry, null, null)).toThrow(/not published/);
+    expect(() => assertValidSupersession(entry, {
+      contentType: "changelog",
+      status: "published",
+      publishedAt: null,
+    }, null)).toThrow(/no valid publication date/);
+    expect(() => assertValidSupersession(entry, {
+      contentType: "changelog",
+      status: "published",
+      publishedAt: entry.publishedAt,
+    }, null)).toThrow(/published after/);
+    expect(() => assertValidSupersession(entry, {
+      contentType: "news",
+      status: "published",
+      publishedAt: new Date(valid.publishedAt),
+    }, null)).toThrow(/same content type/);
+    expect(() => assertValidSupersession(entry, {
+      contentType: "changelog",
+      status: "published",
+      publishedAt: new Date(valid.publishedAt),
+    }, { slug: "another-correction" })).toThrow(/already been superseded/);
+    expect(() => validateChangelogEntry({ ...valid, supersedesSlug: valid.slug })).toThrow(/itself/);
+  });
+
+  it("rejects internal implementation language from new player-facing notes", () => {
+    expect(() => assertPlayerFacingEditorialStyle({
+      ...validateChangelogEntry(valid),
+      body: "The MOTD was changed.",
+      publishedAt: new Date("2026-08-19T21:00:00+02:00"),
+    })).toThrow(/internal terminology/);
+    expect(() => validateChangelogEntry({
+      ...valid,
+      slug: "antedated-new-note",
+      body: "The MOTD was changed.",
+      publishedAt: "2025-01-01T10:00:00Z",
+    })).toThrow(/internal terminology/);
+    expect(() => validateChangelogEntry({
+      ...valid,
+      slug: "new-player-experience-polish",
+      body: "The MOTD was changed.",
+      publishedAt: "2025-01-01T10:00:00Z",
+    })).not.toThrow();
+  });
+
+  it("rejects an entirely mixed batch before opening a database transaction", async () => {
+    const past = validateChangelogEntry(valid);
+    const future = validateChangelogEntry({
+      ...valid,
+      slug: "future-note",
+      publishedAt: "2030-01-01T10:00:00Z",
+    });
+    expect(() => assertPublishableBatch([past, future], new Date("2026-08-19T21:00:00Z")))
+      .toThrow(/future-note/);
+    await expect(publish([past, future])).rejects.toThrow(/future-note/);
   });
 
   it("rejects invalid slugs, timestamps, and image URLs", () => {
@@ -40,6 +113,7 @@ describe("changelog publisher validation", () => {
       summary: entry.summary,
       body: entry.body,
       coverImageUrl: entry.coverImageUrl,
+      supersedesSlug: entry.supersedesSlug,
       status: "published",
       publishedAt: new Date(entry.publishedAt),
     };

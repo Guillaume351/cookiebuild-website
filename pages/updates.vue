@@ -102,6 +102,7 @@ import {
   eventDateTime,
   featuredEvent,
   isEventLive,
+  updateSlugFromHash,
   type NetworkEvent,
   type UpdateContentType,
   type UpdatePost,
@@ -125,7 +126,7 @@ const filters: Array<{ value: UpdateFilter; label: string }> = [
 const activeFilter = ref<UpdateFilter>("all");
 
 const { data, pending, error } = await useFetch<UpdatesResponse>("/api/mobile/v1/news", {
-  query: { limit: 50 },
+  query: { limit: 50, includeSuperseded: "true" },
 });
 const { data: eventsData } = await useFetch<EventsResponse>("/api/mobile/v1/events", {
   query: { limit: 20 },
@@ -137,6 +138,15 @@ const filteredPosts = computed(() => activeFilter.value === "all"
   : posts.value.filter((post) => post.contentType === activeFilter.value));
 const nextEvent = computed(() => featuredEvent(eventsData.value?.data ?? []));
 const nextEventIsLive = computed(() => nextEvent.value ? isEventLive(nextEvent.value) : false);
+
+onMounted(async () => {
+  const slug = updateSlugFromHash(window.location.hash);
+  if (!slug) return;
+  await nextTick();
+  if (!document.getElementById(`update-${slug}`) && !document.getElementById(`news-${slug}`)) {
+    await navigateTo(`/updates/${slug}`, { replace: true });
+  }
+});
 
 useSeoMeta({
   title: "Updates & Events | Cookie Build",

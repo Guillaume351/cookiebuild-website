@@ -13,19 +13,24 @@
             <div><p class="font-black text-white">{{ post.title }}</p><p class="mt-1 text-sm text-zinc-400">{{ post.summary }}</p></div>
             <div class="flex items-center gap-2"><span class="rounded-full bg-zinc-800 px-3 py-1 text-xs uppercase text-zinc-300">{{ post.contentType }}</span><span class="rounded-full bg-orange-500/10 px-3 py-1 text-xs uppercase text-orange-300">{{ post.status }}</span></div>
           </div>
-          <div class="mt-4 flex items-center justify-between text-xs text-zinc-500"><span>/{{ post.slug }}</span><button v-if="canWrite" class="font-bold text-orange-400 hover:text-orange-300" @click="editPost(post)">Modifier</button></div>
+          <div class="mt-4 flex items-center justify-between gap-3 text-xs text-zinc-500">
+            <span>/{{ post.slug }}</span>
+            <span v-if="post.status === 'published' && hasCorrection(post)" class="font-semibold text-zinc-400">Correction déjà créée</span>
+            <button v-else-if="canWrite && post.status === 'published'" class="font-bold text-orange-400 hover:text-orange-300" @click="createCorrection(post)">Créer une correction</button>
+            <button v-else-if="canWrite && post.status === 'draft'" class="font-bold text-orange-400 hover:text-orange-300" @click="editPost(post)">Modifier le brouillon</button>
+          </div>
         </article>
         <p v-if="!loading && !content.posts.length" class="rounded-2xl border border-zinc-800 p-8 text-zinc-500">Aucun contenu.</p>
       </div>
       <form v-if="canWrite" class="h-fit space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-5 xl:sticky xl:top-24" @submit.prevent="savePost">
         <div class="flex items-center justify-between"><h2 class="text-lg font-black">{{ postForm.id ? 'Modifier le contenu' : 'Nouveau contenu' }}</h2><button v-if="postForm.id" type="button" class="text-xs text-zinc-400" @click="resetPost">Annuler</button></div>
-        <div class="grid gap-3 sm:grid-cols-2"><label class="admin-label">Type<select v-model="postForm.contentType" class="admin-input"><option value="news">Actualité</option><option value="changelog">Changelog</option></select></label><label class="admin-label">Statut<select v-model="postForm.status" class="admin-input"><option value="draft">Brouillon</option><option value="published">Publié</option><option value="archived">Archivé</option></select></label></div>
+        <div class="grid gap-3 sm:grid-cols-2"><label class="admin-label">Type<select v-model="postForm.contentType" class="admin-input" :disabled="Boolean(postForm.supersedesSlug)"><option value="news">Actualité</option><option value="changelog">Changelog</option></select></label><label class="admin-label">Statut<input value="Brouillon — publication par fichier versionné" disabled class="admin-input"></label></div>
+        <label v-if="postForm.supersedesSlug" class="admin-label">Corrige la note<input v-model="postForm.supersedesSlug" readonly class="admin-input"></label>
         <label class="admin-label">Titre<input v-model="postForm.title" required maxlength="160" class="admin-input"></label>
         <label class="admin-label">Slug<input v-model="postForm.slug" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*" maxlength="120" class="admin-input"></label>
         <label class="admin-label">Résumé<textarea v-model="postForm.summary" required maxlength="500" rows="2" class="admin-input" /></label>
         <label class="admin-label">Contenu<textarea v-model="postForm.body" required maxlength="20000" rows="7" class="admin-input" /></label>
         <label class="admin-label">Image HTTPS<input v-model="postForm.coverImageUrl" type="url" class="admin-input"></label>
-        <div class="grid gap-3 sm:grid-cols-2"><label class="admin-label">Publication<input v-model="postForm.publishedAt" type="datetime-local" class="admin-input"></label><label class="admin-label">Expiration<input v-model="postForm.expiresAt" type="datetime-local" class="admin-input"></label></div>
         <button :disabled="saving" class="w-full rounded-xl bg-orange-500 px-4 py-3 font-black text-zinc-950 disabled:opacity-50">{{ saving ? 'Enregistrement…' : 'Enregistrer' }}</button>
       </form>
     </section>
@@ -55,19 +60,22 @@
 <script setup lang="ts">
 definePageMeta({ layout: "admin", middleware: "admin" });
 useSeoMeta({ title: "Contenus admin | Cookie Build", robots: "noindex, nofollow" });
-interface Post { id: string; slug: string; title: string; summary: string; body: string; contentType: string; coverImageUrl: string | null; status: string; publishedAt: string | null; expiresAt: string | null }
+interface Post { id: string; slug: string; title: string; summary: string; body: string; contentType: string; coverImageUrl: string | null; supersedesSlug: string | null; status: string; publishedAt: string | null; expiresAt: string | null }
 interface EventItem { id: string; slug: string; title: string; description: string; gameType: string | null; imageUrl: string | null; startsAt: string; endsAt: string | null; status: string }
 const canWrite = useAdminAccess("content:write"); const tab = ref<"posts" | "events">("posts"); const loading = ref(true); const saving = ref(false); const message = ref(""); const messageTone = ref<"success" | "error">("success"); const content = reactive<{ posts: Post[]; events: EventItem[] }>({ posts: [], events: [] });
-const blankPost = () => ({ id: "", slug: "", title: "", summary: "", body: "", contentType: "news", coverImageUrl: "", status: "draft", publishedAt: "", expiresAt: "" });
+const blankPost = () => ({ id: "", slug: "", title: "", summary: "", body: "", contentType: "news", coverImageUrl: "", supersedesSlug: "", status: "draft" });
 const blankEvent = () => ({ id: "", slug: "", title: "", description: "", gameType: "", imageUrl: "", startsAt: "", endsAt: "", status: "draft" });
 const postForm = reactive(blankPost()); const eventForm = reactive(blankEvent());
 const toLocal = (value: string | null) => value ? new Date(new Date(value).getTime() - new Date(value).getTimezoneOffset() * 60_000).toISOString().slice(0, 16) : "";
 const toIso = (value: string) => value ? new Date(value).toISOString() : null;
 async function load() { loading.value = true; try { const response = await adminRequest<{ data: { posts: Post[]; events: EventItem[] } }>("/api/admin/content"); content.posts = response.data.posts; content.events = response.data.events; } catch (error) { showError(error); } finally { loading.value = false; } }
-function editPost(post: Post) { Object.assign(postForm, post, { coverImageUrl: post.coverImageUrl || "", publishedAt: toLocal(post.publishedAt), expiresAt: toLocal(post.expiresAt) }); }
+function editPost(post: Post) { Object.assign(postForm, blankPost(), { id: post.id, slug: post.slug, title: post.title, summary: post.summary, body: post.body, contentType: post.contentType, coverImageUrl: post.coverImageUrl || "", supersedesSlug: post.supersedesSlug || "" }); }
+function hasCorrection(post: Post) { return content.posts.some((candidate) => candidate.supersedesSlug === post.slug); }
+function correctionSlug(slug: string) { const suffix = "-clarification"; return `${slug.slice(0, 120 - suffix.length).replace(/-+$/, "")}${suffix}`; }
+function createCorrection(post: Post) { Object.assign(postForm, blankPost(), { slug: correctionSlug(post.slug), title: `Clarification: ${post.title}`.slice(0, 160), summary: post.summary, body: post.body, contentType: post.contentType, coverImageUrl: post.coverImageUrl || "", supersedesSlug: post.slug }); }
 function editEvent(item: EventItem) { Object.assign(eventForm, item, { gameType: item.gameType || "", imageUrl: item.imageUrl || "", startsAt: toLocal(item.startsAt), endsAt: toLocal(item.endsAt) }); }
 function resetPost() { Object.assign(postForm, blankPost()); } function resetEvent() { Object.assign(eventForm, blankEvent()); }
-async function savePost() { saving.value = true; try { const id = postForm.id; await adminRequest(id ? `/api/admin/content/news/${id}` : "/api/admin/content/news", { method: id ? "PATCH" : "POST", body: { ...postForm, id: undefined, publishedAt: toIso(postForm.publishedAt), expiresAt: toIso(postForm.expiresAt), coverImageUrl: postForm.coverImageUrl || null } }); resetPost(); showSuccess("Contenu enregistré."); await load(); } catch (error) { showError(error); } finally { saving.value = false; } }
+async function savePost() { saving.value = true; try { const id = postForm.id; await adminRequest(id ? `/api/admin/content/news/${id}` : "/api/admin/content/news", { method: id ? "PATCH" : "POST", body: { ...postForm, id: undefined, coverImageUrl: postForm.coverImageUrl || null, supersedesSlug: postForm.supersedesSlug || null, status: "draft" } }); resetPost(); showSuccess("Brouillon enregistré. Publiez ensuite son fichier JSON versionné."); await load(); } catch (error) { showError(error); } finally { saving.value = false; } }
 async function saveEvent() { saving.value = true; try { const id = eventForm.id; await adminRequest(id ? `/api/admin/content/events/${id}` : "/api/admin/content/events", { method: id ? "PATCH" : "POST", body: { ...eventForm, id: undefined, startsAt: toIso(eventForm.startsAt), endsAt: toIso(eventForm.endsAt), imageUrl: eventForm.imageUrl || null, gameType: eventForm.gameType || null } }); resetEvent(); showSuccess("Événement enregistré."); await load(); } catch (error) { showError(error); } finally { saving.value = false; } }
 function showError(error: unknown) { message.value = adminErrorMessage(error); messageTone.value = "error"; } function showSuccess(value: string) { message.value = value; messageTone.value = "success"; }
 const formatDate = (value: string) => new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));

@@ -418,6 +418,7 @@ export const mobileNewsPosts = pgTable(
     body: text().notNull(),
     contentType: varchar("content_type", { length: 16 }).default("news").notNull(),
     coverImageUrl: varchar("cover_image_url", { length: 2048 }),
+    supersedesSlug: varchar("supersedes_slug", { length: 120 }),
     status: varchar({ length: 16 }).default("draft").notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }),
@@ -425,9 +426,18 @@ export const mobileNewsPosts = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
   },
   (table) => [
+    foreignKey({
+      columns: [table.supersedesSlug],
+      foreignColumns: [table.slug],
+      name: "mobile_news_posts_supersedes_slug_fk",
+    }).onUpdate("restrict").onDelete("restrict"),
     uniqueIndex("mobile_news_posts_slug_uq").on(table.slug),
+    uniqueIndex("mobile_news_posts_supersedes_slug_uq")
+      .on(table.supersedesSlug)
+      .where(sql`${table.supersedesSlug} IS NOT NULL`),
     index("mobile_news_posts_published_idx").on(table.status, table.publishedAt),
     check("mobile_news_posts_status_ck", sql`${table.status} IN ('draft', 'published', 'archived')`),
+    check("mobile_news_posts_not_self_superseding_ck", sql`${table.supersedesSlug} IS NULL OR ${table.supersedesSlug} <> ${table.slug}`),
   ],
 );
 
