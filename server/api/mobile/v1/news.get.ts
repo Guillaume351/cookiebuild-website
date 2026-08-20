@@ -22,8 +22,8 @@ export default defineEventHandler(async (event) => {
           FROM mobile_news_posts AS replacement
          WHERE replacement.supersedes_slug = ${mobileNewsPosts.slug}
            AND replacement.status = 'published'
-           AND replacement.published_at <= ${now}
-           AND (replacement.expires_at IS NULL OR replacement.expires_at > ${now})
+           AND replacement.published_at <= CURRENT_TIMESTAMP
+           AND (replacement.expires_at IS NULL OR replacement.expires_at > CURRENT_TIMESTAMP)
          LIMIT 1
       )`,
       publishedAt: mobileNewsPosts.publishedAt,
@@ -38,8 +38,8 @@ export default defineEventHandler(async (event) => {
           FROM mobile_news_posts AS active_replacement
          WHERE active_replacement.supersedes_slug = ${mobileNewsPosts.slug}
            AND active_replacement.status = 'published'
-           AND active_replacement.published_at <= ${now}
-           AND (active_replacement.expires_at IS NULL OR active_replacement.expires_at > ${now})
+           AND active_replacement.published_at <= CURRENT_TIMESTAMP
+           AND (active_replacement.expires_at IS NULL OR active_replacement.expires_at > CURRENT_TIMESTAMP)
       )`] : []),
       lte(mobileNewsPosts.publishedAt, now),
       or(isNull(mobileNewsPosts.expiresAt), gt(mobileNewsPosts.expiresAt, now)),
