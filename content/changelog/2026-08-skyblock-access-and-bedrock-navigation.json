@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-access-and-bedrock-navigation",
+  "contentType": "changelog",
+  "title": "Clearer Skyblock access on Java and Bedrock",
+  "summary": "A persistent island menu and a clearer multi-game picker make it easier to enter Skyblock, understand each mode and move around Cookie Build on either Minecraft edition.",
+  "body": "- Once you are on your island, a dedicated Skyblock Menu item stays available in your inventory and opens your island controls with one action.\n- The selector is restored safely after reconnecting or respawning without replacing the resources you already carry. It cannot be dropped, stored, consumed or duplicated.\n- The game picker now gives every mode its own details before you join, including its goal, main rules and beta or stable status.\n- Bedrock players get the same multi-mode journey in native forms organised into clear submenus, with Join, Back and Close actions.\n- Skyblock remains a beta: if the mode needs maintenance, its status is shown before admission rather than sending you into an unavailable island.\n- This release covers in-game access and navigation. Buying or selling through the companion app is not part of this beta announcement.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-22T22:00:00+02:00"
+}
