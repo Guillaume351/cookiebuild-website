@@ -1,7 +1,9 @@
-const SOURCES = new Set(["geyser", "paper", "viaversion"]);
-const EDITIONS = new Set(["bedrock", "java"]);
-const DIRECTIONS = new Set(["too_old", "too_new", "unsupported"]);
+const RESULTS = new Set(["accepted", "rejected"]);
+const SOURCES = new Set(["cookiedough", "geyser", "paper", "viaversion"]);
+const EDITIONS = new Set(["bedrock", "java", "unknown"]);
+const DIRECTIONS = new Set(["none", "too_old", "too_new", "unsupported"]);
 const MAX_PROTOCOL_LABELS = 32;
+const MAX_VERSION_LABELS = 64;
 
 function stripFormatting(line) {
   return line
@@ -10,7 +12,11 @@ function stripFormatting(line) {
     .trim();
 }
 
-function classify(line) {
+function field(line, name) {
+  return line.match(new RegExp(`(?:^|\\s)${name}=([^\\s]+)`))?.[1];
+}
+
+function classifyRejection(line) {
   if (/Outdated Bedrock client!|Client Bedrock obsolète !/i.test(line)) {
     return { source: "geyser", edition: "bedrock", direction: "too_old" };
   }
@@ -38,53 +44,113 @@ function classify(line) {
   return null;
 }
 
+function normalizeProtocol(raw) {
+  return /^\d{1,5}$/.test(raw ?? "") && Number(raw) > 0 && Number(raw) <= 10_000
+    ? raw
+    : "unknown";
+}
+
+function normalizeVersion(raw) {
+  if (/^\d+(?:\.\d+){0,3}$/.test(raw ?? "")) return raw;
+  if (/^protocol-\d{1,5}$/.test(raw ?? "")) return raw;
+  return "unknown";
+}
+
 function protocolFrom(line) {
-  const value = Number(line.match(/\bprotocol(?:Version)?[=: ]+(\d{1,6})\b/i)?.[1]);
-  return Number.isInteger(value) && value > 0 && value <= 10_000 ? String(value) : "unknown";
+  return normalizeProtocol(
+    field(line, "protocol") ?? line.match(/\bprotocolVersion[=: ]+(\d{1,6})\b/i)?.[1],
+  );
 }
 
-export function clientVersionCounterKey(source, edition, direction, protocol = "unknown") {
-  return JSON.stringify([source, edition, direction, protocol]);
+function versionFrom(line) {
+  return normalizeVersion(field(line, "client_version") ?? field(line, "clientVersion"));
 }
 
-export function parseClientVersionCounterKey(key) {
+export function clientConnectionCounterKey(
+  result,
+  source,
+  edition,
+  direction,
+  clientVersion = "unknown",
+  protocol = "unknown",
+) {
+  return JSON.stringify([result, source, edition, direction, clientVersion, protocol]);
+}
+
+export function parseClientConnectionCounterKey(key) {
   const parsed = JSON.parse(key);
-  if (!Array.isArray(parsed) || parsed.length !== 4) throw new Error("Invalid client-version counter key");
-  const [source, edition, direction, protocol] = parsed.map(String);
-  if (!SOURCES.has(source) || !EDITIONS.has(edition) || !DIRECTIONS.has(direction)) {
-    throw new Error("Invalid client-version counter labels");
+  if (!Array.isArray(parsed) || parsed.length !== 6) throw new Error("Invalid client connection counter key");
+  const [result, source, edition, direction, clientVersion, protocol] = parsed.map(String);
+  if (!RESULTS.has(result) || !SOURCES.has(source) || !EDITIONS.has(edition) || !DIRECTIONS.has(direction)) {
+    throw new Error("Invalid client connection counter labels");
   }
-  if (protocol !== "unknown" && protocol !== "other" && !/^\d{1,5}$/.test(protocol)) {
-    throw new Error("Invalid client-version protocol label");
+  if (normalizeVersion(clientVersion) !== clientVersion && clientVersion !== "other") {
+    throw new Error("Invalid client-version label");
   }
-  return [source, edition, direction, protocol];
+  if (normalizeProtocol(protocol) !== protocol && protocol !== "other") {
+    throw new Error("Invalid client protocol label");
+  }
+  if ((result === "accepted") !== (direction === "none")) {
+    throw new Error("Invalid client connection direction");
+  }
+  return [result, source, edition, direction, clientVersion, protocol];
 }
 
-function boundedProtocol(line, counters) {
-  const protocol = protocolFrom(line);
-  if (protocol === "unknown") return protocol;
+function boundedLabel(value, counters, index, maximum) {
+  if (value === "unknown") return value;
   const known = new Set();
   for (const key of Object.keys(counters)) {
     try {
-      const existing = parseClientVersionCounterKey(key)[3];
+      const existing = parseClientConnectionCounterKey(key)[index];
       if (existing !== "unknown" && existing !== "other") known.add(existing);
     } catch {
       // Ignore malformed persisted keys.
     }
   }
-  return known.has(protocol) || known.size < MAX_PROTOCOL_LABELS ? protocol : "other";
+  return known.has(value) || known.size < maximum ? value : "other";
+}
+
+function increment(counters, labels) {
+  const version = boundedLabel(labels.clientVersion, counters, 4, MAX_VERSION_LABELS);
+  const protocol = boundedLabel(labels.protocol, counters, 5, MAX_PROTOCOL_LABELS);
+  const key = clientConnectionCounterKey(
+    labels.result,
+    labels.source,
+    labels.edition,
+    labels.direction,
+    version,
+    protocol,
+  );
+  counters[key] = Math.max(0, Number(counters[key] ?? 0)) + 1;
 }
 
 /** Count bounded operational labels only; never retain the source line, IP or player name. */
-export function recordClientVersionRejections(text, counters = {}) {
+export function recordClientConnections(text, counters = {}) {
   for (const rawLine of text.split(/\r?\n/)) {
     const line = stripFormatting(rawLine);
     if (!line) continue;
-    const match = classify(line);
-    if (!match) continue;
-    const protocol = boundedProtocol(line, counters);
-    const key = clientVersionCounterKey(match.source, match.edition, match.direction, protocol);
-    counters[key] = Math.max(0, Number(counters[key] ?? 0)) + 1;
+
+    if (line.includes("[funnel]") && field(line, "event") === "joined") {
+      const rawEdition = field(line, "edition");
+      increment(counters, {
+        result: "accepted",
+        source: "cookiedough",
+        edition: EDITIONS.has(rawEdition) ? rawEdition : "unknown",
+        direction: "none",
+        clientVersion: versionFrom(line),
+        protocol: protocolFrom(line),
+      });
+      continue;
+    }
+
+    const rejection = classifyRejection(line);
+    if (!rejection) continue;
+    increment(counters, {
+      result: "rejected",
+      ...rejection,
+      clientVersion: versionFrom(line),
+      protocol: protocolFrom(line),
+    });
   }
   return counters;
 }

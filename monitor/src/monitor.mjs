@@ -4,7 +4,7 @@ import { dirname } from "node:path";
 
 import { AlertState, sendDiscord } from "./alerts.mjs";
 import { checkBedrock, checkDatabaseApi, checkJava, checkWebsite } from "./checks.mjs";
-import { parseClientVersionCounterKey, recordClientVersionRejections } from "./client-versions.mjs";
+import { parseClientConnectionCounterKey, recordClientConnections } from "./client-versions.mjs";
 import { readNewLogChunk, selectNewFatalLines } from "./logs.mjs";
 import { parseFunnelCounterKey, recordFunnelTelemetry } from "./telemetry.mjs";
 import { loadAlertWebhook } from "./webhook.mjs";
@@ -17,6 +17,7 @@ const config = {
   bedrockPort: numberEnv("MINECRAFT_BEDROCK_PORT", 19132),
   websiteUrl: process.env.WEBSITE_URL || "https://www.cookie-build.com",
   intervalMs: numberEnv("MONITOR_INTERVAL_SECONDS", 60) * 1_000,
+  logIntervalMs: numberEnv("MONITOR_LOG_INTERVAL_SECONDS", 10) * 1_000,
   failureThreshold: numberEnv("MONITOR_FAILURE_THRESHOLD", 3),
   reminderMs: numberEnv("MONITOR_REMINDER_HOURS", 6) * 60 * 60 * 1_000,
   startupGraceMs: numberEnv("MONITOR_STARTUP_GRACE_SECONDS", 120) * 1_000,
@@ -34,11 +35,12 @@ const config = {
 const engine = new AlertState(config);
 const startedAt = Date.now();
 let running = false;
+let logRunning = false;
 let state = await loadState(config.stateFile);
 state.checks ||= {};
 state.logFingerprints ||= {};
 state.funnelCounters ||= {};
-state.clientVersionRejections ||= {};
+state.clientVersionConnections ||= {};
 state.queueStates ||= {};
 state.alertsSent ||= 0;
 
@@ -60,6 +62,13 @@ async function saveState() {
   const temporary = `${config.stateFile}.tmp`;
   await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, "utf8");
   await rename(temporary, config.stateFile);
+}
+
+let saveChain = Promise.resolve();
+
+function queueStateSave() {
+  saveChain = saveChain.then(saveState, saveState);
+  return saveChain;
 }
 
 function safeError(error) {
@@ -127,9 +136,9 @@ async function scanLogs() {
     const telemetry = recordFunnelTelemetry(chunk.text, state.funnelCounters, state.queueStates);
     state.funnelCounters = telemetry.counters;
     state.queueStates = telemetry.queueStates;
-    state.clientVersionRejections = recordClientVersionRejections(
+    state.clientVersionConnections = recordClientConnections(
       chunk.text,
-      state.clientVersionRejections,
+      state.clientVersionConnections,
     );
     if (telemetry.latestMspt != null) {
       state.latestMspt = telemetry.latestMspt;
@@ -166,13 +175,26 @@ async function runCycle() {
       runCheck("Bedrock server", () => checkBedrock({ host: config.host, port: config.bedrockPort })),
       runCheck("website", () => checkWebsite({ baseUrl: config.websiteUrl })),
       runCheck("database API", () => checkDatabaseApi({ baseUrl: config.websiteUrl })),
-      scanLogs(),
     ]);
-    await saveState();
+    await queueStateSave();
   } catch (error) {
     console.error(`[monitor cycle failure] ${safeError(error)}`);
   } finally {
     running = false;
+  }
+}
+
+async function runLogCycle() {
+  if (logRunning) return;
+  logRunning = true;
+  try {
+    state.maintenance = await inMaintenance();
+    await scanLogs();
+    await queueStateSave();
+  } catch (error) {
+    console.error(`[monitor log cycle failure] ${safeError(error)}`);
+  } finally {
+    logRunning = false;
   }
 }
 
@@ -222,24 +244,26 @@ function prometheusMetrics() {
       // Ignore malformed persisted keys rather than breaking the metrics endpoint.
     }
   }
-  lines.push("# HELP cookiebuild_client_version_rejections_total Connection attempts rejected for an incompatible client version. Labels are bounded and contain no client identity.");
-  lines.push("# TYPE cookiebuild_client_version_rejections_total counter");
-  const clientVersionSeries = new Map(Object.entries(state.clientVersionRejections));
-  for (const [source, edition, direction] of [
-    ["geyser", "bedrock", "too_old"],
-    ["geyser", "bedrock", "too_new"],
-    ["paper", "java", "too_old"],
-    ["paper", "java", "too_new"],
-    ["viaversion", "java", "unsupported"],
+  lines.push("# HELP cookiebuild_client_version_connections_total Accepted or version-rejected client connections. Labels are bounded and contain no client identity.");
+  lines.push("# TYPE cookiebuild_client_version_connections_total counter");
+  const clientVersionSeries = new Map(Object.entries(state.clientVersionConnections));
+  for (const [result, source, edition, direction] of [
+    ["accepted", "cookiedough", "bedrock", "none"],
+    ["accepted", "cookiedough", "java", "none"],
+    ["rejected", "geyser", "bedrock", "too_old"],
+    ["rejected", "geyser", "bedrock", "too_new"],
+    ["rejected", "paper", "java", "too_old"],
+    ["rejected", "paper", "java", "too_new"],
+    ["rejected", "viaversion", "java", "unsupported"],
   ]) {
-    const key = JSON.stringify([source, edition, direction, "unknown"]);
+    const key = JSON.stringify([result, source, edition, direction, "unknown", "unknown"]);
     if (!clientVersionSeries.has(key)) clientVersionSeries.set(key, 0);
   }
   for (const [key, value] of clientVersionSeries) {
     try {
-      const [source, edition, direction, protocol] = parseClientVersionCounterKey(key)
+      const [result, source, edition, direction, clientVersion, protocol] = parseClientConnectionCounterKey(key)
         .map((label) => String(label).replaceAll('"', '\\"'));
-      lines.push(`cookiebuild_client_version_rejections_total{source="${source}",edition="${edition}",direction="${direction}",protocol="${protocol}"} ${Math.max(0, Number(value) || 0)}`);
+      lines.push(`cookiebuild_client_version_connections_total{result="${result}",source="${source}",edition="${edition}",direction="${direction}",client_version="${clientVersion}",protocol="${protocol}"} ${Math.max(0, Number(value) || 0)}`);
     } catch {
       // Ignore malformed persisted keys rather than breaking the metrics endpoint.
     }
@@ -309,5 +333,6 @@ http.createServer((request, response) => {
     : "No dedicated Discord alert webhook configured");
 });
 
-await runCycle();
+await Promise.all([runCycle(), runLogCycle()]);
 setInterval(runCycle, config.intervalMs).unref();
+setInterval(runLogCycle, config.logIntervalMs).unref();

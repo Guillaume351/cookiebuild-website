@@ -57,9 +57,8 @@ groups:
           summary: Cookie Build match-ready queue is stalled
           description: "{{ $labels.game }} has enough eligible players and a valid team composition, but its oldest player has waited over 90 seconds. Inspect countdowns, admission and map loading."
       - alert: CookieBuildClientVersionRejections
-        expr: (sum by (source, edition, direction, protocol) (increase(cookiebuild_client_version_rejections_total[15m])) >= 3) and on() (max_over_time(cookiebuild_monitor_maintenance[15m]) == 0)
-        for: 5m
+        expr: (sum by (source, edition, direction, client_version, protocol) (increase(cookiebuild_client_version_connections_total{result="rejected"}[1h])) > 0) and on() (cookiebuild_monitor_maintenance == 0)
         labels: { severity: warning, component: minecraft }
         annotations:
           summary: Cookie Build is rejecting incompatible client versions
-          description: "At least three {{ $labels.edition }} attempts were rejected in 15 minutes (direction={{ $labels.direction }}, protocol={{ $labels.protocol }}). Check current Paper/Geyser/ViaVersion coverage before changing versions."
+          description: "A {{ $labels.edition }} attempt was rejected for an incompatible version (direction={{ $labels.direction }}, client_version={{ $labels.client_version }}, protocol={{ $labels.protocol }}). Check current Paper/Geyser/ViaVersion coverage before changing versions. Repeated attempts are grouped by Alertmanager."
