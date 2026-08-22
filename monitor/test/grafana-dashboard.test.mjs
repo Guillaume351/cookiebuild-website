@@ -30,3 +30,17 @@ test("shows one shared Paper player population instead of duplicating Java and B
   assert.match(playerHistory.description, /one total/);
   assert.doesNotMatch(JSON.stringify(playerHistory.targets), /\{\{edition\}\}/);
 });
+
+test("shows privacy-safe incompatible-version refusals without changing player totals", () => {
+  const rejections = panel(15);
+  assert.match(rejections.title, /version/i);
+  assert.equal(rejections.targets.length, 1);
+  assert.equal(
+    rejections.targets[0].expr,
+    "sum(increase(cookiebuild_client_version_rejections_total[$__rate_interval])) by (source, edition, direction, protocol)",
+  );
+  assert.match(rejections.targets[0].legendFormat, /edition/);
+  assert.doesNotMatch(JSON.stringify(rejections), /player_name|username|ip_address/);
+  assert.equal(panel(1).targets[0].expr, "max(cookiebuild_monitor_online_players)");
+  assert.equal(panel(5).targets[0].expr, "max(cookiebuild_monitor_online_players)");
+});

@@ -8,13 +8,24 @@ failures that need an operator response:
 - Bedrock RakNet availability and latency;
 - website availability and expected page content;
 - a real `SELECT 1` database query through `/api/health` (not just a TCP port);
-- new Paper, CookieDough, MicroBattles, Pitchout, SkyWars, BuildBattles, TurfWars and BedWars fatal log lines.
+- new Paper, CookieDough, MicroBattles, Pitchout, SkyWars, BuildBattles, TurfWars and BedWars fatal log lines;
+- incompatible Java and Bedrock client-version refusals, counted only with bounded
+  edition/direction/protocol labels and without retaining IP addresses or player names;
+- match-ready queues that remain blocked after the real per-mode player and team
+  eligibility checks have passed.
 
 It sends a Discord alert only after three consecutive failed checks (three
 minutes by default), sends one reminder every six hours while an outage remains,
 and sends one recovery message. Fatal log signatures are deduplicated for six
 hours. State persists in `/state/monitor.json`, so a monitor restart does not
 repeat an incident.
+
+Version-refusal alerts require at least three matching attempts in fifteen minutes
+and remain pending for five minutes. A match-funnel alert requires a fresh queue
+snapshot with enough eligible players, a valid mode-specific composition and an
+oldest wait above 90 seconds; a lone player in a two-player mode cannot trigger it.
+The aggregate counters retain no raw line or identity, and Alloy drops the matching
+raw refusal lines instead of duplicating their possible IP/player fields into Loki.
 
 The monitor also exposes `GET /healthz` and Prometheus-format `GET /metrics` on
 port 8080. Do not publish that port to the internet; Dokploy or a future

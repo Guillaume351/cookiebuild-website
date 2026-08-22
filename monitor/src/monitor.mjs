@@ -4,6 +4,7 @@ import { dirname } from "node:path";
 
 import { AlertState, sendDiscord } from "./alerts.mjs";
 import { checkBedrock, checkDatabaseApi, checkJava, checkWebsite } from "./checks.mjs";
+import { parseClientVersionCounterKey, recordClientVersionRejections } from "./client-versions.mjs";
 import { readNewLogChunk, selectNewFatalLines } from "./logs.mjs";
 import { parseFunnelCounterKey, recordFunnelTelemetry } from "./telemetry.mjs";
 import { loadAlertWebhook } from "./webhook.mjs";
@@ -37,6 +38,8 @@ let state = await loadState(config.stateFile);
 state.checks ||= {};
 state.logFingerprints ||= {};
 state.funnelCounters ||= {};
+state.clientVersionRejections ||= {};
+state.queueStates ||= {};
 state.alertsSent ||= 0;
 
 function numberEnv(name, fallback) {
@@ -121,8 +124,13 @@ async function scanLogs() {
     if (Date.now() - startedAt < config.startupGraceMs) return;
     const chunk = await readNewLogChunk(config.logFile, state.logOffset);
     state.logOffset = chunk.offset;
-    const telemetry = recordFunnelTelemetry(chunk.text, state.funnelCounters);
+    const telemetry = recordFunnelTelemetry(chunk.text, state.funnelCounters, state.queueStates);
     state.funnelCounters = telemetry.counters;
+    state.queueStates = telemetry.queueStates;
+    state.clientVersionRejections = recordClientVersionRejections(
+      chunk.text,
+      state.clientVersionRejections,
+    );
     if (telemetry.latestMspt != null) {
       state.latestMspt = telemetry.latestMspt;
       state.latestMsptObservedAt = Date.now();
@@ -213,6 +221,46 @@ function prometheusMetrics() {
     } catch {
       // Ignore malformed persisted keys rather than breaking the metrics endpoint.
     }
+  }
+  lines.push("# HELP cookiebuild_client_version_rejections_total Connection attempts rejected for an incompatible client version. Labels are bounded and contain no client identity.");
+  lines.push("# TYPE cookiebuild_client_version_rejections_total counter");
+  const clientVersionSeries = new Map(Object.entries(state.clientVersionRejections));
+  for (const [source, edition, direction] of [
+    ["geyser", "bedrock", "too_old"],
+    ["geyser", "bedrock", "too_new"],
+    ["paper", "java", "too_old"],
+    ["paper", "java", "too_new"],
+    ["viaversion", "java", "unsupported"],
+  ]) {
+    const key = JSON.stringify([source, edition, direction, "unknown"]);
+    if (!clientVersionSeries.has(key)) clientVersionSeries.set(key, 0);
+  }
+  for (const [key, value] of clientVersionSeries) {
+    try {
+      const [source, edition, direction, protocol] = parseClientVersionCounterKey(key)
+        .map((label) => String(label).replaceAll('"', '\\"'));
+      lines.push(`cookiebuild_client_version_rejections_total{source="${source}",edition="${edition}",direction="${direction}",protocol="${protocol}"} ${Math.max(0, Number(value) || 0)}`);
+    } catch {
+      // Ignore malformed persisted keys rather than breaking the metrics endpoint.
+    }
+  }
+  lines.push("# HELP cookiebuild_queue_eligible_players Current eligible players in an open queue.");
+  lines.push("# TYPE cookiebuild_queue_eligible_players gauge");
+  lines.push("# HELP cookiebuild_queue_minimum_players Current real minimum player threshold for a queue.");
+  lines.push("# TYPE cookiebuild_queue_minimum_players gauge");
+  lines.push("# HELP cookiebuild_queue_ready_to_start Whether current headcount and mode-specific composition allow countdown.");
+  lines.push("# TYPE cookiebuild_queue_ready_to_start gauge");
+  lines.push("# HELP cookiebuild_queue_oldest_wait_seconds Current oldest wait in an open queue.");
+  lines.push("# TYPE cookiebuild_queue_oldest_wait_seconds gauge");
+  lines.push("# HELP cookiebuild_queue_state_observed_timestamp_seconds Unix timestamp of the latest queue snapshot.");
+  lines.push("# TYPE cookiebuild_queue_state_observed_timestamp_seconds gauge");
+  for (const [game, queue] of Object.entries(state.queueStates)) {
+    const label = String(game).replaceAll('"', '\\"');
+    lines.push(`cookiebuild_queue_eligible_players{game="${label}"} ${Number(queue.eligiblePlayers)}`);
+    lines.push(`cookiebuild_queue_minimum_players{game="${label}"} ${Number(queue.minimumPlayers)}`);
+    lines.push(`cookiebuild_queue_ready_to_start{game="${label}"} ${queue.readyToStart ? 1 : 0}`);
+    lines.push(`cookiebuild_queue_oldest_wait_seconds{game="${label}"} ${Number(queue.oldestWaitSeconds)}`);
+    lines.push(`cookiebuild_queue_state_observed_timestamp_seconds{game="${label}"} ${Math.floor(Number(queue.observedAt) / 1_000)}`);
   }
   if (Number.isFinite(state.latestMspt)) {
     lines.push("# HELP cookiebuild_minecraft_mspt Latest average milliseconds per tick observed in funnel telemetry.");

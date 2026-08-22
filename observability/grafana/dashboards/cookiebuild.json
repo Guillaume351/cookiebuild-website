@@ -148,6 +148,17 @@
       "targets": [{"expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))", "legendFormat": "CPU", "refId": "A"}, {"expr": "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes", "legendFormat": "Memory", "refId": "B"}, {"expr": "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}", "legendFormat": "Disk", "refId": "C"}],
       "title": "Host resource usage",
       "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Counts privacy-safe client-version refusals by edition and direction. Unknown means the upstream log did not expose a bounded protocol number.",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 24},
+      "id": 15,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum(increase(cookiebuild_client_version_rejections_total[$__rate_interval])) by (source, edition, direction, protocol)", "legendFormat": "{{source}} · {{edition}} · {{direction}} · protocol {{protocol}}", "refId": "A"}],
+      "title": "Incompatible client-version refusals",
+      "type": "timeseries"
     }
   ],
   "refresh": "30s",
@@ -159,6 +170,6 @@
   "timezone": "browser",
   "title": "Cookie Build · Players and Reliability",
   "uid": "cookiebuild-overview",
-  "version": 2,
+  "version": 3,
   "weekStart": "monday"
 }

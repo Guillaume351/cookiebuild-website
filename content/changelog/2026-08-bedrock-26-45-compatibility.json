@@ -1,0 +1,8 @@
+{
+  "slug": "bedrock-26-45-compatibility",
+  "contentType": "changelog",
+  "title": "Minecraft Bedrock 26.45 support",
+  "summary": "Cookie Build now accepts Minecraft Bedrock 26.45 while keeping Java access and existing cross-play unchanged.",
+  "body": "- Players using Minecraft Bedrock 26.45 can now join Cookie Build.\n- Supported Bedrock 26.x versions and Java 26.2 continue to share the same games and progression.\n- Existing worlds, player progress and gameplay rules are unchanged.",
+  "publishedAt": "2026-08-22T08:24:59Z"
+}

@@ -12,6 +12,11 @@ function field(line, name) {
   return line.match(new RegExp(`(?:^|\\s)${name}=([^\\s]+)`))?.[1];
 }
 
+function boundedInteger(line, name, maximum) {
+  const value = Number(field(line, name));
+  return Number.isInteger(value) && value >= 0 && value <= maximum ? value : null;
+}
+
 export function funnelCounterKey(event, edition, game) {
   return JSON.stringify([event, edition, game]);
 }
@@ -22,11 +27,32 @@ export function parseFunnelCounterKey(key) {
   return parsed;
 }
 
-export function recordFunnelTelemetry(text, counters = {}) {
+export function recordFunnelTelemetry(text, counters = {}, queueStates = {}, now = Date.now()) {
   let latestMspt = null;
   let latestServerTickDelayMillis = null;
   let latestSlowGameTick = null;
   for (const line of text.split(/\r?\n/)) {
+    if (line.includes("[queue]") && field(line, "event") === "state") {
+      const game = field(line, "game");
+      const eligiblePlayers = boundedInteger(line, "eligible_players", 100);
+      const minimumPlayers = boundedInteger(line, "minimum_players", 100);
+      const oldestWaitSeconds = boundedInteger(line, "oldest_wait_seconds", 86_400);
+      const readyToStart = field(line, "ready_to_start");
+      if (GAMES.has(game)
+          && eligiblePlayers != null
+          && minimumPlayers != null
+          && minimumPlayers > 0
+          && oldestWaitSeconds != null
+          && (readyToStart === "true" || readyToStart === "false")) {
+        queueStates[game] = {
+          eligiblePlayers,
+          minimumPlayers,
+          oldestWaitSeconds,
+          readyToStart: readyToStart === "true",
+          observedAt: now,
+        };
+      }
+    }
     if (line.includes("[performance]")) {
       const event = field(line, "event");
       if (event === "server_tick_delay") {
@@ -56,5 +82,5 @@ export function recordFunnelTelemetry(text, counters = {}) {
     const mspt = Number(field(line, "mspt"));
     if (Number.isFinite(mspt) && mspt >= 0 && mspt < 60_000) latestMspt = mspt;
   }
-  return { counters, latestMspt, latestServerTickDelayMillis, latestSlowGameTick };
+  return { counters, queueStates, latestMspt, latestServerTickDelayMillis, latestSlowGameTick };
 }
