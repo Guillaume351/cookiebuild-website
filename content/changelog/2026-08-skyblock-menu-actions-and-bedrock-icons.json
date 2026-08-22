@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-menu-actions-and-bedrock-icons",
+  "contentType": "changelog",
+  "title": "Skyblock actions stay visible and Bedrock gains clearer icons",
+  "summary": "Skyblock commands stay visible, a direct lobby return is available, and Bedrock navigation can now use the verified Cookie Build icon pack.",
+  "body": "- Selecting a Skyblock action now closes the current menu before the command, confirmation or status message runs. The result stays visible instead of being covered by the menu again.\n- A dedicated Return to Lobby action is available from the Skyblock menu on Java and Bedrock. Existing inventory-transfer safeguards still prevent unsafe exits.\n- Navigation buttons still open the intended Skyblock submenu, with stale Java clicks and delayed Bedrock responses rejected safely.\n- Bedrock players receive the Cookie Build UI resource pack when they connect. Depending on the device's server-pack setting and cache, the download can happen automatically without showing a confirmation prompt.\n- The pack adds illustrated game, action and BedWars category buttons while keeping every text label visible. If an image cannot load, the action remains readable and usable.\n\nReconnect once on Bedrock after this update so the server can apply the current pack.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-22T23:24:00+02:00"
+}
