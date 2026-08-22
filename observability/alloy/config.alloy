@@ -13,6 +13,17 @@ local.file_match "minecraft" {
 
 loki.source.file "minecraft" {
 	targets    = local.file_match.minecraft.targets
+	forward_to = [loki.process.minecraft_privacy.receiver]
+}
+
+loki.process "minecraft_privacy" {
+	// The monitor exports bounded counters for these refusals. Do not duplicate
+	// their raw IP/player-bearing lines into Loki.
+	stage.drop {
+		expression          = "(?i)(Outdated Bedrock client!|Outdated Geyser proxy!|Client Bedrock obsolète !|Proxy Geyser obsolète !|Outdated client!|Outdated server!|unsupported Minecraft version)"
+		drop_counter_reason = "client_version_rejection_privacy"
+	}
+
 	forward_to = [loki.write.default.receiver]
 }
 

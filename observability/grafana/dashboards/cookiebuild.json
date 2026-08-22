@@ -12,9 +12,10 @@
       "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}]}}, "overrides": []},
       "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
       "id": 1,
+      "description": "Paper reports one shared online population. Bedrock players connected through Geyser are already included in the Java server-list count.",
       "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
-      "targets": [{"expr": "max(cookiebuild_monitor_online_players{edition=\"java\"})", "refId": "A"}],
-      "title": "Players online",
+      "targets": [{"expr": "max(cookiebuild_monitor_online_players)", "refId": "A"}],
+      "title": "Players online · total",
       "type": "stat"
     },
     {
@@ -52,9 +53,10 @@
       "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
       "gridPos": {"h": 8, "w": 8, "x": 0, "y": 4},
       "id": 5,
+      "description": "Paper and Geyser expose the same shared server population. This panel intentionally shows one total instead of duplicating it as Java and Bedrock.",
       "options": {"legend": {"calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
-      "targets": [{"expr": "cookiebuild_monitor_online_players", "legendFormat": "{{edition}}", "refId": "A"}],
-      "title": "Online players over time",
+      "targets": [{"expr": "max(cookiebuild_monitor_online_players)", "legendFormat": "Java + Bedrock total", "refId": "A"}],
+      "title": "Online players over time · total",
       "type": "timeseries"
     },
     {
@@ -146,17 +148,72 @@
       "targets": [{"expr": "1 - avg(rate(node_cpu_seconds_total{mode=\"idle\"}[5m]))", "legendFormat": "CPU", "refId": "A"}, {"expr": "1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes", "legendFormat": "Memory", "refId": "B"}, {"expr": "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}", "legendFormat": "Disk", "refId": "C"}],
       "title": "Host resource usage",
       "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Accepted sessions come from CookieDough's actual join event; refusals come from proven Geyser/Paper/ViaVersion log reasons. All labels are bounded and identity-free.",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+      "id": 15,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum by (result, edition) (increase(cookiebuild_client_version_connections_total[$__rate_interval]))", "legendFormat": "{{result}} · {{edition}}", "refId": "A"}],
+      "title": "Client connections · accepted and rejected",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Accepted connections divided by accepted plus version-rejected connections over the selected version window.",
+      "fieldConfig": {"defaults": {"decimals": 1, "min": 0, "max": 100, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+      "id": 16,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "100 * sum(increase(cookiebuild_client_version_connections_total{result=\"accepted\"}[${version_window}])) / clamp_min(sum(increase(cookiebuild_client_version_connections_total[${version_window}])), 1)", "refId": "A"}],
+      "title": "Client-version acceptance rate · $version_window",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Top accepted client versions. Bedrock uses Floodgate's exact client version; Java uses the actual protocol label because no semantic Java version is exposed reliably at admission.",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 0, "y": 32},
+      "id": 17,
+      "options": {"displayMode": "gradient", "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "topk(10, sum by (edition, client_version, protocol) (increase(cookiebuild_client_version_connections_total{result=\"accepted\"}[${version_window}])))", "instant": true, "legendFormat": "{{edition}} · {{client_version}} · protocol {{protocol}}", "refId": "A"}],
+      "title": "Top accepted client versions · $version_window",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Version refusals by too-old, too-new or unsupported direction. Unknown is retained when upstream does not expose the rejected client's exact version.",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 8, "y": 32},
+      "id": 18,
+      "options": {"displayMode": "gradient", "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "sum by (edition, direction, client_version, protocol) (increase(cookiebuild_client_version_connections_total{result=\"rejected\"}[${version_window}]))", "instant": true, "legendFormat": "{{edition}} · {{direction}} · {{client_version}} · protocol {{protocol}}", "refId": "A"}],
+      "title": "Rejected client versions · $version_window",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "The least-used accepted versions with non-zero traffic, so minority clients remain visible instead of disappearing behind top versions.",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 8, "x": 16, "y": 32},
+      "id": 19,
+      "options": {"displayMode": "gradient", "legend": {"displayMode": "list", "placement": "bottom", "showLegend": true}, "orientation": "horizontal", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}},
+      "targets": [{"expr": "bottomk(10, sum by (edition, client_version, protocol) (increase(cookiebuild_client_version_connections_total{result=\"accepted\"}[${version_window}])) > 0)", "instant": true, "legendFormat": "{{edition}} · {{client_version}} · protocol {{protocol}}", "refId": "A"}],
+      "title": "Minority accepted versions · $version_window",
+      "type": "bargauge"
     }
   ],
   "refresh": "30s",
   "schemaVersion": 41,
   "tags": ["cookie-build", "minecraft"],
-  "templating": {"list": []},
+  "templating": {"list": [{"current": {"selected": false, "text": "24h", "value": "24h"}, "hide": 0, "includeAll": false, "label": "Client-version window", "name": "version_window", "options": [{"selected": false, "text": "15m", "value": "15m"}, {"selected": false, "text": "1h", "value": "1h"}, {"selected": false, "text": "6h", "value": "6h"}, {"selected": true, "text": "24h", "value": "24h"}, {"selected": false, "text": "7d", "value": "7d"}], "query": "15m,1h,6h,24h,7d", "skipUrlSync": false, "type": "custom"}]},
   "time": {"from": "now-24h", "to": "now"},
   "timepicker": {},
   "timezone": "browser",
   "title": "Cookie Build · Players and Reliability",
   "uid": "cookiebuild-overview",
-  "version": 1,
+  "version": 4,
   "weekStart": "monday"
 }

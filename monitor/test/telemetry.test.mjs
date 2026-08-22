@@ -45,3 +45,28 @@ test("records bounded core tick-delay diagnostics", () => {
   assert.equal(result.latestServerTickDelayMillis, 4635);
   assert.deepEqual(result.latestSlowGameTick, { game: "SkyWars", elapsedMillis: 245 });
 });
+
+test("records privacy-safe per-mode queue readiness and real thresholds", () => {
+  const result = recordFunnelTelemetry([
+    "[CookieDough] [queue] event=state game=MicroBattles eligible_players=1 minimum_players=2 ready_to_start=false oldest_wait_seconds=180 player=private",
+    "[CookieDough] [queue] event=state game=BedWars eligible_players=2 minimum_players=2 ready_to_start=true oldest_wait_seconds=95 team=private",
+    "[CookieDough] [queue] event=state game=user-input eligible_players=99 minimum_players=1 ready_to_start=true oldest_wait_seconds=999",
+  ].join("\n"), {}, {}, 123_000);
+
+  assert.deepEqual(result.queueStates.MicroBattles, {
+    eligiblePlayers: 1,
+    minimumPlayers: 2,
+    oldestWaitSeconds: 180,
+    readyToStart: false,
+    observedAt: 123_000,
+  });
+  assert.deepEqual(result.queueStates.BedWars, {
+    eligiblePlayers: 2,
+    minimumPlayers: 2,
+    oldestWaitSeconds: 95,
+    readyToStart: true,
+    observedAt: 123_000,
+  });
+  assert.equal(result.queueStates["user-input"], undefined);
+  assert.doesNotMatch(JSON.stringify(result.queueStates), /private/);
+});

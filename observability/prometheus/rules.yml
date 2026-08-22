@@ -50,9 +50,15 @@ groups:
           summary: Players join Cookie Build but none reach a queue
           description: Inspect lobby readiness, selectors, NPC interaction and game availability.
       - alert: CookieBuildMatchFunnelStalled
-        expr: sum(increase(cookiebuild_funnel_events_total{event="queue_joined"}[2h])) >= 4 and (sum(increase(cookiebuild_funnel_events_total{event="match_started"}[2h])) or vector(0)) == 0
-        for: 10m
+        expr: ((cookiebuild_queue_ready_to_start == 1) and on(game) (cookiebuild_queue_eligible_players >= cookiebuild_queue_minimum_players) and on(game) (cookiebuild_queue_oldest_wait_seconds > 90) and on(game) (time() - cookiebuild_queue_state_observed_timestamp_seconds < 45)) and on() (max_over_time(cookiebuild_monitor_maintenance[15m]) == 0)
+        for: 2m
         labels: { severity: warning, component: gameplay }
         annotations:
-          summary: Cookie Build queues are not producing matches
-          description: Inspect capacity, team admission, countdowns and map loading.
+          summary: Cookie Build match-ready queue is stalled
+          description: "{{ $labels.game }} has enough eligible players and a valid team composition, but its oldest player has waited over 90 seconds. Inspect countdowns, admission and map loading."
+      - alert: CookieBuildClientVersionRejections
+        expr: (sum by (source, edition, direction, client_version, protocol) (increase(cookiebuild_client_version_connections_total{result="rejected"}[1h])) > 0) and on() (cookiebuild_monitor_maintenance == 0)
+        labels: { severity: warning, component: minecraft }
+        annotations:
+          summary: Cookie Build is rejecting incompatible client versions
+          description: "A {{ $labels.edition }} attempt was rejected for an incompatible version (direction={{ $labels.direction }}, client_version={{ $labels.client_version }}, protocol={{ $labels.protocol }}). Check current Paper/Geyser/ViaVersion coverage before changing versions. Repeated attempts are grouped by Alertmanager."

@@ -8,13 +8,30 @@ failures that need an operator response:
 - Bedrock RakNet availability and latency;
 - website availability and expected page content;
 - a real `SELECT 1` database query through `/api/health` (not just a TCP port);
-- new Paper, CookieDough, MicroBattles, Pitchout, SkyWars, BuildBattles, TurfWars and BedWars fatal log lines.
+- new Paper, CookieDough, MicroBattles, Pitchout, SkyWars, BuildBattles, TurfWars and BedWars fatal log lines;
+- actual accepted Java and Bedrock sessions plus incompatible-version refusals,
+  counted only with bounded edition/direction/version/protocol labels and without
+  retaining IP addresses or player names;
+- match-ready queues that remain blocked after the real per-mode player and team
+  eligibility checks have passed.
 
 It sends a Discord alert only after three consecutive failed checks (three
 minutes by default), sends one reminder every six hours while an outage remains,
 and sends one recovery message. Fatal log signatures are deduplicated for six
 hours. State persists in `/state/monitor.json`, so a monitor restart does not
 repeat an incident.
+
+The first version refusal alerts on the next log scan and Prometheus evaluation.
+A dedicated Alertmanager route groups repeated attempts, waits zero seconds, sends
+no resolution noise and repeats at most every six hours. Logs are scanned every ten
+seconds independently of the slower external probes. A match-funnel alert requires a fresh queue
+snapshot with enough eligible players, a valid mode-specific composition and an
+oldest wait above 90 seconds; a lone player in a two-player mode cannot trigger it.
+Accepted Bedrock sessions use Floodgate's exact version. Java sessions retain the
+actual protocol as `protocol-N`; a semantic Java version is not invented. Refusal
+versions remain `unknown` unless an upstream line exposes them explicitly. The
+aggregate counters retain no raw line or identity, and Alloy drops the matching
+raw refusal lines instead of duplicating their possible IP/player fields into Loki.
 
 The monitor also exposes `GET /healthz` and Prometheus-format `GET /metrics` on
 port 8080. Do not publish that port to the internet; Dokploy or a future
@@ -64,7 +81,7 @@ DISCORD_ALERT_WEBHOOK_FILE=/run/secrets/discord_alert_webhook
 
 Mount the secret read-only at the path above. Defaults are already correct for
 every value except the webhook. Optional
-settings are `MONITOR_INTERVAL_SECONDS`, `MONITOR_FAILURE_THRESHOLD`,
+settings are `MONITOR_INTERVAL_SECONDS`, `MONITOR_LOG_INTERVAL_SECONDS`, `MONITOR_FAILURE_THRESHOLD`,
 `MONITOR_REMINDER_HOURS`, `MONITOR_STARTUP_GRACE_SECONDS`,
 `DISCORD_ALERT_MENTION`, `MINECRAFT_LOG_FILE`, and `PORT`.
 
