@@ -75,7 +75,9 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Purchases and ownership</h2>
         <p>
-          The app includes a kit shop that uses virtual coins earned through Cookie Build gameplay.
+          The app includes a kit shop and a player-to-player Skyblock marketplace that use virtual
+          coins earned through Cookie Build gameplay. Marketplace sales exchange only eligible
+          in-game Skyblock resources for those virtual coins.
           It contains no real-money checkout, subscription, paid digital entitlement, or conversion of
           virtual coins into money. Cookie Build code, artwork, and branding remain owned by their
           respective owners. Minecraft names, marks, and game assets belong to Mojang or Microsoft and
@@ -172,8 +174,10 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Achats et propriété</h2>
         <p>
-          L’app contient une boutique de kits utilisant uniquement les pièces virtuelles gagnées en
-          jouant sur Cookie Build. Elle ne contient aucun paiement en argent réel, souscription,
+          L’app contient une boutique de kits et un marché Skyblock entre joueurs utilisant uniquement
+          les pièces virtuelles gagnées en jouant sur Cookie Build. Les ventes du marché échangent
+          uniquement des ressources Skyblock éligibles contre ces pièces. Elle ne contient aucun
+          paiement en argent réel, souscription,
           avantage numérique payant ni conversion des pièces en argent. Les codes, créations et
           marques restent la propriété de leurs titulaires. Les noms, marques et éléments Minecraft
           appartiennent à Mojang ou Microsoft et sont utilisés selon leurs règles d’usage applicables.

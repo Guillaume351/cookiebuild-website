@@ -60,6 +60,43 @@ Admin before touching account data.
   devices, and deletes the Firebase Auth user. A failed Firebase deletion remains in the outbox for
   operator retry while the local account stays disabled.
 
+## Skyblock companion and marketplace
+
+Skyblock is private, linked-player data. `GET /skyblock` returns the active island overview and role,
+progression, global `playerdata.coins` balance, storage/listing summaries, and the catalog version.
+`GET /skyblock/inventory`, `GET /skyblock/market`, and `GET /skyblock/listings` use opaque `cursor`
+pagination with `pageSize` from 1 to 50. Inventory can filter by `category` and `marketable`; market
+can filter by allowlisted `itemId`, `category`, `rarity`, `minPrice`, and `maxPrice`, and sort by
+`recent`, `price_asc`, or `price_desc`; own listings accept `status`.
+
+Marketplace writes are:
+
+- `POST /skyblock/listing-quotes` with exactly `inventoryItemId`, `quantity`, and total
+  `priceCoins`. The server revalidates the versioned catalog, available unreserved island storage,
+  item bounds, and returns a five-minute quote with fee/net amounts.
+- `POST /skyblock/listings` with exactly `quoteId`.
+- `POST /skyblock/listings/:id/cancel` with an empty JSON object.
+- `POST /skyblock/listings/:id/purchase` with exactly `expectedPriceCoins`.
+
+The three durable mutations require a canonical UUID `Idempotency-Key`; missing keys return `428`,
+reuse with a different request returns `409`, and identical retries return the stored JSON result.
+Settlement is one PostgreSQL transaction with deterministic player/island/listing/storage locks,
+shared-island reservations, one terminal listing state, a unique sale, and buyer/seller entries in
+the existing `coin_transactions` ledger. Purchased resources are delivered directly to the buyer's
+authoritative island storage. The app never sells Bukkit/NBT inventory and never uses Stripe or real
+money. Only the island owner can sell shared storage; managers and members can read it. Purchases
+from the same island are rejected, and stored items plus prepared/marked deposits must fit within
+the buyer island's locked storage capacity before any coins or items move.
+Successful settlement also completes the seller's `market_seller` quest in the same transaction;
+the reward remains explicitly claimable only through gameplay.
+
+Both capabilities fail closed. Reads require `MOBILE_SKYBLOCK_ENABLED=true` plus the complete
+Skyblock schema, including the crash-safe `skyblock_inventory_transfers` hand-off table. Writes
+additionally require `MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED=true`, the
+market tables, `coin_transactions`, and its unique player/source index. The account export includes
+the full paginated Skyblock storage and listing history plus a privacy-safe transfer history only
+when the companion capability is live. Transfer exports omit the Bukkit slot and player/island IDs.
+
 ## Minecraft player linking contract
 
 CookieDough owns link-code creation. It generates exactly eight characters from
@@ -84,22 +121,28 @@ through Dokploy; it must never be committed or sent to clients.
    `ops/add-retention-ledger.sql` first. It owns `coin_transactions`, the unique
    `(player_id, source)` idempotency constraint, and the progression timestamps used by the kit
    shop. The website deliberately does not duplicate this shared gameplay migration.
-2. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`,
+2. Apply the canonical `Cookies/ops/add-skyblock-v1.sql` migration. The website declares the shared
+   tables in Drizzle for type safety but deliberately owns no numbered Skyblock migration.
+3. Before enabling the gameplay plugin, configure Paper with
+   `bukkit.yml` `settings.save-player-data: true` and `spigot.yml`
+   `players.disable-saving: false`. Skyblock fails closed without both gates because live inventory,
+   location, and the durable activity/transfer markers must survive reconnects.
+4. Apply `drizzle/0001_mobile_foundation.sql`, `drizzle/0002_mobile_social.sql`,
    `drizzle/0003_player_rally.sql`, `drizzle/0004_player_changelog.sql`,
    `drizzle/0005_correct_2026_update_wording.sql`, `drizzle/0006_mobile_engagement.sql`,
    `drizzle/0007_admin_control_center.sql`, `drizzle/0008_player_onboarding.sql`, then
    `drizzle/0009_player_rally_responses.sql`, `drizzle/0010_friend_suggestions.sql`, then
    `drizzle/0011_mobile_device_timezone.sql`, with PostgreSQL `ON_ERROR_STOP`.
-3. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
+5. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
    `MOBILE_LINK_PEPPER` for the website.
-4. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.
-5. Run `npm run kit-catalog:verify-gameplay -- ../Cookies` from the website checkout. This explicit
-   cross-repository release gate verifies the gameplay sources against the Docker-local,
-   versioned `contracts/mobile-kit-catalog-v1.json`; ordinary website tests never read outside their
-   build context.
-6. Deploy the website, verify public endpoints, then test claim/revoke with a real Firebase test user
+6. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.
+7. Run `npm run kit-catalog:verify-gameplay -- ../Cookies` and
+   `npm run skyblock-catalog:verify-gameplay -- ../Cookies` from the website checkout. These explicit
+   cross-repository release gates verify both gameplay catalogs against the Docker-local, versioned
+   website contracts; ordinary website tests never read outside their build context.
+8. Deploy the website, verify public endpoints, then test claim/revoke with a real Firebase test user
    and an in-game link challenge.
-7. Populate published news/events. Set `COOKIEBUILD_BEDWARS_ENABLED=true` on both
+9. Populate published news/events. Set `COOKIEBUILD_BEDWARS_ENABLED=true` on both
    the Minecraft and website services only while the BedWars beta is open. Set
    `MOBILE_FRIENDS_ENABLED=true` and/or
    `MOBILE_PARTIES_ENABLED=true` only after the matching website, CookieDough, and app versions are
@@ -107,7 +150,11 @@ through Dokploy; it must never be committed or sent to clients.
    `MOBILE_KIT_SHOP_ENABLED=true` and `MOBILE_PLAYER_DASHBOARD_ENABLED=true` only after the matching
    website, mobile app, gameplay catalogs, and database prerequisites are deployed. The bootstrap
    and private routes fail closed when either the explicit flag or runtime schema capability is
-   absent.
+   absent. Enable `COOKIEBUILD_SKYBLOCK_ENABLED=true` only after both Paper persistence gates, the
+   gameplay migration, matching JARs, and catalog are in place. Enable `MOBILE_SKYBLOCK_ENABLED=true`
+   only after the gameplay migration, catalog gate, website, and app are deployed; enable
+   `MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED=true` only after authenticated
+   quote/create/cancel/purchase smoke tests pass.
 
 ## Structured social contract
 

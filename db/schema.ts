@@ -871,3 +871,302 @@ export const playerPartyInvites = pgTable(
     check("player_party_invites_expiry_ck", sql`${table.expiresAt} > ${table.createdAt}`),
   ],
 );
+
+// The canonical DDL for these shared gameplay tables lives in
+// Cookies/ops/add-skyblock-v1.sql. They are declared here so the Nuxt API and
+// Drizzle use the same typed contract without creating a second migration.
+export const skyblockIslands = pgTable(
+  "skyblock_islands",
+  {
+    id: uuid().primaryKey(),
+    ownerPlayerId: uuid("owner_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    name: varchar({ length: 48 }).notNull(),
+    state: varchar({ length: 16 }).default("creating").notNull(),
+    gridX: integer("grid_x").notNull(),
+    gridZ: integer("grid_z").notNull(),
+    generation: integer().default(1).notNull(),
+    templateVersion: varchar("template_version", { length: 64 }).notNull(),
+    buildRadius: integer("build_radius").default(96).notNull(),
+    generatorTier: integer("generator_tier").default(1).notNull(),
+    memberLimit: integer("member_limit").default(4).notNull(),
+    visibility: varchar({ length: 16 }).default("invite_only").notNull(),
+    level: integer().default(1).notNull(),
+    experience: bigint({ mode: "number" }).default(0).notNull(),
+    storageCapacity: bigint("storage_capacity", { mode: "number" }).default(2304).notNull(),
+    version: bigint({ mode: "number" }).default(0).notNull(),
+    lastSavedAt: timestamp("last_saved_at", { withTimezone: true, mode: "date" }),
+    lastActiveAt: timestamp("last_active_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("skyblock_islands_owner_uq").on(table.ownerPlayerId),
+    uniqueIndex("skyblock_islands_grid_uq").on(table.gridX, table.gridZ),
+    check("skyblock_islands_state_ck", sql`${table.state} IN ('creating', 'active', 'resetting', 'disabled')`),
+    check("skyblock_islands_visibility_ck", sql`${table.visibility} IN ('private', 'invite_only')`),
+    check("skyblock_islands_level_ck", sql`${table.level} >= 1 AND ${table.experience} >= 0`),
+    check("skyblock_islands_limits_ck", sql`${table.generation} > 0 AND ${table.buildRadius} BETWEEN 32 AND 224 AND ${table.storageCapacity} > 0 AND ${table.generatorTier} BETWEEN 1 AND 5 AND ${table.memberLimit} BETWEEN 1 AND 4 AND ${table.version} >= 0`),
+  ],
+);
+
+export const skyblockIslandMembers = pgTable(
+  "skyblock_island_members",
+  {
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    role: varchar({ length: 16 }).notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.islandId, table.playerId] }),
+    uniqueIndex("skyblock_island_members_player_uq").on(table.playerId),
+    check("skyblock_island_members_role_ck", sql`${table.role} IN ('owner', 'manager', 'member')`),
+  ],
+);
+
+export const skyblockIslandInvites = pgTable(
+  "skyblock_island_invites",
+  {
+    id: uuid().primaryKey(),
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    inviterPlayerId: uuid("inviter_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    inviteePlayerId: uuid("invitee_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    status: varchar({ length: 16 }).default("pending").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("skyblock_island_invites_pending_uq")
+      .on(table.islandId, table.inviteePlayerId)
+      .where(sql`${table.status} = 'pending'`),
+    index("skyblock_island_invites_invitee_idx").on(table.inviteePlayerId, table.status),
+    check("skyblock_island_invites_status_ck", sql`${table.status} IN ('pending', 'accepted', 'declined', 'expired', 'revoked')`),
+    check("skyblock_island_invites_players_ck", sql`${table.inviterPlayerId} <> ${table.inviteePlayerId}`),
+  ],
+);
+
+export const skyblockSkillProgress = pgTable(
+  "skyblock_skill_progress",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    skill: varchar({ length: 16 }).notNull(),
+    level: integer().default(1).notNull(),
+    experience: bigint({ mode: "number" }).default(0).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.skill] }),
+    check("skyblock_skill_progress_skill_ck", sql`${table.skill} IN ('mining', 'farming', 'foraging', 'combat')`),
+    check("skyblock_skill_progress_value_ck", sql`${table.level} BETWEEN 1 AND 100 AND ${table.experience} >= 0`),
+  ],
+);
+
+export const skyblockQuestProgress = pgTable(
+  "skyblock_quest_progress",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    questId: varchar("quest_id", { length: 64 }).notNull(),
+    progress: integer().default(0).notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    claimedAt: timestamp("claimed_at", { withTimezone: true, mode: "date" }),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.questId] }),
+    check("skyblock_quest_progress_value_ck", sql`${table.progress} >= 0`),
+    check("skyblock_quest_progress_claim_ck", sql`${table.claimedAt} IS NULL OR ${table.completedAt} IS NOT NULL`),
+  ],
+);
+
+export const skyblockWorkers = pgTable(
+  "skyblock_workers",
+  {
+    id: uuid().primaryKey(),
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    workerType: varchar("worker_type", { length: 16 }).notNull(),
+    tier: integer().default(1).notNull(),
+    status: varchar({ length: 16 }).default("active").notNull(),
+    bufferItemId: varchar("buffer_item_id", { length: 64 }).notNull(),
+    bufferQuantity: bigint("buffer_quantity", { mode: "number" }).default(0).notNull(),
+    productionCursorAt: timestamp("production_cursor_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("skyblock_workers_island_idx").on(table.islandId, table.status),
+    uniqueIndex("skyblock_workers_island_type_uq").on(table.islandId, table.workerType),
+    check("skyblock_workers_type_ck", sql`${table.workerType} IN ('miner', 'farmer', 'lumberjack')`),
+    check("skyblock_workers_status_ck", sql`${table.status} IN ('active', 'paused')`),
+    check("skyblock_workers_values_ck", sql`${table.tier} BETWEEN 1 AND 5 AND ${table.bufferQuantity} >= 0`),
+  ],
+);
+
+export const skyblockStorageItems = pgTable(
+  "skyblock_storage_items",
+  {
+    id: uuid().primaryKey(),
+    ownerPlayerId: uuid("owner_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    quantity: bigint({ mode: "number" }).default(0).notNull(),
+    reservedQuantity: bigint("reserved_quantity", { mode: "number" }).default(0).notNull(),
+    version: bigint({ mode: "number" }).default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("skyblock_storage_items_island_item_uq").on(table.islandId, table.itemId),
+    index("skyblock_storage_items_owner_idx").on(table.ownerPlayerId, table.updatedAt),
+    check("skyblock_storage_items_quantity_ck", sql`${table.quantity} >= 0 AND ${table.reservedQuantity} >= 0 AND ${table.reservedQuantity} <= ${table.quantity}`),
+    check("skyblock_storage_items_version_ck", sql`${table.version} >= 0`),
+  ],
+);
+
+export const skyblockInventoryTransfers = pgTable(
+  "skyblock_inventory_transfers",
+  {
+    id: uuid().primaryKey(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    inventorySlot: integer("inventory_slot").notNull(),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    quantity: bigint({ mode: "number" }).notNull(),
+    state: varchar({ length: 16 }).default("prepared").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    committedAt: timestamp("committed_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    index("idx_skyblock_transfer_recovery")
+      .on(table.playerId, table.updatedAt.desc())
+      .where(sql`${table.state} IN ('prepared', 'marked')`),
+    uniqueIndex("uq_skyblock_open_transfer_player")
+      .on(table.playerId)
+      .where(sql`${table.state} IN ('prepared', 'marked')`),
+    check("ck_skyblock_transfer_slot", sql`${table.inventorySlot} BETWEEN 0 AND 40`),
+    check("ck_skyblock_transfer_quantity", sql`${table.quantity} > 0`),
+    check("ck_skyblock_transfer_state", sql`${table.state} IN ('prepared', 'marked', 'committed', 'cancelled')`),
+    check("ck_skyblock_transfer_commit", sql`(${table.state} = 'committed' AND ${table.committedAt} IS NOT NULL) OR (${table.state} <> 'committed' AND ${table.committedAt} IS NULL)`),
+  ],
+);
+
+export const skyblockMarketQuotes = pgTable(
+  "skyblock_market_quotes",
+  {
+    id: uuid().primaryKey(),
+    sellerPlayerId: uuid("seller_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    islandId: uuid("island_id").notNull().references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    storageItemId: uuid("storage_item_id").notNull().references(() => skyblockStorageItems.id, { onDelete: "restrict" }),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    quantity: bigint({ mode: "number" }).notNull(),
+    priceCoins: integer("price_coins").notNull(),
+    feeCoins: integer("fee_coins").notNull(),
+    netCoins: integer("net_coins").notNull(),
+    inventoryVersion: bigint("inventory_version", { mode: "number" }).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("skyblock_market_quotes_seller_expiry_idx").on(table.sellerPlayerId, table.expiresAt),
+    check("skyblock_market_quotes_value_ck", sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins} AND ${table.inventoryVersion} >= 0`),
+  ],
+);
+
+export const skyblockMarketListings = pgTable(
+  "skyblock_market_listings",
+  {
+    id: uuid().primaryKey(),
+    sellerPlayerId: uuid("seller_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    buyerPlayerId: uuid("buyer_player_id").references(() => playerdata.id, { onDelete: "restrict" }),
+    sellerIslandId: uuid("seller_island_id").notNull().references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    buyerIslandId: uuid("buyer_island_id").references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    storageItemId: uuid("storage_item_id").notNull().references(() => skyblockStorageItems.id, { onDelete: "restrict" }),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    quantity: bigint({ mode: "number" }).notNull(),
+    priceCoins: integer("price_coins").notNull(),
+    feeCoins: integer("fee_coins").notNull(),
+    netCoins: integer("net_coins").notNull(),
+    status: varchar({ length: 16 }).default("active").notNull(),
+    version: bigint({ mode: "number" }).default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    index("skyblock_market_listings_market_idx").on(table.status, table.createdAt),
+    index("skyblock_market_listings_seller_idx").on(table.sellerPlayerId, table.status, table.createdAt),
+    check("skyblock_market_listings_status_ck", sql`${table.status} IN ('active', 'sold', 'cancelled', 'expired')`),
+    check("skyblock_market_listings_value_ck", sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins} AND ${table.version} >= 0`),
+    check("skyblock_market_listings_resolution_ck", sql`(${table.status} = 'active' AND ${table.resolvedAt} IS NULL AND ${table.buyerPlayerId} IS NULL AND ${table.buyerIslandId} IS NULL) OR (${table.status} = 'sold' AND ${table.resolvedAt} IS NOT NULL AND ${table.buyerPlayerId} IS NOT NULL AND ${table.buyerIslandId} IS NOT NULL) OR (${table.status} IN ('cancelled', 'expired') AND ${table.resolvedAt} IS NOT NULL)`),
+  ],
+);
+
+export const skyblockMarketSales = pgTable(
+  "skyblock_market_sales",
+  {
+    id: uuid().primaryKey(),
+    listingId: uuid("listing_id").notNull().references(() => skyblockMarketListings.id, { onDelete: "restrict" }),
+    buyerPlayerId: uuid("buyer_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    sellerPlayerId: uuid("seller_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    buyerIslandId: uuid("buyer_island_id").notNull().references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    sellerIslandId: uuid("seller_island_id").notNull().references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    quantity: bigint({ mode: "number" }).notNull(),
+    priceCoins: integer("price_coins").notNull(),
+    feeCoins: integer("fee_coins").notNull(),
+    netCoins: integer("net_coins").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("skyblock_market_sales_listing_uq").on(table.listingId),
+    index("skyblock_market_sales_buyer_idx").on(table.buyerPlayerId, table.createdAt),
+    index("skyblock_market_sales_seller_idx").on(table.sellerPlayerId, table.createdAt),
+    check("skyblock_market_sales_value_ck", sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins}`),
+    check("skyblock_market_sales_players_ck", sql`${table.buyerPlayerId} <> ${table.sellerPlayerId}`),
+  ],
+);
+
+export const skyblockMobileRequests = pgTable(
+  "skyblock_mobile_requests",
+  {
+    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    scope: varchar({ length: 64 }).notNull(),
+    idempotencyKey: varchar("idempotency_key", { length: 128 }).notNull(),
+    requestHash: varchar("request_hash", { length: 128 }).notNull(),
+    responseStatus: integer("response_status").notNull(),
+    responseBody: jsonb("response_body").$type<Record<string, unknown>>().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.scope, table.idempotencyKey] }),
+    check("skyblock_mobile_requests_status_ck", sql`${table.responseStatus} BETWEEN 100 AND 599`),
+  ],
+);

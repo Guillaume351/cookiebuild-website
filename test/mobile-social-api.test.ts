@@ -18,6 +18,8 @@ describe("mobile social API gates", () => {
     delete process.env.COOKIEBUILD_BEDWARS_ENABLED;
     delete process.env.MOBILE_KIT_SHOP_ENABLED;
     delete process.env.MOBILE_PLAYER_DASHBOARD_ENABLED;
+    delete process.env.MOBILE_SKYBLOCK_ENABLED;
+    delete process.env.MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED;
     await databaseModule.postgresClient.end({ timeout: 0 });
     vi.unstubAllGlobals();
   });
@@ -28,6 +30,8 @@ describe("mobile social API gates", () => {
     expect(capabilityModule.configuredMobileCapabilities()).toEqual({
       kitShop: false,
       playerDashboard: false,
+      skyblockCompanion: false,
+      skyblockMarketWrites: false,
     });
 
     process.env.MOBILE_KIT_SHOP_ENABLED = "TRUE";
@@ -35,6 +39,8 @@ describe("mobile social API gates", () => {
     expect(capabilityModule.configuredMobileCapabilities()).toEqual({
       kitShop: true,
       playerDashboard: true,
+      skyblockCompanion: false,
+      skyblockMarketWrites: false,
     });
   });
 
@@ -96,6 +102,8 @@ describe("mobile social API gates", () => {
           friendOnlineAlerts: boolean;
           shop: boolean;
           playerDashboard: boolean;
+          skyblockCompanion: boolean;
+          skyblockMarketWrites: boolean;
         };
         gamemodes: Array<{ id: string; available: boolean; releaseStage?: string }>;
       };
@@ -108,6 +116,8 @@ describe("mobile social API gates", () => {
       friendOnlineAlerts: false,
       shop: false,
       playerDashboard: false,
+      skyblockCompanion: false,
+      skyblockMarketWrites: false,
     });
     expect(response.data.gamemodes).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "microbattles", available: true }),
@@ -116,6 +126,7 @@ describe("mobile social API gates", () => {
       expect.objectContaining({ id: "buildbattles", available: true }),
       expect.objectContaining({ id: "turfwars", available: true }),
       expect.objectContaining({ id: "bedwars", available: false, releaseStage: "beta" }),
+      expect.objectContaining({ id: "skyblock", available: false, releaseStage: "beta" }),
     ]));
   });
 

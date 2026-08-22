@@ -8,7 +8,7 @@
     <section id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Privacy Policy</h1>
-        <p>Effective and last updated: August 18, 2026</p>
+        <p>Effective and last updated: August 22, 2026</p>
       </header>
 
       <section>
@@ -28,6 +28,7 @@
           <li>Technical authentication diagnostics automatically processed by Firebase, such as IP address, operating system, device model, brand, form factor, installer, SDK versions, and Firebase app identifier.</li>
           <li>Minecraft UUID, display name, Java or Bedrock edition, link status, and gameplay statistics.</li>
           <li>Personal seasonal rank, per-game match history and activity, aggregate minigame XP, achievements, earned coin balance, unlocked and selected kits, and daily and weekly goal progress. Goal resets use UTC.</li>
+          <li>Skyblock island membership and role, progression, quests, workers, virtual storage quantities, marketplace quotes/listings/sales, and the state and timestamps of crash-safe inventory deposits.</li>
           <li>Structured friend requests, accepted friendships, blocks, report reason, parties, members, invitations, and fixed-format player calls. The app has no free-form chat.</li>
           <li>Friend suggestions calculated on demand from completed matches shared in the last 30 days. Suggestions do not expose the match, time, score, online state, or last-seen time, and exclude existing relationships, blocks, and reports.</li>
           <li>Presence derived from active game sessions. It is available only to accepted friends and current party members, subject to the player’s friends-and-party, friends-only, or hidden setting and all blocks.</li>
@@ -48,7 +49,7 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Purposes and legal bases</h2>
         <ul class="list-disc space-y-2 pl-6">
-          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, history, rank, goal progression, earned-coin kit unlocks and selections, privacy-scoped presence, friends and recent-player suggestions, parties, events, and requested account controls.</li>
+          <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, history, rank, goal progression, Skyblock island/storage and earned-coin marketplace management, earned-coin kit unlocks and selections, privacy-scoped presence, friends and recent-player suggestions, parties, events, and requested account controls.</li>
           <li><strong>Consent:</strong> send push notifications, including separately configurable player calls, goal reminders, and selected accepted-friend online alerts, only after the corresponding in-app opt-in. Consent can be withdrawn in Settings. Quiet hours suppress these notifications.</li>
           <li><strong>Legitimate interests:</strong> secure accounts, prevent abuse, moderate reports, keep games fair, diagnose incidents, and protect service availability.</li>
           <li><strong>Legal obligations:</strong> respond to lawful requests and preserve evidence when required.</li>
@@ -83,6 +84,7 @@
           <li>Delivered notification jobs and deleted-account tombstones are removed after 90 days and 30 days respectively.</li>
           <li>Match results and aggregate gameplay statistics remain for the life of the server for public leaderboards, fair-play, and match integrity, unless law requires earlier deletion.</li>
           <li>Daily/weekly goal progress, achievements, XP, coins, and the app-promotion limiter are Minecraft gameplay records and follow the game-statistics retention period.</li>
+          <li>Skyblock island progress, storage, market transactions, and crash-recovery deposit records are Minecraft gameplay and integrity records and follow the game-statistics retention period.</li>
         </ul>
       </section>
 
@@ -95,7 +97,8 @@
           preferences, per-friend online-alert selections, and mobile player links. It does not erase the Minecraft name, friendships,
           blocks, party or safety records keyed to that player, or integrity records from public
           gameplay history. It also does not erase rank inputs, XP, coins, achievements, or
-          daily/weekly goal progress, which are gameplay records rather than mobile-account data;
+          daily/weekly goal progress, Skyblock island/storage, market, or deposit records, which are
+          gameplay records rather than mobile-account data;
           those use their own controls and retention periods above.
         </p>
         <p class="mt-3">
@@ -122,7 +125,7 @@
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
-        <p>Applicable et mise à jour le 18 août 2026</p>
+        <p>Applicable et mise à jour le 22 août 2026</p>
       </header>
 
       <section>
@@ -141,6 +144,7 @@
           <li>Diagnostics techniques d’authentification traités automatiquement par Firebase, notamment adresse IP, système, modèle, marque, format de l’appareil, installateur, versions des SDK et identifiant d’app Firebase.</li>
           <li>UUID, pseudo, édition Java ou Bedrock, association et statistiques Minecraft.</li>
           <li>Rang saisonnier personnel, historique et activité par jeu, XP agrégée des mini-jeux, succès, solde de pièces gagnées, kits débloqués et sélectionnés, et progression des objectifs quotidiens et hebdomadaires. Les remises à zéro utilisent UTC.</li>
+          <li>Île Skyblock, appartenance et rôle, progression, quêtes, ouvriers, quantités du stockage virtuel, cotations/annonces/ventes du marché, ainsi que l’état et les dates des dépôts d’inventaire résistants aux interruptions.</li>
           <li>Demandes et listes d’amis, blocages, motif de signalement, groupes, membres, invitations et appels de joueurs structurés. L’app ne contient aucun chat libre.</li>
           <li>Suggestions d’amis calculées à la demande depuis les parties terminées jouées ensemble pendant les 30 derniers jours. Ni partie, heure, score, présence ou dernière connexion n’est affiché, et les relations, blocages et signalements sont exclus.</li>
           <li>Présence déduite des sessions actives, visible uniquement par les amis acceptés et membres du groupe actuel, selon le réglage amis et groupe, amis uniquement ou masqué, et dans le respect des blocages.</li>
@@ -161,7 +165,8 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Finalités et bases légales</h2>
         <p>
           Le contrat permet de fournir le compte, l’association, les statistiques, l’historique, le rang,
-          les objectifs, les achats de kits avec les pièces gagnées en jeu, la présence restreinte,
+          les objectifs, la gestion de l’île, du stockage et du marché Skyblock avec les pièces
+          gagnées en jeu, les achats de kits avec ces pièces, la présence restreinte,
           les amis et suggestions de joueurs récents, groupes et événements. Le consentement couvre
           uniquement les notifications facultatives, dont les appels de joueurs, rappels d’objectifs
           et alertes d’amis acceptés configurables séparément. Les heures calmes les suppriment. L’intérêt
@@ -196,6 +201,7 @@
           <li>Tâches de notification livrées : 90 jours ; marqueur de compte supprimé : 30 jours.</li>
           <li>Résultats et statistiques agrégées : pendant la durée de vie du serveur pour le classement, l’équité et l’intégrité des matchs.</li>
           <li>Objectifs quotidiens/hebdomadaires, succès, XP, pièces et limiteur de promotion de l’app : données de jeu conservées selon la même durée que les statistiques Minecraft.</li>
+          <li>Progression d’île, stockage, transactions du marché et dépôts de reprise Skyblock : données de jeu et d’intégrité conservées selon la même durée que les statistiques Minecraft.</li>
         </ul>
       </section>
 
@@ -213,7 +219,8 @@
         <p class="mt-3">
           La suppression du compte mobile efface le profil mobile pseudonyme, les appareils,
           préférences, alertes d’amis et associations mobiles. Elle n’efface pas le rang, l’XP, les
-          pièces, succès ou objectifs quotidiens/hebdomadaires : ces éléments sont des données de jeu
+          pièces, succès, objectifs quotidiens/hebdomadaires, île/stockage, marché ou dépôts Skyblock :
+          ces éléments sont des données de jeu
           Minecraft, avec les contrôles et durées indiqués ci-dessus.
         </p>
       </section>

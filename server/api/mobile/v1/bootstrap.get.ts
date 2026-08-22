@@ -28,6 +28,8 @@ export default defineCachedEventHandler(
           liveChat: false,
           shop: capabilities.kitShop,
           playerDashboard: capabilities.playerDashboard,
+          skyblockCompanion: capabilities.skyblockCompanion,
+          skyblockMarketWrites: capabilities.skyblockMarketWrites,
         },
         gamemodes: [
           { id: "microbattles", name: "MicroBattles", icon: "/microbattles-icon.svg", available: true },
@@ -40,6 +42,13 @@ export default defineCachedEventHandler(
             name: "BedWars",
             icon: "/bedwars-icon.svg",
             available: bedWarsEnabled,
+            releaseStage: "beta",
+          },
+          {
+            id: "skyblock",
+            name: "Skyblock",
+            icon: "/skyblock-icon.svg",
+            available: capabilities.skyblockCompanion,
             releaseStage: "beta",
           },
         ],
