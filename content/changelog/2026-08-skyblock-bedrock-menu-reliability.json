@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-bedrock-menu-reliability",
+  "contentType": "changelog",
+  "title": "Skyblock menus stay responsive on Bedrock",
+  "summary": "Reopening the Skyblock menu on Bedrock no longer leaves its actions stuck on the main page after an empty warehouse deposit.",
+  "body": "- Reopening the Skyblock menu with its inventory selector now coalesces duplicate Bedrock interaction events into one form.\n- The visible form keeps the current action session, so Island, Progression, Community and their submenus open normally instead of returning to the main page.\n- Attempting a warehouse deposit without an allowed resource still leaves every item untouched and shows the existing guidance. You can then reopen the menu and continue immediately.\n- Stale and repeated action responses remain rejected to prevent an action from running twice.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-23T09:50:29+02:00"
+}

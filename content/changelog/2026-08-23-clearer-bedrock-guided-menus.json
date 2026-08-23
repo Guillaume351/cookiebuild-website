@@ -1,0 +1,8 @@
+{
+  "slug": "clearer-bedrock-guided-menus",
+  "contentType": "changelog",
+  "title": "Clearer illustrated menus across Cookie Build on Bedrock",
+  "summary": "Bedrock players now get more readable illustrated buttons and guided menu journeys across the lobby, minigames, BedWars shops and Skyblock.",
+  "body": "- The Bedrock lobby, game picker, queue and replay screens now use consistent Cookie Build images so joining, switching games, practising, rallying friends and replaying are easier to recognise.\n- Every current MicroBattles and SkyWars kit has its own illustrated selector. BuildBattles palette actions and Pitchout voting and replay actions keep the same clear navigation.\n- BedWars shop categories, all current items and team upgrades are now illustrated, making it easier to distinguish equipment and purchases before confirming an action.\n- Skyblock keeps its guided Island, Progression and Community sections, with matching images for storage, generators, workers, quests, co-op and the market.\n- All buttons retain their full text labels on high-contrast tiles. If an image is unavailable, the readable text button remains usable instead of hiding the action.\n- All seven Cookie Build modes remain available from the shared game picker on Java and Bedrock. Reconnect once on Bedrock so your device can apply the current server pack.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "publishedAt": "2026-08-23T10:57:36+02:00"
+}
