@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "locales": [
+    { "code": "en", "pathSegment": "", "languageTag": "en-AU", "label": "English", "nativeLabel": "English", "country": "Australia", "flag": "🇦🇺" },
+    { "code": "fr", "pathSegment": "fr", "languageTag": "fr-FR", "label": "French", "nativeLabel": "Français", "country": "France", "flag": "🇫🇷" },
+    { "code": "de", "pathSegment": "de", "languageTag": "de-DE", "label": "German", "nativeLabel": "Deutsch", "country": "Germany", "flag": "🇩🇪" },
+    { "code": "it", "pathSegment": "it", "languageTag": "it-IT", "label": "Italian", "nativeLabel": "Italiano", "country": "Italy", "flag": "🇮🇹" },
+    { "code": "bg", "pathSegment": "bg", "languageTag": "bg-BG", "label": "Bulgarian", "nativeLabel": "Български", "country": "Bulgaria", "flag": "🇧🇬" },
+    { "code": "es", "pathSegment": "es", "languageTag": "es-PE", "label": "Spanish", "nativeLabel": "Español", "country": "Peru", "flag": "🇵🇪" },
+    { "code": "hi", "pathSegment": "hi", "languageTag": "hi-IN", "label": "Hindi", "nativeLabel": "हिन्दी", "country": "India", "flag": "🇮🇳" },
+    { "code": "pt-BR", "pathSegment": "pt-br", "languageTag": "pt-BR", "label": "Brazilian Portuguese", "nativeLabel": "Português (Brasil)", "country": "Brazil", "flag": "🇧🇷" }
+  ]
+}

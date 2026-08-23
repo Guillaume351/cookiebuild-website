@@ -14,6 +14,7 @@ import {
 import {
   enforceLinkClaimRateLimit,
   enforceMobileRequestRateLimit,
+  type MobileRateLimitStore,
 } from "../server/utils/mobile-rate-limit";
 
 describe("mobile API validation", () => {
@@ -56,21 +57,33 @@ describe("mobile API validation", () => {
     expect(() => requiredInteger(4, "level", { minimum: 1, maximum: 3 })).toThrowError();
   });
 
-  it("limits repeated claim attempts and resets the window", () => {
+  it("limits repeated claim attempts and resets the shared window", async () => {
     const key = `test:${Math.random()}`;
+    const store = memoryRateLimitStore();
     for (let index = 0; index < 8; index += 1) {
-      expect(() => enforceLinkClaimRateLimit(key, 1_000)).not.toThrow();
+      await expect(enforceLinkClaimRateLimit(key, { now: 1_000, store })).resolves.toBeUndefined();
     }
-    expect(() => enforceLinkClaimRateLimit(key, 1_000)).toThrowError();
-    expect(() => enforceLinkClaimRateLimit(key, 601_001)).not.toThrow();
+    await expect(enforceLinkClaimRateLimit(key, { now: 1_000, store })).rejects.toMatchObject({ statusCode: 429 });
+    await expect(enforceLinkClaimRateLimit(key, { now: 601_001, store })).resolves.toBeUndefined();
   });
 
-  it("supports bounded per-user limits for private mobile reads", () => {
+  it("supports bounded per-user limits for private mobile reads", async () => {
     const key = `dashboard-${crypto.randomUUID()}`;
-    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 10)).not.toThrow();
-    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 20)).not.toThrow();
-    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 30)).toThrowError();
-    expect(() => enforceMobileRequestRateLimit(key, 2, 1_000, 1_011)).not.toThrow();
+    const store = memoryRateLimitStore();
+    await expect(enforceMobileRequestRateLimit(key, 2, 1_000, { now: 10, store })).resolves.toBeUndefined();
+    await expect(enforceMobileRequestRateLimit(key, 2, 1_000, { now: 20, store })).resolves.toBeUndefined();
+    await expect(enforceMobileRequestRateLimit(key, 2, 1_000, { now: 30, store })).rejects.toMatchObject({ statusCode: 429 });
+    await expect(enforceMobileRequestRateLimit(key, 2, 1_000, { now: 1_011, store })).resolves.toBeUndefined();
+  });
+
+  it("fails closed for mutations when the shared limiter is unavailable", async () => {
+    const store: MobileRateLimitStore = {
+      consume: async () => { throw new Error("database unavailable"); },
+    };
+    await expect(enforceMobileRequestRateLimit("write", 1, 1_000, {
+      failClosed: true,
+      store,
+    })).rejects.toMatchObject({ statusCode: 503 });
   });
 
   it("validates a bounded and timestamped device timezone snapshot", () => {
@@ -94,3 +107,19 @@ describe("mobile API validation", () => {
     )).toThrowError();
   });
 });
+
+function memoryRateLimitStore(): MobileRateLimitStore {
+  const attempts = new Map<string, { count: number; resetsAt: Date }>();
+  return {
+    async consume({ keyHash, limit, windowMs, now }) {
+      const current = attempts.get(keyHash);
+      if (!current || current.resetsAt <= now) {
+        const result = { count: 1, resetsAt: new Date(now.getTime() + windowMs) };
+        attempts.set(keyHash, result);
+        return { allowed: true, resetsAt: result.resetsAt };
+      }
+      current.count += 1;
+      return { allowed: current.count <= limit, resetsAt: current.resetsAt };
+    },
+  };
+}

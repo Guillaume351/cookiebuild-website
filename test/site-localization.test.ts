@@ -8,6 +8,7 @@ import {
   SITE_LOCALES,
   localizedAbsoluteUrl,
   localizedSitePath,
+  supportsLocalizedSitePath,
   siteLocaleFromPath,
   stripSiteLocale,
 } from "../utils/site-locales";
@@ -36,6 +37,20 @@ describe("country-targeted public-site localization", () => {
     }
   });
 
+  it("drives the site registry from the shared locale contract", async () => {
+    const contract = JSON.parse(await readSource("../contracts/locales-v1.json"));
+    expect(contract.schemaVersion).toBe(1);
+    expect(SITE_LOCALES.map((locale) => ({
+      code: locale.code,
+      pathSegment: locale.pathSegment,
+      languageTag: locale.htmlLang,
+    }))).toEqual(contract.locales.map((locale: { code: string; pathSegment: string; languageTag: string }) => ({
+      code: locale.code,
+      pathSegment: locale.pathSegment,
+      languageTag: locale.languageTag,
+    })));
+  });
+
   it("resolves and switches prefixed routes without changing the stable page slug", () => {
     expect(siteLocaleFromPath("/bg/skywars").code).toBe("bg");
     expect(siteLocaleFromPath("/es/games").htmlLang).toBe("es-PE");
@@ -47,6 +62,10 @@ describe("country-targeted public-site localization", () => {
     expect(stripSiteLocale("/pt-br/build-battle?from=menu")).toBe("/build-battle");
     expect(localizedSitePath("/es/skywars", "bg")).toBe("/bg/skywars");
     expect(localizedSitePath("/hi", "en")).toBe("/");
+    expect(localizedSitePath("/fr/support", "de")).toBe("/de/support");
+    expect(localizedSitePath("/it/player-stats", "pt-BR")).toBe("/pt-br/player-stats");
+    expect(supportsLocalizedSitePath("/de/account/delete")).toBe(true);
+    expect(supportsLocalizedSitePath("/it/updates/skyblock-cookie-orchard")).toBe(true);
   });
 
   it("provides localized visible copy and metadata for every game page", () => {
@@ -90,7 +109,7 @@ describe("country-targeted public-site localization", () => {
   it("generates one indexable URL per locale and page with complete alternates", () => {
     const sitemap = buildMarketingSitemap();
     const localizedUrlCount = LOCALIZED_MARKETING_PATHS.length * SITE_LOCALES.length;
-    expect((sitemap.match(/<loc>/g) || []).length).toBe(localizedUrlCount + 7);
+    expect((sitemap.match(/<loc>/g) || []).length).toBe(localizedUrlCount);
     expect(sitemap).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
 
     for (const path of LOCALIZED_MARKETING_PATHS) {

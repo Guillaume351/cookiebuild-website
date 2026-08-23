@@ -1,5 +1,6 @@
 <template>
   <article class="mx-auto max-w-3xl space-y-10 py-12 text-gray-300">
+    <LanguageFallbackNotice :available-locales="['en', 'fr']" />
     <nav class="flex gap-3 text-sm" aria-label="Language">
       <a class="rounded-md bg-orange-600 px-3 py-2 font-semibold text-white" href="#english">English</a>
       <a class="rounded-md border border-gray-700 px-3 py-2 font-semibold text-white" href="#francais">Français</a>
@@ -62,8 +63,10 @@
         <p>
           Google Firebase provides anonymous authentication and push delivery. The legacy app also
           shared app-view interactions with Google App Indexing. Apple and Google distribute the
-          app. Player avatars are loaded from mc-heads.net, which receives the public Minecraft
-          display name and the requesting device's IP address. EU-based infrastructure providers host the website, API, database,
+          app. Current website and companion source builds proxy public Minecraft avatars through
+          Cookie Build using the public UUID, so mc-heads.net does not receive the requesting device's
+          IP address or player display name. A legacy app build may still load avatars directly and
+          disclose those values until it is removed from every store track. EU-based infrastructure providers host the website, API, database,
           monitoring, and Minecraft server. These providers process only the data needed for their
           services under their own terms and data-processing safeguards. Firebase or store services
           may process data outside the EEA using applicable transfer mechanisms such as adequacy
@@ -181,8 +184,10 @@
         <p>
           Google Firebase fournit l’authentification anonyme et les notifications. L’ancienne app
           partageait aussi les interactions de consultation avec Google App Indexing. Apple et Google
-          distribuent l’app. Les avatars sont chargés depuis mc-heads.net, qui reçoit le pseudo
-          Minecraft public et l’adresse IP de l’appareil. Des prestataires d’infrastructure européens hébergent le site, l’API,
+          distribuent l’app. Le site et les builds sources actuels chargent les avatars via le proxy
+          Cookie Build avec l’UUID Minecraft public : mc-heads.net ne reçoit donc ni l’adresse IP de
+          l’appareil ni le pseudo. Un ancien build peut encore les envoyer directement tant qu’il reste
+          disponible sur une piste du store. Des prestataires d’infrastructure européens hébergent le site, l’API,
           la base, le monitoring et le serveur. Certains services peuvent traiter des données hors
           EEE avec les garanties applicables, notamment décision d’adéquation ou clauses contractuelles types.
         </p>
@@ -238,9 +243,11 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({
-  title: "Privacy Policy | Cookie Build",
-  description: "Cookie Build privacy policy, data controls, retention, and account deletion.",
-  robots: "index, follow",
-});
+import { publicPageSeo } from "@/utils/public-page-seo";
+
+definePageMeta({ alias: ["/fr/privacy", "/de/privacy", "/it/privacy", "/bg/privacy", "/es/privacy", "/hi/privacy", "/pt-br/privacy"] });
+
+const { locale } = useSiteLocale();
+const seo = computed(() => publicPageSeo(locale.value.code, "privacy"));
+useLocalizedSeo("/privacy", () => seo.value.title, () => seo.value.description);
 </script>

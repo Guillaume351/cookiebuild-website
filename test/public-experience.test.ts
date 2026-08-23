@@ -52,7 +52,7 @@ describe("public experience", () => {
     const footer = await source("../components/AppFooter.vue");
     const sitemap = buildMarketingSitemap();
 
-    expect(header).toContain('to="/status"');
+    expect(header).toContain(':to="localizePath(\'/status\')"');
     expect(footer).toContain('to="/rules"');
     expect(footer).toContain('to="/support"');
     expect(sitemap).toContain("https://www.cookie-build.com/status");

@@ -11,10 +11,12 @@ describe("changelog supersession contract", () => {
       read("../db/schema.ts"),
     ]);
 
-    expect(JSON.parse(journal).entries.at(-1)).toMatchObject({
-      idx: 12,
-      tag: "0012_changelog_supersession",
-    });
+    expect(JSON.parse(journal).entries).toContainEqual(
+      expect.objectContaining({
+        idx: 12,
+        tag: "0012_changelog_supersession",
+      }),
+    );
     expect(migration).toContain('ADD COLUMN IF NOT EXISTS "supersedes_slug"');
     expect(migration).toContain('REFERENCES "mobile_news_posts" ("slug")');
     expect(migration).toContain('"supersedes_slug" <> "slug"');

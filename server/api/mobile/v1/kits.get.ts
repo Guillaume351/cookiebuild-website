@@ -6,7 +6,7 @@ import { enforceMobileRequestRateLimit } from "../../../utils/mobile-rate-limit"
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("kitShop");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`kit-shop:${auth.uid}`, 60, 60_000);
+  await enforceMobileRequestRateLimit(`kit-shop:${auth.uid}`, 60, 60_000, { event });
   const shop = await mobileKitShopSnapshot(auth.uid);
   setHeader(event, "Cache-Control", "private, no-store");
   return { data: shop };

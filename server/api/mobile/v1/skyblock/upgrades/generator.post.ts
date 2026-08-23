@@ -8,7 +8,7 @@ import { generatorUpgradeBody, skyblockIdempotencyKey } from "../../../../../uti
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockManagementWrites");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-management-write:${auth.uid}`, 20, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-management-write:${auth.uid}`, 20, 60_000, { event, failClosed: true });
   const input = generatorUpgradeBody(await readBody(event));
   const key = skyblockIdempotencyKey(getHeader(event, "idempotency-key"));
   const result = await upgradeSkyblockGenerator(auth.uid, input, key);

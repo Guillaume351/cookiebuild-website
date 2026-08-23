@@ -1,4 +1,5 @@
 import { COOKIE_BUILD_SITE_URL } from "./game-landings";
+import localeContract from "../contracts/locales-v1.json";
 
 export type SiteLocaleCode = "en" | "fr" | "de" | "it" | "bg" | "es" | "hi" | "pt-BR";
 
@@ -13,16 +14,13 @@ export interface SiteLocale {
   flag: string;
 }
 
-export const SITE_LOCALES: readonly SiteLocale[] = [
-  { code: "en", pathSegment: "", htmlLang: "en-AU", hreflang: "en-AU", label: "English", nativeLabel: "English", country: "Australia", flag: "🇦🇺" },
-  { code: "fr", pathSegment: "fr", htmlLang: "fr-FR", hreflang: "fr-FR", label: "French", nativeLabel: "Français", country: "France", flag: "🇫🇷" },
-  { code: "de", pathSegment: "de", htmlLang: "de-DE", hreflang: "de-DE", label: "German", nativeLabel: "Deutsch", country: "Germany", flag: "🇩🇪" },
-  { code: "it", pathSegment: "it", htmlLang: "it-IT", hreflang: "it-IT", label: "Italian", nativeLabel: "Italiano", country: "Italy", flag: "🇮🇹" },
-  { code: "bg", pathSegment: "bg", htmlLang: "bg-BG", hreflang: "bg-BG", label: "Bulgarian", nativeLabel: "Български", country: "Bulgaria", flag: "🇧🇬" },
-  { code: "es", pathSegment: "es", htmlLang: "es-PE", hreflang: "es-PE", label: "Spanish", nativeLabel: "Español", country: "Peru", flag: "🇵🇪" },
-  { code: "hi", pathSegment: "hi", htmlLang: "hi-IN", hreflang: "hi-IN", label: "Hindi", nativeLabel: "हिन्दी", country: "India", flag: "🇮🇳" },
-  { code: "pt-BR", pathSegment: "pt-br", htmlLang: "pt-BR", hreflang: "pt-BR", label: "Brazilian Portuguese", nativeLabel: "Português (Brasil)", country: "Brazil", flag: "🇧🇷" },
-] as const;
+export const SITE_LOCALES: readonly SiteLocale[] = localeContract.locales.map((locale) => ({
+  ...locale,
+  code: locale.code as SiteLocaleCode,
+  pathSegment: locale.pathSegment as SiteLocale["pathSegment"],
+  htmlLang: locale.languageTag as SiteLocale["htmlLang"],
+  hreflang: locale.languageTag as SiteLocale["hreflang"],
+}));
 
 export const LOCALIZED_MARKETING_PATHS = [
   "/",
@@ -34,6 +32,18 @@ export const LOCALIZED_MARKETING_PATHS = [
   "/pitchout",
   "/skywars",
   "/turfwars",
+  "/updates",
+  "/player-stats",
+  "/support",
+  "/status",
+  "/rules",
+  "/privacy",
+  "/terms",
+] as const;
+
+export const LOCALIZED_FUNCTIONAL_PATHS = [
+  ...LOCALIZED_MARKETING_PATHS,
+  "/account/delete",
 ] as const;
 
 const localeBySegment = new Map<string, SiteLocale>(
@@ -64,6 +74,13 @@ export function localizedSitePath(path: string, locale: SiteLocale | SiteLocaleC
 
 export function localizedAbsoluteUrl(path: string, locale: SiteLocale | SiteLocaleCode): string {
   return `${COOKIE_BUILD_SITE_URL}${localizedSitePath(path, locale)}`;
+}
+
+export function supportsLocalizedSitePath(path: string) {
+  const basePath = stripSiteLocale(path);
+  return LOCALIZED_FUNCTIONAL_PATHS.includes(
+    basePath as (typeof LOCALIZED_FUNCTIONAL_PATHS)[number],
+  ) || basePath.startsWith("/updates/");
 }
 
 export function localizedSeoLinks(path: string) {

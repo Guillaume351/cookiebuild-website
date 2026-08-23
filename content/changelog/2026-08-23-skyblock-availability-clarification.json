@@ -1,0 +1,10 @@
+{
+  "slug": "skyblock-beta-availability-clarified",
+  "contentType": "changelog",
+  "title": "Skyblock beta availability, clearly explained",
+  "summary": "Skyblock is playable on Java and Bedrock, while companion management remains a limited beta and mobile market actions stay closed until their own safety checks are complete.",
+  "body": "- Minecraft — Java and Bedrock: Cookie Orchard islands, progression, workers, quests, co-op and the in-game economy are available as a beta.\n- Public iOS and Android app: the current 2.1.3 store release does not include Skyblock companion management.\n- Limited 2.1.4 companion builds: linked players can review their island and use generator, worker, quest and valid co-op actions only when each capability is available.\n- Mobile player market: buying, selling and cancelling remain unavailable until that capability is enabled separately after economy and release checks. No store upload or source build opens it automatically.\n- Website: the eight supported language routes now keep the same page when switching language. Pages awaiting a full translation show an explicit English notice instead of a missing page.\n- Supported language journeys: Australian English, French, German, Italian, Bulgarian, Peruvian Spanish, Hindi and Brazilian Portuguese.",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "supersedesSlug": "skyblock-cookie-orchard",
+  "publishedAt": "2026-08-23T00:30:00+02:00"
+}

@@ -12,7 +12,7 @@ import {
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockManagementWrites");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-management-write:${auth.uid}`, 20, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-management-write:${auth.uid}`, 20, 60_000, { event, failClosed: true });
   const questId = skyblockQuestId(getRouterParam(event, "id"));
   emptySkyblockMutationBody(await readBody(event));
   const key = skyblockIdempotencyKey(getHeader(event, "idempotency-key"));

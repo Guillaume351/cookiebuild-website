@@ -1,5 +1,6 @@
 <template>
   <main class="mx-auto max-w-3xl space-y-8 py-12 text-gray-300">
+    <LanguageFallbackNotice :available-locales="['en', 'fr']" />
     <header>
       <h1 class="mb-3 text-4xl font-bold text-white">Cookie Build Support</h1>
       <p lang="fr">Assistance Cookie Build · English and French support</p>
@@ -56,9 +57,11 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({
-  title: "Support | Cookie Build",
-  description: "Cookie Build mobile app and Minecraft server support in English and French.",
-  robots: "index, follow",
-});
+import { publicPageSeo } from "@/utils/public-page-seo";
+
+definePageMeta({ alias: ["/fr/support", "/de/support", "/it/support", "/bg/support", "/es/support", "/hi/support", "/pt-br/support"] });
+
+const { locale } = useSiteLocale();
+const seo = computed(() => publicPageSeo(locale.value.code, "support"));
+useLocalizedSeo("/support", () => seo.value.title, () => seo.value.description);
 </script>

@@ -1,5 +1,6 @@
 <template>
   <main class="container mx-auto max-w-3xl px-4 py-16 text-gray-100">
+    <LanguageFallbackNotice :available-locales="['en', 'fr']" />
     <h1 class="mb-3 text-4xl font-bold">Delete your Cookie Build app account</h1>
     <p class="mb-8 text-gray-400" lang="fr">Supprimer votre compte de l’application Cookie Build</p>
 
@@ -86,6 +87,8 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ alias: ["/fr/account/delete", "/de/account/delete", "/it/account/delete", "/bg/account/delete", "/es/account/delete", "/hi/account/delete", "/pt-br/account/delete"] });
+
 const code = ref("");
 const confirmed = ref(false);
 const submitting = ref(false);
@@ -120,9 +123,9 @@ async function deleteByCode() {
   }
 }
 
-useSeoMeta({
-  title: "Delete your account | Cookie Build",
-  description: "Delete the Cookie Build mobile account in-app or with a verified one-time Minecraft code.",
-  robots: "index, follow",
-});
+useLocalizedSeo(
+  "/account/delete",
+  "Delete your account | Cookie Build",
+  "Delete the Cookie Build mobile account in-app or with a verified one-time Minecraft code.",
+);
 </script>

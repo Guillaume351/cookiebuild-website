@@ -8,7 +8,7 @@ import { skyblockInventoryQuery } from "../../../../utils/mobile-skyblock";
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockCompanion");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-inventory:${auth.uid}`, 60, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-inventory:${auth.uid}`, 60, 60_000, { event });
   const inventory = await skyblockInventory(auth.uid, skyblockInventoryQuery(getQuery(event)));
   setHeader(event, "Cache-Control", "private, no-store");
   return { data: inventory };

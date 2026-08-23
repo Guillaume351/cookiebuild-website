@@ -8,7 +8,7 @@ import { skyblockListingsQuery } from "../../../../utils/mobile-skyblock";
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockCompanion");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-listings:${auth.uid}`, 60, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-listings:${auth.uid}`, 60, 60_000, { event });
   const listings = await skyblockListings(auth.uid, skyblockListingsQuery(getQuery(event)));
   setHeader(event, "Cache-Control", "private, no-store");
   return { data: listings };

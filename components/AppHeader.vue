@@ -16,11 +16,11 @@
       <div class="hidden items-center space-x-6 md:flex">
         <NuxtLink :to="localizePath('/')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.home }}</NuxtLink>
         <NuxtLink :to="localizePath('/games')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.games }}</NuxtLink>
-        <NuxtLink to="/player-stats" class="text-white hover:text-gray-300 transition-colors"
+        <NuxtLink :to="localizePath('/player-stats')" class="text-white hover:text-gray-300 transition-colors"
           >{{ copy.navigation.playerStats }}</NuxtLink
         >
-        <NuxtLink to="/updates" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
-        <NuxtLink to="/status" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.status }}</NuxtLink>
+        <NuxtLink :to="localizePath('/updates')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
+        <NuxtLink :to="localizePath('/status')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.status }}</NuxtLink>
         <label class="relative">
           <span class="sr-only">{{ copy.navigation.language }}</span>
           <select
@@ -68,21 +68,21 @@
           {{ copy.navigation.games }}
         </NuxtLink>
         <NuxtLink
-          to="/player-stats"
+          :to="localizePath('/player-stats')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
           @click="mobileMenuOpen = false"
         >
           {{ copy.navigation.playerStats }}
         </NuxtLink>
         <NuxtLink
-          to="/updates"
+          :to="localizePath('/updates')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
           @click="mobileMenuOpen = false"
         >
           {{ copy.navigation.updates }}
         </NuxtLink>
         <NuxtLink
-          to="/status"
+          :to="localizePath('/status')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
           @click="mobileMenuOpen = false"
         >

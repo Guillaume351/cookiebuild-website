@@ -120,6 +120,26 @@ so the API does not invent them: build radius is a generator-tier effect and war
 fixed. Outgoing invites, role changes, and kicks remain in-game only because safe mobile target
 identity and anti-abuse UX are not part of this V1 contract.
 
+All mobile limits use the shared PostgreSQL `mobile_rate_limits` window, keyed by a SHA-256 digest
+instead of raw account, address, or player identifiers. A rejected request returns `429` with an
+integer `Retry-After` header. Read-only routes may temporarily fall back to a bounded in-process
+window if PostgreSQL is unavailable; economic and identity mutations fail closed with `503` and
+`Retry-After: 5`, so a multi-replica outage cannot silently weaken write protection.
+
+The independent Skyblock maintenance runner expires active listings in bounded, locked batches,
+releases their reservations atomically, and purges consumed or expired quotes, old idempotency
+results, and expired rate-limit rows. Each operation is safe to repeat. It runs every five minutes
+only when `MOBILE_SKYBLOCK_MAINTENANCE_ENABLED=true`; keep this off until migration 0013 is applied.
+Disabling it pauses cleanup but never enables a feature or a market write.
+
+Privacy-safe product metrics are exposed only at `GET /api/internal/metrics` with a bearer secret of
+at least 32 characters in `COOKIEBUILD_METRICS_TOKEN`. Labels are restricted by
+`contracts/product-events-v1.json` to event, result, and source; names, UUIDs, addresses, tokens,
+and free-form route values are never labels. Prometheus must scrape this private endpoint over the
+internal HTTPS or service network with the token stored outside Git. The shared
+`cookiebuild_funnel_events_total` schema lets dashboards compare existing Java and mobile API
+events without adding Java and Bedrock server-status player probes together.
+
 All three capabilities fail closed. Reads require `MOBILE_SKYBLOCK_ENABLED=true` plus the complete
 Skyblock schema, including the crash-safe `skyblock_inventory_transfers` hand-off table. Writes
 require independent flags: `MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED=true` for the safe management
@@ -164,7 +184,9 @@ through Dokploy; it must never be committed or sent to clients.
    `drizzle/0005_correct_2026_update_wording.sql`, `drizzle/0006_mobile_engagement.sql`,
    `drizzle/0007_admin_control_center.sql`, `drizzle/0008_player_onboarding.sql`, then
    `drizzle/0009_player_rally_responses.sql`, `drizzle/0010_friend_suggestions.sql`, then
-   `drizzle/0011_mobile_device_timezone.sql`, with PostgreSQL `ON_ERROR_STOP`.
+   `drizzle/0011_mobile_device_timezone.sql`, `drizzle/0012_changelog_supersession.sql`, then
+   `drizzle/0013_mobile_platform_consolidation.sql`, with PostgreSQL `ON_ERROR_STOP`. Migration 0013
+   installs the shared rate-limit store before any consolidated mobile write is released.
 5. Configure `NUXT_FIREBASE_PROJECT_ID`, `GOOGLE_APPLICATION_CREDENTIALS`, and
    `MOBILE_LINK_PEPPER` for the website.
 6. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.
@@ -381,3 +403,11 @@ those rows never invoke FCM. After Firebase confirms deletion, the original Fire
 atomically replaced with a `deleted:<internal-user-id>` marker while a SHA-256 tombstone is stored
 to reject already-issued tokens. The outbox row is marked delivered and its UID-bearing audience is
 cleared in that same transaction, including when direct API completion races worker completion.
+### Schema drift gate
+
+`npm run schema:verify` checks the website model against
+`contracts/skyblock-schema-v1.json`. Release/preflight CI that has the gameplay
+repository must also set `COOKIEBUILD_GAMEPLAY_SCHEMA_SQL` to
+`Cookies/ops/add-skyblock-v1.sql`; the command then requires its reviewed SHA-256
+to match. A gameplay migration change must update the website model and contract
+in the same release, never by silently accepting a new hash.

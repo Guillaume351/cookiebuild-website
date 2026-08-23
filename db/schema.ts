@@ -1170,3 +1170,17 @@ export const skyblockMobileRequests = pgTable(
     check("skyblock_mobile_requests_status_ck", sql`${table.responseStatus} BETWEEN 100 AND 599`),
   ],
 );
+
+export const mobileRateLimits = pgTable(
+  "mobile_rate_limits",
+  {
+    keyHash: varchar("key_hash", { length: 64 }).primaryKey().notNull(),
+    requestCount: integer("request_count").default(1).notNull(),
+    resetsAt: timestamp("resets_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("mobile_rate_limits_expiry_idx").on(table.resetsAt),
+    check("mobile_rate_limits_count_ck", sql`${table.requestCount} > 0`),
+  ],
+);

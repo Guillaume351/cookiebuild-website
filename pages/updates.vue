@@ -1,5 +1,6 @@
 <template>
   <div class="mx-auto max-w-5xl space-y-10">
+    <LanguageFallbackNotice :available-locales="['en']" />
     <section class="overflow-hidden rounded-3xl border border-orange-500/20 bg-gradient-to-br from-zinc-950 via-zinc-900 to-orange-950/40 p-7 shadow-2xl sm:p-10 md:p-12">
       <Badge class="mb-4 bg-orange-600 hover:bg-orange-600">Cookie Build updates</Badge>
       <h1 class="text-4xl font-black tracking-tight text-white sm:text-5xl md:text-6xl">What’s happening</h1>
@@ -93,6 +94,10 @@
 </template>
 
 <script setup lang="ts">
+import { publicPageSeo } from "@/utils/public-page-seo";
+
+definePageMeta({ alias: ["/fr/updates", "/de/updates", "/it/updates", "/bg/updates", "/es/updates", "/hi/updates", "/pt-br/updates"] });
+
 import { CalendarDays, ExternalLink, Gamepad2 } from "@lucide/vue";
 import UpdatePostCard from "@/components/UpdatePostCard.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
@@ -148,21 +153,7 @@ onMounted(async () => {
   }
 });
 
-useSeoMeta({
-  title: "Updates & Events | Cookie Build",
-  description: "See the latest Cookie Build Minecraft news, upcoming community sessions and release notes in one place.",
-  ogTitle: "What’s Happening on Cookie Build",
-  ogDescription: "Cookie Build news, community play sessions and player-facing updates for Java and Bedrock.",
-  ogImage: "https://www.cookie-build.com/cookie-build-social.webp",
-  ogImageWidth: 1200,
-  ogImageHeight: 630,
-  ogImageAlt: "Cookie Build Minecraft lobby",
-  twitterImage: "https://www.cookie-build.com/cookie-build-social.webp",
-  twitterImageAlt: "Cookie Build Minecraft lobby",
-  ogType: "website",
-});
-
-useHead({
-  link: [{ rel: "canonical", href: "https://www.cookie-build.com/updates" }],
-});
+const { locale } = useSiteLocale();
+const seo = computed(() => publicPageSeo(locale.value.code, "updates"));
+useLocalizedSeo("/updates", () => seo.value.title, () => seo.value.description);
 </script>
