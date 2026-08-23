@@ -1,0 +1,8 @@
+{
+  "slug": "safer-skyblock-loading-and-live-lobby-guides",
+  "contentType": "changelog",
+  "title": "Safer Skyblock loading and livelier lobby guides",
+  "summary": "Skyblock entry now lands players safely on their island, every lobby guide shows the mode's live activity, and compact champion heads return.",
+  "body": "- Skyblock entry and rejoin now place players directly on safe solid ground, preventing illegal-flight disconnects on slower clients.\n- Every game guide in the main lobby now shows the total number of online players currently active in that mode.\n- Counts include players across every open or running arena instead of only one preferred match.\n- Skyblock reports its persistent active sessions through the same compact guide label.\n- Where ranking data exists, one best-player head returns beside the game guide, while the large weekly ranking panels stay disabled to keep the spawn open and readable.\n- The changes are available to Java and Bedrock players.",
+  "publishedAt": "2026-08-23T16:45:00+02:00"
+}
