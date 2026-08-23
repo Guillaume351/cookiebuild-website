@@ -209,7 +209,7 @@
   "refresh": "5m",
   "schemaVersion": 41,
   "tags": ["cookie-build", "minecraft", "product-analytics"],
-  "templating": {"list": [{"current": {"selected": true, "text": "Skyblock", "value": "Skyblock"}, "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"}, "definition": "SELECT mode AS __text, mode AS __value FROM metrics.mode_engagement_summary ORDER BY CASE WHEN mode = 'Skyblock' THEN 0 ELSE 1 END, mode", "hide": 0, "includeAll": false, "label": "Game mode", "multi": false, "name": "game_mode", "options": [], "query": "SELECT mode AS __text, mode AS __value FROM metrics.mode_engagement_summary ORDER BY CASE WHEN mode = 'Skyblock' THEN 0 ELSE 1 END, mode", "refresh": 1, "regex": "", "skipUrlSync": false, "sort": 0, "type": "query"}]},
+  "templating": {"list": [{"current": {"selected": true, "text": "Skyblock", "value": "Skyblock"}, "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"}, "definition": "SELECT mode AS __text, mode AS __value FROM (SELECT mode FROM metrics.mode_engagement_summary UNION SELECT 'Skyblock'::text) modes ORDER BY CASE WHEN mode = 'Skyblock' THEN 0 ELSE 1 END, mode", "hide": 0, "includeAll": false, "label": "Game mode", "multi": false, "name": "game_mode", "options": [], "query": "SELECT mode AS __text, mode AS __value FROM (SELECT mode FROM metrics.mode_engagement_summary UNION SELECT 'Skyblock'::text) modes ORDER BY CASE WHEN mode = 'Skyblock' THEN 0 ELSE 1 END, mode", "refresh": 1, "regex": "", "skipUrlSync": false, "sort": 0, "type": "query"}]},
   "time": {"from": "now-28d", "to": "now"},
   "timepicker": {},
   "timezone": "Europe/Paris",
