@@ -6,7 +6,7 @@
 import GameLandingPage from "@/components/GameLandingPage.vue";
 import { localizedGameLandingBySlug } from "@/utils/game-landings-localized";
 
-definePageMeta({ alias: ["/bg/pitchout", "/es/pitchout", "/hi/pitchout", "/pt-br/pitchout"] });
+definePageMeta({ alias: ["/fr/pitchout", "/de/pitchout", "/it/pitchout", "/bg/pitchout", "/es/pitchout", "/hi/pitchout", "/pt-br/pitchout"] });
 
 const { locale } = useSiteLocale();
 const game = computed(() => localizedGameLandingBySlug(locale.value.code, "pitchout"));

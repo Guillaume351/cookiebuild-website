@@ -19,6 +19,9 @@ describe("country-targeted public-site localization", () => {
   it("maps every requested country to a complete regional language target", () => {
     expect(SITE_LOCALES.map(({ code, country, htmlLang, pathSegment }) => ({ code, country, htmlLang, pathSegment }))).toEqual([
       { code: "en", country: "Australia", htmlLang: "en-AU", pathSegment: "" },
+      { code: "fr", country: "France", htmlLang: "fr-FR", pathSegment: "fr" },
+      { code: "de", country: "Germany", htmlLang: "de-DE", pathSegment: "de" },
+      { code: "it", country: "Italy", htmlLang: "it-IT", pathSegment: "it" },
       { code: "bg", country: "Bulgaria", htmlLang: "bg-BG", pathSegment: "bg" },
       { code: "es", country: "Peru", htmlLang: "es-PE", pathSegment: "es" },
       { code: "hi", country: "India", htmlLang: "hi-IN", pathSegment: "hi" },
@@ -38,6 +41,9 @@ describe("country-targeted public-site localization", () => {
     expect(siteLocaleFromPath("/es/games").htmlLang).toBe("es-PE");
     expect(siteLocaleFromPath("/hi").country).toBe("India");
     expect(siteLocaleFromPath("/pt-br/bedwars").code).toBe("pt-BR");
+    expect(siteLocaleFromPath("/fr/skyblock").htmlLang).toBe("fr-FR");
+    expect(siteLocaleFromPath("/de/games").code).toBe("de");
+    expect(siteLocaleFromPath("/it/bedwars").country).toBe("Italy");
     expect(stripSiteLocale("/pt-br/build-battle?from=menu")).toBe("/build-battle");
     expect(localizedSitePath("/es/skywars", "bg")).toBe("/bg/skywars");
     expect(localizedSitePath("/hi", "en")).toBe("/");
@@ -70,14 +76,15 @@ describe("country-targeted public-site localization", () => {
       readSource("../components/AppHeader.vue"),
     ]);
 
-    expect(home).toContain('alias: ["/bg", "/es", "/hi", "/pt-br"]');
+    expect(home).toContain('alias: ["/fr", "/de", "/it", "/bg", "/es", "/hi", "/pt-br"]');
     expect(home).toContain("innerHTML: JSON.stringify");
     expect(home).not.toContain("children: JSON.stringify");
-    expect(catalog).toContain('"/bg/games", "/es/games", "/hi/games", "/pt-br/games"');
+    expect(catalog).toContain('"/fr/games", "/de/games", "/it/games", "/bg/games", "/es/games", "/hi/games", "/pt-br/games"');
     expect(seo).toContain("localizedSeoLinks");
     expect(seo).toContain('htmlAttrs: { lang: locale.value.htmlLang }');
     expect(header).toContain('v-for="language in SITE_LOCALES"');
     expect(header).toContain("switchLocalePath(code)");
+    expect(header).toContain("{ external: true }");
   });
 
   it("generates one indexable URL per locale and page with complete alternates", () => {

@@ -6,7 +6,7 @@
 import GameLandingPage from "@/components/GameLandingPage.vue";
 import { localizedGameLandingBySlug } from "@/utils/game-landings-localized";
 
-definePageMeta({ alias: ["/bg/skywars", "/es/skywars", "/hi/skywars", "/pt-br/skywars"] });
+definePageMeta({ alias: ["/fr/skywars", "/de/skywars", "/it/skywars", "/bg/skywars", "/es/skywars", "/hi/skywars", "/pt-br/skywars"] });
 
 const { locale } = useSiteLocale();
 const game = computed(() => localizedGameLandingBySlug(locale.value.code, "skywars"));

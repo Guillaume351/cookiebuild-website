@@ -38,7 +38,7 @@ import Badge from "@/components/ui/badge/Badge.vue";
 import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
 import { localizedGameLandings } from "@/utils/game-landings-localized";
 
-definePageMeta({ alias: ["/bg/games", "/es/games", "/hi/games", "/pt-br/games"] });
+definePageMeta({ alias: ["/fr/games", "/de/games", "/it/games", "/bg/games", "/es/games", "/hi/games", "/pt-br/games"] });
 
 const { locale, copy } = useSiteLocale();
 const localizedGames = computed(() => localizedGameLandings(locale.value.code));

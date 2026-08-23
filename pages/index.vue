@@ -333,7 +333,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Copy, ExternalLink, Gamepad2, Mic, X } from "@lucide/vue";
 import { onMounted, ref, watch } from "vue";
 
-definePageMeta({ alias: ["/bg", "/es", "/hi", "/pt-br"] });
+definePageMeta({ alias: ["/fr", "/de", "/it", "/bg", "/es", "/hi", "/pt-br"] });
 
 const serverIP = ref("play.cookie-build.com");
 const bedrockPort = "19132";

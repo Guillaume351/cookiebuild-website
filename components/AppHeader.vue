@@ -111,11 +111,17 @@ import { Menu, X } from "@lucide/vue";
 import { SITE_LOCALES, type SiteLocaleCode } from "@/utils/site-locales";
 
 const mobileMenuOpen = ref(false);
+const route = useRoute();
 const { locale, copy, localizePath, switchLocalePath } = useSiteLocale();
 
 const changeLanguage = async (event: Event) => {
   const code = (event.target as HTMLSelectElement).value as SiteLocaleCode;
+  const target = switchLocalePath(code);
   mobileMenuOpen.value = false;
-  await navigateTo(switchLocalePath(code));
+  if (target === route.path) return;
+  // A full document navigation guarantees that Nuxt resolves the translated
+  // route and refreshes every SSR SEO signal, even when two URLs are aliases
+  // of the same page record.
+  await navigateTo(target, { external: true });
 };
 </script>

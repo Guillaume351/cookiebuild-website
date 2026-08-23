@@ -5,6 +5,9 @@ import process from "node:process";
 const origin = "https://www.cookie-build.com";
 const locales = [
   { code: "en", segment: "", lang: "en-AU" },
+  { code: "fr", segment: "fr", lang: "fr-FR" },
+  { code: "de", segment: "de", lang: "de-DE" },
+  { code: "it", segment: "it", lang: "it-IT" },
   { code: "bg", segment: "bg", lang: "bg-BG" },
   { code: "es", segment: "es", lang: "es-PE" },
   { code: "hi", segment: "hi", lang: "hi-IN" },
@@ -95,13 +98,14 @@ try {
   const sitemap = await sitemapResponse.text();
   assert(sitemapResponse.status === 200, "sitemap did not return 200");
   assert(sitemapResponse.headers.get("content-type")?.includes("application/xml"), "sitemap content type is not XML");
-  assert((sitemap.match(/<loc>/g) || []).length === 52, "sitemap must contain 52 public URLs");
+  const localizedUrlCount = paths.length * locales.length;
+  assert((sitemap.match(/<loc>/g) || []).length === localizedUrlCount + 7, `sitemap must contain ${localizedUrlCount + 7} public URLs`);
   for (const locale of locales) {
-    assert((sitemap.match(new RegExp(`hreflang="${locale.lang}"`, "g")) || []).length === 45, `sitemap ${locale.lang} alternate count mismatch`);
+    assert((sitemap.match(new RegExp(`hreflang="${locale.lang}"`, "g")) || []).length === localizedUrlCount, `sitemap ${locale.lang} alternate count mismatch`);
   }
-  assert((sitemap.match(/hreflang="x-default"/g) || []).length === 45, "sitemap x-default count mismatch");
+  assert((sitemap.match(/hreflang="x-default"/g) || []).length === localizedUrlCount, "sitemap x-default count mismatch");
 
-  process.stdout.write(`Localized SSR verified: ${routeCount} routes, 1 localized 404, 52 sitemap URLs.\n`);
+  process.stdout.write(`Localized SSR verified: ${routeCount} routes, 1 localized 404, ${localizedUrlCount + 7} sitemap URLs.\n`);
 } finally {
   server.kill("SIGTERM");
 }

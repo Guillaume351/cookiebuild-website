@@ -1,12 +1,12 @@
 import { COOKIE_BUILD_SITE_URL } from "./game-landings";
 
-export type SiteLocaleCode = "en" | "bg" | "es" | "hi" | "pt-BR";
+export type SiteLocaleCode = "en" | "fr" | "de" | "it" | "bg" | "es" | "hi" | "pt-BR";
 
 export interface SiteLocale {
   code: SiteLocaleCode;
-  pathSegment: "" | "bg" | "es" | "hi" | "pt-br";
-  htmlLang: "en-AU" | "bg-BG" | "es-PE" | "hi-IN" | "pt-BR";
-  hreflang: "en-AU" | "bg-BG" | "es-PE" | "hi-IN" | "pt-BR";
+  pathSegment: "" | "fr" | "de" | "it" | "bg" | "es" | "hi" | "pt-br";
+  htmlLang: "en-AU" | "fr-FR" | "de-DE" | "it-IT" | "bg-BG" | "es-PE" | "hi-IN" | "pt-BR";
+  hreflang: "en-AU" | "fr-FR" | "de-DE" | "it-IT" | "bg-BG" | "es-PE" | "hi-IN" | "pt-BR";
   label: string;
   nativeLabel: string;
   country: string;
@@ -15,6 +15,9 @@ export interface SiteLocale {
 
 export const SITE_LOCALES: readonly SiteLocale[] = [
   { code: "en", pathSegment: "", htmlLang: "en-AU", hreflang: "en-AU", label: "English", nativeLabel: "English", country: "Australia", flag: "🇦🇺" },
+  { code: "fr", pathSegment: "fr", htmlLang: "fr-FR", hreflang: "fr-FR", label: "French", nativeLabel: "Français", country: "France", flag: "🇫🇷" },
+  { code: "de", pathSegment: "de", htmlLang: "de-DE", hreflang: "de-DE", label: "German", nativeLabel: "Deutsch", country: "Germany", flag: "🇩🇪" },
+  { code: "it", pathSegment: "it", htmlLang: "it-IT", hreflang: "it-IT", label: "Italian", nativeLabel: "Italiano", country: "Italy", flag: "🇮🇹" },
   { code: "bg", pathSegment: "bg", htmlLang: "bg-BG", hreflang: "bg-BG", label: "Bulgarian", nativeLabel: "Български", country: "Bulgaria", flag: "🇧🇬" },
   { code: "es", pathSegment: "es", htmlLang: "es-PE", hreflang: "es-PE", label: "Spanish", nativeLabel: "Español", country: "Peru", flag: "🇵🇪" },
   { code: "hi", pathSegment: "hi", htmlLang: "hi-IN", hreflang: "hi-IN", label: "Hindi", nativeLabel: "हिन्दी", country: "India", flag: "🇮🇳" },

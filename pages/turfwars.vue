@@ -6,7 +6,7 @@
 import GameLandingPage from "@/components/GameLandingPage.vue";
 import { localizedGameLandingBySlug } from "@/utils/game-landings-localized";
 
-definePageMeta({ alias: ["/bg/turfwars", "/es/turfwars", "/hi/turfwars", "/pt-br/turfwars"] });
+definePageMeta({ alias: ["/fr/turfwars", "/de/turfwars", "/it/turfwars", "/bg/turfwars", "/es/turfwars", "/hi/turfwars", "/pt-br/turfwars"] });
 
 const { locale } = useSiteLocale();
 const game = computed(() => localizedGameLandingBySlug(locale.value.code, "turfwars"));
