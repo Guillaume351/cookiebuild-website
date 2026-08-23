@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "policyVersion": "skyblock-management-v1",
+  "generator": {
+    "maxTier": 5,
+    "tiers": [
+      { "tier": 1, "buildRadius": 96, "upgradeCostCoins": null },
+      { "tier": 2, "buildRadius": 112, "upgradeCostCoins": 250 },
+      { "tier": 3, "buildRadius": 128, "upgradeCostCoins": 750 },
+      { "tier": 4, "buildRadius": 144, "upgradeCostCoins": 2000 },
+      { "tier": 5, "buildRadius": 160, "upgradeCostCoins": 5000 }
+    ]
+  },
+  "workers": {
+    "offlineCapHours": 12,
+    "tierBufferCapacityMultiplier": 256,
+    "types": [
+      { "type": "miner", "itemId": "cobblestone" },
+      { "type": "farmer", "itemId": "wheat" },
+      { "type": "lumberjack", "itemId": "oak_log" }
+    ],
+    "tiers": [
+      { "tier": 1, "intervalSeconds": 75 },
+      { "tier": 2, "intervalSeconds": 63 },
+      { "tier": 3, "intervalSeconds": 51 },
+      { "tier": 4, "intervalSeconds": 39 },
+      { "tier": 5, "intervalSeconds": 27 }
+    ]
+  },
+  "quests": [
+    { "id": "orchard_arrival", "chapter": 1, "event": "visit", "subject": "home", "target": 1, "rewardCoins": 10 },
+    { "id": "first_cobble", "chapter": 1, "event": "collect", "subject": "cobblestone", "target": 16, "rewardCoins": 15 },
+    { "id": "first_harvest", "chapter": 1, "event": "collect", "subject": "wheat", "target": 12, "rewardCoins": 15 },
+    { "id": "warehouse_delivery", "chapter": 1, "event": "deposit", "subject": "any", "target": 16, "rewardCoins": 20 },
+    { "id": "generator_apprentice", "chapter": 2, "event": "upgrade_generator", "subject": "tier", "target": 2, "rewardCoins": 30 },
+    { "id": "mining_student", "chapter": 2, "event": "skill_level", "subject": "mining", "target": 3, "rewardCoins": 30 },
+    { "id": "farming_student", "chapter": 2, "event": "skill_level", "subject": "farming", "target": 3, "rewardCoins": 30 },
+    { "id": "worker_awakened", "chapter": 2, "event": "collect_worker", "subject": "any", "target": 32, "rewardCoins": 35 },
+    { "id": "orchard_expansion", "chapter": 3, "event": "island_level", "subject": "level", "target": 5, "rewardCoins": 50 },
+    { "id": "market_seller", "chapter": 3, "event": "market_sale", "subject": "any", "target": 1, "rewardCoins": 50 },
+    { "id": "coop_founder", "chapter": 3, "event": "coop_member", "subject": "count", "target": 2, "rewardCoins": 50 },
+    { "id": "cookie_pioneer", "chapter": 3, "event": "skill_total", "subject": "all", "target": 20, "rewardCoins": 100 }
+  ]
+}

@@ -25,6 +25,8 @@ Run the same checks expected before a production release:
 ```bash
 npm test
 npm run typecheck
+npm run skyblock-catalog:verify-gameplay -- ../Cookies
+npm run skyblock-management:verify-gameplay -- ../Cookies
 npm run build
 npm audit --omit=dev
 ```

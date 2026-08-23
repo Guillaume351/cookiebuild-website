@@ -5,6 +5,7 @@ const IDS = {
   quote: "20000000-0000-4000-8000-000000000001",
   listing: "30000000-0000-4000-8000-000000000001",
   idempotency: "40000000-0000-4000-8000-000000000001",
+  invite: "50000000-0000-4000-8000-000000000001",
 };
 
 const h3Mocks = vi.hoisted(() => ({
@@ -15,7 +16,10 @@ const h3Mocks = vi.hoisted(() => ({
   setResponseStatus: vi.fn(),
 }));
 const capabilityMocks = vi.hoisted(() => ({
-  mobileCapabilities: vi.fn(async () => ({ skyblockMarketWrites: true })),
+  mobileCapabilities: vi.fn(async () => ({
+    skyblockManagementWrites: true,
+    skyblockMarketWrites: true,
+  })),
   requireMobileCapability: vi.fn(async () => undefined),
 }));
 const serviceMocks = vi.hoisted(() => ({
@@ -27,6 +31,11 @@ const serviceMocks = vi.hoisted(() => ({
   createSkyblockListing: vi.fn(async () => ({ data: { listingId: IDS.listing }, created: true })),
   cancelSkyblockListing: vi.fn(async () => ({ data: { listingId: IDS.listing, status: "cancelled" }, created: true })),
   purchaseSkyblockListing: vi.fn(async () => ({ data: { purchaseId: IDS.quote }, created: true })),
+  skyblockManagementOverview: vi.fn(async () => ({ policyVersion: "skyblock-management-v1" })),
+  upgradeSkyblockGenerator: vi.fn(async () => ({ data: { costCoins: 250 }, created: true })),
+  collectSkyblockWorkers: vi.fn(async () => ({ data: { totalQuantity: 32 }, created: true })),
+  claimSkyblockQuest: vi.fn(async () => ({ data: { questId: "first_cobble" }, created: true })),
+  acceptSkyblockInvite: vi.fn(async () => ({ data: { inviteId: IDS.invite }, created: true })),
 }));
 const userMocks = vi.hoisted(() => ({
   requireMobileUser: vi.fn(async () => ({ auth: { uid: "firebase-skyblock-user" } })),
@@ -47,6 +56,11 @@ describe("mobile Skyblock API routes", () => {
   let createRoute: (event: unknown) => Promise<unknown>;
   let cancelRoute: (event: unknown) => Promise<unknown>;
   let purchaseRoute: (event: unknown) => Promise<unknown>;
+  let managementRoute: (event: unknown) => Promise<unknown>;
+  let generatorRoute: (event: unknown) => Promise<unknown>;
+  let collectRoute: (event: unknown) => Promise<unknown>;
+  let claimRoute: (event: unknown) => Promise<unknown>;
+  let acceptInviteRoute: (event: unknown) => Promise<unknown>;
 
   beforeAll(async () => {
     vi.stubGlobal("defineEventHandler", (handler: unknown) => handler);
@@ -56,14 +70,24 @@ describe("mobile Skyblock API routes", () => {
     createRoute = (await import("../server/api/mobile/v1/skyblock/listings.post")).default as typeof createRoute;
     cancelRoute = (await import("../server/api/mobile/v1/skyblock/listings/[id]/cancel.post")).default as typeof cancelRoute;
     purchaseRoute = (await import("../server/api/mobile/v1/skyblock/listings/[id]/purchase.post")).default as typeof purchaseRoute;
+    managementRoute = (await import("../server/api/mobile/v1/skyblock/management.get")).default as typeof managementRoute;
+    generatorRoute = (await import("../server/api/mobile/v1/skyblock/upgrades/generator.post")).default as typeof generatorRoute;
+    collectRoute = (await import("../server/api/mobile/v1/skyblock/workers/collect.post")).default as typeof collectRoute;
+    claimRoute = (await import("../server/api/mobile/v1/skyblock/quests/[id]/claim.post")).default as typeof claimRoute;
+    acceptInviteRoute = (await import("../server/api/mobile/v1/skyblock/coop/invites/[id]/accept.post")).default as typeof acceptInviteRoute;
   });
 
   beforeEach(() => {
     vi.clearAllMocks();
+    capabilityMocks.requireMobileCapability.mockResolvedValue(undefined);
+    userMocks.requireMobileUser.mockResolvedValue({ auth: { uid: "firebase-skyblock-user" } });
     h3Mocks.getHeader.mockReturnValue(IDS.idempotency);
     h3Mocks.getRouterParam.mockReturnValue(IDS.listing);
     h3Mocks.readBody.mockResolvedValue({});
-    capabilityMocks.mobileCapabilities.mockResolvedValue({ skyblockMarketWrites: true });
+    capabilityMocks.mobileCapabilities.mockResolvedValue({
+      skyblockManagementWrites: true,
+      skyblockMarketWrites: true,
+    });
     serviceMocks.createSkyblockListing.mockResolvedValue({ data: { listingId: IDS.listing }, created: true });
     serviceMocks.purchaseSkyblockListing.mockResolvedValue({ data: { purchaseId: IDS.quote }, created: true });
   });
@@ -152,5 +176,91 @@ describe("mobile Skyblock API routes", () => {
     });
     await purchaseRoute(event);
     expect(h3Mocks.setResponseStatus).toHaveBeenLastCalledWith(event, 200);
+  });
+
+  it("returns one authenticated management aggregate with the independent write state", async () => {
+    await managementRoute({ context: {} });
+    expect(capabilityMocks.requireMobileCapability).toHaveBeenCalledWith("skyblockCompanion");
+    expect(serviceMocks.skyblockManagementOverview)
+      .toHaveBeenCalledWith("firebase-skyblock-user", true);
+  });
+
+  it("validates and forwards a server-authoritative generator upgrade", async () => {
+    h3Mocks.readBody.mockResolvedValue({
+      expectedIslandVersion: 4,
+      expectedNextTier: 2,
+      expectedCostCoins: 250,
+    });
+    await generatorRoute({ context: {} });
+    expect(capabilityMocks.requireMobileCapability).toHaveBeenCalledWith("skyblockManagementWrites");
+    expect(serviceMocks.upgradeSkyblockGenerator).toHaveBeenCalledWith(
+      "firebase-skyblock-user",
+      { expectedIslandVersion: 4, expectedNextTier: 2, expectedCostCoins: 250 },
+      IDS.idempotency,
+    );
+  });
+
+  it("keeps worker collection body empty and idempotent", async () => {
+    h3Mocks.readBody.mockResolvedValue({});
+    await collectRoute({ context: {} });
+    expect(serviceMocks.collectSkyblockWorkers)
+      .toHaveBeenCalledWith("firebase-skyblock-user", IDS.idempotency);
+    h3Mocks.readBody.mockResolvedValue({ workerId: IDS.inventory });
+    await expect(collectRoute({ context: {} })).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  it("claims only a validated catalog-shaped quest id", async () => {
+    h3Mocks.getRouterParam.mockReturnValue("first_cobble");
+    h3Mocks.readBody.mockResolvedValue({});
+    await claimRoute({ context: {} });
+    expect(serviceMocks.claimSkyblockQuest).toHaveBeenCalledWith(
+      "firebase-skyblock-user",
+      "first_cobble",
+      IDS.idempotency,
+    );
+  });
+
+  it("accepts a coop invite by invite id without accepting a player identity", async () => {
+    h3Mocks.getRouterParam.mockReturnValue(IDS.invite);
+    h3Mocks.readBody.mockResolvedValue({});
+    await acceptInviteRoute({ context: {} });
+    expect(serviceMocks.acceptSkyblockInvite).toHaveBeenCalledWith(
+      "firebase-skyblock-user",
+      IDS.invite,
+      IDS.idempotency,
+    );
+  });
+
+  it("checks each read/write feature flag before authentication and each service after authentication", async () => {
+    const routes = [
+      { route: managementRoute, capability: "skyblockCompanion" },
+      { route: generatorRoute, capability: "skyblockManagementWrites" },
+      { route: collectRoute, capability: "skyblockManagementWrites" },
+      { route: claimRoute, capability: "skyblockManagementWrites" },
+      { route: acceptInviteRoute, capability: "skyblockManagementWrites" },
+    ] as const;
+    for (const { route, capability } of routes) {
+      vi.clearAllMocks();
+      capabilityMocks.requireMobileCapability.mockRejectedValueOnce(
+        Object.assign(new Error("Feature unavailable"), { statusCode: 404 }),
+      );
+      await expect(route({ context: {} })).rejects.toMatchObject({ statusCode: 404 });
+      expect(capabilityMocks.requireMobileCapability).toHaveBeenCalledWith(capability);
+      expect(userMocks.requireMobileUser).not.toHaveBeenCalled();
+    }
+
+    for (const { route } of routes) {
+      vi.clearAllMocks();
+      capabilityMocks.requireMobileCapability.mockResolvedValue(undefined);
+      userMocks.requireMobileUser.mockRejectedValueOnce(
+        Object.assign(new Error("Authentication required"), { statusCode: 401 }),
+      );
+      await expect(route({ context: {} })).rejects.toMatchObject({ statusCode: 401 });
+      expect(serviceMocks.skyblockManagementOverview).not.toHaveBeenCalled();
+      expect(serviceMocks.upgradeSkyblockGenerator).not.toHaveBeenCalled();
+      expect(serviceMocks.collectSkyblockWorkers).not.toHaveBeenCalled();
+      expect(serviceMocks.claimSkyblockQuest).not.toHaveBeenCalled();
+      expect(serviceMocks.acceptSkyblockInvite).not.toHaveBeenCalled();
+    }
   });
 });

@@ -19,6 +19,7 @@ describe("mobile social API gates", () => {
     delete process.env.MOBILE_KIT_SHOP_ENABLED;
     delete process.env.MOBILE_PLAYER_DASHBOARD_ENABLED;
     delete process.env.MOBILE_SKYBLOCK_ENABLED;
+    delete process.env.MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED;
     delete process.env.MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED;
     await databaseModule.postgresClient.end({ timeout: 0 });
     vi.unstubAllGlobals();
@@ -31,6 +32,7 @@ describe("mobile social API gates", () => {
       kitShop: false,
       playerDashboard: false,
       skyblockCompanion: false,
+      skyblockManagementWrites: false,
       skyblockMarketWrites: false,
     });
 
@@ -40,8 +42,30 @@ describe("mobile social API gates", () => {
       kitShop: true,
       playerDashboard: true,
       skyblockCompanion: false,
+      skyblockManagementWrites: false,
       skyblockMarketWrites: false,
     });
+  });
+
+  it("keeps Skyblock management and market writes independently fail-closed", () => {
+    delete process.env.MOBILE_SKYBLOCK_ENABLED;
+    process.env.MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED = "true";
+    process.env.MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED = "true";
+    expect(capabilityModule.configuredMobileCapabilities()).toMatchObject({
+      skyblockCompanion: false,
+      skyblockManagementWrites: false,
+      skyblockMarketWrites: false,
+    });
+
+    process.env.MOBILE_SKYBLOCK_ENABLED = "true";
+    delete process.env.MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED;
+    expect(capabilityModule.configuredMobileCapabilities()).toMatchObject({
+      skyblockCompanion: true,
+      skyblockManagementWrites: true,
+      skyblockMarketWrites: false,
+    });
+    delete process.env.MOBILE_SKYBLOCK_ENABLED;
+    delete process.env.MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED;
   });
 
   it("rejects shop and dashboard routes before authentication while flags are disabled", async () => {
@@ -103,6 +127,7 @@ describe("mobile social API gates", () => {
           shop: boolean;
           playerDashboard: boolean;
           skyblockCompanion: boolean;
+          skyblockManagementWrites: boolean;
           skyblockMarketWrites: boolean;
         };
         gamemodes: Array<{ id: string; available: boolean; releaseStage?: string }>;
@@ -117,6 +142,7 @@ describe("mobile social API gates", () => {
       shop: false,
       playerDashboard: false,
       skyblockCompanion: false,
+      skyblockManagementWrites: false,
       skyblockMarketWrites: false,
     });
     expect(response.data.gamemodes).toEqual(expect.arrayContaining([

@@ -29,6 +29,7 @@ export default defineCachedEventHandler(
           shop: capabilities.kitShop,
           playerDashboard: capabilities.playerDashboard,
           skyblockCompanion: capabilities.skyblockCompanion,
+          skyblockManagementWrites: capabilities.skyblockManagementWrites,
           skyblockMarketWrites: capabilities.skyblockMarketWrites,
         },
         gamemodes: [

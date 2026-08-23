@@ -6,15 +6,25 @@ import {
   SKYBLOCK_ITEM_CATALOG,
   skyblockCatalogItem,
 } from "../server/services/mobile-skyblock-catalog";
+import managementPolicy from "../contracts/skyblock-management-v1.json";
+import {
+  SKYBLOCK_MANAGEMENT_POLICY_VERSION,
+  SKYBLOCK_QUESTS,
+  skyblockBuildRadiusForTier,
+  skyblockGeneratorUpgradeCost,
+} from "../server/services/mobile-skyblock-management-policy";
 import {
   cancelListingBody,
   createListingBody,
   decodeSkyblockCursor,
   encodeSkyblockCursor,
   listingQuoteBody,
+  emptySkyblockMutationBody,
+  generatorUpgradeBody,
   purchaseListingBody,
   skyblockIdempotencyKey,
   skyblockMarketQuery,
+  skyblockQuestId,
 } from "../server/utils/mobile-skyblock";
 
 describe("mobile Skyblock contract", () => {
@@ -55,6 +65,34 @@ describe("mobile Skyblock contract", () => {
     })).toThrow();
     expect(() => cancelListingBody({ reason: "free text" })).toThrow();
     expect(() => purchaseListingBody({ expectedPriceCoins: 1.5 })).toThrow();
+  });
+
+  it("publishes strict versioned management, generator, worker and quest policies", () => {
+    expect(SKYBLOCK_MANAGEMENT_POLICY_VERSION).toBe("skyblock-management-v1");
+    expect(SKYBLOCK_QUESTS).toEqual(managementPolicy.quests);
+    expect(SKYBLOCK_QUESTS).toHaveLength(12);
+    expect(skyblockBuildRadiusForTier(1)).toBe(96);
+    expect(skyblockBuildRadiusForTier(5)).toBe(160);
+    expect(skyblockGeneratorUpgradeCost(2)).toBe(250);
+    expect(skyblockGeneratorUpgradeCost(5)).toBe(5_000);
+  });
+
+  it("accepts no identity or unversioned state in management mutation bodies", () => {
+    expect(generatorUpgradeBody({
+      expectedIslandVersion: 4,
+      expectedNextTier: 3,
+      expectedCostCoins: 750,
+    })).toEqual({ expectedIslandVersion: 4, expectedNextTier: 3, expectedCostCoins: 750 });
+    expect(emptySkyblockMutationBody({})).toEqual({});
+    expect(skyblockQuestId("generator_apprentice")).toBe("generator_apprentice");
+    expect(() => generatorUpgradeBody({
+      expectedIslandVersion: 4,
+      expectedNextTier: 3,
+      expectedCostCoins: 750,
+      playerId: "forbidden",
+    })).toThrow();
+    expect(() => emptySkyblockMutationBody({ playerId: "forbidden" })).toThrow();
+    expect(() => skyblockQuestId("../first_cobble")).toThrow();
   });
 
   it("requires UUID idempotency keys and rejects ambiguous query filters", () => {
@@ -112,6 +150,7 @@ describe("mobile Skyblock contract", () => {
     expect(capabilities).toContain("to_regclass('public.skyblock_inventory_transfers')");
     expect(capabilities).toContain("to_regclass('public.uq_skyblock_open_transfer_player')");
     expect(exportRoute).toContain("skyblockInventoryTransferHistory");
+    expect(exportRoute).toContain("skyblockManagementOverview");
     expect(service).toContain("FROM skyblock_inventory_transfers transfer");
   });
 });

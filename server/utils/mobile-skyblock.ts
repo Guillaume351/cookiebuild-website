@@ -11,6 +11,7 @@ import { requiredInteger, requiredUuid } from "./mobile-validation";
 export const SKYBLOCK_MARKET_SORTS = ["recent", "price_asc", "price_desc"] as const;
 export const SKYBLOCK_LISTING_STATUSES = ["active", "sold", "cancelled", "expired", "all"] as const;
 const ITEM_ID_PATTERN = /^[a-z0-9_]{1,64}$/;
+const QUEST_ID_PATTERN = /^[a-z0-9_]{1,64}$/;
 
 export type SkyblockMarketSort = typeof SKYBLOCK_MARKET_SORTS[number];
 export type SkyblockListingStatus = typeof SKYBLOCK_LISTING_STATUSES[number];
@@ -137,6 +138,34 @@ export function purchaseListingBody(value: unknown) {
       maximum: 2_000_000_000,
     }),
   };
+}
+
+export function generatorUpgradeBody(value: unknown) {
+  const body = objectBody(value, ["expectedCostCoins", "expectedIslandVersion", "expectedNextTier"]);
+  return {
+    expectedIslandVersion: requiredInteger(body.expectedIslandVersion, "expectedIslandVersion", {
+      minimum: 0,
+      maximum: Number.MAX_SAFE_INTEGER,
+    }),
+    expectedNextTier: requiredInteger(body.expectedNextTier, "expectedNextTier", { minimum: 2, maximum: 5 }),
+    expectedCostCoins: requiredInteger(body.expectedCostCoins, "expectedCostCoins", {
+      minimum: 1,
+      maximum: 2_000_000_000,
+    }),
+  };
+}
+
+export function emptySkyblockMutationBody(value: unknown) {
+  objectBody(value, []);
+  return {};
+}
+
+export function skyblockQuestId(value: unknown) {
+  const questId = String(value ?? "").trim();
+  if (!QUEST_ID_PATTERN.test(questId)) {
+    throw skyblockError(400, "INVALID_REQUEST", "Invalid questId");
+  }
+  return questId;
 }
 
 export function skyblockIdempotencyKey(value: unknown) {

@@ -16,6 +16,7 @@ import {
   skyblockInventory,
   skyblockInventoryTransferHistory,
   skyblockListings,
+  skyblockManagementOverview,
   skyblockOverview,
 } from "../../../../services/mobile-skyblock";
 
@@ -73,8 +74,9 @@ export default defineEventHandler(async (event) => {
     ]);
     social = { friends, blocks, party, friendRequestCooldowns };
     if (capabilities.skyblockCompanion) {
-      const [overview, inventory, listings, inventoryTransfers] = await Promise.all([
+      const [overview, management, inventory, listings, inventoryTransfers] = await Promise.all([
         skyblockOverview(auth.uid, capabilities.skyblockMarketWrites),
+        skyblockManagementOverview(auth.uid, capabilities.skyblockManagementWrites),
         collectCursorPages((cursor) => skyblockInventory(auth.uid, {
           cursor,
           pageSize: 50,
@@ -88,7 +90,7 @@ export default defineEventHandler(async (event) => {
         })),
         skyblockInventoryTransferHistory(auth.uid),
       ]);
-      skyblock = { overview, inventory, listings, inventoryTransfers };
+      skyblock = { overview, management, inventory, listings, inventoryTransfers };
     }
   }
 

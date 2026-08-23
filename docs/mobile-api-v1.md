@@ -90,12 +90,44 @@ the buyer island's locked storage capacity before any coins or items move.
 Successful settlement also completes the seller's `market_seller` quest in the same transaction;
 the reward remains explicitly claimable only through gameplay.
 
-Both capabilities fail closed. Reads require `MOBILE_SKYBLOCK_ENABLED=true` plus the complete
+Safe island management is exposed separately from marketplace writes:
+
+- `GET /skyblock/management` returns policy version `skyblock-management-v1`, the authenticated
+  player's balance, active island/version/role, generator and next upgrade, storage capacity,
+  workers with estimated ready quantities, the complete 12-quest arc, coop members, and (when the
+  player has no island) their latest non-expired incoming invitation.
+- `POST /skyblock/upgrades/generator` requires exactly `expectedIslandVersion`,
+  `expectedNextTier`, and `expectedCostCoins`. Owners and managers may upgrade. Cost, next tier,
+  build radius, quest progression, island version, coin debit, and the unique `coin_transactions`
+  entry are revalidated and committed atomically.
+- `POST /skyblock/workers/collect` accepts only `{}`. Any coop role may collect because gameplay
+  grants all members shared-storage access. Island, open inventory transfers, storage rows, and
+  workers are locked in canonical order. Collection fills only remaining capacity and leaves any
+  overflow in worker buffers.
+- `POST /skyblock/quests/:id/claim` accepts only `{}`. Any coop role may claim only their own
+  completed, unclaimed catalog quest; the coin credit, ledger entry, and claim timestamp share one
+  transaction.
+- `POST /skyblock/coop/invites/:id/accept` accepts only `{}`. It addresses an invitation already
+  returned to the authenticated invitee, then revalidates expiry, absence of another island, and
+  the locked coop member limit before adding that same authenticated player.
+
+All four management mutations require a canonical UUID `Idempotency-Key`, return `201` on the first
+commit and `200` with the stored response on an identical retry, and accept no player identity in
+the request body. Generator upgrades use owner/manager permissions; worker collection and quest
+claims allow every active member; invite acceptance is limited to the addressed authenticated
+invitee. Independent warehouse/radius upgrades and worker upgrades do not exist in gameplay V1,
+so the API does not invent them: build radius is a generator-tier effect and warehouse capacity is
+fixed. Outgoing invites, role changes, and kicks remain in-game only because safe mobile target
+identity and anti-abuse UX are not part of this V1 contract.
+
+All three capabilities fail closed. Reads require `MOBILE_SKYBLOCK_ENABLED=true` plus the complete
 Skyblock schema, including the crash-safe `skyblock_inventory_transfers` hand-off table. Writes
-additionally require `MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED=true`, the
-market tables, `coin_transactions`, and its unique player/source index. The account export includes
-the full paginated Skyblock storage and listing history plus a privacy-safe transfer history only
-when the companion capability is live. Transfer exports omit the Bukkit slot and player/island IDs.
+require independent flags: `MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED=true` for the safe management
+routes and `MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED=true` for marketplace settlement. Each also
+requires its full schema prerequisites, `coin_transactions`, and its unique player/source index.
+The account export includes the management snapshot, full paginated Skyblock storage and listing
+history, plus a privacy-safe transfer history only when the companion capability is live. Transfer
+exports omit the Bukkit slot and player/island IDs.
 
 ## Minecraft player linking contract
 
@@ -137,9 +169,11 @@ through Dokploy; it must never be committed or sent to clients.
    `MOBILE_LINK_PEPPER` for the website.
 6. Configure the same `MOBILE_LINK_PEPPER` for CookieDough and deploy the matching plugin build.
 7. Run `npm run kit-catalog:verify-gameplay -- ../Cookies` and
-   `npm run skyblock-catalog:verify-gameplay -- ../Cookies` from the website checkout. These explicit
-   cross-repository release gates verify both gameplay catalogs against the Docker-local, versioned
-   website contracts; ordinary website tests never read outside their build context.
+   `npm run skyblock-catalog:verify-gameplay -- ../Cookies` plus
+   `npm run skyblock-management:verify-gameplay -- ../Cookies` from the website checkout. These
+   explicit cross-repository release gates verify the gameplay catalogs, generator tiers/radii,
+   worker production, and complete quest arc against the Docker-local, versioned website contracts;
+   ordinary website tests never read outside their build context.
 8. Deploy the website, verify public endpoints, then test claim/revoke with a real Firebase test user
    and an in-game link challenge.
 9. Populate published news/events. Set `COOKIEBUILD_BEDWARS_ENABLED=true` on both
@@ -152,7 +186,9 @@ through Dokploy; it must never be committed or sent to clients.
    and private routes fail closed when either the explicit flag or runtime schema capability is
    absent. Enable `COOKIEBUILD_SKYBLOCK_ENABLED=true` only after both Paper persistence gates, the
    gameplay migration, matching JARs, and catalog are in place. Enable `MOBILE_SKYBLOCK_ENABLED=true`
-   only after the gameplay migration, catalog gate, website, and app are deployed; enable
+   only after the gameplay migration, both Skyblock policy gates, website, and app are deployed;
+   enable `MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED=true` only after authenticated
+   generator/worker/quest/invite concurrency smokes pass. Independently enable
    `MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED=true` only after authenticated
    quote/create/cancel/purchase smoke tests pass.
 

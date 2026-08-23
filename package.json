@@ -10,6 +10,7 @@
     "changelog:publish": "node scripts/publish-changelog.mjs",
     "kit-catalog:verify-gameplay": "node scripts/verify-gameplay-kit-catalog.mjs",
     "skyblock-catalog:verify-gameplay": "node scripts/verify-skyblock-catalog.mjs",
+    "skyblock-management:verify-gameplay": "node scripts/verify-skyblock-management-policy.mjs",
     "admin:provision": "node scripts/provision-admin.mjs",
     "postinstall": "nuxt prepare",
     "test": "vitest run",

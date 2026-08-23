@@ -10,6 +10,19 @@ import {
   type SkyblockRarity,
 } from "./mobile-skyblock-catalog";
 import {
+  SKYBLOCK_MANAGEMENT_POLICY_VERSION,
+  SKYBLOCK_MAX_GENERATOR_TIER,
+  SKYBLOCK_QUESTS,
+  SKYBLOCK_WORKER_STATUSES,
+  SKYBLOCK_WORKER_POLICY,
+  SKYBLOCK_WORKER_TYPES,
+  skyblockBuildRadiusForTier,
+  skyblockGeneratorUpgradeCost,
+  skyblockQuest,
+  type SkyblockWorkerStatus,
+  type SkyblockWorkerType,
+} from "./mobile-skyblock-management-policy";
+import {
   decodeSkyblockCursor,
   encodeSkyblockCursor,
   hashSkyblockRequest,
@@ -30,6 +43,10 @@ interface IslandRow extends Record<string, unknown> {
   level: number;
   experience: number;
   storageCapacity: number;
+  generatorTier: number;
+  buildRadius: number;
+  memberLimit: number;
+  visibility: "private" | "invite_only";
   version: number;
   memberCount: number;
   createdAt: Date | string;
@@ -96,6 +113,40 @@ interface InventoryTransferRow extends Record<string, unknown> {
   createdAt: Date | string;
   updatedAt: Date | string;
   committedAt: Date | string | null;
+}
+
+interface WorkerRow extends Record<string, unknown> {
+  id: string;
+  workerType: SkyblockWorkerType;
+  tier: number;
+  status: SkyblockWorkerStatus;
+  bufferItemId: string;
+  bufferQuantity: number;
+  productionCursorAt: Date | string;
+  updatedAt: Date | string;
+}
+
+interface QuestProgressRow extends Record<string, unknown> {
+  questId: string;
+  progress: number;
+  completedAt: Date | string | null;
+  claimedAt: Date | string | null;
+}
+
+interface MemberRow extends Record<string, unknown> {
+  playerId: string;
+  displayName: string | null;
+  role: "owner" | "manager" | "member";
+  joinedAt: Date | string;
+}
+
+interface PendingInviteRow extends Record<string, unknown> {
+  inviteId: string;
+  islandId: string;
+  islandName: string;
+  inviterPlayerId: string;
+  inviterDisplayName: string | null;
+  expiresAt: Date | string;
 }
 
 interface IdempotencyRow extends Record<string, unknown> {
@@ -189,6 +240,10 @@ async function activeIsland(
            island.level,
            island.experience,
            island.storage_capacity AS "storageCapacity",
+           island.generator_tier AS "generatorTier",
+           island.build_radius AS "buildRadius",
+           island.member_limit AS "memberLimit",
+           island.visibility,
            island.version,
            (SELECT count(*)::int FROM skyblock_island_members member_count
              WHERE member_count.island_id = island.id) AS "memberCount",
@@ -298,6 +353,660 @@ function idsClause(column: ReturnType<typeof sql>, ids: string[]) {
   return ids.length
     ? sql`${column} IN (${sql.join(ids.map((id) => sql`${id}`), sql`, `)})`
     : sql`false`;
+}
+
+function requireManagementRole(island: IslandRow) {
+  if (island.role === "member") {
+    throw skyblockError(403, "ISLAND_ROLE_REQUIRED", "Owner or manager role required");
+  }
+}
+
+function workerProduction(row: WorkerRow, now: Date) {
+  const tier = number(row.tier);
+  if (tier < 1 || tier > 5) {
+    throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker tier is invalid");
+  }
+  const cursor = new Date(row.productionCursorAt);
+  if (Number.isNaN(cursor.getTime()) || now.getTime() < cursor.getTime()) {
+    throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker cursor is invalid");
+  }
+  const creditedSeconds = Math.min(
+    SKYBLOCK_WORKER_POLICY.offlineCapHours * 60 * 60,
+    Math.floor((now.getTime() - cursor.getTime()) / 1_000),
+  );
+  const intervalSeconds = SKYBLOCK_WORKER_POLICY.tiers.find((candidate) => candidate.tier === tier)?.intervalSeconds;
+  if (!intervalSeconds) throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker policy is invalid");
+  const produced = Math.min(
+    Math.floor(creditedSeconds / intervalSeconds),
+    tier * SKYBLOCK_WORKER_POLICY.tierBufferCapacityMultiplier,
+  );
+  return {
+    quantity: produced,
+    nextCursor: new Date(now.getTime() - (creditedSeconds % intervalSeconds) * 1_000),
+  };
+}
+
+function workerView(row: WorkerRow, now: Date, overrides?: { bufferQuantity: number; cursor: Date }) {
+  if (!SKYBLOCK_WORKER_TYPES.includes(row.workerType) || !SKYBLOCK_WORKER_STATUSES.includes(row.status)) {
+    throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker type or status is invalid");
+  }
+  const item = itemView(row.bufferItemId);
+  if (!item) throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Unknown Skyblock worker item");
+  const production = overrides ? { quantity: 0 } : workerProduction(row, now);
+  const bufferQuantity = overrides?.bufferQuantity ?? number(row.bufferQuantity);
+  const estimatedReadyQuantity = bufferQuantity + production.quantity;
+  if (!Number.isSafeInteger(estimatedReadyQuantity)) {
+    throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker quantity is invalid");
+  }
+  return {
+    workerId: row.id,
+    type: row.workerType,
+    tier: number(row.tier),
+    status: row.status,
+    item,
+    bufferQuantity,
+    estimatedReadyQuantity,
+    productionCursorAt: iso(overrides?.cursor ?? row.productionCursorAt),
+    updatedAt: iso(row.updatedAt),
+  };
+}
+
+async function recordManagementQuestEvent(
+  tx: MobileDbTransaction,
+  playerId: string,
+  event: string,
+  subject: string,
+  amount: number,
+) {
+  const absoluteEvents = new Set([
+    "visit",
+    "upgrade_generator",
+    "skill_level",
+    "island_level",
+    "coop_member",
+    "skill_total",
+  ]);
+  const completed: string[] = [];
+  for (const quest of SKYBLOCK_QUESTS) {
+    if (quest.event !== event || (quest.subject !== subject && quest.subject !== "any")) continue;
+    const progress = Math.min(quest.target, amount);
+    const accumulated = absoluteEvents.has(event)
+      ? sql`GREATEST(skyblock_quest_progress.progress, EXCLUDED.progress)`
+      : sql`skyblock_quest_progress.progress + EXCLUDED.progress`;
+    const rows = await tx.execute<{ completedAt: Date | string | null } & Record<string, unknown>>(sql`
+      INSERT INTO skyblock_quest_progress
+        (player_id, quest_id, progress, completed_at, updated_at)
+      VALUES
+        (${playerId}, ${quest.id}, ${progress},
+         CASE WHEN ${progress} >= ${quest.target} THEN now() ELSE NULL END, now())
+      ON CONFLICT (player_id, quest_id) DO UPDATE
+        SET progress = LEAST(${quest.target}, ${accumulated}),
+            completed_at = CASE
+              WHEN LEAST(${quest.target}, ${accumulated}) >= ${quest.target}
+                THEN COALESCE(skyblock_quest_progress.completed_at, now())
+              ELSE skyblock_quest_progress.completed_at
+            END,
+            updated_at = now()
+      WHERE skyblock_quest_progress.completed_at IS NULL
+      RETURNING completed_at AS "completedAt"
+    `);
+    if (rows[0]?.completedAt) completed.push(quest.id);
+  }
+  return completed;
+}
+
+async function pendingInvite(tx: MobileDbTransaction, playerId: string, lock = false) {
+  const lockClause = lock ? sql`FOR UPDATE OF invite` : sql``;
+  const rows = await tx.execute<PendingInviteRow>(sql`
+    SELECT invite.id AS "inviteId",
+           invite.island_id AS "islandId",
+           island.name AS "islandName",
+           invite.inviter_player_id AS "inviterPlayerId",
+           inviter.name AS "inviterDisplayName",
+           invite.expires_at AS "expiresAt"
+      FROM skyblock_island_invites invite
+      JOIN skyblock_islands island ON island.id = invite.island_id
+      JOIN playerdata inviter ON inviter.id = invite.inviter_player_id
+     WHERE invite.invitee_player_id = ${playerId}
+       AND invite.status = 'pending'
+       AND invite.expires_at > now()
+     ORDER BY invite.created_at DESC, invite.id
+     LIMIT 1
+     ${lockClause}
+  `);
+  return rows[0] ?? null;
+}
+
+async function managementWorkers(tx: MobileDbTransaction, islandId: string, lock = false) {
+  const lockClause = lock ? sql`FOR UPDATE` : sql``;
+  return tx.execute<WorkerRow>(sql`
+    SELECT id,
+           worker_type AS "workerType",
+           tier,
+           status,
+           buffer_item_id AS "bufferItemId",
+           buffer_quantity AS "bufferQuantity",
+           production_cursor_at AS "productionCursorAt",
+           updated_at AS "updatedAt"
+      FROM skyblock_workers
+     WHERE island_id = ${islandId}
+     ORDER BY id
+     ${lockClause}
+  `);
+}
+
+export async function skyblockManagementOverview(
+  firebaseUid: string,
+  managementWritesEnabled: boolean,
+) {
+  return db.transaction(async (tx) => {
+    const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    const players = await tx.execute<PlayerRow>(sql`
+      SELECT id AS "playerId", name AS "playerName", coins
+        FROM playerdata
+       WHERE id = ${actor.playerId}
+       LIMIT 1
+    `);
+    const player = players[0];
+    if (!player) throw skyblockError(428, "PRIMARY_LINK_REQUIRED", "Primary player link required");
+    const island = await activeIsland(tx, actor.playerId);
+    const invite = island ? null : await pendingInvite(tx, actor.playerId);
+    const base = {
+      schemaVersion: 1,
+      policyVersion: SKYBLOCK_MANAGEMENT_POLICY_VERSION,
+      managementWritesEnabled,
+      player: {
+        playerId: actor.playerId,
+        playerName: player.playerName ?? actor.playerName,
+        coins: number(player.coins),
+      },
+    };
+    if (!island) {
+      return {
+        ...base,
+        island: null,
+        generator: null,
+        workers: [],
+        quests: [],
+        coop: {
+          members: [],
+          pendingInvite: invite ? {
+            inviteId: invite.inviteId,
+            islandName: invite.islandName,
+            inviterDisplayName: invite.inviterDisplayName ?? "Skyblock player",
+            expiresAt: iso(invite.expiresAt),
+          } : null,
+        },
+      };
+    }
+    const [storageRows, workers, questRows, members] = await Promise.all([
+      tx.execute<Record<string, unknown>>(sql`
+        SELECT
+          (SELECT COALESCE(sum(item.quantity), 0)::bigint
+             FROM skyblock_storage_items item WHERE item.island_id = ${island.islandId}) AS "usedItems",
+          (SELECT COALESCE(sum(transfer.quantity), 0)::bigint
+             FROM skyblock_inventory_transfers transfer
+            WHERE transfer.island_id = ${island.islandId}
+              AND transfer.state IN ('prepared', 'marked')) AS "reservedTransfers"
+      `),
+      managementWorkers(tx, island.islandId),
+      tx.execute<QuestProgressRow>(sql`
+        SELECT quest_id AS "questId", progress,
+               completed_at AS "completedAt", claimed_at AS "claimedAt"
+          FROM skyblock_quest_progress
+         WHERE player_id = ${actor.playerId}
+      `),
+      tx.execute<MemberRow>(sql`
+        SELECT member.player_id AS "playerId", player.name AS "displayName",
+               member.role, member.joined_at AS "joinedAt"
+          FROM skyblock_island_members member
+          JOIN playerdata player ON player.id = member.player_id
+         WHERE member.island_id = ${island.islandId}
+         ORDER BY CASE member.role WHEN 'owner' THEN 0 WHEN 'manager' THEN 1 ELSE 2 END,
+                  lower(player.name), member.player_id
+      `),
+    ]);
+    const progress = new Map(questRows.map((row) => [row.questId, row]));
+    const nextTier = number(island.generatorTier) + 1;
+    const nextUpgrade = nextTier <= SKYBLOCK_MAX_GENERATOR_TIER ? {
+      tier: nextTier,
+      costCoins: skyblockGeneratorUpgradeCost(nextTier),
+      buildRadius: skyblockBuildRadiusForTier(nextTier),
+    } : null;
+    const storage = storageRows[0] ?? {};
+    const now = new Date();
+    return {
+      ...base,
+      island: {
+        islandId: island.islandId,
+        name: island.name,
+        role: island.role,
+        version: number(island.version),
+        level: number(island.level),
+        experience: number(island.experience),
+        generatorTier: number(island.generatorTier),
+        buildRadius: number(island.buildRadius),
+        storage: {
+          usedItems: number(storage.usedItems ?? 0),
+          reservedTransfers: number(storage.reservedTransfers ?? 0),
+          capacity: number(island.storageCapacity),
+        },
+        memberLimit: number(island.memberLimit),
+        visibility: island.visibility,
+      },
+      generator: {
+        tier: number(island.generatorTier),
+        maxTier: SKYBLOCK_MAX_GENERATOR_TIER,
+        buildRadius: number(island.buildRadius),
+        nextUpgrade,
+        canUpgrade: Boolean(
+          managementWritesEnabled
+          && island.role !== "member"
+          && nextUpgrade
+          && number(player.coins) >= nextUpgrade.costCoins
+        ),
+      },
+      workers: workers.map((worker) => workerView(worker, now)),
+      quests: SKYBLOCK_QUESTS.map((quest) => {
+        const row = progress.get(quest.id);
+        const completed = Boolean(row?.completedAt);
+        const claimed = Boolean(row?.claimedAt);
+        return {
+          questId: quest.id,
+          chapter: quest.chapter,
+          progress: Math.min(quest.target, number(row?.progress ?? 0)),
+          target: quest.target,
+          completed,
+          claimed,
+          rewardCoins: quest.rewardCoins,
+          claimable: managementWritesEnabled && completed && !claimed,
+        };
+      }),
+      coop: {
+        members: members.map((member) => ({
+          playerId: member.playerId,
+          displayName: member.displayName ?? "Skyblock player",
+          role: member.role,
+          joinedAt: iso(member.joinedAt),
+        })),
+        pendingInvite: null,
+      },
+    };
+  });
+}
+
+export async function upgradeSkyblockGenerator(
+  firebaseUid: string,
+  input: { expectedIslandVersion: number; expectedNextTier: number; expectedCostCoins: number },
+  idempotencyKey: string,
+) {
+  return db.transaction(async (tx) => {
+    const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    const scope = "skyblock:management:generator-upgrade";
+    const requestHash = hashSkyblockRequest(scope, input);
+    const players = await lockPlayers(tx, [actor.playerId]);
+    const existing = await idempotentRequest(tx, actor.playerId, scope, idempotencyKey, requestHash);
+    if (existing) return { data: existing.responseBody, created: false };
+    const island = await requireActiveIsland(tx, actor.playerId, true);
+    requireManagementRole(island);
+    const currentTier = number(island.generatorTier);
+    if (currentTier >= SKYBLOCK_MAX_GENERATOR_TIER) {
+      throw skyblockError(409, "MAX_GENERATOR_TIER", "Generator is already at the maximum tier");
+    }
+    const nextTier = currentTier + 1;
+    const costCoins = skyblockGeneratorUpgradeCost(nextTier);
+    if (number(island.version) !== input.expectedIslandVersion) {
+      throw skyblockError(409, "ISLAND_VERSION_CONFLICT", "Island changed; refresh before upgrading");
+    }
+    if (input.expectedNextTier !== nextTier || input.expectedCostCoins !== costCoins) {
+      throw skyblockError(409, "UPGRADE_CHANGED", "Generator upgrade changed; refresh before upgrading");
+    }
+    const player = players.get(actor.playerId)!;
+    if (number(player.coins) < costCoins) {
+      throw skyblockError(409, "INSUFFICIENT_COINS", "Not enough coins");
+    }
+    const buildRadius = skyblockBuildRadiusForTier(nextTier);
+    const balanceCoins = number(player.coins) - costCoins;
+    await tx.execute(sql`
+      UPDATE playerdata SET coins = ${balanceCoins} WHERE id = ${actor.playerId}
+    `);
+    await tx.execute(sql`
+      INSERT INTO coin_transactions (id, player_id, amount, source, created_at)
+      VALUES
+        (gen_random_uuid(), ${actor.playerId}, ${-costCoins},
+         ${`skyblock:generator:${island.islandId}:tier:${nextTier}`}, now())
+    `);
+    const upgraded = await tx.execute<{
+      version: number;
+      level: number;
+      experience: number;
+      generatorTier: number;
+      buildRadius: number;
+    } & Record<string, unknown>>(sql`
+      UPDATE skyblock_islands
+         SET generator_tier = ${nextTier},
+             build_radius = ${buildRadius},
+             level = GREATEST(level, ${nextTier}),
+             experience = experience + ${costCoins},
+             version = version + 1,
+             updated_at = now()
+       WHERE id = ${island.islandId}
+         AND version = ${input.expectedIslandVersion}
+      RETURNING version, level, experience,
+                generator_tier AS "generatorTier", build_radius AS "buildRadius"
+    `);
+    if (!upgraded[0]) {
+      throw skyblockError(409, "ISLAND_VERSION_CONFLICT", "Island changed; refresh before upgrading");
+    }
+    const questCompletions = [
+      ...await recordManagementQuestEvent(tx, actor.playerId, "upgrade_generator", "tier", nextTier),
+      ...await recordManagementQuestEvent(tx, actor.playerId, "island_level", "level", nextTier),
+    ];
+    const row = upgraded[0];
+    const data = {
+      island: {
+        version: number(row.version),
+        level: number(row.level),
+        experience: number(row.experience),
+        generatorTier: number(row.generatorTier),
+        buildRadius: number(row.buildRadius),
+      },
+      coins: balanceCoins,
+      costCoins,
+      questCompletions: [...new Set(questCompletions)],
+    };
+    await saveIdempotentResponse(tx, actor.playerId, scope, idempotencyKey, requestHash, 201, data);
+    return { data, created: true };
+  });
+}
+
+export async function collectSkyblockWorkers(
+  firebaseUid: string,
+  idempotencyKey: string,
+) {
+  return db.transaction(async (tx) => {
+    const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    const scope = "skyblock:management:workers-collect";
+    const body = {};
+    const requestHash = hashSkyblockRequest(scope, body);
+    await lockPlayers(tx, [actor.playerId]);
+    const existing = await idempotentRequest(tx, actor.playerId, scope, idempotencyKey, requestHash);
+    if (existing) return { data: existing.responseBody, created: false };
+    const island = await requireActiveIsland(tx, actor.playerId, true);
+    const transfers = await tx.execute<{ quantity: number } & Record<string, unknown>>(sql`
+      SELECT quantity
+        FROM skyblock_inventory_transfers
+       WHERE island_id = ${island.islandId}
+         AND state IN ('prepared', 'marked')
+       ORDER BY id
+       FOR UPDATE
+    `);
+    const storageRows = await tx.execute<StorageRow>(sql`
+      SELECT id,
+             owner_player_id AS "ownerPlayerId",
+             island_id AS "islandId",
+             item_id AS "itemId",
+             quantity,
+             reserved_quantity AS "reservedQuantity",
+             version,
+             updated_at AS "updatedAt"
+        FROM skyblock_storage_items
+       WHERE island_id = ${island.islandId}
+       ORDER BY id
+       FOR UPDATE
+    `);
+    const workers = await managementWorkers(tx, island.islandId, true);
+    const usedBefore = storageRows.reduce((sum, row) => sum + number(row.quantity), 0);
+    const reservedTransfers = transfers.reduce((sum, row) => sum + number(row.quantity), 0);
+    let available = Math.max(0, number(island.storageCapacity) - usedBefore - reservedTransfers);
+    const now = new Date();
+    const collected = new Map<string, number>();
+    const updatedWorkers: ReturnType<typeof workerView>[] = [];
+    const storageByItem = new Map(storageRows.map((row) => [row.itemId, row]));
+    for (const worker of workers) {
+      const production = workerProduction(worker, now);
+      const ready = number(worker.bufferQuantity) + production.quantity;
+      if (!Number.isSafeInteger(ready)) {
+        throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker quantity is invalid");
+      }
+      const accepted = Math.min(ready, available);
+      const remaining = ready - accepted;
+      if (accepted > 0) {
+        const storage = storageByItem.get(worker.bufferItemId);
+        if (storage) {
+          await tx.execute(sql`
+            UPDATE skyblock_storage_items
+               SET quantity = quantity + ${accepted},
+                   version = version + 1,
+                   updated_at = now()
+             WHERE id = ${storage.id}
+          `);
+          storage.quantity = number(storage.quantity) + accepted;
+        } else {
+          const inserted = await tx.execute<StorageRow>(sql`
+            INSERT INTO skyblock_storage_items
+              (id, owner_player_id, island_id, item_id, quantity, reserved_quantity, version, created_at, updated_at)
+            VALUES
+              (gen_random_uuid(), ${island.ownerPlayerId}, ${island.islandId}, ${worker.bufferItemId},
+               ${accepted}, 0, 1, now(), now())
+            RETURNING id, owner_player_id AS "ownerPlayerId", island_id AS "islandId",
+                      item_id AS "itemId", quantity, reserved_quantity AS "reservedQuantity",
+                      version, updated_at AS "updatedAt"
+          `);
+          storageByItem.set(worker.bufferItemId, inserted[0]!);
+        }
+        collected.set(worker.bufferItemId, (collected.get(worker.bufferItemId) ?? 0) + accepted);
+        available -= accepted;
+      }
+      await tx.execute(sql`
+        UPDATE skyblock_workers
+           SET buffer_quantity = ${remaining},
+               production_cursor_at = ${production.nextCursor.toISOString()},
+               updated_at = now()
+         WHERE id = ${worker.id}
+      `);
+      updatedWorkers.push(workerView({ ...worker, updatedAt: now }, now, {
+        bufferQuantity: remaining,
+        cursor: production.nextCursor,
+      }));
+    }
+    const totalQuantity = [...collected.values()].reduce((sum, quantity) => sum + quantity, 0);
+    const questCompletions = totalQuantity > 0
+      ? await recordManagementQuestEvent(
+          tx,
+          actor.playerId,
+          "collect_worker",
+          "any",
+          Math.min(2_000_000_000, totalQuantity),
+        )
+      : [];
+    const data = {
+      collected: [...collected.entries()].sort(([first], [second]) => first.localeCompare(second))
+        .map(([itemId, quantity]) => ({ item: itemView(itemId)!, quantity })),
+      totalQuantity,
+      storage: {
+        usedItems: usedBefore + totalQuantity,
+        reservedTransfers,
+        capacity: number(island.storageCapacity),
+      },
+      workers: updatedWorkers,
+      questCompletions,
+    };
+    await saveIdempotentResponse(tx, actor.playerId, scope, idempotencyKey, requestHash, 201, data);
+    return { data, created: true };
+  });
+}
+
+export async function claimSkyblockQuest(
+  firebaseUid: string,
+  questId: string,
+  idempotencyKey: string,
+) {
+  const quest = skyblockQuest(questId);
+  if (!quest) throw skyblockError(404, "QUEST_UNKNOWN", "Unknown Skyblock quest");
+  return db.transaction(async (tx) => {
+    const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    const scope = `skyblock:management:quests:${questId}:claim`;
+    const body = {};
+    const requestHash = hashSkyblockRequest(scope, body);
+    const players = await lockPlayers(tx, [actor.playerId]);
+    const existing = await idempotentRequest(tx, actor.playerId, scope, idempotencyKey, requestHash);
+    if (existing) return { data: existing.responseBody, created: false };
+    await requireActiveIsland(tx, actor.playerId, true);
+    const progress = await tx.execute<QuestProgressRow>(sql`
+      SELECT quest_id AS "questId", progress,
+             completed_at AS "completedAt", claimed_at AS "claimedAt"
+        FROM skyblock_quest_progress
+       WHERE player_id = ${actor.playerId}
+         AND quest_id = ${questId}
+       LIMIT 1
+       FOR UPDATE
+    `);
+    const row = progress[0];
+    if (!row?.completedAt) throw skyblockError(409, "QUEST_INCOMPLETE", "Quest is incomplete");
+    if (row.claimedAt) throw skyblockError(409, "QUEST_ALREADY_CLAIMED", "Quest reward already claimed");
+    const balanceCoins = number(players.get(actor.playerId)!.coins) + quest.rewardCoins;
+    if (!Number.isSafeInteger(balanceCoins) || balanceCoins > 2_147_483_647) {
+      throw skyblockError(409, "COIN_BALANCE_LIMIT", "Coin balance limit reached");
+    }
+    await tx.execute(sql`UPDATE playerdata SET coins = ${balanceCoins} WHERE id = ${actor.playerId}`);
+    await tx.execute(sql`
+      INSERT INTO coin_transactions (id, player_id, amount, source, created_at)
+      VALUES
+        (gen_random_uuid(), ${actor.playerId}, ${quest.rewardCoins}, ${`skyblock:quest:${questId}`}, now())
+    `);
+    const claims = await tx.execute<{ claimedAt: Date | string } & Record<string, unknown>>(sql`
+      UPDATE skyblock_quest_progress
+         SET claimed_at = now(), updated_at = now()
+       WHERE player_id = ${actor.playerId}
+         AND quest_id = ${questId}
+         AND claimed_at IS NULL
+      RETURNING claimed_at AS "claimedAt"
+    `);
+    if (!claims[0]) throw skyblockError(409, "QUEST_ALREADY_CLAIMED", "Quest reward already claimed");
+    const data = {
+      questId,
+      rewardCoins: quest.rewardCoins,
+      coins: balanceCoins,
+      claimedAt: iso(claims[0].claimedAt),
+    };
+    await saveIdempotentResponse(tx, actor.playerId, scope, idempotencyKey, requestHash, 201, data);
+    return { data, created: true };
+  });
+}
+
+export async function acceptSkyblockInvite(
+  firebaseUid: string,
+  inviteId: string,
+  idempotencyKey: string,
+) {
+  return db.transaction(async (tx) => {
+    const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    const scope = "skyblock:management:invite-accept";
+    const body = { inviteId };
+    const requestHash = hashSkyblockRequest(scope, body);
+    const snapshots = await tx.execute<PendingInviteRow>(sql`
+      SELECT invite.id AS "inviteId", invite.island_id AS "islandId", island.name AS "islandName",
+             invite.inviter_player_id AS "inviterPlayerId", inviter.name AS "inviterDisplayName",
+             invite.expires_at AS "expiresAt"
+        FROM skyblock_island_invites invite
+        JOIN skyblock_islands island ON island.id = invite.island_id
+        JOIN playerdata inviter ON inviter.id = invite.inviter_player_id
+       WHERE invite.id = ${inviteId}
+         AND invite.invitee_player_id = ${actor.playerId}
+       LIMIT 1
+    `);
+    const snapshot = snapshots[0];
+    if (!snapshot) throw skyblockError(404, "INVITE_NOT_FOUND", "Skyblock invite not found");
+    await lockPlayers(tx, [actor.playerId, snapshot.inviterPlayerId]);
+    const existing = await idempotentRequest(tx, actor.playerId, scope, idempotencyKey, requestHash);
+    if (existing) return { data: existing.responseBody, created: false };
+    const islands = await tx.execute<{
+      islandId: string;
+      name: string;
+      state: string;
+      memberLimit: number;
+      version: number;
+    } & Record<string, unknown>>(sql`
+      SELECT id AS "islandId", name, state, member_limit AS "memberLimit", version
+        FROM skyblock_islands
+       WHERE id = ${snapshot.islandId}
+       LIMIT 1
+       FOR UPDATE
+    `);
+    const island = islands[0];
+    if (!island || island.state !== "active") {
+      throw skyblockError(409, "INVITE_EXPIRED", "Skyblock invite is no longer available");
+    }
+    const invites = await tx.execute<{
+      status: string;
+      expiresAt: Date | string;
+    } & Record<string, unknown>>(sql`
+      SELECT status, expires_at AS "expiresAt"
+        FROM skyblock_island_invites
+       WHERE id = ${inviteId}
+         AND invitee_player_id = ${actor.playerId}
+       LIMIT 1
+       FOR UPDATE
+    `);
+    const invite = invites[0];
+    if (!invite || invite.status !== "pending" || new Date(invite.expiresAt).getTime() <= Date.now()) {
+      throw skyblockError(409, "INVITE_EXPIRED", "Skyblock invite is no longer available");
+    }
+    const existingMembership = await tx.execute(sql`
+      SELECT 1
+        FROM skyblock_island_members
+       WHERE player_id = ${actor.playerId}
+       LIMIT 1
+    `);
+    if (existingMembership.length) {
+      throw skyblockError(409, "ALREADY_IN_ISLAND", "Player already belongs to an island");
+    }
+    const counts = await tx.execute<{ memberCount: number } & Record<string, unknown>>(sql`
+      SELECT count(*)::int AS "memberCount"
+        FROM skyblock_island_members
+       WHERE island_id = ${island.islandId}
+    `);
+    const memberCount = number(counts[0]?.memberCount ?? 0);
+    if (memberCount >= number(island.memberLimit)) {
+      throw skyblockError(409, "COOP_FULL", "Skyblock coop is full");
+    }
+    await tx.execute(sql`
+      INSERT INTO skyblock_island_members (island_id, player_id, role, joined_at)
+      VALUES (${island.islandId}, ${actor.playerId}, 'member', now())
+    `);
+    for (const skill of ["mining", "farming", "foraging", "combat"] as const) {
+      await tx.execute(sql`
+        INSERT INTO skyblock_skill_progress (player_id, skill)
+        VALUES (${actor.playerId}, ${skill})
+        ON CONFLICT (player_id, skill) DO NOTHING
+      `);
+    }
+    await tx.execute(sql`
+      UPDATE skyblock_island_invites
+         SET status = 'accepted', resolved_at = now()
+       WHERE id = ${inviteId}
+    `);
+    await recordManagementQuestEvent(
+      tx,
+      snapshot.inviterPlayerId,
+      "coop_member",
+      "count",
+      memberCount + 1,
+    );
+    const data = {
+      inviteId,
+      island: {
+        islandId: island.islandId,
+        name: island.name,
+        role: "member" as const,
+        version: number(island.version),
+      },
+      memberCount: memberCount + 1,
+    };
+    await saveIdempotentResponse(tx, actor.playerId, scope, idempotencyKey, requestHash, 201, data);
+    return { data, created: true };
+  });
 }
 
 export async function skyblockOverview(firebaseUid: string, marketWritesEnabled: boolean) {

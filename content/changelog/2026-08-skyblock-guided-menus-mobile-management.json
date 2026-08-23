@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-guided-menus-mobile-management",
+  "contentType": "changelog",
+  "title": "Skyblock gets guided menus and mobile island management",
+  "summary": "The first Bedrock lobby screen is illustrated, Skyblock actions now stay inside guided menus, and the companion-app beta can manage core island progression.",
+  "body": "- The first Cookie Build lobby screen on Bedrock now uses the versioned Cookie Build icon pack for Quick Play, Games, Goals, Friends, Party, Events, the app and Help. Text labels remain visible if an image cannot load.\n- Skyblock no longer asks players to type a follow-up command to complete an action. Generator upgrades, worker collection, quest chapters and rewards, storage, market deposits and co-op management now use shared Java and Bedrock submenus.\n- Generator confirmations are tied to the exact island version, tier and coin cost shown on screen. Delayed or stale responses are rejected instead of applying a different upgrade.\n- Co-op invitations can be reviewed and accepted through a dedicated menu, and the main Skyblock menu keeps its safe Return to Lobby action.\n- The companion-app beta adds a compact island-management area for generator upgrades, worker collection, quest rewards and co-op invitation acceptance. Existing inventory, market and listing screens remain separate so the four-tab app navigation stays unchanged.\n- Mobile management and market writes remain independently gated during the beta. Every write requires the authenticated primary Minecraft link and an idempotency key.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-23T00:15:00+02:00"
+}
