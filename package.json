@@ -14,6 +14,7 @@
     "admin:provision": "node scripts/provision-admin.mjs",
     "postinstall": "nuxt prepare",
     "test": "vitest run",
+    "test:ssr-localization": "npm run build && node scripts/verify-localized-ssr.mjs",
     "test:integration:mobile": "vitest run test/mobile-account-concurrency.test.ts",
     "typecheck": "nuxt typecheck",
     "audit:prod": "npm audit --omit=dev"

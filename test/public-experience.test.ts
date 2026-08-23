@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import { buildMarketingSitemap } from "../utils/marketing-sitemap";
 
 async function source(path: string) {
   return readFile(new URL(path, import.meta.url), "utf8");
@@ -9,8 +10,8 @@ describe("public experience", () => {
   it("reports zero players honestly without promising a ready match", async () => {
     const counter = await source("../components/PlayerCounter.vue");
 
-    expect(counter).toContain("Online · 0 players right now");
-    expect(counter).toContain("Status check partially unavailable");
+    expect(counter).toContain("copy.status.onlineZero");
+    expect(counter).toContain("copy.status.partial");
     expect(counter).toContain("Java: {{ editionLabel(status.java) }}");
     expect(counter).toContain("Bedrock: {{ editionLabel(status.bedrock) }}");
     expect(counter).not.toContain("Quick Play ready");
@@ -49,7 +50,7 @@ describe("public experience", () => {
   it("links the public trust pages from navigation and the sitemap", async () => {
     const header = await source("../components/AppHeader.vue");
     const footer = await source("../components/AppFooter.vue");
-    const sitemap = await source("../public/sitemap.xml");
+    const sitemap = buildMarketingSitemap();
 
     expect(header).toContain('to="/status"');
     expect(footer).toContain('to="/rules"');

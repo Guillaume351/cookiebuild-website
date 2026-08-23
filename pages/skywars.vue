@@ -4,8 +4,11 @@
 
 <script setup lang="ts">
 import GameLandingPage from "@/components/GameLandingPage.vue";
-import { gameLandingBySlug } from "@/utils/game-landings";
+import { localizedGameLandingBySlug } from "@/utils/game-landings-localized";
 
-const game = gameLandingBySlug.skywars!;
+definePageMeta({ alias: ["/bg/skywars", "/es/skywars", "/hi/skywars", "/pt-br/skywars"] });
+
+const { locale } = useSiteLocale();
+const game = computed(() => localizedGameLandingBySlug(locale.value.code, "skywars"));
 useGameLandingSeo(game);
 </script>

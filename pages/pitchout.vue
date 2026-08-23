@@ -4,8 +4,11 @@
 
 <script setup lang="ts">
 import GameLandingPage from "@/components/GameLandingPage.vue";
-import { gameLandingBySlug } from "@/utils/game-landings";
+import { localizedGameLandingBySlug } from "@/utils/game-landings-localized";
 
-const game = gameLandingBySlug.pitchout!;
+definePageMeta({ alias: ["/bg/pitchout", "/es/pitchout", "/hi/pitchout", "/pt-br/pitchout"] });
+
+const { locale } = useSiteLocale();
+const game = computed(() => localizedGameLandingBySlug(locale.value.code, "pitchout"));
 useGameLandingSeo(game);
 </script>

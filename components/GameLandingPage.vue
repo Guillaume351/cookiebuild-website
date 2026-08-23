@@ -12,29 +12,29 @@
       <div class="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/90 to-orange-950/60"></div>
 
       <div class="relative px-6 py-16 md:px-12 md:py-24">
-        <NuxtLink to="/games" class="mb-8 inline-flex text-sm font-bold text-orange-300 hover:text-orange-200">
-          &larr; All Cookie Build games
+        <NuxtLink :to="localizePath('/games')" class="mb-8 inline-flex text-sm font-bold text-orange-300 hover:text-orange-200">
+          {{ copy.gameUi.allGames }}
         </NuxtLink>
         <div class="max-w-4xl">
           <div class="mb-5 flex items-center gap-3">
-            <img :src="game.icon" :alt="`${game.name} icon`" class="h-11 w-11" />
-            <Badge class="bg-green-600 hover:bg-green-600">{{ game.badgeLabel || "Available now · Free to play" }}</Badge>
+            <img :src="game.icon" :alt="game.name" class="h-11 w-11" />
+            <Badge class="bg-green-600 hover:bg-green-600">{{ game.badgeLabel || copy.gameUi.available }}</Badge>
           </div>
           <h1 class="text-4xl font-black tracking-tight text-white md:text-6xl">{{ game.h1 }}</h1>
           <p class="mt-6 max-w-3xl text-lg leading-relaxed text-zinc-200 md:text-xl">{{ game.heroIntro }}</p>
 
           <p class="mt-5 font-mono text-sm font-bold text-white md:text-base">
-            Bedrock IP: {{ serverIP }} · Port: {{ bedrockPort }} · Java IP: {{ serverIP }}
+            {{ copy.gameUi.bedrockIp }}: {{ serverIP }} · {{ copy.gameUi.bedrockPort }}: {{ bedrockPort }} · {{ copy.gameUi.javaIp }}: {{ serverIP }}
           </p>
 
           <div class="mt-8 flex flex-col gap-4 sm:flex-row">
             <Button size="lg" class="bg-green-600 px-7 text-base font-bold hover:bg-green-700" @click="openBedrockLink">
               <Gamepad2 class="mr-2 h-5 w-5" />
-              Add Bedrock server
+              {{ copy.gameUi.addBedrock }}
             </Button>
             <Button size="lg" variant="outline" class="border-white/20 bg-white/10 px-7 text-base font-bold text-white hover:bg-white/20" @click="copyServerAddress">
               <Copy class="mr-2 h-5 w-5" />
-              {{ copiedLabel || "Copy server IP" }}
+              {{ copiedLabel || copy.gameUi.copyIp }}
             </Button>
           </div>
 
@@ -58,7 +58,7 @@
 
     <section :aria-labelledby="`${game.slug}-join-title`" class="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <div>
-        <p class="text-sm font-black uppercase tracking-widest text-orange-400">Server address</p>
+        <p class="text-sm font-black uppercase tracking-widest text-orange-400">{{ copy.gameUi.serverAddress }}</p>
         <h2 :id="`${game.slug}-join-title`" class="mt-3 text-3xl font-black tracking-tight text-white md:text-4xl">
           {{ game.joinHeading }}
         </h2>
@@ -67,17 +67,14 @@
 
       <div class="rounded-2xl border border-zinc-800 bg-zinc-950 p-6 shadow-xl md:p-8">
         <div class="grid gap-4 sm:grid-cols-2">
-          <JoinAddress :address="serverIP" label="Bedrock and Java address" @copy="copyText(serverIP, 'Server address')" />
-          <JoinAddress :address="bedrockPort" label="Bedrock port" @copy="copyText(bedrockPort, 'Bedrock port')" />
+          <JoinAddress :address="serverIP" :label="copy.gameUi.connectionAddress" @copy="copyText(serverIP, copy.gameUi.serverAddress)" />
+          <JoinAddress :address="bedrockPort" :label="copy.gameUi.bedrockPort" @copy="copyText(bedrockPort, copy.gameUi.bedrockPort)" />
         </div>
         <ol class="mt-7 list-decimal space-y-3 pl-5 text-zinc-300">
-          <li>Open <strong>Minecraft Bedrock</strong> and choose <strong>Play → Servers → Add Server</strong>.</li>
-          <li>Enter <strong>{{ serverIP }}</strong> and port <strong>{{ bedrockPort }}</strong>.</li>
-          <li>Join Cookie Build, then choose <strong>{{ game.lobbyLabel }}</strong> in the lobby.</li>
+          <li v-for="step in copy.gameUi.steps" :key="step">{{ step }}</li>
         </ol>
         <p class="mt-5 text-sm text-zinc-500">
-          On Xbox, PlayStation, and Nintendo Switch, custom servers require a LAN-proxy or
-          BedrockConnect-style workaround.
+          {{ copy.gameUi.consoleNotice }}
         </p>
       </div>
     </section>
@@ -113,7 +110,7 @@
             {{ serverIP }}
           </Button>
           <Button as-child variant="outline" class="border-zinc-700 bg-zinc-900 text-white hover:bg-zinc-800">
-            <NuxtLink to="/player-stats">View player stats</NuxtLink>
+            <NuxtLink to="/player-stats">{{ copy.gameUi.stats }}</NuxtLink>
           </Button>
         </div>
       </div>
@@ -121,7 +118,7 @@
 
     <section :aria-labelledby="`${game.slug}-faq-title`" class="mx-auto max-w-4xl">
       <h2 :id="`${game.slug}-faq-title`" class="text-center text-3xl font-black tracking-tight text-white md:text-4xl">
-        {{ game.name }} server FAQ
+        {{ copy.gameUi.faqTitle(game.name) }}
       </h2>
       <div class="mt-9 space-y-4">
         <details v-for="faq in game.faqs" :key="faq.question" class="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
@@ -145,16 +142,17 @@ defineProps<{ game: GameLanding }>();
 const serverIP = COOKIE_BUILD_SERVER_IP;
 const bedrockPort = COOKIE_BUILD_BEDROCK_PORT;
 const copiedLabel = ref("");
+const { copy, localizePath } = useSiteLocale();
 
 const copyText = async (value: string, label: string) => {
   await navigator.clipboard.writeText(value);
-  copiedLabel.value = `${label} copied`;
+  copiedLabel.value = `${label} ${copy.value.common.copied}`;
   window.setTimeout(() => {
     copiedLabel.value = "";
   }, 2000);
 };
 
-const copyServerAddress = () => copyText(serverIP, "Server IP");
+const copyServerAddress = () => copyText(serverIP, copy.value.gameUi.serverAddress);
 
 const openBedrockLink = () => {
   window.location.href = `minecraft://?addExternalServer=CookieBuild|${serverIP}:${bedrockPort}`;

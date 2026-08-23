@@ -1,21 +1,21 @@
 <template>
   <div class="player-counter" role="status" aria-live="polite">
     <Users class="mr-2 h-5 w-5" />
-    <span v-if="pending">Checking server...</span>
+    <span v-if="pending">{{ copy.status.checking }}</span>
     <template v-else-if="status">
       <span v-if="status.online && status.players > 0">
-        {{ status.players }} {{ status.players === 1 ? "player" : "players" }} online
+        {{ status.players }} {{ status.players === 1 ? copy.status.onePlayer : copy.status.players }} {{ copy.status.online }}
       </span>
-      <span v-else-if="status.online">Online · 0 players right now</span>
-      <span v-else-if="status.java.reachable && status.bedrock.reachable">Server offline</span>
-      <span v-else-if="status.java.reachable || status.bedrock.reachable">Status check partially unavailable</span>
-      <span v-else>Status check unavailable</span>
-      <span class="edition-status" aria-label="Edition availability">
+      <span v-else-if="status.online">{{ copy.status.onlineZero }}</span>
+      <span v-else-if="status.java.reachable && status.bedrock.reachable">{{ copy.status.offline }}</span>
+      <span v-else-if="status.java.reachable || status.bedrock.reachable">{{ copy.status.partial }}</span>
+      <span v-else>{{ copy.status.unavailable }}</span>
+      <span class="edition-status" :aria-label="copy.status.availability">
         <span>Java: {{ editionLabel(status.java) }}</span>
         <span>Bedrock: {{ editionLabel(status.bedrock) }}</span>
       </span>
     </template>
-    <span v-else>Status check unavailable</span>
+    <span v-else>{{ copy.status.unavailable }}</span>
   </div>
 </template>
 
@@ -36,10 +36,11 @@ interface ServerStatus {
 }
 
 const { data: status, pending } = useFetch<ServerStatus>("/api/server-status");
+const { copy } = useSiteLocale();
 
 function editionLabel(edition: EditionStatus) {
-  if (!edition.reachable) return "check unavailable";
-  return edition.online ? "online" : "offline";
+  if (!edition.reachable) return copy.value.status.checkUnavailable;
+  return edition.online ? copy.value.status.online : copy.value.status.offline;
 }
 </script>
 

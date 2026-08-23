@@ -5,83 +5,86 @@
         <div>
           <h3 class="text-xl font-bold mb-4">Cookie Build</h3>
           <p class="text-gray-400">
-            The Classic Minecraft Mini-Games Server, bringing players together
-            since 2014.
+            {{ copy.footer.description }}
           </p>
         </div>
         <div>
-          <h3 class="text-xl font-bold mb-4">Quick Links</h3>
+          <h3 class="text-xl font-bold mb-4">{{ copy.footer.quickLinks }}</h3>
           <ul class="space-y-2">
             <li>
-              <NuxtLink to="/" class="text-gray-400 hover:text-white transition-colors"
-                >Home</NuxtLink
+              <NuxtLink :to="localizePath('/')" class="text-gray-400 hover:text-white transition-colors"
+                >{{ copy.navigation.home }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/games" class="text-gray-400 hover:text-white transition-colors"
-                >Games</NuxtLink
+              <NuxtLink :to="localizePath('/games')" class="text-gray-400 hover:text-white transition-colors"
+                >{{ copy.navigation.games }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/player-stats" class="text-gray-400 hover:text-white transition-colors"
-                >Player Stats</NuxtLink
+                >{{ copy.navigation.playerStats }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/updates" class="text-gray-400 hover:text-white transition-colors"
-                >Updates</NuxtLink
+                >{{ copy.navigation.updates }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/status" class="text-gray-400 hover:text-white transition-colors"
-                >Server Status</NuxtLink
+                >{{ copy.footer.serverStatus }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/rules" class="text-gray-400 hover:text-white transition-colors"
-                >Server Rules</NuxtLink
+                >{{ copy.footer.rules }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/support" class="text-gray-400 hover:text-white transition-colors"
-                >Support</NuxtLink
+                >{{ copy.footer.support }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/account/delete" class="text-gray-400 hover:text-white transition-colors"
-                >Delete App Account</NuxtLink
+                >{{ copy.footer.deleteAccount }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/privacy" class="text-gray-400 hover:text-white transition-colors"
-                >Privacy</NuxtLink
+                >{{ copy.footer.privacy }}</NuxtLink
               >
             </li>
             <li>
               <NuxtLink to="/terms" class="text-gray-400 hover:text-white transition-colors"
-                >Terms</NuxtLink
+                >{{ copy.footer.terms }}</NuxtLink
               >
             </li>
           </ul>
         </div>
         <div>
-          <h3 class="text-xl font-bold mb-4">Support</h3>
+          <h3 class="text-xl font-bold mb-4">{{ copy.footer.help }}</h3>
           <p class="text-gray-400 mb-4">
-            Need help? Contact our support team.
+            {{ copy.footer.helpText }}
           </p>
           <a
             href="mailto:support@cookie-build.com"
             class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 text-black"
           >
-            Contact Support
+            {{ copy.footer.contact }}
           </a>
         </div>
       </div>
       <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
         <p>
-          &copy; {{ new Date().getFullYear() }} Cookie Build. Not affiliated with Mojang or Microsoft.
+          &copy; {{ new Date().getFullYear() }} Cookie Build. {{ copy.footer.legal }}
         </p>
       </div>
     </div>
   </footer>
 </template>
+
+<script setup lang="ts">
+const { copy, localizePath } = useSiteLocale();
+</script>

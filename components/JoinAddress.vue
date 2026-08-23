@@ -6,7 +6,7 @@
       <button
         type="button"
         class="shrink-0 rounded-lg bg-zinc-800 p-2 text-zinc-300 hover:bg-zinc-700 hover:text-white"
-        :aria-label="`Copy ${label}`"
+        :aria-label="`${copy.common.copy} ${label}`"
         @click="$emit('copy')"
       >
         <Copy class="h-4 w-4" />
@@ -20,4 +20,5 @@ import { Copy } from "@lucide/vue";
 
 defineProps<{ address: string; label: string }>();
 defineEmits<{ copy: [] }>();
+const { copy } = useSiteLocale();
 </script>

@@ -1,33 +1,44 @@
 import type { GameLanding } from "@/utils/game-landings";
 import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
+import { computed, toValue, type MaybeRefOrGetter } from "vue";
+import { localizedSeoLinks, localizedSitePath, siteLocaleFromPath } from "@/utils/site-locales";
+import { SITE_COPY } from "@/utils/site-copy";
 
-export function useGameLandingSeo(game: GameLanding) {
-  const canonicalUrl = `${COOKIE_BUILD_SITE_URL}${game.path}`;
-  const socialImage = game.heroImage
-    ? `${COOKIE_BUILD_SITE_URL}${game.heroImage}`
-    : `${COOKIE_BUILD_SITE_URL}/cookie-build-social.webp`;
+export function useGameLandingSeo(game: MaybeRefOrGetter<GameLanding>) {
+  const route = useRoute();
+  const landing = computed(() => toValue(game));
+  const locale = computed(() => siteLocaleFromPath(route.path));
+  const canonicalUrl = computed(() => `${COOKIE_BUILD_SITE_URL}${landing.value.path}`);
+  const socialImage = computed(() => landing.value.heroImage
+    ? `${COOKIE_BUILD_SITE_URL}${landing.value.heroImage}`
+    : `${COOKIE_BUILD_SITE_URL}/cookie-build-social.webp`);
 
   useSeoMeta({
-    title: game.seoTitle,
-    description: game.metaDescription,
+    title: computed(() => landing.value.seoTitle),
+    description: computed(() => landing.value.metaDescription),
     robots: "index, follow",
-    ogTitle: game.h1,
-    ogDescription: game.socialDescription,
+    ogTitle: computed(() => landing.value.h1),
+    ogDescription: computed(() => landing.value.socialDescription),
     ogType: "website",
     ogUrl: canonicalUrl,
+    ogLocale: computed(() => locale.value.htmlLang.replace("-", "_")),
     ogImage: socialImage,
-    ogImageAlt: game.heroImageAlt || "Cookie Build Minecraft server lobby",
-    ogImageWidth: String(game.heroImageWidth || 1200),
-    ogImageHeight: String(game.heroImageHeight || 630),
+    ogImageAlt: computed(() => landing.value.heroImageAlt || "Cookie Build Minecraft server lobby"),
+    ogImageWidth: computed(() => String(landing.value.heroImageWidth || 1200)),
+    ogImageHeight: computed(() => String(landing.value.heroImageHeight || 630)),
     twitterCard: "summary_large_image",
-    twitterTitle: game.seoTitle,
-    twitterDescription: game.socialDescription,
+    twitterTitle: computed(() => landing.value.seoTitle),
+    twitterDescription: computed(() => landing.value.socialDescription),
     twitterImage: socialImage,
-    twitterImageAlt: game.heroImageAlt || "Cookie Build Minecraft server lobby",
+    twitterImageAlt: computed(() => landing.value.heroImageAlt || "Cookie Build Minecraft server lobby"),
   });
 
-  useHead({
-    link: [{ rel: "canonical", href: canonicalUrl }],
+  useHead(() => ({
+    htmlAttrs: { lang: locale.value.htmlLang },
+    link: [
+      { rel: "canonical", href: canonicalUrl.value },
+      ...localizedSeoLinks(landing.value.path),
+    ],
     script: [
       {
         type: "application/ld+json",
@@ -36,11 +47,11 @@ export function useGameLandingSeo(game: GameLanding) {
           "@graph": [
             {
               "@type": "WebPage",
-              "@id": `${canonicalUrl}#webpage`,
-              url: canonicalUrl,
-              name: game.seoTitle,
-              description: game.metaDescription,
-              inLanguage: "en",
+              "@id": `${canonicalUrl.value}#webpage`,
+              url: canonicalUrl.value,
+              name: landing.value.seoTitle,
+              description: landing.value.metaDescription,
+              inLanguage: locale.value.htmlLang,
             },
             {
               "@type": "BreadcrumbList",
@@ -49,25 +60,26 @@ export function useGameLandingSeo(game: GameLanding) {
                   "@type": "ListItem",
                   position: 1,
                   name: "Cookie Build",
-                  item: `${COOKIE_BUILD_SITE_URL}/`,
+                  item: `${COOKIE_BUILD_SITE_URL}${localizedSitePath("/", locale.value)}`,
                 },
                 {
                   "@type": "ListItem",
                   position: 2,
-                  name: "Games",
-                  item: `${COOKIE_BUILD_SITE_URL}/games`,
+                  name: SITE_COPY[locale.value.code].navigation.games,
+                  item: `${COOKIE_BUILD_SITE_URL}${localizedSitePath("/games", locale.value)}`,
                 },
                 {
                   "@type": "ListItem",
                   position: 3,
-                  name: game.name,
-                  item: canonicalUrl,
+                  name: landing.value.name,
+                  item: canonicalUrl.value,
                 },
               ],
             },
             {
               "@type": "FAQPage",
-              mainEntity: game.faqs.map((faq) => ({
+              inLanguage: locale.value.htmlLang,
+              mainEntity: landing.value.faqs.map((faq) => ({
                 "@type": "Question",
                 name: faq.question,
                 acceptedAnswer: {
@@ -80,5 +92,5 @@ export function useGameLandingSeo(game: GameLanding) {
         }),
       },
     ],
-  });
+  }));
 }

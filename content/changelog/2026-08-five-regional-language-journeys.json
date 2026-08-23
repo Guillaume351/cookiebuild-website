@@ -1,0 +1,8 @@
+{
+  "slug": "five-regional-language-journeys",
+  "contentType": "changelog",
+  "title": "Cookie Build adds five regional language journeys",
+  "summary": "The website, core Java and Bedrock menus, and supported companion-app actions now share clearer regional language choices for Australia, Bulgaria, Peru, India and Brazil.",
+  "body": "- Choose English for Australia, Bulgarian for Bulgaria, Spanish for Peru, Hindi for India or Brazilian Portuguese for Brazil from the website language menu.\n- The home page, game catalog and guides for Skyblock, BedWars, Build Battle, MicroBattles, Pitchout, SkyWars and Turf Wars keep the selected language while players explore.\n- Each translated guide includes regional connection help, readable game objectives and the same stable Cookie Build server address.\n- Core lobby and supported game menus now present translated labels across Java and Bedrock while keeping every action consistent between editions.\n- Supported companion-app navigation and shared game actions use the same target languages, including the available Skyblock management, inventory and market journeys.\n- Search results can discover the matching regional page instead of treating every translated guide as the same page.\n- The language selector, page language and social sharing descriptions stay aligned for a clearer experience with browsers and assistive technology.",
+  "publishedAt": "2026-08-23T12:50:00+02:00"
+}
