@@ -39,7 +39,7 @@
     "@types/node": "^24.13.3",
     "@types/amqplib": "^0.10.8",
     "drizzle-kit": "^0.31.10",
-    "nuxt": "^4.4.8",
+    "nuxt": "^4.5.2",
     "shadcn-nuxt": "^2.7.4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.9.3",
@@ -47,10 +47,17 @@
     "vue-tsc": "^3.3.7"
   },
   "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    },
     "brace-expansion@^2.0.0": "^2.1.4",
     "fast-xml-parser": "^5.10.1",
     "nanoid@^3.0.0": "^3.3.18",
     "postcss": "^8.5.23",
+    "replace-in-file": {
+      "brace-expansion": "1.1.18"
+    },
+    "tar@<=7.5.20": "7.5.22",
     "uuid": "^11.1.1"
   }
 }

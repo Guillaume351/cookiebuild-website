@@ -87,12 +87,12 @@ export function localizedSeoLinks(path: string) {
   const canonicalPath = stripSiteLocale(path);
   return [
     ...SITE_LOCALES.map((locale) => ({
-      rel: "alternate",
+      rel: "alternate" as const,
       hreflang: locale.hreflang,
       href: localizedAbsoluteUrl(canonicalPath, locale),
     })),
     {
-      rel: "alternate",
+      rel: "alternate" as const,
       hreflang: "x-default",
       href: localizedAbsoluteUrl(canonicalPath, "en"),
     },
