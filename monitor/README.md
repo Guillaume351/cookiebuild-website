@@ -33,9 +33,12 @@ versions remain `unknown` unless an upstream line exposes them explicitly. The
 aggregate counters retain no raw line or identity, and Alloy drops the matching
 raw refusal lines instead of duplicating their possible IP/player fields into Loki.
 
-The monitor also exposes `GET /healthz` and Prometheus-format `GET /metrics` on
-port 8080. Do not publish that port to the internet; Dokploy or a future
-Prometheus instance can reach it on the internal network.
+The monitor also exposes `GET /livez`, `GET /healthz` and Prometheus-format
+`GET /metrics` on port 8080. `/livez` only proves that the collector process can
+serve requests and is used by Docker. `/healthz` reflects monitored dependency
+readiness and may return 503 without restarting the collector or losing
+counters. Do not publish that port to the internet; Prometheus can reach it on
+the internal network.
 
 ## Test and build
 

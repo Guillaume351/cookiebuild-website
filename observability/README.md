@@ -21,3 +21,14 @@ The endpoint exposes only the bounded event/result/source labels declared in
 `contracts/product-events-v1.json`; never add names, UUIDs, addresses, or free-form paths.
 
 Retention is 30 days / 10 GB for Prometheus and 14 days for Loki.
+
+The provisioned game-mode dashboard uses aggregate PostgreSQL views for DAU,
+player time, repeat usage and mature D1/D7/D30 cohorts. Competitive player time
+is match duration multiplied by recorded participants, so an early disconnect
+can be over-counted. Skyblock uses its checkpointed activity-session ledger and
+starts accumulating duration/retention history only after that ledger is
+deployed; it cannot be reconstructed from `last_active_at`.
+
+Skyblock marketplace panels aggregate durable listings and sales. Coin volume
+is an in-game economy measure, never real-money revenue. Neither dashboard role
+nor Prometheus receives player, UUID, island, listing or session labels.

@@ -2,11 +2,13 @@ const FUNNEL_EVENTS = new Set([
   "joined", "lobby_ready", "player_data_ready", "selector_opened", "queue_joined", "queue_left",
   "match_started", "match_completed", "rematch_clicked", "disconnected", "kicked",
   "tutorial_started", "tutorial_completed", "reward_claimed", "kit_selected", "kit_purchased",
-  "npc_selected", "feedback",
+  "npc_selected", "feedback", "skyblock_entry", "skyblock_rejoin", "skyblock_quest_completed",
+  "skyblock_quest_claimed", "skyblock_worker_collected", "skyblock_generator_upgraded",
+  "skyblock_coop_joined", "skyblock_deposit_completed",
 ]);
 
 const EDITIONS = new Set(["java", "bedrock"]);
-const GAMES = new Set(["MicroBattles", "Pitchout", "SkyWars", "BuildBattles", "TurfWars", "BedWars"]);
+const GAMES = new Set(["MicroBattles", "Pitchout", "SkyWars", "BuildBattles", "TurfWars", "BedWars", "Skyblock"]);
 
 function field(line, name) {
   return line.match(new RegExp(`(?:^|\\s)${name}=([^\\s]+)`))?.[1];
@@ -75,7 +77,7 @@ export function recordFunnelTelemetry(text, counters = {}, queueStates = {}, now
     const rawEdition = field(line, "edition");
     const rawGame = field(line, "game");
     const edition = EDITIONS.has(rawEdition) ? rawEdition : "unknown";
-    const game = GAMES.has(rawGame) ? rawGame : "none";
+    const game = event.startsWith("skyblock_") ? "Skyblock" : GAMES.has(rawGame) ? rawGame : "none";
     const key = funnelCounterKey(event, edition, game);
     counters[key] = Math.max(0, Number(counters[key] ?? 0)) + 1;
 

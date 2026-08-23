@@ -4,7 +4,7 @@
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
   "id": null,
-  "links": [],
+  "links": [{"asDropdown": false, "icon": "dashboard", "includeVars": false, "keepTime": true, "tags": [], "targetBlank": false, "title": "Game modes usage", "tooltip": "DAU, play time, recurrence, retention and Skyblock economy", "type": "link", "url": "/d/cookiebuild-game-modes"}],
   "liveNow": false,
   "panels": [
     {
