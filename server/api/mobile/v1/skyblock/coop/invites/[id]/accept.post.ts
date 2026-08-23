@@ -9,7 +9,7 @@ import { requiredUuid } from "../../../../../../../utils/mobile-validation";
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockManagementWrites");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-management-write:${auth.uid}`, 20, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-management-write:${auth.uid}`, 20, 60_000, { event, failClosed: true });
   const inviteId = requiredUuid(getRouterParam(event, "id"), "inviteId");
   emptySkyblockMutationBody(await readBody(event));
   const key = skyblockIdempotencyKey(getHeader(event, "idempotency-key"));

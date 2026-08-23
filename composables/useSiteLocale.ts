@@ -1,13 +1,13 @@
 import { computed, toValue, type MaybeRefOrGetter } from "vue";
 import { SITE_COPY } from "@/utils/site-copy";
 import {
-  LOCALIZED_MARKETING_PATHS,
   SITE_LOCALES,
   localizedAbsoluteUrl,
   localizedSeoLinks,
   localizedSitePath,
   siteLocaleFromPath,
   stripSiteLocale,
+  supportsLocalizedSitePath,
 } from "@/utils/site-locales";
 
 export function useSiteLocale() {
@@ -15,9 +15,7 @@ export function useSiteLocale() {
   const locale = computed(() => siteLocaleFromPath(route.path));
   const copy = computed(() => SITE_COPY[locale.value.code]);
   const basePath = computed(() => stripSiteLocale(route.path));
-  const supportsLocalizedRoute = computed(() =>
-    LOCALIZED_MARKETING_PATHS.includes(basePath.value as (typeof LOCALIZED_MARKETING_PATHS)[number]),
-  );
+  const supportsLocalizedRoute = computed(() => supportsLocalizedSitePath(basePath.value));
 
   const localizePath = (path: string) => localizedSitePath(path, locale.value);
   const switchLocalePath = (code: (typeof SITE_LOCALES)[number]["code"]) => {

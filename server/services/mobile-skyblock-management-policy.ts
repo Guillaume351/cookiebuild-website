@@ -38,6 +38,13 @@ export const SKYBLOCK_QUESTS: readonly SkyblockQuestDefinition[] = policy.quests
 
 export const SKYBLOCK_WORKER_POLICY = policy.workers;
 
+export function skyblockWorkerBufferCapacity(tier: number) {
+  if (!Number.isSafeInteger(tier) || tier < 1 || tier > 5) {
+    throw new Error("Invalid Skyblock worker tier");
+  }
+  return tier * SKYBLOCK_WORKER_POLICY.tierBufferCapacityMultiplier;
+}
+
 export function skyblockQuest(questId: string) {
   return SKYBLOCK_QUESTS.find((quest) => quest.id === questId);
 }

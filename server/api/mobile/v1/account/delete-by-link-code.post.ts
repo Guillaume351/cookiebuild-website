@@ -7,7 +7,7 @@ import { normalizeLinkCode } from "../../../../utils/mobile-validation";
 
 export default defineEventHandler(async (event) => {
   const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "unknown";
-  enforceLinkClaimRateLimit(`delete-ip:${requestIp}`);
+  await enforceLinkClaimRateLimit(`delete-ip:${requestIp}`, { event });
   const body = await readBody<{ code?: unknown }>(event);
   const link = await beginMobileAccountDeletionByLinkCode(normalizeLinkCode(body?.code));
   const { outboxId } = link;

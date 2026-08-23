@@ -19,6 +19,7 @@ import {
   skyblockBuildRadiusForTier,
   skyblockGeneratorUpgradeCost,
   skyblockQuest,
+  skyblockWorkerBufferCapacity,
   type SkyblockWorkerStatus,
   type SkyblockWorkerType,
 } from "./mobile-skyblock-management-policy";
@@ -376,9 +377,14 @@ function workerProduction(row: WorkerRow, now: Date) {
   );
   const intervalSeconds = SKYBLOCK_WORKER_POLICY.tiers.find((candidate) => candidate.tier === tier)?.intervalSeconds;
   if (!intervalSeconds) throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker policy is invalid");
+  const bufferQuantity = number(row.bufferQuantity);
+  const capacity = skyblockWorkerBufferCapacity(tier);
+  if (bufferQuantity < 0 || bufferQuantity > capacity) {
+    throw skyblockError(500, "SKYBLOCK_DATA_INVALID", "Skyblock worker buffer exceeds policy");
+  }
   const produced = Math.min(
     Math.floor(creditedSeconds / intervalSeconds),
-    tier * SKYBLOCK_WORKER_POLICY.tierBufferCapacityMultiplier,
+    capacity - bufferQuantity,
   );
   return {
     quantity: produced,

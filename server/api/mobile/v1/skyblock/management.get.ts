@@ -6,7 +6,7 @@ import { enforceMobileRequestRateLimit } from "../../../../utils/mobile-rate-lim
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockCompanion");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-management:${auth.uid}`, 30, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-management:${auth.uid}`, 30, 60_000, { event });
   const capabilities = await mobileCapabilities();
   const management = await skyblockManagementOverview(auth.uid, capabilities.skyblockManagementWrites);
   setHeader(event, "Cache-Control", "private, no-store");

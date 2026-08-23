@@ -1,5 +1,6 @@
 import { isValidLinkPepper } from "../../../utils/mobile-validation";
 import { mobileCapabilities } from "../../../services/mobile-capabilities";
+import localeContract from "../../../../contracts/locales-v1.json";
 
 export default defineCachedEventHandler(
   async () => {
@@ -10,6 +11,7 @@ export default defineCachedEventHandler(
     return {
       data: {
         apiVersion: 1,
+        localeContract,
         server: {
           java: { host: "play.cookie-build.com", port: 25565 },
           bedrock: { host: "play.cookie-build.com", port: 19132 },

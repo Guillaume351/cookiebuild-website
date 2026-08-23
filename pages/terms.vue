@@ -1,5 +1,6 @@
 <template>
   <article class="mx-auto max-w-3xl space-y-10 py-12 text-gray-300">
+    <LanguageFallbackNotice :available-locales="['en', 'fr']" />
     <nav class="flex gap-3 text-sm" aria-label="Language">
       <a class="rounded-md bg-orange-600 px-3 py-2 font-semibold text-white" href="#english">English</a>
       <a class="rounded-md border border-gray-700 px-3 py-2 font-semibold text-white" href="#francais">Français</a>
@@ -209,9 +210,11 @@
 </template>
 
 <script setup lang="ts">
-useSeoMeta({
-  title: "Terms of Service | Cookie Build",
-  description: "Terms for the Cookie Build Minecraft server, website, and companion app.",
-  robots: "index, follow",
-});
+import { publicPageSeo } from "@/utils/public-page-seo";
+
+definePageMeta({ alias: ["/fr/terms", "/de/terms", "/it/terms", "/bg/terms", "/es/terms", "/hi/terms", "/pt-br/terms"] });
+
+const { locale } = useSiteLocale();
+const seo = computed(() => publicPageSeo(locale.value.code, "terms"));
+useLocalizedSeo("/terms", () => seo.value.title, () => seo.value.description);
 </script>

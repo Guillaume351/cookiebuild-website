@@ -1,0 +1,35 @@
+import { createHash } from "node:crypto";
+import { readFile } from "node:fs/promises";
+import process from "node:process";
+
+const contract = JSON.parse(await readFile(new URL("../contracts/skyblock-schema-v1.json", import.meta.url)));
+const schema = await readFile(new URL("../db/schema.ts", import.meta.url), "utf8");
+
+const camel = (value) => value.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+for (const [table, columns] of Object.entries(contract.tables)) {
+  const marker = `"${table}"`;
+  const start = schema.indexOf(marker);
+  if (start < 0) throw new Error(`db/schema.ts is missing ${table}`);
+  const next = schema.indexOf("\nexport const ", start + marker.length);
+  const definition = schema.slice(start, next < 0 ? schema.length : next);
+  for (const column of columns) {
+    if (!definition.includes(`"${column}"`) && !definition.includes(`${camel(column)}:`)) {
+      throw new Error(`db/schema.ts ${table} is missing ${column}`);
+    }
+  }
+}
+
+const gameplayPath = process.env.COOKIEBUILD_GAMEPLAY_SCHEMA_SQL;
+if (gameplayPath) {
+  const gameplay = await readFile(gameplayPath);
+  const digest = createHash("sha256").update(gameplay).digest("hex");
+  if (digest !== contract.gameplayMigrationSha256) {
+    throw new Error(
+      `Gameplay Skyblock migration drifted (${digest}); review both schemas and update the contract atomically.`,
+    );
+  }
+}
+
+process.stdout.write(
+  `Skyblock schema contract verified (${Object.keys(contract.tables).length} tables${gameplayPath ? ", gameplay hash matched" : ", website-only mode"}).\n`,
+);

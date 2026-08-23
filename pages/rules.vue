@@ -1,5 +1,6 @@
 <template>
   <main class="mx-auto max-w-4xl space-y-10 py-12 text-zinc-300">
+    <LanguageFallbackNotice :available-locales="['en', 'fr', 'es', 'pt-BR']" />
     <header class="space-y-4">
       <Badge class="bg-orange-600 hover:bg-orange-600">{{ selectedCopy.badge }}</Badge>
       <h1 class="text-4xl font-black tracking-tight text-white md:text-5xl">{{ selectedCopy.title }}</h1>
@@ -66,7 +67,10 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ alias: ["/fr/rules", "/de/rules", "/it/rules", "/bg/rules", "/es/rules", "/hi/rules", "/pt-br/rules"] });
+
 import Badge from "@/components/ui/badge/Badge.vue";
+import { publicPageSeo } from "@/utils/public-page-seo";
 
 type LanguageId = "en" | "fr" | "es" | "pt-BR";
 
@@ -168,13 +172,13 @@ const copies = {
   },
 } as const;
 
-const selectedLanguage = ref<LanguageId>("en");
+const { locale } = useSiteLocale();
+const initialLanguage = ["en", "fr", "es", "pt-BR"].includes(locale.value.code)
+  ? locale.value.code as LanguageId
+  : "en";
+const selectedLanguage = ref<LanguageId>(initialLanguage);
 const selectedCopy = computed(() => copies[selectedLanguage.value]);
 
-useSeoMeta({
-  title: "Server Rules | Cookie Build",
-  description: "Cookie Build fair-play and player-safety rules in English, French, Spanish, and Brazilian Portuguese.",
-});
-
-useHead({ link: [{ rel: "canonical", href: "https://www.cookie-build.com/rules" }] });
+const seo = computed(() => publicPageSeo(locale.value.code, "rules"));
+useLocalizedSeo("/rules", () => seo.value.title, () => seo.value.description);
 </script>

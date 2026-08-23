@@ -6,7 +6,7 @@ import { enforceMobileRequestRateLimit } from "../../../../utils/mobile-rate-lim
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("playerDashboard");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`player-dashboard:${auth.uid}`, 30, 60_000);
+  await enforceMobileRequestRateLimit(`player-dashboard:${auth.uid}`, 30, 60_000, { event });
   const dashboard = await mobilePlayerDashboard(auth.uid);
   setHeader(event, "Cache-Control", "private, no-store");
   return { data: dashboard };

@@ -8,7 +8,7 @@ import { listingQuoteBody } from "../../../../utils/mobile-skyblock";
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockMarketWrites");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-market-write:${auth.uid}`, 20, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-market-write:${auth.uid}`, 20, 60_000, { event, failClosed: true });
   const quote = await createSkyblockListingQuote(auth.uid, listingQuoteBody(await readBody(event)));
   setHeader(event, "Cache-Control", "no-store");
   setResponseStatus(event, 201);

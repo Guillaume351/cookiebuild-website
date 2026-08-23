@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "gameplayMigrationSha256": "d243ae407e3b4cb93bd1f2fe9619666cefbf31062b1c6ca1a7e91e061c78ffa1",
+  "tables": {
+    "skyblock_islands": ["owner_player_id", "state", "storage_capacity", "generator_tier", "version"],
+    "skyblock_island_members": ["island_id", "player_id", "role"],
+    "skyblock_island_invites": ["invitee_player_id", "status", "expires_at", "resolved_at"],
+    "skyblock_skill_progress": ["player_id", "skill", "level", "experience"],
+    "skyblock_quest_progress": ["player_id", "quest_id", "progress", "completed_at", "claimed_at"],
+    "skyblock_workers": ["worker_type", "tier", "buffer_item_id", "buffer_quantity", "production_cursor_at"],
+    "skyblock_storage_items": ["island_id", "item_id", "quantity", "reserved_quantity", "version"],
+    "skyblock_inventory_transfers": ["inventory_slot", "quantity", "state", "committed_at"],
+    "skyblock_market_quotes": ["storage_item_id", "quantity", "price_coins", "inventory_version", "expires_at", "consumed_at"],
+    "skyblock_market_listings": ["storage_item_id", "quantity", "price_coins", "status", "version", "expires_at", "resolved_at"],
+    "skyblock_market_sales": ["listing_id", "buyer_player_id", "seller_player_id", "price_coins"],
+    "skyblock_mobile_requests": ["player_id", "scope", "idempotency_key", "request_hash", "response_body", "created_at"]
+  }
+}

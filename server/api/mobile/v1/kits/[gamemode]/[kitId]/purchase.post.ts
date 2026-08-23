@@ -8,7 +8,7 @@ import { requiredInteger, requiredString } from "../../../../../../utils/mobile-
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("kitShop");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`kit-shop-write:${auth.uid}`, 20, 60_000);
+  await enforceMobileRequestRateLimit(`kit-shop-write:${auth.uid}`, 20, 60_000, { event, failClosed: true });
   const gamemode = requiredString(getRouterParam(event, "gamemode"), "gamemode", { maximum: 32 });
   const kitId = requiredString(getRouterParam(event, "kitId"), "kitId", { maximum: 64 });
   const body = await readBody<{ level?: unknown }>(event);

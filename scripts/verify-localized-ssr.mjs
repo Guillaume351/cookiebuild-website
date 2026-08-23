@@ -1,19 +1,17 @@
 import { spawn } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import net from "node:net";
 import process from "node:process";
 
 const origin = "https://www.cookie-build.com";
-const locales = [
-  { code: "en", segment: "", lang: "en-AU" },
-  { code: "fr", segment: "fr", lang: "fr-FR" },
-  { code: "de", segment: "de", lang: "de-DE" },
-  { code: "it", segment: "it", lang: "it-IT" },
-  { code: "bg", segment: "bg", lang: "bg-BG" },
-  { code: "es", segment: "es", lang: "es-PE" },
-  { code: "hi", segment: "hi", lang: "hi-IN" },
-  { code: "pt-BR", segment: "pt-br", lang: "pt-BR" },
-];
-const paths = ["/", "/games", "/bedwars", "/skyblock", "/build-battle", "/microbattles", "/pitchout", "/skywars", "/turfwars"];
+const localeContract = JSON.parse(await readFile(new URL("../contracts/locales-v1.json", import.meta.url), "utf8"));
+const locales = localeContract.locales.map((locale) => ({
+  code: locale.code,
+  segment: locale.pathSegment,
+  lang: locale.languageTag,
+}));
+const paths = ["/", "/games", "/bedwars", "/skyblock", "/build-battle", "/microbattles", "/pitchout", "/skywars", "/turfwars", "/updates", "/player-stats", "/support", "/status", "/rules", "/privacy", "/terms"];
+const functionalPaths = [...paths, "/account/delete"];
 
 const localize = (path, locale) => locale.segment
   ? path === "/" ? `/${locale.segment}` : `/${locale.segment}${path}`
@@ -62,7 +60,7 @@ try {
   assert(ready, "Nuxt server did not become ready");
 
   let routeCount = 0;
-  for (const path of paths) {
+  for (const path of functionalPaths) {
     for (const locale of locales) {
       const route = localize(path, locale);
       const response = await fetch(`${localOrigin}${route}`);
@@ -85,7 +83,9 @@ try {
       const jsonLdBodies = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)]
         .map((match) => match[1].trim())
         .filter(Boolean);
-      assert(jsonLdBodies.length > 0, `${route}: JSON-LD is empty`);
+      if (["/", "/games", "/bedwars", "/skyblock", "/build-battle", "/microbattles", "/pitchout", "/skywars", "/turfwars"].includes(path)) {
+        assert(jsonLdBodies.length > 0, `${route}: JSON-LD is empty`);
+      }
       for (const body of jsonLdBodies) JSON.parse(body);
       routeCount += 1;
     }
@@ -99,13 +99,13 @@ try {
   assert(sitemapResponse.status === 200, "sitemap did not return 200");
   assert(sitemapResponse.headers.get("content-type")?.includes("application/xml"), "sitemap content type is not XML");
   const localizedUrlCount = paths.length * locales.length;
-  assert((sitemap.match(/<loc>/g) || []).length === localizedUrlCount + 7, `sitemap must contain ${localizedUrlCount + 7} public URLs`);
+  assert((sitemap.match(/<loc>/g) || []).length === localizedUrlCount, `sitemap must contain ${localizedUrlCount} public URLs`);
   for (const locale of locales) {
     assert((sitemap.match(new RegExp(`hreflang="${locale.lang}"`, "g")) || []).length === localizedUrlCount, `sitemap ${locale.lang} alternate count mismatch`);
   }
   assert((sitemap.match(/hreflang="x-default"/g) || []).length === localizedUrlCount, "sitemap x-default count mismatch");
 
-  process.stdout.write(`Localized SSR verified: ${routeCount} routes, 1 localized 404, ${localizedUrlCount + 7} sitemap URLs.\n`);
+  process.stdout.write(`Localized SSR verified: ${routeCount} routes, 1 localized 404, ${localizedUrlCount} sitemap URLs.\n`);
 } finally {
   server.kill("SIGTERM");
 }

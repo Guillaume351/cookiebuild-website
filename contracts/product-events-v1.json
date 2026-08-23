@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "metric": "cookiebuild_funnel_events_total",
+  "javaEvents": [
+    "joined", "lobby_ready", "player_data_ready", "selector_opened", "queue_joined",
+    "queue_left", "match_started", "match_completed", "rematch_clicked", "disconnected",
+    "kicked", "onboarding_completed", "queue_help_opened", "tutorial_started",
+    "tutorial_completed", "reward_claimed", "kit_selected", "kit_purchased", "npc_selected",
+    "feedback", "skyblock_entry", "skyblock_rejoin", "skyblock_quest_completed",
+    "skyblock_quest_claimed", "skyblock_worker_collected", "skyblock_generator_upgraded",
+    "skyblock_coop_joined", "skyblock_deposit_completed"
+  ],
+  "mobileEvents": [
+    "mobile_bootstrap_viewed", "mobile_dashboard_viewed", "mobile_kit_shop_viewed",
+    "skyblock_overview_viewed", "skyblock_inventory_viewed", "skyblock_market_viewed",
+    "skyblock_listings_viewed", "skyblock_management_viewed", "skyblock_quest_claimed",
+    "skyblock_worker_collected", "skyblock_generator_upgraded", "skyblock_coop_joined",
+    "skyblock_listing_quoted", "skyblock_listing_created", "skyblock_listing_cancelled",
+    "skyblock_listing_purchased"
+  ],
+  "results": ["success", "client_error", "rate_limited", "server_error"]
+}

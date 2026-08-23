@@ -1,5 +1,6 @@
 <template>
   <div class="space-y-12">
+    <LanguageFallbackNotice :available-locales="['en']" />
     <!-- Stats Hero -->
     <section class="relative overflow-hidden rounded-3xl bg-zinc-900 text-center text-white shadow-xl py-10">
       <div class="absolute inset-0 z-0 bg-[url('/lobby-hero-960.webp')] bg-cover bg-center opacity-20 blur-sm"></div>
@@ -180,7 +181,7 @@
                       <div class="relative">
                         <img
                           v-if="!isBedrockPlayer(stat.name) && stat.name"
-                          :src="`https://mc-heads.net/avatar/${encodeURIComponent(formatPlayerName(stat.name))}/32`"
+                          :src="`/api/player-avatar/${encodeURIComponent(stat.id)}?size=32`"
                           class="w-10 h-10 rounded-lg shadow-lg group-hover:scale-110 transition-transform"
                         />
                         <div v-else class="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-600">
@@ -271,6 +272,10 @@
 </template>
 
 <script setup lang="ts">
+import { publicPageSeo } from "@/utils/public-page-seo";
+
+definePageMeta({ alias: ["/fr/player-stats", "/de/player-stats", "/it/player-stats", "/bg/player-stats", "/es/player-stats", "/hi/player-stats", "/pt-br/player-stats"] });
+
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Badge from "@/components/ui/badge/Badge.vue";
@@ -437,4 +442,8 @@ watch([debouncedSearch, selectedGamemode, selectedPeriod], () => {
   currentPage.value = 1;
   selectedPlayer.value = null;
 });
+
+const { locale } = useSiteLocale();
+const seo = computed(() => publicPageSeo(locale.value.code, "playerStats"));
+useLocalizedSeo("/player-stats", () => seo.value.title, () => seo.value.description);
 </script>

@@ -1,5 +1,6 @@
 <template>
   <main class="mx-auto max-w-5xl space-y-10 py-12 text-zinc-300">
+    <LanguageFallbackNotice :available-locales="['en', 'fr', 'es', 'pt-BR']" />
     <header class="space-y-4">
       <Badge class="bg-orange-600 hover:bg-orange-600">{{ copy.badge }}</Badge>
       <h1 class="text-4xl font-black tracking-tight text-white md:text-5xl">{{ copy.title }}</h1>
@@ -110,9 +111,12 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ alias: ["/fr/status", "/de/status", "/it/status", "/bg/status", "/es/status", "/hi/status", "/pt-br/status"] });
+
 import { RefreshCw } from "@lucide/vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
+import { publicPageSeo } from "@/utils/public-page-seo";
 
 interface EditionStatus {
   online: boolean;
@@ -269,7 +273,11 @@ const statusCopies = {
   },
 } as const;
 
-const selectedLanguage = ref<LanguageId>("en");
+const { locale } = useSiteLocale();
+const initialLanguage = ["en", "fr", "es", "pt-BR"].includes(locale.value.code)
+  ? locale.value.code as LanguageId
+  : "en";
+const selectedLanguage = ref<LanguageId>(initialLanguage);
 const copy = computed(() => statusCopies[selectedLanguage.value]);
 
 const { data: status, pending, refresh } = await useFetch<ServerStatus>("/api/server-status");
@@ -314,10 +322,6 @@ function statusTone(edition: EditionStatus) {
   return edition.online ? "bg-emerald-500/15 text-emerald-200" : "bg-red-500/15 text-red-200";
 }
 
-useSeoMeta({
-  title: "Server Status | Cookie Build",
-  description: "Live Java and Bedrock status in English, French, Spanish, and Brazilian Portuguese.",
-});
-
-useHead({ link: [{ rel: "canonical", href: "https://www.cookie-build.com/status" }] });
+const seo = computed(() => publicPageSeo(locale.value.code, "status"));
+useLocalizedSeo("/status", () => seo.value.title, () => seo.value.description);
 </script>

@@ -13,4 +13,11 @@ Secrets are generated on the production host and mounted read-only from
 `/home/ubuntu/Volumes/cookiebuild/observability/secrets`. They must never be
 committed or copied into Dokploy output.
 
+The website's aggregate mobile and Skyblock funnel endpoint is private:
+`GET /api/internal/metrics` requires `Authorization: Bearer <COOKIEBUILD_METRICS_TOKEN>` with a
+secret of at least 32 characters. Configure the Prometheus scrape target only on the private
+service network and source the token from a mounted secret or protected runtime configuration.
+The endpoint exposes only the bounded event/result/source labels declared in
+`contracts/product-events-v1.json`; never add names, UUIDs, addresses, or free-form paths.
+
 Retention is 30 days / 10 GB for Prometheus and 14 days for Loki.

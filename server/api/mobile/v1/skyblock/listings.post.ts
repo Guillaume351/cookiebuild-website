@@ -8,7 +8,7 @@ import { createListingBody, skyblockIdempotencyKey } from "../../../../utils/mob
 export default defineEventHandler(async (event) => {
   await requireMobileCapability("skyblockMarketWrites");
   const { auth } = await requireMobileUser(event);
-  enforceMobileRequestRateLimit(`skyblock-market-write:${auth.uid}`, 20, 60_000);
+  await enforceMobileRequestRateLimit(`skyblock-market-write:${auth.uid}`, 20, 60_000, { event, failClosed: true });
   const input = createListingBody(await readBody(event));
   const key = skyblockIdempotencyKey(getHeader(event, "idempotency-key"));
   const result = await createSkyblockListing(auth.uid, input, key);

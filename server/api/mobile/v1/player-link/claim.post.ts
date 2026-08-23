@@ -7,8 +7,8 @@ import { normalizeLinkCode } from "../../../../utils/mobile-validation";
 export default defineEventHandler(async (event) => {
   const { auth } = await requireMobileUser(event);
   const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "unknown";
-  enforceLinkClaimRateLimit(`uid:${auth.uid}`);
-  enforceLinkClaimRateLimit(`ip:${requestIp}`);
+  await enforceLinkClaimRateLimit(`uid:${auth.uid}`, { event });
+  await enforceLinkClaimRateLimit(`ip:${requestIp}`, { event });
   const body = await readBody<{ code?: unknown }>(event);
   const link = await claimPlayerLink(auth.uid, normalizeLinkCode(body?.code));
   setResponseStatus(event, 201);
