@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-generator-and-queue-hotfix",
+  "contentType": "changelog",
+  "title": "Clearer Skyblock generators and safer minigame queues",
+  "summary": "Java players can reach and understand their generator, see upgrade affordability, and prepare their inventory for a queued minigame without a false server error.",
+  "body": "- The Java and Bedrock generator menu now separates mining, warehouse access and upgrades. A dedicated action teleports the player safely within reach of the regenerating block and explains that its drops are picked up from the world.\n- Generator upgrades show the island bank balance, price and missing amount before confirmation. An insufficient balance is presented as a normal economy outcome with a direct path to the merchant, not as a technical server failure.\n- Joining a minigame queue from Skyblock keeps the queue intent active. If Skyblock items still block the eventual hand-off, the existing deposit-all screen opens automatically so the player can prepare without guessing a command.\n- A protected inventory exit is no longer logged as a fatal lobby teleport error. Real destination-load and teleport failures remain high-severity server errors.\n- The compact Skyblock HUD refreshes before Minecraft fades the action bar, removing the repeated disappear-and-return effect while keeping database refreshes bounded.\n- All new menu guidance is localized across Cookie Build's supported server languages.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-24T16:48:38+02:00"
+}
