@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gameplayMigrationSha256": "d243ae407e3b4cb93bd1f2fe9619666cefbf31062b1c6ca1a7e91e061c78ffa1",
-  "gameplayEconomyV2MigrationSha256": "3527913d166a0a5dc1cd0984b15f02e54dda907f0e53c3f9a033b36e3ce9d788",
+  "gameplayEconomyV2MigrationSha256": "e6800d902e318f0e777dd979bf38aba5150ab3edd0a166ba07fe624eeafa1108",
   "tables": {
     "skyblock_islands": [
       "owner_player_id",
