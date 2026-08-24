@@ -1125,6 +1125,13 @@ export async function upgradeSkyblockWorker(
     if (number(account.balance) < costCoins) {
       throw skyblockError(409, "INSUFFICIENT_COINS", "Not enough coins");
     }
+    // Settle the elapsed time using the old tier before changing its interval
+    // and capacity. Otherwise the next read would retroactively apply the new
+    // tier to the whole pre-upgrade period.
+    const upgradedAt = new Date();
+    const accrued = workerProduction(worker, upgradedAt);
+    const settledBufferQuantity =
+      number(worker.bufferQuantity) + accrued.quantity;
     const balanceCoins = await mutateIslandAccount(
       tx,
       account,
@@ -1135,7 +1142,10 @@ export async function upgradeSkyblockWorker(
     );
     const upgraded = await tx.execute<WorkerRow>(sql`
       UPDATE skyblock_workers
-         SET tier = ${nextTier}, updated_at = now()
+         SET tier = ${nextTier},
+             buffer_quantity = ${settledBufferQuantity},
+             production_cursor_at = ${accrued.nextCursor.toISOString()},
+             updated_at = now()
        WHERE id = ${worker.id} AND tier = ${input.expectedTier}
       RETURNING id, worker_type AS "workerType", tier, status,
                 buffer_item_id AS "bufferItemId", buffer_quantity AS "bufferQuantity",
@@ -1149,7 +1159,7 @@ export async function upgradeSkyblockWorker(
       );
     }
     const data = {
-      worker: workerView(upgraded[0], new Date(), undefined, {
+      worker: workerView(upgraded[0], upgradedAt, undefined, {
         balanceCoins,
         managementWritesEnabled: true,
         role: island.role,

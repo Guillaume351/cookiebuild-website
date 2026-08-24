@@ -1219,8 +1219,9 @@ export const playerPartyInvites = pgTable(
 );
 
 // The canonical DDL for these shared gameplay tables lives in
-// Cookies/ops/add-skyblock-v1.sql. They are declared here so the Nuxt API and
-// Drizzle use the same typed contract without creating a second migration.
+// Cookies/ops/add-skyblock-v1.sql and add-skyblock-economy-v2.sql. They are
+// declared here so the Nuxt API and Drizzle use the same typed contract without
+// creating a second migration.
 export const skyblockIslands = pgTable(
   "skyblock_islands",
   {
@@ -1237,7 +1238,7 @@ export const skyblockIslands = pgTable(
     buildRadius: integer("build_radius").default(96).notNull(),
     generatorTier: integer("generator_tier").default(1).notNull(),
     memberLimit: integer("member_limit").default(4).notNull(),
-    visibility: varchar({ length: 16 }).default("invite_only").notNull(),
+    visibility: varchar({ length: 16 }).default("private").notNull(),
     level: integer().default(1).notNull(),
     experience: bigint({ mode: "number" }).default(0).notNull(),
     storageCapacity: bigint("storage_capacity", { mode: "number" })
@@ -1270,7 +1271,7 @@ export const skyblockIslands = pgTable(
     ),
     check(
       "skyblock_islands_visibility_ck",
-      sql`${table.visibility} IN ('private', 'invite_only')`,
+      sql`${table.visibility} IN ('private', 'public')`,
     ),
     check(
       "skyblock_islands_level_ck",
@@ -1450,6 +1451,121 @@ export const skyblockWorkers = pgTable(
   ],
 );
 
+export const skyblockIslandAccounts = pgTable(
+  "skyblock_island_accounts",
+  {
+    islandId: uuid("island_id")
+      .primaryKey()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    balance: bigint({ mode: "number" }).default(0).notNull(),
+    version: bigint({ mode: "number" }).default(0).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check("ck_skyblock_account_balance", sql`${table.balance} >= 0`),
+    check("ck_skyblock_account_version", sql`${table.version} >= 0`),
+  ],
+);
+
+export const skyblockCoinTransactions = pgTable(
+  "skyblock_coin_transactions",
+  {
+    id: uuid().primaryKey(),
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    actorPlayerId: uuid("actor_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    amount: bigint({ mode: "number" }).notNull(),
+    balanceAfter: bigint("balance_after", { mode: "number" }).notNull(),
+    source: varchar({ length: 128 }).notNull(),
+    referenceId: uuid("reference_id"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("idx_skyblock_coin_transactions_island").on(
+      table.islandId,
+      table.createdAt.desc(),
+    ),
+    uniqueIndex("uq_skyblock_coin_migration_quest_rewards_v2")
+      .on(table.islandId, table.source)
+      .where(sql`${table.source} = 'migration:quest_rewards:v2'`),
+    check("ck_skyblock_coin_amount", sql`${table.amount} <> 0`),
+    check("ck_skyblock_coin_balance", sql`${table.balanceAfter} >= 0`),
+  ],
+);
+
+export const skyblockCollections = pgTable(
+  "skyblock_collections",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    quantity: bigint({ mode: "number" }).default(0).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.itemId] }),
+    check("ck_skyblock_collection_quantity", sql`${table.quantity} >= 0`),
+  ],
+);
+
+export const skyblockPeriodicObjectives = pgTable(
+  "skyblock_periodic_objectives",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    cadence: varchar({ length: 16 }).notNull(),
+    periodStart: date("period_start").notNull(),
+    objectiveId: varchar("objective_id", { length: 64 }).notNull(),
+    event: varchar({ length: 32 }).notNull(),
+    subject: varchar({ length: 64 }).notNull(),
+    target: integer().notNull(),
+    rewardCoins: integer("reward_coins").notNull(),
+    progress: integer().default(0).notNull(),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    claimedAt: timestamp("claimed_at", { withTimezone: true, mode: "date" }),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.playerId, table.cadence, table.periodStart],
+    }),
+    index("idx_skyblock_periodic_current").on(
+      table.playerId,
+      table.periodStart.desc(),
+    ),
+    check(
+      "ck_skyblock_periodic_cadence",
+      sql`${table.cadence} IN ('daily', 'weekly')`,
+    ),
+    check("ck_skyblock_periodic_target", sql`${table.target} > 0`),
+    check("ck_skyblock_periodic_reward", sql`${table.rewardCoins} > 0`),
+    check(
+      "ck_skyblock_periodic_progress",
+      sql`${table.progress} BETWEEN 0 AND ${table.target}`,
+    ),
+    check(
+      "ck_skyblock_periodic_claim",
+      sql`${table.claimedAt} IS NULL OR ${table.completedAt} IS NOT NULL`,
+    ),
+  ],
+);
+
 export const skyblockStorageItems = pgTable(
   "skyblock_storage_items",
   {
@@ -1504,6 +1620,7 @@ export const skyblockInventoryTransfers = pgTable(
     itemId: varchar("item_id", { length: 64 }).notNull(),
     quantity: bigint({ mode: "number" }).notNull(),
     state: varchar({ length: 16 }).default("prepared").notNull(),
+    direction: varchar({ length: 16 }).default("deposit").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
@@ -1530,6 +1647,10 @@ export const skyblockInventoryTransfers = pgTable(
     check(
       "ck_skyblock_transfer_state",
       sql`${table.state} IN ('prepared', 'marked', 'committed', 'cancelled')`,
+    ),
+    check(
+      "ck_skyblock_transfer_direction",
+      sql`${table.direction} IN ('deposit', 'withdraw')`,
     ),
     check(
       "ck_skyblock_transfer_commit",
@@ -1694,7 +1815,7 @@ export const skyblockMobileRequests = pgTable(
     playerId: uuid("player_id")
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
-    scope: varchar({ length: 64 }).notNull(),
+    scope: varchar({ length: 128 }).notNull(),
     idempotencyKey: varchar("idempotency_key", { length: 128 }).notNull(),
     requestHash: varchar("request_hash", { length: 128 }).notNull(),
     responseStatus: integer("response_status").notNull(),
