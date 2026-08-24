@@ -1,9 +1,17 @@
 import { readFile } from "node:fs/promises";
+import { resolve } from "node:path";
 import postgres, { type Sql } from "postgres";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 
 const databaseUrl = process.env.MOBILE_SKYBLOCK_INTEGRATION_DATABASE_URL;
+const gameplayRoot = process.env.COOKIEBUILD_GAMEPLAY_ROOT;
 const integration = databaseUrl ? describe : describe.skip;
+
+function gameplayMigration(name: string) {
+  return gameplayRoot
+    ? resolve(gameplayRoot, "ops", name)
+    : new URL(`../../Cookies/ops/${name}`, import.meta.url);
+}
 
 const SELLER = "10000000-0000-4000-8000-000000000001";
 const BUYER = "20000000-0000-4000-8000-000000000001";
@@ -77,7 +85,7 @@ integration("mobile Skyblock marketplace transactions", () => {
     await setupSql.unsafe(retentionMigration);
     const skyblockMigration = (
       await readFile(
-        new URL("../../Cookies/ops/add-skyblock-v1.sql", import.meta.url),
+        gameplayMigration("add-skyblock-v1.sql"),
         "utf8",
       )
     ).replace(/^\\set[^\n]*\n/m, "");
@@ -85,15 +93,20 @@ integration("mobile Skyblock marketplace transactions", () => {
     await setupSql.unsafe(skyblockMigration);
     const skyblockEconomyV2Migration = (
       await readFile(
-        new URL(
-          "../../Cookies/ops/add-skyblock-economy-v2.sql",
-          import.meta.url,
-        ),
+        gameplayMigration("add-skyblock-economy-v2.sql"),
         "utf8",
       )
     ).replace(/^\\set[^\n]*\n/m, "");
     await setupSql.unsafe(skyblockEconomyV2Migration);
     await setupSql.unsafe(skyblockEconomyV2Migration);
+    const skyblockEconomyV3Migration = (
+      await readFile(
+        gameplayMigration("add-skyblock-economy-v3.sql"),
+        "utf8",
+      )
+    ).replace(/^\\set[^\n]*\n/m, "");
+    await setupSql.unsafe(skyblockEconomyV3Migration);
+    await setupSql.unsafe(skyblockEconomyV3Migration);
 
     databaseModule = await import("../db/client");
     skyblock = await import("../server/services/mobile-skyblock");
@@ -251,9 +264,11 @@ integration("mobile Skyblock marketplace transactions", () => {
          WHERE name LIKE 'Retention-%';
 
         INSERT INTO skyblock_workers
-          (id, island_id, worker_type, tier, status, buffer_item_id, buffer_quantity, production_cursor_at)
+          (id, island_id, worker_type, tier, status, buffer_item_id,
+           buffer_quantity, buffer_capacity, production_cursor_at)
         VALUES
-          ('${workerId}'::uuid, '${SELLER_ISLAND}'::uuid, 'miner', 1, 'active', 'cobblestone', 256, now());
+          ('${workerId}'::uuid, '${SELLER_ISLAND}'::uuid, 'miner', 1, 'active',
+           'cobblestone', 256, 256, now());
 
         INSERT INTO skyblock_periodic_objectives
           (player_id, cadence, period_start, objective_id, event, subject,
@@ -1013,6 +1028,7 @@ integration("mobile Skyblock marketplace transactions", () => {
     expect(management).toMatchObject({
       schemaVersion: 1,
       policyVersion: "skyblock-management-v1",
+      economyVersion: "skyblock-economy-v3",
       managementWritesEnabled: true,
       island: null,
       generator: null,
@@ -1025,10 +1041,11 @@ integration("mobile Skyblock marketplace transactions", () => {
   it("returns one coherent management aggregate for an active coop member", async () => {
     await setupSql`
       INSERT INTO skyblock_workers
-        (id, island_id, worker_type, tier, status, buffer_item_id, buffer_quantity, production_cursor_at)
+        (id, island_id, worker_type, tier, status, buffer_item_id, buffer_quantity,
+         buffer_capacity, unlock_source, production_cursor_at)
       VALUES
         ('99000000-0000-4000-8000-000000000001', ${SELLER_ISLAND}, 'miner', 1,
-         'active', 'cobblestone', 2, now() - interval '160 seconds')
+         'active', 'cobblestone', 2, 256, 'legacy_v2', now() - interval '160 seconds')
     `;
     await setupSql`
       INSERT INTO skyblock_quest_progress (player_id, quest_id, progress, completed_at)
@@ -1054,7 +1071,25 @@ integration("mobile Skyblock marketplace transactions", () => {
       generator: {
         tier: 1,
         maxTier: 5,
-        nextUpgrade: { tier: 2, costCoins: 250, buildRadius: 112 },
+        dropChances: [
+          { itemId: "cobblestone", percent: 100, npcSellCoins: 1 },
+        ],
+        nextUpgrade: {
+          tier: 2,
+          costCoins: 500,
+          buildRadius: 96,
+          changesBuildRadius: false,
+          requiredResources: [
+            expect.objectContaining({
+              requiredQuantity: 128,
+              availableQuantity: 0,
+              sufficient: false,
+            }),
+          ],
+          dropChances: expect.arrayContaining([
+            { itemId: "coal", percent: 50, npcSellCoins: 2 },
+          ]),
+        },
         canUpgrade: false,
       },
       workers: [
@@ -1063,9 +1098,23 @@ integration("mobile Skyblock marketplace transactions", () => {
           type: "miner",
           tier: 1,
           status: "active",
+          capacity: 256,
+          nextUpgrade: expect.objectContaining({ capacity: 512 }),
           bufferQuantity: 2,
         }),
       ],
+      workerUnlocks: expect.arrayContaining([
+        expect.objectContaining({ type: "miner", unlocked: true }),
+        expect.objectContaining({
+          type: "lumberjack",
+          unlocked: false,
+          requirement: expect.objectContaining({
+            requiredLevel: 3,
+            currentLevel: 1,
+            met: false,
+          }),
+        }),
+      ]),
       coop: {
         members: expect.arrayContaining([
           expect.objectContaining({ playerId: SELLER, role: "owner" }),
@@ -1090,10 +1139,17 @@ integration("mobile Skyblock marketplace transactions", () => {
 
   it("upgrades a generator once under a concurrent idempotent retry", async () => {
     await setupSql`UPDATE skyblock_island_accounts SET balance = 1000 WHERE island_id = ${SELLER_ISLAND}`;
+    await setupSql`
+      INSERT INTO skyblock_storage_items
+        (id, owner_player_id, island_id, item_id, quantity, reserved_quantity, version)
+      VALUES
+        ('91000000-0000-4000-8000-000000000001', ${SELLER}, ${SELLER_ISLAND},
+         'cobblestone', 128, 0, 0)
+    `;
     const input = {
       expectedIslandVersion: 0,
       expectedNextTier: 2,
-      expectedCostCoins: 250,
+      expectedCostCoins: 500,
     };
     const key = "81000000-0000-4000-8000-000000000001";
     const results = await Promise.all([
@@ -1109,27 +1165,37 @@ integration("mobile Skyblock marketplace transactions", () => {
       island: {
         version: 1,
         level: 2,
-        experience: 250,
+        experience: 1_250,
         generatorTier: 2,
-        buildRadius: 112,
+        buildRadius: 96,
       },
-      coins: 750,
-      costCoins: 250,
+      coins: 500,
+      costCoins: 500,
+      consumedResources: [
+        expect.objectContaining({ quantity: 128 }),
+      ],
       questCompletions: ["generator_apprentice"],
     });
     const [state] = await setupSql<
       {
         tier: number;
+        level: number;
+        experience: number;
         radius: number;
         coins: number;
         ledgerRows: number;
         requests: number;
         questProgress: number;
         completed: boolean;
+        cobblestone: number;
+        storageVersion: number;
+        generatorUpgrades: number;
       }[]
     >`
       SELECT
         (SELECT generator_tier FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS tier,
+        (SELECT level FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS level,
+        (SELECT experience::int FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS experience,
         (SELECT build_radius FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS radius,
         (SELECT balance::int FROM skyblock_island_accounts WHERE island_id = ${SELLER_ISLAND}) AS coins,
         (SELECT count(*)::int FROM skyblock_coin_transactions
@@ -1139,16 +1205,27 @@ integration("mobile Skyblock marketplace transactions", () => {
         (SELECT progress FROM skyblock_quest_progress
           WHERE player_id = ${SELLER} AND quest_id = 'generator_apprentice') AS "questProgress",
         (SELECT completed_at IS NOT NULL FROM skyblock_quest_progress
-          WHERE player_id = ${SELLER} AND quest_id = 'generator_apprentice') AS completed
+          WHERE player_id = ${SELLER} AND quest_id = 'generator_apprentice') AS completed,
+        (SELECT quantity::int FROM skyblock_storage_items
+          WHERE island_id = ${SELLER_ISLAND} AND item_id = 'cobblestone') AS cobblestone,
+        (SELECT version::int FROM skyblock_storage_items
+          WHERE island_id = ${SELLER_ISLAND} AND item_id = 'cobblestone') AS "storageVersion",
+        (SELECT generator_upgrades::int FROM skyblock_economy_daily
+          WHERE island_id = ${SELLER_ISLAND} AND metric_date = CURRENT_DATE) AS "generatorUpgrades"
     `;
     expect(state).toEqual({
       tier: 2,
-      radius: 112,
-      coins: 750,
+      level: 2,
+      experience: 1_250,
+      radius: 96,
+      coins: 500,
       ledgerRows: 1,
       requests: 1,
       questProgress: 2,
       completed: true,
+      cobblestone: 0,
+      storageVersion: 1,
+      generatorUpgrades: 1,
     });
   });
 
@@ -1163,7 +1240,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         {
           expectedIslandVersion: 0,
           expectedNextTier: 2,
-          expectedCostCoins: 250,
+          expectedCostCoins: 500,
         },
         "82000000-0000-4000-8000-000000000001",
       ),
@@ -1190,7 +1267,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         {
           expectedIslandVersion: 1,
           expectedNextTier: 2,
-          expectedCostCoins: 250,
+          expectedCostCoins: 500,
         },
         "8d000000-0000-4000-8000-000000000001",
       ),
@@ -1204,7 +1281,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         {
           expectedIslandVersion: 0,
           expectedNextTier: 3,
-          expectedCostCoins: 750,
+          expectedCostCoins: 1_500,
         },
         "8e000000-0000-4000-8000-000000000001",
       ),
@@ -1218,7 +1295,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         {
           expectedIslandVersion: 0,
           expectedNextTier: 2,
-          expectedCostCoins: 250,
+          expectedCostCoins: 500,
         },
         "8f000000-0000-4000-8000-000000000001",
       ),
@@ -1257,6 +1334,55 @@ integration("mobile Skyblock marketplace transactions", () => {
     });
   });
 
+  it("rolls back the generator upgrade when required storage is unavailable", async () => {
+    await setupSql`UPDATE skyblock_island_accounts SET balance = 1000 WHERE island_id = ${SELLER_ISLAND}`;
+
+    await expect(
+      skyblock.upgradeSkyblockGenerator(
+        SELLER_UID,
+        {
+          expectedIslandVersion: 0,
+          expectedNextTier: 2,
+          expectedCostCoins: 500,
+        },
+        "8a000000-0000-4000-8000-000000000001",
+      ),
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      data: { code: "INSUFFICIENT_RESOURCES" },
+    });
+
+    const [state] = await setupSql<
+      {
+        tier: number;
+        radius: number;
+        version: number;
+        coins: number;
+        ledgerRows: number;
+        requests: number;
+        coal: number;
+      }[]
+    >`
+      SELECT
+        (SELECT generator_tier FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS tier,
+        (SELECT build_radius FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS radius,
+        (SELECT version::int FROM skyblock_islands WHERE id = ${SELLER_ISLAND}) AS version,
+        (SELECT balance::int FROM skyblock_island_accounts WHERE island_id = ${SELLER_ISLAND}) AS coins,
+        (SELECT count(*)::int FROM skyblock_coin_transactions WHERE actor_player_id = ${SELLER}) AS "ledgerRows",
+        (SELECT count(*)::int FROM skyblock_mobile_requests WHERE player_id = ${SELLER}) AS requests,
+        (SELECT quantity::int FROM skyblock_storage_items WHERE id = ${STORAGE}) AS coal
+    `;
+    expect(state).toEqual({
+      tier: 1,
+      radius: 96,
+      version: 0,
+      coins: 1000,
+      ledgerRows: 0,
+      requests: 0,
+      coal: 100,
+    });
+  });
+
   it("settles worker output at the old tier before upgrading", async () => {
     const workerId = "92000000-0000-4000-8000-000000000001";
     await setupSql`UPDATE skyblock_island_accounts SET balance = 1000 WHERE island_id = ${SELLER_ISLAND}`;
@@ -1282,6 +1408,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         worker: {
           workerId,
           tier: 2,
+          capacity: 512,
           bufferQuantity: 2,
           estimatedReadyQuantity: 2,
         },
@@ -1293,6 +1420,7 @@ integration("mobile Skyblock marketplace transactions", () => {
       {
         tier: number;
         buffer: number;
+        capacity: number;
         cursorAgeSeconds: number;
         coins: number;
         ledgerRows: number;
@@ -1301,6 +1429,7 @@ integration("mobile Skyblock marketplace transactions", () => {
       SELECT
         (SELECT tier FROM skyblock_workers WHERE id = ${workerId}) AS tier,
         (SELECT buffer_quantity::int FROM skyblock_workers WHERE id = ${workerId}) AS buffer,
+        (SELECT buffer_capacity::int FROM skyblock_workers WHERE id = ${workerId}) AS capacity,
         (SELECT extract(epoch FROM (now() - production_cursor_at))::int
            FROM skyblock_workers WHERE id = ${workerId}) AS "cursorAgeSeconds",
         (SELECT balance::int FROM skyblock_island_accounts
@@ -1311,6 +1440,7 @@ integration("mobile Skyblock marketplace transactions", () => {
     expect(state).toMatchObject({
       tier: 2,
       buffer: 2,
+      capacity: 512,
       coins: 750,
       ledgerRows: 1,
     });
@@ -1357,6 +1487,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         buffer: number;
         questProgress: number;
         requests: number;
+        economyItems: number;
       }[]
     >`
       SELECT
@@ -1367,13 +1498,16 @@ integration("mobile Skyblock marketplace transactions", () => {
         (SELECT progress FROM skyblock_quest_progress
           WHERE player_id = ${MANAGER} AND quest_id = 'worker_awakened') AS "questProgress",
         (SELECT count(*)::int FROM skyblock_mobile_requests
-          WHERE player_id = ${MANAGER} AND scope = 'skyblock:management:workers-collect') AS requests
+          WHERE player_id = ${MANAGER} AND scope = 'skyblock:management:workers-collect') AS requests,
+        (SELECT worker_items_collected::int FROM skyblock_economy_daily
+          WHERE island_id = ${SELLER_ISLAND} AND metric_date = CURRENT_DATE) AS "economyItems"
     `;
     expect(state).toEqual({
       stored: 105,
       buffer: 15,
       questProgress: 5,
       requests: 1,
+      economyItems: 5,
     });
   });
 

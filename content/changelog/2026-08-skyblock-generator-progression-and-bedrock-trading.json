@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-generator-progression-and-bedrock-trading",
+  "contentType": "changelog",
+  "title": "Skyblock gets clearer progression and reliable Bedrock trading",
+  "summary": "The generator is now a visible island landmark, Workers unlock through play, and Bedrock merchant menus recover instead of waiting forever.",
+  "body": "- Bedrock merchant forms now recover from rejected, outdated or slow server responses, with bounded loading, retry paths and safer transaction timeouts.\n- The manual generator is now marked by a cross-platform structure with its tier, drop chances and merchant values, plus distinct colors and feedback for every tier.\n- Generator menus explain the complete break, pick up, deposit and sell loop on Java and Bedrock.\n- New islands keep the tier-one cobblestone generator but unlock the Miner, Farmer and Lumberjack progressively instead of receiving three automatic Workers immediately. Existing Workers and their stored capacity are preserved.\n- Generator upgrades now require both island coins and stored resources. Merchant prices remain unchanged.\n- Island build radius now grows with island level instead of generator tier.\n- Worker menus and the mobile companion show production speed, capacity, time before saturation and unlock requirements.\n- Aggregate balancing measurements now cover generator breaks, warehouse deposits, Worker collection, merchant sales, upgrade timing and storage pressure without identifying individual players.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-24T18:45:03Z"
+}

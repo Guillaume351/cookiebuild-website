@@ -1417,6 +1417,18 @@ export const skyblockWorkers = pgTable(
     bufferQuantity: bigint("buffer_quantity", { mode: "number" })
       .default(0)
       .notNull(),
+    bufferCapacity: bigint("buffer_capacity", { mode: "number" })
+      .default(64)
+      .notNull(),
+    unlockSource: varchar("unlock_source", { length: 64 })
+      .default("legacy_v2")
+      .notNull(),
+    unlockedAt: timestamp("unlocked_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .defaultNow()
+      .notNull(),
     productionCursorAt: timestamp("production_cursor_at", {
       withTimezone: true,
       mode: "date",
@@ -1447,6 +1459,10 @@ export const skyblockWorkers = pgTable(
     check(
       "skyblock_workers_values_ck",
       sql`${table.tier} BETWEEN 1 AND 5 AND ${table.bufferQuantity} >= 0`,
+    ),
+    check(
+      "ck_skyblock_worker_capacity",
+      sql`${table.bufferCapacity} > 0 AND ${table.bufferQuantity} <= ${table.bufferCapacity}`,
     ),
   ],
 );

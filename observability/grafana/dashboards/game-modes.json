@@ -204,6 +204,28 @@
       "targets": [{"format": "time_series", "rawSql": "SELECT time AS \"time\", islands_created AS \"Islands created\", coop_members_joined AS \"Co-op joins\", quests_completed AS \"Quests completed\", quests_claimed AS \"Quests claimed\" FROM metrics.skyblock_progress_daily WHERE $__timeFilter(time) ORDER BY 1", "refId": "A"}],
       "title": "Skyblock progression and co-op",
       "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "description": "Manual generator output, deposits, worker collections and NPC sales. The gap between broken and deposited items exposes pickup/storage friction without player identifiers.",
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 48},
+      "id": 19,
+      "options": {"legend": {"calcs": ["sum"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"format": "time_series", "rawSql": "SELECT time AS \"time\", generator_items_broken AS \"Generator breaks\", storage_items_deposited AS \"Deposited\", worker_items_collected AS \"Worker collection\", npc_items_sold AS \"NPC sold\" FROM metrics.skyblock_economy_daily WHERE $__timeFilter(time) ORDER BY 1", "refId": "A"}],
+      "title": "Skyblock resource flow",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "postgres", "uid": "cookiebuild-postgres"},
+      "description": "Generator progression speed and storage pressure used to tune costs and capacities after enough real play sessions.",
+      "fieldConfig": {"defaults": {"decimals": 1, "unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 48},
+      "id": 20,
+      "options": {"legend": {"calcs": ["mean"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"format": "time_series", "rawSql": "SELECT time AS \"time\", average_upgrade_minutes AS \"Upgrade minutes\", average_storage_percent AS \"Storage %\", storage_full_percent AS \"Full samples %\" FROM metrics.skyblock_economy_daily WHERE $__timeFilter(time) ORDER BY 1", "refId": "A"}],
+      "title": "Skyblock progression and storage pressure",
+      "type": "timeseries"
     }
   ],
   "refresh": "5m",
@@ -215,6 +237,6 @@
   "timezone": "Europe/Paris",
   "title": "Cookie Build · Game modes usage",
   "uid": "cookiebuild-game-modes",
-  "version": 1,
+  "version": 2,
   "weekStart": "monday"
 }

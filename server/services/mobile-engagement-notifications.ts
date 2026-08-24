@@ -172,7 +172,7 @@ export async function enqueueMobileEngagementNotifications() {
            AND worker.buffer_quantity + floor(
              least(43200, greatest(0, extract(epoch FROM (now() - worker.production_cursor_at)))) /
              greatest(15, 75 - (worker.tier - 1) * 12)
-           ) >= worker.tier * 256
+           ) >= worker.buffer_capacity
            AND EXISTS (
              SELECT 1 FROM mobile_devices device
               WHERE device.mobile_user_id = user_row.id

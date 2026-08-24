@@ -576,10 +576,34 @@ SELECT local_day::timestamp AT TIME ZONE 'Europe/Paris' AS time,
 FROM events
 GROUP BY local_day;
 
+CREATE OR REPLACE VIEW metrics.skyblock_economy_daily WITH (security_barrier = true) AS
+SELECT economy.metric_date::timestamp AT TIME ZONE 'Europe/Paris' AS time,
+       sum(economy.generator_items_broken)::bigint AS generator_items_broken,
+       sum(economy.storage_items_deposited)::bigint AS storage_items_deposited,
+       sum(economy.worker_items_collected)::bigint AS worker_items_collected,
+       sum(economy.npc_items_sold)::bigint AS npc_items_sold,
+       sum(economy.npc_sale_coins)::bigint AS npc_sale_coins,
+       sum(economy.generator_upgrades)::bigint AS generator_upgrades,
+       CASE WHEN sum(economy.generator_upgrades) > 0 THEN
+         sum(economy.generator_upgrade_seconds_total)::numeric
+           / sum(economy.generator_upgrades) / 60.0
+       END AS average_upgrade_minutes,
+       CASE WHEN sum(economy.storage_saturation_samples) > 0 THEN
+         sum(economy.storage_saturation_basis_points_total)::numeric
+           / sum(economy.storage_saturation_samples) / 100.0
+       END AS average_storage_percent,
+       CASE WHEN sum(economy.storage_saturation_samples) > 0 THEN
+         sum(economy.storage_full_samples)::numeric * 100.0
+           / sum(economy.storage_saturation_samples)
+       END AS storage_full_percent
+FROM public.skyblock_economy_daily economy
+GROUP BY economy.metric_date;
+
 GRANT USAGE ON SCHEMA metrics TO cookiebuild_metrics;
 GRANT SELECT ON metrics.usage_hourly, metrics.matches_hourly, metrics.usage_summary,
     metrics.mode_usage_daily, metrics.mode_engagement_summary, metrics.mode_retention_cohorts,
-    metrics.skyblock_market_daily, metrics.skyblock_progress_daily TO cookiebuild_metrics;
+    metrics.skyblock_market_daily, metrics.skyblock_progress_daily,
+    metrics.skyblock_economy_daily TO cookiebuild_metrics;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM cookiebuild_metrics;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM cookiebuild_metrics;
 REVOKE ALL ON SCHEMA public FROM cookiebuild_metrics;
