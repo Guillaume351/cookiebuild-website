@@ -14,38 +14,50 @@ import {
 describe("mobile notification validation", () => {
   it("accepts one bounded audience selector", () => {
     expect(parseNotificationAudience({ all: true })).toEqual({ all: true });
-    expect(parseNotificationAudience({
-      deviceIds: ["0772c75e-d8a7-4e9d-98a1-f1744dde448e"],
-    })).toEqual({ deviceIds: ["0772c75e-d8a7-4e9d-98a1-f1744dde448e"] });
+    expect(
+      parseNotificationAudience({
+        deviceIds: ["0772c75e-d8a7-4e9d-98a1-f1744dde448e"],
+      }),
+    ).toEqual({ deviceIds: ["0772c75e-d8a7-4e9d-98a1-f1744dde448e"] });
   });
 
   it("rejects ambiguous or malformed audiences", () => {
-    expect(() => parseNotificationAudience({ all: true, firebaseUid: "user" }))
-      .toThrow(PermanentOutboxError);
-    expect(() => parseNotificationAudience({ deviceIds: ["not-a-uuid"] }))
-      .toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationAudience({ all: true, firebaseUid: "user" }),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationAudience({ deviceIds: ["not-a-uuid"] }),
+    ).toThrow(PermanentOutboxError);
   });
 
   it("requires the global audience for player rallies", () => {
-    expect(parseNotificationAudience({ all: true }, "player_rally")).toEqual({ all: true });
-    expect(() => parseNotificationAudience({ firebaseUid: "user" }, "player_rally"))
-      .toThrow(PermanentOutboxError);
+    expect(parseNotificationAudience({ all: true }, "player_rally")).toEqual({
+      all: true,
+    });
+    expect(() =>
+      parseNotificationAudience({ firebaseUid: "user" }, "player_rally"),
+    ).toThrow(PermanentOutboxError);
     const retryDevice = "0772c75e-d8a7-4e9d-98a1-f1744dde448e";
-    expect(() => parseNotificationAudience({ deviceIds: [retryDevice] }, "player_rally"))
-      .toThrow(PermanentOutboxError);
-    expect(parseNotificationAudience(
-      { deviceIds: [retryDevice] },
-      "player_rally",
-      true,
-    )).toEqual({ deviceIds: [retryDevice] });
+    expect(() =>
+      parseNotificationAudience({ deviceIds: [retryDevice] }, "player_rally"),
+    ).toThrow(PermanentOutboxError);
+    expect(
+      parseNotificationAudience(
+        { deviceIds: [retryDevice] },
+        "player_rally",
+        true,
+      ),
+    ).toEqual({ deviceIds: [retryDevice] });
   });
 
   it("normalizes a safe notification payload", () => {
-    expect(parseNotificationPayload({
-      notification: { title: " Event soon ", body: "Join us" },
-      deepLink: "cookiebuild://events/summer",
-      data: { eventId: 42, reminder: true },
-    })).toEqual({
+    expect(
+      parseNotificationPayload({
+        notification: { title: " Event soon ", body: "Join us" },
+        deepLink: "cookiebuild://events/summer",
+        data: { eventId: 42, reminder: true },
+      }),
+    ).toEqual({
       title: "Event soon",
       body: "Join us",
       deepLink: "cookiebuild://events/summer",
@@ -55,27 +67,42 @@ describe("mobile notification validation", () => {
   });
 
   it("rejects untrusted links and non-scalar data", () => {
-    expect(() => parseNotificationPayload({ title: "No", deepLink: "https://example.com" }))
-      .toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayload({ title: "No", data: { nested: {} } }))
-      .toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayload({ title: "No", data: { "google.message": "reserved" } }))
-      .toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayload({ title: "No", body: "é".repeat(2_000) }))
-      .toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayload({
+        title: "No",
+        deepLink: "https://example.com",
+      }),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayload({ title: "No", data: { nested: {} } }),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayload({
+        title: "No",
+        data: { "google.message": "reserved" },
+      }),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayload({ title: "No", body: "é".repeat(2_000) }),
+    ).toThrow(PermanentOutboxError);
   });
 
   it("synthesizes player rally notifications from a strict structured payload", () => {
-    expect(parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "0772c75e-d8a7-4e9d-98a1-f1744dde448e",
-      source: "player",
-      gamemode: "microbattles",
-      edition: "crossplay",
-      queuedCount: 2,
-      neededCount: 6,
-      actorDisplayName: "Cookie_Player",
-    }, "player_rally")).toEqual({
+    expect(
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "0772c75e-d8a7-4e9d-98a1-f1744dde448e",
+          source: "player",
+          gamemode: "microbattles",
+          edition: "crossplay",
+          queuedCount: 2,
+          neededCount: 6,
+          actorDisplayName: "Cookie_Player",
+        },
+        "player_rally",
+      ),
+    ).toEqual({
       title: "Players needed for MicroBattles",
       body: "Cookie_Player is rallying players: 2 queued, 6 more needed.",
       deepLink: "cookiebuild://rallies/0772c75e-d8a7-4e9d-98a1-f1744dde448e",
@@ -95,16 +122,21 @@ describe("mobile notification validation", () => {
   });
 
   it("synthesizes an actionable login rally without accepting producer text", () => {
-    expect(parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "login",
-      gamemode: "network",
-      edition: "crossplay",
-      queuedCount: 0,
-      neededCount: 0,
-      actorDisplayName: "CookieFan",
-    }, "player_rally")).toEqual({
+    expect(
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "login",
+          gamemode: "network",
+          edition: "crossplay",
+          queuedCount: 0,
+          neededCount: 0,
+          actorDisplayName: "CookieFan",
+        },
+        "player_rally",
+      ),
+    ).toEqual({
       title: "CookieFan is online",
       body: "CookieFan is online and looking for players",
       deepLink: "cookiebuild://rallies/b53233cd-20d2-4d15-b093-2caaf4cd7774",
@@ -121,27 +153,37 @@ describe("mobile notification validation", () => {
       },
       urgent: false,
     });
-    expect(() => parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "login",
-      gamemode: "network",
-      edition: "crossplay",
-      queuedCount: 0,
-      neededCount: 0,
-      actorDisplayName: "CookieFan",
-      body: "untrusted producer text",
-    }, "player_rally")).toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "login",
-      gamemode: "network",
-      edition: "crossplay",
-      queuedCount: 1,
-      neededCount: 0,
-      actorDisplayName: "CookieFan",
-    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "login",
+          gamemode: "network",
+          edition: "crossplay",
+          queuedCount: 0,
+          neededCount: 0,
+          actorDisplayName: "CookieFan",
+          body: "untrusted producer text",
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "b53233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "login",
+          gamemode: "network",
+          edition: "crossplay",
+          queuedCount: 1,
+          neededCount: 0,
+          actorDisplayName: "CookieFan",
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
   });
 
   it("rejects free text and inconsistent player rally fields", () => {
@@ -155,73 +197,117 @@ describe("mobile notification validation", () => {
       neededCount: 3,
       actorDisplayName: null,
     };
-    expect(() => parseNotificationPayloadForKind({ ...valid, body: "free text" }, "player_rally"))
-      .toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayloadForKind({
-      ...valid,
-      source: "player",
-      actorDisplayName: "hello\nplayers",
-    }, "player_rally")).toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayloadForKind({
-      ...valid,
-      edition: "java",
-    }, "player_rally")).toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayloadForKind({
-      ...valid,
-      source: "player",
-      actorDisplayName: "CookieFan",
-      neededCount: 0,
-    }, "player_rally")).toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayloadForKind({
-      ...valid,
-      source: "login",
-      gamemode: "pitchout",
-      actorDisplayName: "CookieFan",
-    }, "player_rally")).toThrow(PermanentOutboxError);
-    expect(() => parseNotificationPayloadForKind({
-      ...valid,
-      gamemode: "network",
-    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        { ...valid, body: "free text" },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          ...valid,
+          source: "player",
+          actorDisplayName: "hello\nplayers",
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          ...valid,
+          edition: "java",
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          ...valid,
+          source: "player",
+          actorDisplayName: "CookieFan",
+          neededCount: 0,
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          ...valid,
+          source: "login",
+          gamemode: "pitchout",
+          actorDisplayName: "CookieFan",
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          ...valid,
+          gamemode: "network",
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
   });
 
   it("synthesizes an automatic start-imminent rally without fake missing players", () => {
-    expect(parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "a53233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "automatic",
-      gamemode: "buildbattles",
-      edition: "crossplay",
-      queuedCount: 3,
-      neededCount: 0,
-      actorDisplayName: null,
-    }, "player_rally")).toMatchObject({
+    expect(
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "a53233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "automatic",
+          gamemode: "buildbattles",
+          edition: "crossplay",
+          queuedCount: 3,
+          neededCount: 0,
+          actorDisplayName: null,
+        },
+        "player_rally",
+      ),
+    ).toMatchObject({
       title: "BuildBattles is starting soon",
       body: "3 players are ready. Join now before the match starts.",
       data: { neededCount: "0", source: "automatic" },
     });
-    expect(() => parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "a53233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "automatic",
-      gamemode: "buildbattles",
-      edition: "crossplay",
-      queuedCount: 0,
-      neededCount: 0,
-      actorDisplayName: null,
-    }, "player_rally")).toThrow(PermanentOutboxError);
+    expect(() =>
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "a53233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "automatic",
+          gamemode: "buildbattles",
+          edition: "crossplay",
+          queuedCount: 0,
+          neededCount: 0,
+          actorDisplayName: null,
+        },
+        "player_rally",
+      ),
+    ).toThrow(PermanentOutboxError);
   });
 
   it("accepts TurfWars as a bounded rally game", () => {
-    expect(parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "a63233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "player",
-      gamemode: "turfwars",
-      edition: "crossplay",
-      queuedCount: 1,
-      neededCount: 1,
-      actorDisplayName: "CookieArcher",
-    }, "player_rally")).toMatchObject({
+    expect(
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "a63233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "player",
+          gamemode: "turfwars",
+          edition: "crossplay",
+          queuedCount: 1,
+          neededCount: 1,
+          actorDisplayName: "CookieArcher",
+        },
+        "player_rally",
+      ),
+    ).toMatchObject({
       title: "Players needed for TurfWars",
       deepLink: "cookiebuild://rallies/a63233cd-20d2-4d15-b093-2caaf4cd7774",
       data: { gamemode: "turfwars" },
@@ -229,16 +315,21 @@ describe("mobile notification validation", () => {
   });
 
   it("accepts BedWars as a bounded rally game", () => {
-    expect(parseNotificationPayloadForKind({
-      schemaVersion: 1,
-      rallyId: "b63233cd-20d2-4d15-b093-2caaf4cd7774",
-      source: "player",
-      gamemode: "bedwars",
-      edition: "crossplay",
-      queuedCount: 1,
-      neededCount: 1,
-      actorDisplayName: "CookieBaker",
-    }, "player_rally")).toMatchObject({
+    expect(
+      parseNotificationPayloadForKind(
+        {
+          schemaVersion: 1,
+          rallyId: "b63233cd-20d2-4d15-b093-2caaf4cd7774",
+          source: "player",
+          gamemode: "bedwars",
+          edition: "crossplay",
+          queuedCount: 1,
+          neededCount: 1,
+          actorDisplayName: "CookieBaker",
+        },
+        "player_rally",
+      ),
+    ).toMatchObject({
       title: "Players needed for BedWars",
       deepLink: "cookiebuild://rallies/b63233cd-20d2-4d15-b093-2caaf4cd7774",
       data: { gamemode: "bedwars" },
@@ -255,18 +346,33 @@ describe("mobile notification policy", () => {
     expect(preferenceKind("daily_goal_reminder")).toBe("daily_reminder");
     expect(preferenceKind("weekly_goal_reminder")).toBe("weekly_reminder");
     expect(preferenceKind("friend_online")).toBe("friend_online");
+    expect(preferenceKind("skyblock_market_sold")).toBe("skyblock_market_sold");
+    expect(preferenceKind("skyblock_worker_full")).toBe("skyblock_worker_full");
+    expect(preferenceKind("skyblock_objective_ready")).toBe(
+      "skyblock_objective_ready",
+    );
     expect(preferenceKind("unknown")).toBeUndefined();
   });
 
   it("handles quiet hours across midnight in the recipient timezone", () => {
     const at2300Paris = new Date("2026-07-14T21:00:00.000Z");
     const at0900Paris = new Date("2026-07-14T07:00:00.000Z");
-    expect(isInQuietHours(at2300Paris, "Europe/Paris", "22:00", "08:00")).toBe(true);
-    expect(isInQuietHours(at0900Paris, "Europe/Paris", "22:00", "08:00")).toBe(false);
-    expect(isInQuietHours(at2300Paris, "invalid/timezone", "22:00", "08:00")).toBe(false);
+    expect(isInQuietHours(at2300Paris, "Europe/Paris", "22:00", "08:00")).toBe(
+      true,
+    );
+    expect(isInQuietHours(at0900Paris, "Europe/Paris", "22:00", "08:00")).toBe(
+      false,
+    );
+    expect(
+      isInQuietHours(at2300Paris, "invalid/timezone", "22:00", "08:00"),
+    ).toBe(false);
     expect(isInQuietHours(at2300Paris, null, "22:00", "08:00", 120)).toBe(true);
-    expect(isInQuietHours(at0900Paris, null, "22:00", "08:00", 120)).toBe(false);
-    expect(isInQuietHours(at2300Paris, "invalid/timezone", "22:00", "08:00", 120)).toBe(true);
+    expect(isInQuietHours(at0900Paris, null, "22:00", "08:00", 120)).toBe(
+      false,
+    );
+    expect(
+      isInQuietHours(at2300Paris, "invalid/timezone", "22:00", "08:00", 120),
+    ).toBe(true);
   });
 
   it("uses capped exponential backoff with bounded jitter", () => {
@@ -276,14 +382,20 @@ describe("mobile notification policy", () => {
   });
 
   it("never dead-letters Firebase account deletion", () => {
-    expect(shouldDeadLetterOutbox("firebase_auth_delete", 100, 6, false)).toBe(false);
-    expect(shouldDeadLetterOutbox("firebase_auth_delete", 100, 6, true)).toBe(false);
+    expect(shouldDeadLetterOutbox("firebase_auth_delete", 100, 6, false)).toBe(
+      false,
+    );
+    expect(shouldDeadLetterOutbox("firebase_auth_delete", 100, 6, true)).toBe(
+      false,
+    );
     expect(shouldDeadLetterOutbox("announcement", 6, 6, false)).toBe(true);
     expect(shouldDeadLetterOutbox("announcement", 1, 6, true)).toBe(true);
   });
 
   it("only disables tokens for permanent registration failures", () => {
-    expect(classifyFcmError("messaging/registration-token-not-registered")).toBe("disable");
+    expect(
+      classifyFcmError("messaging/registration-token-not-registered"),
+    ).toBe("disable");
     expect(classifyFcmError("messaging/sender-id-mismatch")).toBe("disable");
     expect(classifyFcmError("messaging/invalid-argument")).toBe("retry");
     expect(classifyFcmError("messaging/server-unavailable")).toBe("retry");

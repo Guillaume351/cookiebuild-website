@@ -319,6 +319,11 @@ http.createServer((request, response) => {
     response.end(prometheusMetrics());
     return;
   }
+  if (request.url === "/livez") {
+    response.writeHead(200, { "content-type": "application/json" });
+    response.end(JSON.stringify({ ok: true }));
+    return;
+  }
   if (request.url === "/healthz") {
     const status = publicStatus();
     response.writeHead(status.ok ? 200 : 503, { "content-type": "application/json" });

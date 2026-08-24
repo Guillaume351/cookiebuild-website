@@ -7,7 +7,10 @@ import {
   lockActiveMobileUser,
   requireMobileUser,
 } from "../../../services/mobile-user";
-import { optionalBoolean, optionalQuietHour } from "../../../utils/mobile-validation";
+import {
+  optionalBoolean,
+  optionalQuietHour,
+} from "../../../utils/mobile-validation";
 
 interface PreferenceBody {
   announcementsEnabled?: unknown;
@@ -19,6 +22,9 @@ interface PreferenceBody {
   dailyReminderEnabled?: unknown;
   weeklyReminderEnabled?: unknown;
   friendOnlineEnabled?: unknown;
+  skyblockMarketSoldEnabled?: unknown;
+  skyblockWorkerFullEnabled?: unknown;
+  skyblockObjectiveReadyEnabled?: unknown;
   quietHoursEnabled?: unknown;
   timezoneOffsetMinutes?: unknown;
   onlineVisibility?: unknown;
@@ -38,16 +44,23 @@ export default defineEventHandler(async (event) => {
       .limit(1);
     const existing = rows[0];
     if (!existing) {
-      throw createError({ statusCode: 500, statusMessage: "Preferences unavailable" });
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Preferences unavailable",
+      });
     }
 
     const hasStart = Object.hasOwn(body ?? {}, "quietHoursStart");
     const hasEnd = Object.hasOwn(body ?? {}, "quietHoursEnd");
-    const normalizeHour = (value: unknown) => typeof value === "number"
-      ? `${String(value).padStart(2, "0")}:00`
-      : value;
+    const normalizeHour = (value: unknown) =>
+      typeof value === "number"
+        ? `${String(value).padStart(2, "0")}:00`
+        : value;
     const quietHoursStart = hasStart
-      ? optionalQuietHour(normalizeHour(body.quietHoursStart), "quietHoursStart")
+      ? optionalQuietHour(
+          normalizeHour(body.quietHoursStart),
+          "quietHoursStart",
+        )
       : existing.quietHoursStart;
     const quietHoursEnd = hasEnd
       ? optionalQuietHour(normalizeHour(body.quietHoursEnd), "quietHoursEnd")
@@ -55,7 +68,8 @@ export default defineEventHandler(async (event) => {
     if ((quietHoursStart === null) !== (quietHoursEnd === null)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "quietHoursStart and quietHoursEnd must both be set or cleared",
+        statusMessage:
+          "quietHoursStart and quietHoursEnd must both be set or cleared",
       });
     }
 
@@ -63,17 +77,27 @@ export default defineEventHandler(async (event) => {
       ? Number(body.timezoneOffsetMinutes)
       : existing.timezoneOffsetMinutes;
     if (!Number.isInteger(offset) || offset < -840 || offset > 840) {
-      throw createError({ statusCode: 400, statusMessage: "Invalid timezoneOffsetMinutes" });
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid timezoneOffsetMinutes",
+      });
     }
     const visibility = Object.hasOwn(body ?? {}, "onlineVisibility")
       ? String(body.onlineVisibility)
       : existing.onlineVisibility;
     if (!["friends_and_party", "friends", "hidden"].includes(visibility)) {
-      throw createError({ statusCode: 400, statusMessage: "Invalid onlineVisibility" });
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid onlineVisibility",
+      });
     }
-    const quietHoursEnabled = optionalBoolean(body?.quietHoursEnabled, "quietHoursEnabled")
-      ?? existing.quietHoursEnabled;
-    if (quietHoursEnabled && (quietHoursStart === null || quietHoursEnd === null)) {
+    const quietHoursEnabled =
+      optionalBoolean(body?.quietHoursEnabled, "quietHoursEnabled") ??
+      existing.quietHoursEnabled;
+    if (
+      quietHoursEnabled &&
+      (quietHoursStart === null || quietHoursEnd === null)
+    ) {
       throw createError({
         statusCode: 400,
         statusMessage: "Quiet hours require both a start and end",
@@ -81,21 +105,48 @@ export default defineEventHandler(async (event) => {
     }
 
     const values = {
-      announcementsEnabled: optionalBoolean(body?.announcementsEnabled, "announcementsEnabled")
-        ?? existing.announcementsEnabled,
-      eventsEnabled: optionalBoolean(body?.eventsEnabled, "eventsEnabled") ?? existing.eventsEnabled,
-      serverStatusEnabled: optionalBoolean(body?.serverStatusEnabled, "serverStatusEnabled")
-        ?? existing.serverStatusEnabled,
-      socialEnabled: optionalBoolean(body?.socialEnabled, "socialEnabled") ?? existing.socialEnabled,
-      rallyEnabled: optionalBoolean(body?.rallyEnabled, "rallyEnabled") ?? existing.rallyEnabled,
-      weeklyDigestEnabled: optionalBoolean(body?.weeklyDigestEnabled, "weeklyDigestEnabled")
-        ?? existing.weeklyDigestEnabled,
-      dailyReminderEnabled: optionalBoolean(body?.dailyReminderEnabled, "dailyReminderEnabled")
-        ?? existing.dailyReminderEnabled,
-      weeklyReminderEnabled: optionalBoolean(body?.weeklyReminderEnabled, "weeklyReminderEnabled")
-        ?? existing.weeklyReminderEnabled,
-      friendOnlineEnabled: optionalBoolean(body?.friendOnlineEnabled, "friendOnlineEnabled")
-        ?? existing.friendOnlineEnabled,
+      announcementsEnabled:
+        optionalBoolean(body?.announcementsEnabled, "announcementsEnabled") ??
+        existing.announcementsEnabled,
+      eventsEnabled:
+        optionalBoolean(body?.eventsEnabled, "eventsEnabled") ??
+        existing.eventsEnabled,
+      serverStatusEnabled:
+        optionalBoolean(body?.serverStatusEnabled, "serverStatusEnabled") ??
+        existing.serverStatusEnabled,
+      socialEnabled:
+        optionalBoolean(body?.socialEnabled, "socialEnabled") ??
+        existing.socialEnabled,
+      rallyEnabled:
+        optionalBoolean(body?.rallyEnabled, "rallyEnabled") ??
+        existing.rallyEnabled,
+      weeklyDigestEnabled:
+        optionalBoolean(body?.weeklyDigestEnabled, "weeklyDigestEnabled") ??
+        existing.weeklyDigestEnabled,
+      dailyReminderEnabled:
+        optionalBoolean(body?.dailyReminderEnabled, "dailyReminderEnabled") ??
+        existing.dailyReminderEnabled,
+      weeklyReminderEnabled:
+        optionalBoolean(body?.weeklyReminderEnabled, "weeklyReminderEnabled") ??
+        existing.weeklyReminderEnabled,
+      friendOnlineEnabled:
+        optionalBoolean(body?.friendOnlineEnabled, "friendOnlineEnabled") ??
+        existing.friendOnlineEnabled,
+      skyblockMarketSoldEnabled:
+        optionalBoolean(
+          body?.skyblockMarketSoldEnabled,
+          "skyblockMarketSoldEnabled",
+        ) ?? existing.skyblockMarketSoldEnabled,
+      skyblockWorkerFullEnabled:
+        optionalBoolean(
+          body?.skyblockWorkerFullEnabled,
+          "skyblockWorkerFullEnabled",
+        ) ?? existing.skyblockWorkerFullEnabled,
+      skyblockObjectiveReadyEnabled:
+        optionalBoolean(
+          body?.skyblockObjectiveReadyEnabled,
+          "skyblockObjectiveReadyEnabled",
+        ) ?? existing.skyblockObjectiveReadyEnabled,
       quietHoursEnabled,
       timezoneOffsetMinutes: offset,
       onlineVisibility: visibility,
@@ -106,14 +157,16 @@ export default defineEventHandler(async (event) => {
     const preferences = await tx
       .update(mobileNotificationPreferences)
       .set(values)
-      .where(and(
-        eq(mobileNotificationPreferences.mobileUserId, user.id),
-        sql`EXISTS (
+      .where(
+        and(
+          eq(mobileNotificationPreferences.mobileUserId, user.id),
+          sql`EXISTS (
           SELECT 1 FROM mobile_users
            WHERE id = ${user.id}
              AND deleted_at IS NULL
         )`,
-      ))
+        ),
+      )
       .returning();
     if (!preferences.length) throw accountDeletedError();
     return preferences;

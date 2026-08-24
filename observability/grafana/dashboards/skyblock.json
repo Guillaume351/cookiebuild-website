@@ -1,0 +1,535 @@
+{
+  "annotations": { "list": [] },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [{ "color": "green", "value": null }]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_active_players_24h", "refId": "A" }
+      ],
+      "title": "Active players · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": { "decimals": 1, "unit": "h" },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_play_seconds_24h / 3600", "refId": "A" }
+      ],
+      "title": "Play time · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "max": 1,
+          "min": 0,
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "cookiebuild_skyblock_retention_ratio{period=\"d1\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "Retention · D1",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "max": 1,
+          "min": 0,
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "cookiebuild_skyblock_retention_ratio{period=\"d7\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "Retention · D7",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "max": 1,
+          "min": 0,
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "expr": "cookiebuild_skyblock_retention_ratio{period=\"d30\"}",
+          "refId": "A"
+        }
+      ],
+      "title": "Retention · D30",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 6,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_total_balance_coins", "refId": "A" }
+      ],
+      "title": "Liquid coins",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Market buyer/seller ledger transfers are excluded. Only real faucets are counted.",
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 4 },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_minted_coins_24h", "refId": "A" }
+      ],
+      "title": "Coins created · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "description": "Real sinks plus market fees; market buyer/seller transfers are excluded.",
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 4 },
+      "id": 8,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_burned_coins_24h", "refId": "A" }
+      ],
+      "title": "Coins destroyed · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 4 },
+      "id": 9,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_market_sales_24h", "refId": "A" }
+      ],
+      "title": "Market sales · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 4 },
+      "id": 10,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        { "expr": "cookiebuild_skyblock_market_volume_coins_24h", "refId": "A" }
+      ],
+      "title": "Market volume · 24h",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cookiebuild-postgres" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 11,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time, platform || ' active' AS metric, active_players AS value FROM metrics.skyblock_sessions_daily WHERE $__timeFilter(time) ORDER BY 1",
+          "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time, platform || ' sessions' AS metric, sessions AS value FROM metrics.skyblock_sessions_daily WHERE $__timeFilter(time) ORDER BY 1",
+          "refId": "B"
+        }
+      ],
+      "title": "Skyblock sessions and active players",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cookiebuild-postgres" },
+      "fieldConfig": {
+        "defaults": { "decimals": 1, "unit": "h" },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 12,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time, platform AS metric, play_seconds / 3600.0 AS value FROM metrics.skyblock_sessions_daily WHERE $__timeFilter(time) ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Play time by platform",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cookiebuild-postgres" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "max": 1,
+          "min": 0,
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "id": 13,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT cohort_date::timestamp AS time, retention_d1 AS \"D1\", retention_d7 AS \"D7\", retention_d30 AS \"D30\" FROM metrics.skyblock_retention_cohorts WHERE $__timeFilter(cohort_date::timestamp) ORDER BY 1",
+          "refId": "A"
+        }
+      ],
+      "title": "Retention by UTC cohort",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "postgres", "uid": "cookiebuild-postgres" },
+      "description": "Faucets and sinks only. market:buy/market:sell transfers are removed; market_fee is a sink.",
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "id": 14,
+      "options": {
+        "legend": {
+          "calcs": ["sum"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time, source || ' minted' AS metric, minted_coins AS value FROM metrics.skyblock_economy_hourly WHERE $__timeFilter(time) AND minted_coins > 0 ORDER BY 1",
+          "refId": "A"
+        },
+        {
+          "format": "time_series",
+          "rawSql": "SELECT time, source || ' burned' AS metric, burned_coins AS value FROM metrics.skyblock_economy_hourly WHERE $__timeFilter(time) AND burned_coins > 0 ORDER BY 1",
+          "refId": "B"
+        }
+      ],
+      "title": "Economy sources and sinks",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": { "defaults": { "unit": "short" }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
+      "id": 15,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "expr": "cookiebuild_skyblock_total_balance_coins",
+          "legendFormat": "Total",
+          "refId": "A"
+        },
+        {
+          "expr": "cookiebuild_skyblock_largest_balance_coins",
+          "legendFormat": "Largest island",
+          "refId": "B"
+        },
+        {
+          "expr": "cookiebuild_skyblock_median_balance_coins",
+          "legendFormat": "Median",
+          "refId": "C"
+        }
+      ],
+      "title": "Island bank liquidity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
+      "id": 16,
+      "options": {
+        "displayMode": "gradient",
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        }
+      },
+      "targets": [
+        {
+          "expr": "cookiebuild_skyblock_storage_invariant_violations",
+          "legendFormat": "{{kind}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Storage invariants · must be zero",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 1 }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
+      "id": 17,
+      "options": {
+        "legend": {
+          "calcs": ["lastNotNull", "max"],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": { "mode": "multi", "sort": "desc" }
+      },
+      "targets": [
+        {
+          "expr": "cookiebuild_skyblock_expired_active_listings",
+          "legendFormat": "Expired active listings",
+          "refId": "A"
+        },
+        {
+          "expr": "cookiebuild_skyblock_orphan_sessions",
+          "legendFormat": "Orphan sessions",
+          "refId": "B"
+        },
+        {
+          "expr": "cookiebuild_skyblock_ledger_balance_drift_coins",
+          "legendFormat": "Ledger drift coins",
+          "refId": "C"
+        },
+        {
+          "expr": "cookiebuild_skyblock_ledger_version_drift_accounts",
+          "legendFormat": "Ledger version drift",
+          "refId": "D"
+        }
+      ],
+      "title": "Operational invariants · must be zero",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "1m",
+  "schemaVersion": 41,
+  "tags": ["cookie-build", "minecraft", "skyblock", "economy", "retention"],
+  "templating": { "list": [] },
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "utc",
+  "title": "Cookie Build · Skyblock Retention and Economy",
+  "uid": "cookiebuild-skyblock",
+  "version": 1,
+  "weekStart": "monday"
+}

@@ -1,0 +1,45 @@
+collector_name: skyblock_retention
+min_interval: 15m
+
+metrics:
+  - metric_name: cookiebuild_skyblock_retention_ratio
+    type: gauge
+    help: Exact UTC calendar-day Skyblock retention by bounded cohort age.
+    key_labels: [period]
+    values: [ratio]
+    query_ref: retention_ratios
+  - metric_name: cookiebuild_skyblock_retention_eligible_players
+    type: gauge
+    help: Mature Skyblock cohort players eligible for each retention period.
+    key_labels: [period]
+    values: [players]
+    query_ref: retention_eligible
+  - metric_name: cookiebuild_skyblock_retention_returned_players
+    type: gauge
+    help: Mature Skyblock cohort players returning on each exact retention day.
+    key_labels: [period]
+    values: [players]
+    query_ref: retention_returned
+
+queries:
+  - query_name: retention_ratios
+    query: |
+      SELECT period, ratio
+      FROM metrics.skyblock_retention_summary
+      CROSS JOIN LATERAL (VALUES
+        ('d1', retention_d1), ('d7', retention_d7), ('d30', retention_d30)
+      ) AS retention(period, ratio)
+  - query_name: retention_eligible
+    query: |
+      SELECT period, players
+      FROM metrics.skyblock_retention_summary
+      CROSS JOIN LATERAL (VALUES
+        ('d1', eligible_d1), ('d7', eligible_d7), ('d30', eligible_d30)
+      ) AS retention(period, players)
+  - query_name: retention_returned
+    query: |
+      SELECT period, players
+      FROM metrics.skyblock_retention_summary
+      CROSS JOIN LATERAL (VALUES
+        ('d1', retained_d1), ('d7', retained_d7), ('d30', retained_d30)
+      ) AS retention(period, players)

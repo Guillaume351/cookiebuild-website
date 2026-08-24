@@ -15,7 +15,7 @@
           <p class="mt-2 text-xs text-zinc-500">{{ metric.hint }}</p>
         </article>
       </section>
-      <section class="mt-8 grid gap-4 lg:grid-cols-3">
+      <section class="mt-8 grid gap-4 lg:grid-cols-4">
         <NuxtLink to="/admin/reports" class="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition hover:border-orange-500/60">
           <h2 class="font-black text-white">Modération</h2><p class="mt-2 text-sm text-zinc-400">Traiter les signalements et documenter chaque décision.</p>
         </NuxtLink>
@@ -24,6 +24,9 @@
         </NuxtLink>
         <NuxtLink to="/admin/notifications" class="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition hover:border-orange-500/60">
           <h2 class="font-black text-white">Notifications mobiles</h2><p class="mt-2 text-sm text-zinc-400">Prévisualiser l’audience, programmer et suivre les envois.</p>
+        </NuxtLink>
+        <NuxtLink to="/admin/skyblock-economy" class="rounded-2xl border border-zinc-800 bg-zinc-900 p-6 transition hover:border-orange-500/60">
+          <h2 class="font-black text-white">Économie Skyblock</h2><p class="mt-2 text-sm text-zinc-400">Suivre monnaie, marchand, marché et invariants de stockage.</p>
         </NuxtLink>
       </section>
       <p class="mt-6 text-right text-xs text-zinc-600">Calculé le {{ formatDate(dashboard.generatedAt) }}</p>

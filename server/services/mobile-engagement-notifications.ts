@@ -1,5 +1,10 @@
 import { sql } from "drizzle-orm";
 import db from "../../db/client";
+import { mobileCapabilities } from "./mobile-capabilities";
+import {
+  skyblockActionNotificationsEnabled,
+  skyblockNotificationTextSql,
+} from "./mobile-skyblock-notification-copy";
 
 /**
  * Produces only explicitly opted-in reminders. Unique dedupe keys make every
@@ -144,5 +149,118 @@ export async function enqueueMobileEngagementNotifications() {
     ON CONFLICT (dedupe_key) WHERE dedupe_key IS NOT NULL DO NOTHING
     RETURNING id
   `);
-  return { daily: daily.length, weekly: weekly.length, friendOnline: friends.length };
+  let workerFull = 0;
+  let objectiveReady = 0;
+  const capabilities = await mobileCapabilities();
+  if (skyblockActionNotificationsEnabled(capabilities)) {
+    const workerTitle = skyblockNotificationTextSql(sql`locale`, "workerTitle");
+    const workerBody = skyblockNotificationTextSql(sql`locale`, "workerBody");
+    const workers = await db.execute(sql`
+      WITH candidates AS (
+        SELECT user_row.id AS mobile_user_id, user_row.firebase_uid, user_row.locale,
+               worker.id AS worker_id, worker.worker_type,
+               worker.production_cursor_at
+          FROM skyblock_workers worker
+          JOIN skyblock_island_members membership ON membership.island_id = worker.island_id
+          JOIN mobile_player_links link
+            ON link.player_id = membership.player_id AND link.is_primary AND link.revoked_at IS NULL
+          JOIN mobile_users user_row
+            ON user_row.firebase_uid = link.firebase_uid AND user_row.deleted_at IS NULL
+          JOIN mobile_notification_preferences preference
+            ON preference.mobile_user_id = user_row.id AND preference.skyblock_worker_full_enabled
+         WHERE worker.status = 'active'
+           AND worker.buffer_quantity + floor(
+             least(43200, greatest(0, extract(epoch FROM (now() - worker.production_cursor_at)))) /
+             greatest(15, 75 - (worker.tier - 1) * 12)
+           ) >= worker.tier * 256
+           AND EXISTS (
+             SELECT 1 FROM mobile_devices device
+              WHERE device.mobile_user_id = user_row.id
+                AND device.notifications_authorized AND device.revoked_at IS NULL
+           )
+           AND NOT EXISTS (
+             SELECT 1 FROM mobile_notification_outbox existing
+              WHERE existing.dedupe_key =
+                'skyblock-worker-full:' || user_row.id || ':' || worker.id || ':' ||
+                extract(epoch FROM worker.production_cursor_at)::bigint
+           )
+         ORDER BY worker.updated_at, worker.id, user_row.id
+         LIMIT 100
+      )
+      INSERT INTO mobile_notification_outbox (kind, dedupe_key, audience, payload)
+      SELECT 'skyblock_worker_full',
+             'skyblock-worker-full:' || mobile_user_id || ':' || worker_id || ':' ||
+               extract(epoch FROM production_cursor_at)::bigint,
+             jsonb_build_object('firebaseUid', firebase_uid),
+             jsonb_build_object(
+               'title', ${workerTitle},
+               'body', ${workerBody},
+               'deepLink', 'cookiebuild://skyblock/management/workers',
+               'data', jsonb_build_object('type', 'skyblock_worker_full', 'workerId', worker_id, 'workerType', worker_type)
+             )
+        FROM candidates
+      ON CONFLICT (dedupe_key) WHERE dedupe_key IS NOT NULL DO NOTHING
+      RETURNING id
+    `);
+    workerFull = workers.length;
+
+    const objectiveTitle = skyblockNotificationTextSql(
+      sql`locale`,
+      "objectiveTitle",
+    );
+    const objectiveBody = skyblockNotificationTextSql(
+      sql`locale`,
+      "objectiveBody",
+    );
+    const objectives = await db.execute(sql`
+      WITH candidates AS (
+        SELECT user_row.id AS mobile_user_id, user_row.firebase_uid, user_row.locale,
+               objective.cadence, objective.period_start, objective.objective_id
+          FROM skyblock_periodic_objectives objective
+          JOIN mobile_player_links link
+            ON link.player_id = objective.player_id AND link.is_primary AND link.revoked_at IS NULL
+          JOIN mobile_users user_row
+            ON user_row.firebase_uid = link.firebase_uid AND user_row.deleted_at IS NULL
+          JOIN mobile_notification_preferences preference
+            ON preference.mobile_user_id = user_row.id AND preference.skyblock_objective_ready_enabled
+         WHERE objective.completed_at IS NOT NULL AND objective.claimed_at IS NULL
+           AND ((objective.cadence = 'daily' AND objective.period_start = timezone('UTC', now())::date)
+             OR (objective.cadence = 'weekly' AND objective.period_start = date_trunc('week', timezone('UTC', now()))::date))
+           AND EXISTS (
+             SELECT 1 FROM mobile_devices device
+              WHERE device.mobile_user_id = user_row.id
+                AND device.notifications_authorized AND device.revoked_at IS NULL
+           )
+           AND NOT EXISTS (
+             SELECT 1 FROM mobile_notification_outbox existing
+              WHERE existing.dedupe_key =
+                'skyblock-objective-ready:' || user_row.id || ':' || objective.cadence || ':' ||
+                objective.period_start || ':' || objective.objective_id
+           )
+         ORDER BY objective.updated_at, objective.player_id
+         LIMIT 100
+      )
+      INSERT INTO mobile_notification_outbox (kind, dedupe_key, audience, payload)
+      SELECT 'skyblock_objective_ready',
+             'skyblock-objective-ready:' || mobile_user_id || ':' || cadence || ':' || period_start || ':' || objective_id,
+             jsonb_build_object('firebaseUid', firebase_uid),
+             jsonb_build_object(
+               'title', ${objectiveTitle},
+               'body', ${objectiveBody},
+               'deepLink', 'cookiebuild://skyblock/management/objectives',
+               'data', jsonb_build_object('type', 'skyblock_objective_ready', 'cadence', cadence, 'objectiveId', objective_id)
+             )
+        FROM candidates
+      ON CONFLICT (dedupe_key) WHERE dedupe_key IS NOT NULL DO NOTHING
+      RETURNING id
+    `);
+    objectiveReady = objectives.length;
+  }
+  return {
+    daily: daily.length,
+    weekly: weekly.length,
+    friendOnline: friends.length,
+    workerFull,
+    objectiveReady,
+  };
 }

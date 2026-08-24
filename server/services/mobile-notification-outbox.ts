@@ -65,23 +65,49 @@ interface DeliveryResult {
   excludedOnline: number;
 }
 
-function log(level: "info" | "warn" | "error", event: string, details: Record<string, unknown> = {}) {
+function log(
+  level: "info" | "warn" | "error",
+  event: string,
+  details: Record<string, unknown> = {},
+) {
   console[level]("[mobile-outbox]", JSON.stringify({ event, ...details }));
 }
 
-function integerEnv(name: string, fallback: number, minimum: number, maximum: number) {
+function integerEnv(
+  name: string,
+  fallback: number,
+  minimum: number,
+  maximum: number,
+) {
   const raw = process.env[name];
   if (!raw) return fallback;
   const value = Number(raw);
-  return Number.isInteger(value) && value >= minimum && value <= maximum ? value : fallback;
+  return Number.isInteger(value) && value >= minimum && value <= maximum
+    ? value
+    : fallback;
 }
 
 export function mobileNotificationWorkerConfig(): MobileNotificationWorkerConfig {
-  const batchSize = integerEnv("MOBILE_NOTIFICATION_WORKER_BATCH_SIZE", 10, 1, 20);
-  const concurrency = integerEnv("MOBILE_NOTIFICATION_WORKER_CONCURRENCY", 2, 1, 5);
-  const sendTimeoutMs = integerEnv("MOBILE_NOTIFICATION_SEND_TIMEOUT_MS", 30_000, 5_000, 120_000);
+  const batchSize = integerEnv(
+    "MOBILE_NOTIFICATION_WORKER_BATCH_SIZE",
+    10,
+    1,
+    20,
+  );
+  const concurrency = integerEnv(
+    "MOBILE_NOTIFICATION_WORKER_CONCURRENCY",
+    2,
+    1,
+    5,
+  );
+  const sendTimeoutMs = integerEnv(
+    "MOBILE_NOTIFICATION_SEND_TIMEOUT_MS",
+    30_000,
+    5_000,
+    120_000,
+  );
   const minimumSafeStaleSeconds = Math.ceil(
-    ((sendTimeoutMs * Math.ceil(batchSize / concurrency)) + 30_000) / 1_000,
+    (sendTimeoutMs * Math.ceil(batchSize / concurrency) + 30_000) / 1_000,
   );
   return {
     batchSize,
@@ -121,7 +147,9 @@ async function markExhausted(config: MobileNotificationWorkerConfig) {
   `);
 }
 
-export async function claimMobileNotificationOutboxRows(config: MobileNotificationWorkerConfig) {
+export async function claimMobileNotificationOutboxRows(
+  config: MobileNotificationWorkerConfig,
+) {
   await markExhausted(config);
   const rows = await db.execute<ClaimedOutboxRow>(sql`
     WITH candidates AS (
@@ -157,54 +185,87 @@ export async function claimMobileNotificationOutboxRows(config: MobileNotificati
 }
 
 async function heartbeatRows(rows: ClaimedOutboxRow[]) {
-  await Promise.all(rows.map((row) => db
-    .update(mobileNotificationOutbox)
-    .set({ lockedAt: new Date() })
-    .where(and(
-      eq(mobileNotificationOutbox.id, row.id),
-      eq(mobileNotificationOutbox.status, "processing"),
-      eq(mobileNotificationOutbox.lockToken, row.lockToken),
-    ))));
+  await Promise.all(
+    rows.map((row) =>
+      db
+        .update(mobileNotificationOutbox)
+        .set({ lockedAt: new Date() })
+        .where(
+          and(
+            eq(mobileNotificationOutbox.id, row.id),
+            eq(mobileNotificationOutbox.status, "processing"),
+            eq(mobileNotificationOutbox.lockToken, row.lockToken),
+          ),
+        ),
+    ),
+  );
 }
 
 function preferenceCondition(kind: NotificationPreferenceKind) {
   switch (kind) {
-    case "announcement": return sql`coalesce(${mobileNotificationPreferences.announcementsEnabled}, true)`;
-    case "event": return sql`coalesce(${mobileNotificationPreferences.eventsEnabled}, true)`;
-    case "server_status": return sql`coalesce(${mobileNotificationPreferences.serverStatusEnabled}, true)`;
-    case "social": return sql`coalesce(${mobileNotificationPreferences.socialEnabled}, true)`;
-    case "rally": return sql`coalesce(${mobileNotificationPreferences.rallyEnabled}, false)`;
-    case "weekly_digest": return sql`coalesce(${mobileNotificationPreferences.weeklyDigestEnabled}, true)`;
-    case "daily_reminder": return sql`coalesce(${mobileNotificationPreferences.dailyReminderEnabled}, false)`;
-    case "weekly_reminder": return sql`coalesce(${mobileNotificationPreferences.weeklyReminderEnabled}, false)`;
-    case "friend_online": return sql`coalesce(${mobileNotificationPreferences.friendOnlineEnabled}, false)`;
+    case "announcement":
+      return sql`coalesce(${mobileNotificationPreferences.announcementsEnabled}, true)`;
+    case "event":
+      return sql`coalesce(${mobileNotificationPreferences.eventsEnabled}, true)`;
+    case "server_status":
+      return sql`coalesce(${mobileNotificationPreferences.serverStatusEnabled}, true)`;
+    case "social":
+      return sql`coalesce(${mobileNotificationPreferences.socialEnabled}, true)`;
+    case "rally":
+      return sql`coalesce(${mobileNotificationPreferences.rallyEnabled}, false)`;
+    case "weekly_digest":
+      return sql`coalesce(${mobileNotificationPreferences.weeklyDigestEnabled}, true)`;
+    case "daily_reminder":
+      return sql`coalesce(${mobileNotificationPreferences.dailyReminderEnabled}, false)`;
+    case "weekly_reminder":
+      return sql`coalesce(${mobileNotificationPreferences.weeklyReminderEnabled}, false)`;
+    case "friend_online":
+      return sql`coalesce(${mobileNotificationPreferences.friendOnlineEnabled}, false)`;
+    case "skyblock_market_sold":
+      return sql`coalesce(${mobileNotificationPreferences.skyblockMarketSoldEnabled}, false)`;
+    case "skyblock_worker_full":
+      return sql`coalesce(${mobileNotificationPreferences.skyblockWorkerFullEnabled}, false)`;
+    case "skyblock_objective_ready":
+      return sql`coalesce(${mobileNotificationPreferences.skyblockObjectiveReadyEnabled}, false)`;
   }
 }
 
-async function recipientsFor(audience: NotificationAudience, preference: NotificationPreferenceKind) {
+async function recipientsFor(
+  audience: NotificationAudience,
+  preference: NotificationPreferenceKind,
+) {
   const conditions = [
     eq(mobileDevices.notificationsAuthorized, true),
     isNull(mobileDevices.revokedAt),
     isNull(mobileUsers.deletedAt),
     preferenceCondition(preference),
   ];
-  if (audience.firebaseUid) conditions.push(eq(mobileUsers.firebaseUid, audience.firebaseUid));
-  if (audience.mobileUserIds) conditions.push(inArray(mobileUsers.id, audience.mobileUserIds));
-  if (audience.deviceIds) conditions.push(inArray(mobileDevices.id, audience.deviceIds));
+  if (audience.firebaseUid)
+    conditions.push(eq(mobileUsers.firebaseUid, audience.firebaseUid));
+  if (audience.mobileUserIds)
+    conditions.push(inArray(mobileUsers.id, audience.mobileUserIds));
+  if (audience.deviceIds)
+    conditions.push(inArray(mobileDevices.id, audience.deviceIds));
 
   const rows = await db
     .select({
       deviceId: mobileDevices.id,
       fcmToken: mobileDevices.fcmToken,
-      timezone: sql<string | null>`coalesce(${mobileDevices.timezone}, ${mobileUsers.timezone})`,
+      timezone: sql<
+        string | null
+      >`coalesce(${mobileDevices.timezone}, ${mobileUsers.timezone})`,
       timezoneOffsetMinutes: sql<number>`coalesce(
         ${mobileDevices.timezoneOffsetMinutes},
         ${mobileNotificationPreferences.timezoneOffsetMinutes},
         0
       )`,
-      quietHoursStart: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
+      quietHoursStart: sql<
+        string | null
+      >`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
         THEN ${mobileNotificationPreferences.quietHoursStart} ELSE NULL END`,
-      quietHoursEnd: sql<string | null>`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
+      quietHoursEnd: sql<
+        string | null
+      >`CASE WHEN ${mobileNotificationPreferences.quietHoursEnabled}
         THEN ${mobileNotificationPreferences.quietHoursEnd} ELSE NULL END`,
       linkedPlayerOnline: sql<boolean>`EXISTS (
         SELECT 1
@@ -255,9 +316,10 @@ function multicastMessage(
 ): MulticastMessage {
   const urgent = payload.urgent && preferenceKind(row.kind) === "server_status";
   const rally = preferenceKind(row.kind) === "rally";
-  const collapseId = rally && payload.data.gamemode
-    ? `player-rally-${payload.data.gamemode}`
-    : row.id;
+  const collapseId =
+    rally && payload.data.gamemode
+      ? `player-rally-${payload.data.gamemode}`
+      : row.id;
   const data = {
     ...payload.data,
     outboxId: row.id,
@@ -279,7 +341,9 @@ function multicastMessage(
       notification: {
         channelId: urgent
           ? "cookiebuild_status"
-          : rally ? "cookiebuild_rallies" : "cookiebuild_updates",
+          : rally
+            ? "cookiebuild_rallies"
+            : "cookiebuild_updates",
         clickAction: "FLUTTER_NOTIFICATION_CLICK",
         ...(payload.imageUrl ? { imageUrl: payload.imageUrl } : {}),
       },
@@ -288,12 +352,23 @@ function multicastMessage(
       headers: {
         "apns-collapse-id": collapseId,
         "apns-priority": "10",
-        ...(rally ? {
-          "apns-expiration": String(Math.floor(Date.now() / 1_000) + (5 * 60)),
-        } : {}),
+        ...(rally
+          ? {
+              "apns-expiration": String(
+                Math.floor(Date.now() / 1_000) + 5 * 60,
+              ),
+            }
+          : {}),
       },
-      payload: { aps: { sound: "default", ...(payload.imageUrl ? { mutableContent: true } : {}) } },
-      ...(payload.imageUrl ? { fcmOptions: { imageUrl: payload.imageUrl } } : {}),
+      payload: {
+        aps: {
+          sound: "default",
+          ...(payload.imageUrl ? { mutableContent: true } : {}),
+        },
+      },
+      ...(payload.imageUrl
+        ? { fcmOptions: { imageUrl: payload.imageUrl } }
+        : {}),
     },
   };
 }
@@ -303,8 +378,15 @@ async function deliverNotification(
   config: MobileNotificationWorkerConfig,
 ): Promise<DeliveryResult> {
   const preference = preferenceKind(row.kind);
-  if (!preference) throw new PermanentOutboxError(`Unsupported notification kind: ${row.kind}`);
-  const audience = parseNotificationAudience(row.audience, row.kind, row.attempts > 1);
+  if (!preference)
+    throw new PermanentOutboxError(
+      `Unsupported notification kind: ${row.kind}`,
+    );
+  const audience = parseNotificationAudience(
+    row.audience,
+    row.kind,
+    row.attempts > 1,
+  );
   const payload = parseNotificationPayload(row.payload, row.kind);
   const now = new Date();
   const selected = await recipientsFor(audience, preference);
@@ -338,7 +420,11 @@ async function deliverNotification(
     try {
       const response = await timeout(
         getMessaging(firebaseApp()).sendEachForMulticast(
-          multicastMessage(row, batch.map((recipient) => recipient.fcmToken), payload),
+          multicastMessage(
+            row,
+            batch.map((recipient) => recipient.fcmToken),
+            payload,
+          ),
         ),
         config.sendTimeoutMs,
       );
@@ -355,9 +441,17 @@ async function deliverNotification(
       });
     } catch (error) {
       retry.push(...batch.map((recipient) => recipient.deviceId));
-      retry.push(...recipients.slice(offset + batch.length).map((recipient) => recipient.deviceId));
+      retry.push(
+        ...recipients
+          .slice(offset + batch.length)
+          .map((recipient) => recipient.deviceId),
+      );
       const safe = safeError(error);
-      log("warn", "firebase_send_failed", { outboxId: row.id, code: safe.code, message: safe.message });
+      log("warn", "firebase_send_failed", {
+        outboxId: row.id,
+        code: safe.code,
+        message: safe.message,
+      });
       break;
     }
   }
@@ -391,11 +485,13 @@ async function markDelivered(row: ClaimedOutboxRow, clearAudience = false) {
       lastError: null,
       ...(clearAudience ? { audience: {} } : {}),
     })
-    .where(and(
-      eq(mobileNotificationOutbox.id, row.id),
-      eq(mobileNotificationOutbox.status, "processing"),
-      eq(mobileNotificationOutbox.lockToken, row.lockToken),
-    ))
+    .where(
+      and(
+        eq(mobileNotificationOutbox.id, row.id),
+        eq(mobileNotificationOutbox.status, "processing"),
+        eq(mobileNotificationOutbox.lockToken, row.lockToken),
+      ),
+    )
     .returning({ id: mobileNotificationOutbox.id });
   return updated.length === 1;
 }
@@ -403,16 +499,32 @@ async function markDelivered(row: ClaimedOutboxRow, clearAudience = false) {
 async function markDead(row: ClaimedOutboxRow, reason: string) {
   await db
     .update(mobileNotificationOutbox)
-    .set({ status: "dead", lockedAt: null, lockToken: null, lastError: reason.slice(0, 1_000) })
-    .where(and(
-      eq(mobileNotificationOutbox.id, row.id),
-      eq(mobileNotificationOutbox.status, "processing"),
-      eq(mobileNotificationOutbox.lockToken, row.lockToken),
-    ));
-  log("error", "dead", { outboxId: row.id, kind: row.kind, attempts: row.attempts, reason });
+    .set({
+      status: "dead",
+      lockedAt: null,
+      lockToken: null,
+      lastError: reason.slice(0, 1_000),
+    })
+    .where(
+      and(
+        eq(mobileNotificationOutbox.id, row.id),
+        eq(mobileNotificationOutbox.status, "processing"),
+        eq(mobileNotificationOutbox.lockToken, row.lockToken),
+      ),
+    );
+  log("error", "dead", {
+    outboxId: row.id,
+    kind: row.kind,
+    attempts: row.attempts,
+    reason,
+  });
 }
 
-async function markForRetry(row: ClaimedOutboxRow, reason: string, deviceIds?: string[]) {
+async function markForRetry(
+  row: ClaimedOutboxRow,
+  reason: string,
+  deviceIds?: string[],
+) {
   const availableAt = new Date(Date.now() + retryDelayMs(row.attempts));
   await db
     .update(mobileNotificationOutbox)
@@ -424,11 +536,13 @@ async function markForRetry(row: ClaimedOutboxRow, reason: string, deviceIds?: s
       lastError: reason.slice(0, 1_000),
       ...(deviceIds?.length ? { audience: { deviceIds } } : {}),
     })
-    .where(and(
-      eq(mobileNotificationOutbox.id, row.id),
-      eq(mobileNotificationOutbox.status, "processing"),
-      eq(mobileNotificationOutbox.lockToken, row.lockToken),
-    ));
+    .where(
+      and(
+        eq(mobileNotificationOutbox.id, row.id),
+        eq(mobileNotificationOutbox.status, "processing"),
+        eq(mobileNotificationOutbox.lockToken, row.lockToken),
+      ),
+    );
   log("warn", "retry_scheduled", {
     outboxId: row.id,
     kind: row.kind,
@@ -441,16 +555,18 @@ async function markForRetry(row: ClaimedOutboxRow, reason: string, deviceIds?: s
 
 export async function deliverFirebaseAuthDeletion(
   row: ClaimedOutboxRow,
-  deleteUser: (firebaseUid: string) => Promise<void> = (firebaseUid) => (
-    firebaseAuth().deleteUser(firebaseUid)
-  ),
+  deleteUser: (firebaseUid: string) => Promise<void> = (firebaseUid) =>
+    firebaseAuth().deleteUser(firebaseUid),
 ) {
-  const audience = typeof row.audience === "object" && row.audience !== null
-    ? row.audience as Record<string, unknown>
-    : {};
+  const audience =
+    typeof row.audience === "object" && row.audience !== null
+      ? (row.audience as Record<string, unknown>)
+      : {};
   const uid = audience.firebaseUid;
   if (typeof uid !== "string" || !uid || uid.length > 128) {
-    throw new PermanentOutboxError("firebase_auth_delete audience.firebaseUid is invalid");
+    throw new PermanentOutboxError(
+      "firebase_auth_delete audience.firebaseUid is invalid",
+    );
   }
   try {
     await deleteUser(uid);
@@ -462,18 +578,35 @@ export async function deliverFirebaseAuthDeletion(
   await completeFirebaseIdentityDeletion(row.id, uid);
 }
 
-async function processRow(row: ClaimedOutboxRow, config: MobileNotificationWorkerConfig) {
+async function processRow(
+  row: ClaimedOutboxRow,
+  config: MobileNotificationWorkerConfig,
+) {
   try {
     if (row.kind === "firebase_auth_delete") {
       await deliverFirebaseAuthDeletion(row);
-      log("info", "delivered", { outboxId: row.id, kind: row.kind, attempts: row.attempts });
+      log("info", "delivered", {
+        outboxId: row.id,
+        kind: row.kind,
+        attempts: row.attempts,
+      });
       return;
     }
     const result = await deliverNotification(row, config);
     await disableDevices(result.disabled);
     if (result.retry.length > 0) {
-      if (shouldDeadLetterOutbox(row.kind, row.attempts, config.maxAttempts, false)) {
-        await markDead(row, `Firebase delivery failed for ${result.retry.length} device(s)`);
+      if (
+        shouldDeadLetterOutbox(
+          row.kind,
+          row.attempts,
+          config.maxAttempts,
+          false,
+        )
+      ) {
+        await markDead(
+          row,
+          `Firebase delivery failed for ${result.retry.length} device(s)`,
+        );
       } else {
         await markForRetry(
           row,
@@ -495,15 +628,28 @@ async function processRow(row: ClaimedOutboxRow, config: MobileNotificationWorke
         disabled: result.disabled.length,
         suppressed: result.suppressed,
         excludedOnline: result.excludedOnline,
-        queueLatencyMs: Math.max(0, Date.now() - new Date(row.createdAt).getTime()),
-        readyLatencyMs: Math.max(0, Date.now() - new Date(row.availableAt).getTime()),
+        queueLatencyMs: Math.max(
+          0,
+          Date.now() - new Date(row.createdAt).getTime(),
+        ),
+        readyLatencyMs: Math.max(
+          0,
+          Date.now() - new Date(row.availableAt).getTime(),
+        ),
       });
     }
   } catch (error) {
     const safe = safeError(error);
     const reason = safe.code ? `${safe.code}: ${safe.message}` : safe.message;
     const permanent = error instanceof PermanentOutboxError;
-    if (shouldDeadLetterOutbox(row.kind, row.attempts, config.maxAttempts, permanent)) {
+    if (
+      shouldDeadLetterOutbox(
+        row.kind,
+        row.attempts,
+        config.maxAttempts,
+        permanent,
+      )
+    ) {
       await markDead(row, reason);
     } else {
       await markForRetry(row, reason);
@@ -518,14 +664,20 @@ async function processRow(row: ClaimedOutboxRow, config: MobileNotificationWorke
   }
 }
 
-async function parallelLimit<T>(items: T[], concurrency: number, task: (item: T) => Promise<void>) {
+async function parallelLimit<T>(
+  items: T[],
+  concurrency: number,
+  task: (item: T) => Promise<void>,
+) {
   let next = 0;
-  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, async () => {
-    while (next < items.length) {
-      const item = items[next++];
-      if (item) await task(item);
-    }
-  }));
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+      while (next < items.length) {
+        const item = items[next++];
+        if (item) await task(item);
+      }
+    }),
+  );
 }
 
 export async function processMobileNotificationOutbox(
@@ -534,15 +686,23 @@ export async function processMobileNotificationOutbox(
   const rows = await claimMobileNotificationOutboxRows(config);
   if (rows.length === 0) return 0;
   log("info", "claimed", { count: rows.length });
-  const heartbeat = setInterval(() => {
-    void heartbeatRows(rows).catch((error) => {
-      const safe = safeError(error);
-      log("warn", "heartbeat_failed", { code: safe.code, message: safe.message });
-    });
-  }, Math.max(5_000, Math.floor((config.staleLockSeconds * 1_000) / 3)));
+  const heartbeat = setInterval(
+    () => {
+      void heartbeatRows(rows).catch((error) => {
+        const safe = safeError(error);
+        log("warn", "heartbeat_failed", {
+          code: safe.code,
+          message: safe.message,
+        });
+      });
+    },
+    Math.max(5_000, Math.floor((config.staleLockSeconds * 1_000) / 3)),
+  );
   heartbeat.unref();
   try {
-    await parallelLimit(rows, config.concurrency, (row) => processRow(row, config));
+    await parallelLimit(rows, config.concurrency, (row) =>
+      processRow(row, config),
+    );
   } finally {
     clearInterval(heartbeat);
   }

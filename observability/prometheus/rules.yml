@@ -9,7 +9,7 @@ groups:
           summary: Cookie Build monitor has stopped refreshing
           description: The external Java, Bedrock, website and database canary is stale.
       - alert: CookieBuildObservabilityTargetDown
-        expr: up{job=~"prometheus|cookiebuild-monitor|node|cadvisor|postgres|rabbitmq|alertmanager|loki|alloy"} == 0
+        expr: up{job=~"prometheus|cookiebuild-monitor|node|cadvisor|postgres|sql-exporter|rabbitmq|alertmanager|loki|alloy"} == 0
         for: 5m
         labels: { severity: warning, component: observability }
         annotations:
@@ -62,3 +62,31 @@ groups:
         annotations:
           summary: Cookie Build is rejecting incompatible client versions
           description: "A {{ $labels.edition }} attempt was rejected for an incompatible version (direction={{ $labels.direction }}, client_version={{ $labels.client_version }}, protocol={{ $labels.protocol }}). Check current Paper/Geyser/ViaVersion coverage before changing versions. Repeated attempts are grouped by Alertmanager."
+      - alert: CookieBuildSkyblockStorageInvariantViolation
+        expr: sum(cookiebuild_skyblock_storage_invariant_violations) > 0
+        for: 10m
+        labels: { severity: critical, component: skyblock-economy }
+        annotations:
+          summary: Skyblock storage accounting invariant is broken
+          description: "At least one aggregate storage invariant has remained non-zero for ten minutes. Inspect quantity, reservation, listing reservation and capacity consistency before allowing further market writes."
+      - alert: CookieBuildSkyblockExpiredListingsStuck
+        expr: cookiebuild_skyblock_expired_active_listings > 0
+        for: 15m
+        labels: { severity: warning, component: skyblock-market }
+        annotations:
+          summary: Expired Skyblock listings remain active
+          description: "One or more market listings are still active after expiry. Check the bounded expiry maintenance batch and reserved inventory release."
+      - alert: CookieBuildSkyblockOrphanSessions
+        expr: cookiebuild_skyblock_orphan_sessions > 0
+        for: 15m
+        labels: { severity: warning, component: skyblock-retention }
+        annotations:
+          summary: Skyblock sessions exceeded the twelve-hour safety bound
+          description: "At least one open Skyblock session is older than twelve hours. Reconcile session shutdown/quit handling before using affected rows for retention."
+      - alert: CookieBuildSkyblockMonetaryDrift
+        expr: cookiebuild_skyblock_ledger_balance_drift_coins > 0 or cookiebuild_skyblock_ledger_version_drift_accounts > 0
+        for: 10m
+        labels: { severity: critical, component: skyblock-economy }
+        annotations:
+          summary: Skyblock bank balances drifted from their ledger
+          description: "An island balance no longer matches its latest ledger balance or account version. Market transfers are intentionally excluded from faucet/sink totals, but every bank mutation must remain journaled."
