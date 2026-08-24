@@ -13,10 +13,12 @@ const h3Mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("firebase-admin/messaging", () => ({
-  getMessaging: () => ({ sendEachForMulticast: firebaseMessaging.sendEachForMulticast }),
+  getMessaging: () => ({
+    sendEachForMulticast: firebaseMessaging.sendEachForMulticast,
+  }),
 }));
 vi.mock("h3", async (importOriginal) => ({
-  ...await importOriginal<typeof import("h3")>(),
+  ...(await importOriginal<typeof import("h3")>()),
   readBody: h3Mocks.readBody,
 }));
 
@@ -29,24 +31,59 @@ const PLAYERS = {
   third: { id: "10000000-0000-4000-8000-000000000003", name: "Third" },
   fourth: { id: "10000000-0000-4000-8000-000000000004", name: "Fourth" },
   fifth: { id: "10000000-0000-4000-8000-000000000005", name: "Fifth" },
-  rallyOnline: { id: "10000000-0000-4000-8000-000000000006", name: "AlreadyOnline" },
-  rallyTarget: { id: "10000000-0000-4000-8000-000000000007", name: "RallyTarget" },
-  rallyResponder: { id: "10000000-0000-4000-8000-000000000008", name: "RallyResponder" },
-  rallyBlocked: { id: "10000000-0000-4000-8000-000000000009", name: "RallyBlocked" },
-  suggestionActor: { id: "10000000-0000-4000-8000-000000000010", name: "SuggestionActor" },
-  suggestionBest: { id: "10000000-0000-4000-8000-000000000011", name: "SuggestionBest" },
-  suggestionOther: { id: "10000000-0000-4000-8000-000000000012", name: "SuggestionOther" },
-  suggestionBlocked: { id: "10000000-0000-4000-8000-000000000013", name: "SuggestionBlocked" },
-  suggestionReported: { id: "10000000-0000-4000-8000-000000000014", name: "SuggestionReported" },
-  suggestionPending: { id: "10000000-0000-4000-8000-000000000015", name: "SuggestionPending" },
-  suggestionOld: { id: "10000000-0000-4000-8000-000000000016", name: "SuggestionOld" },
+  rallyOnline: {
+    id: "10000000-0000-4000-8000-000000000006",
+    name: "AlreadyOnline",
+  },
+  rallyTarget: {
+    id: "10000000-0000-4000-8000-000000000007",
+    name: "RallyTarget",
+  },
+  rallyResponder: {
+    id: "10000000-0000-4000-8000-000000000008",
+    name: "RallyResponder",
+  },
+  rallyBlocked: {
+    id: "10000000-0000-4000-8000-000000000009",
+    name: "RallyBlocked",
+  },
+  suggestionActor: {
+    id: "10000000-0000-4000-8000-000000000010",
+    name: "SuggestionActor",
+  },
+  suggestionBest: {
+    id: "10000000-0000-4000-8000-000000000011",
+    name: "SuggestionBest",
+  },
+  suggestionOther: {
+    id: "10000000-0000-4000-8000-000000000012",
+    name: "SuggestionOther",
+  },
+  suggestionBlocked: {
+    id: "10000000-0000-4000-8000-000000000013",
+    name: "SuggestionBlocked",
+  },
+  suggestionReported: {
+    id: "10000000-0000-4000-8000-000000000014",
+    name: "SuggestionReported",
+  },
+  suggestionPending: {
+    id: "10000000-0000-4000-8000-000000000015",
+    name: "SuggestionPending",
+  },
+  suggestionOld: {
+    id: "10000000-0000-4000-8000-000000000016",
+    name: "SuggestionOld",
+  },
 } as const;
 
 type SocialModule = typeof import("../server/services/mobile-social");
 type UserModule = typeof import("../server/services/mobile-user");
 type DatabaseModule = typeof import("../db/client");
-type RetentionModule = typeof import("../server/services/mobile-data-retention");
-type NotificationOutboxModule = typeof import("../server/services/mobile-notification-outbox");
+type RetentionModule =
+  typeof import("../server/services/mobile-data-retention");
+type NotificationOutboxModule =
+  typeof import("../server/services/mobile-notification-outbox");
 type RalliesModule = typeof import("../server/services/mobile-rallies");
 
 function eventFor(uid: string) {
@@ -116,17 +153,22 @@ integration("mobile social service", () => {
       "0002_mobile_social.sql",
       "0003_player_rally.sql",
       "0006_mobile_engagement.sql",
+      "0014_skyblock_retention.sql",
       "0009_player_rally_responses.sql",
       "0010_friend_suggestions.sql",
     ]) {
-      const migration = await readFile(new URL(`../drizzle/${migrationName}`, import.meta.url), "utf8");
+      const migration = await readFile(
+        new URL(`../drizzle/${migrationName}`, import.meta.url),
+        "utf8",
+      );
       await setupSql.unsafe(migration);
     }
     databaseModule = await import("../db/client");
     users = await import("../server/services/mobile-user");
     social = await import("../server/services/mobile-social");
     retention = await import("../server/services/mobile-data-retention");
-    notificationOutbox = await import("../server/services/mobile-notification-outbox");
+    notificationOutbox =
+      await import("../server/services/mobile-notification-outbox");
     rallies = await import("../server/services/mobile-rallies");
     vi.stubGlobal("defineEventHandler", (handler: unknown) => handler);
     vi.stubGlobal("setHeader", () => undefined);
@@ -140,10 +182,12 @@ integration("mobile social service", () => {
 
   it("requires an active primary Minecraft link for every social mutation", async () => {
     await provision("unlinked-user");
-    await expect(social.sendFriendRequest("unlinked-user", PLAYERS.friend.name))
-      .rejects.toMatchObject({ statusCode: 428 });
-    await expect(social.createParty("unlinked-user"))
-      .rejects.toMatchObject({ statusCode: 428 });
+    await expect(
+      social.sendFriendRequest("unlinked-user", PLAYERS.friend.name),
+    ).rejects.toMatchObject({ statusCode: 428 });
+    await expect(social.createParty("unlinked-user")).rejects.toMatchObject({
+      statusCode: 428,
+    });
   });
 
   it("canonicalizes concurrent opposite friend requests and exposes presence only as friendship data", async () => {
@@ -155,7 +199,10 @@ integration("mobile social service", () => {
       social.sendFriendRequest("leader-user", "Friend"),
       social.sendFriendRequest("friend-user", "Leader"),
     ]);
-    expect(results.map((result) => result.status).sort()).toEqual(["accepted", "pending"]);
+    expect(results.map((result) => result.status).sort()).toEqual([
+      "accepted",
+      "pending",
+    ]);
     const friendships = await setupSql<{ status: string; count: number }[]>`
       SELECT status, count(*)::int AS count FROM player_friendships GROUP BY status
     `;
@@ -172,11 +219,15 @@ integration("mobile social service", () => {
       INSERT INTO player_sessions (player_id, start_time) VALUES (${PLAYERS.third.id}, now())
     `;
     const snapshot = await social.friendsSnapshot("leader-user");
-    expect(snapshot.friends).toEqual([expect.objectContaining({
-      playerId: PLAYERS.friend.id,
-      online: true,
-    })]);
-    expect(snapshot.friends.some((friend) => friend.playerId === PLAYERS.third.id)).toBe(false);
+    expect(snapshot.friends).toEqual([
+      expect.objectContaining({
+        playerId: PLAYERS.friend.id,
+        online: true,
+      }),
+    ]);
+    expect(
+      snapshot.friends.some((friend) => friend.playerId === PLAYERS.third.id),
+    ).toBe(false);
   });
 
   it("suggests only safe players from completed recent shared matches", async () => {
@@ -248,29 +299,48 @@ integration("mobile social service", () => {
       "reason",
     ]);
 
-    await expect(social.sendFriendRequest("suggestion-actor-user", {
-      playerId: PLAYERS.suggestionOld.id,
-    })).rejects.toMatchObject({ statusCode: 404, statusMessage: "Friend suggestion unavailable" });
-    await expect(social.sendFriendRequest("suggestion-actor-user", {
-      playerId: PLAYERS.suggestionReported.id,
-    })).rejects.toMatchObject({ statusCode: 404, statusMessage: "Friend suggestion unavailable" });
+    await expect(
+      social.sendFriendRequest("suggestion-actor-user", {
+        playerId: PLAYERS.suggestionOld.id,
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 404,
+      statusMessage: "Friend suggestion unavailable",
+    });
+    await expect(
+      social.sendFriendRequest("suggestion-actor-user", {
+        playerId: PLAYERS.suggestionReported.id,
+      }),
+    ).rejects.toMatchObject({
+      statusCode: 404,
+      statusMessage: "Friend suggestion unavailable",
+    });
 
-    await expect(social.sendFriendRequest("suggestion-actor-user", {
-      playerId: PLAYERS.suggestionOther.id,
-    })).resolves.toMatchObject({ status: "pending" });
-    await expect(social.deleteFriendRequest(
-      "suggestion-other-user",
-      PLAYERS.suggestionActor.id,
-    )).resolves.toEqual({ deleted: true });
+    await expect(
+      social.sendFriendRequest("suggestion-actor-user", {
+        playerId: PLAYERS.suggestionOther.id,
+      }),
+    ).resolves.toMatchObject({ status: "pending" });
+    await expect(
+      social.deleteFriendRequest(
+        "suggestion-other-user",
+        PLAYERS.suggestionActor.id,
+      ),
+    ).resolves.toEqual({ deleted: true });
     const afterDecline = await social.friendsSnapshot("suggestion-actor-user");
-    expect(afterDecline.suggestions.some(
-      (suggestion) => suggestion.playerId === PLAYERS.suggestionOther.id,
-    )).toBe(false);
-    await expect(social.sendFriendRequest("suggestion-actor-user", {
-      playerId: PLAYERS.suggestionOther.id,
-    })).rejects.toMatchObject({
+    expect(
+      afterDecline.suggestions.some(
+        (suggestion) => suggestion.playerId === PLAYERS.suggestionOther.id,
+      ),
+    ).toBe(false);
+    await expect(
+      social.sendFriendRequest("suggestion-actor-user", {
+        playerId: PLAYERS.suggestionOther.id,
+      }),
+    ).rejects.toMatchObject({
       statusCode: 409,
-      statusMessage: "Please wait before sending this player another friend request",
+      statusMessage:
+        "Please wait before sending this player another friend request",
     });
   });
 
@@ -283,11 +353,16 @@ integration("mobile social service", () => {
       const name = `RequestTarget${index}`;
       await setupSql`INSERT INTO playerdata (id, name) VALUES (${id}, ${name})`;
       if (index < 10) {
-        await expect(social.sendFriendRequest("request-limiter-user", name))
-          .resolves.toMatchObject({ playerId: id, status: "pending" });
+        await expect(
+          social.sendFriendRequest("request-limiter-user", name),
+        ).resolves.toMatchObject({ playerId: id, status: "pending" });
       } else {
-        await expect(social.sendFriendRequest("request-limiter-user", name))
-          .rejects.toMatchObject({ statusCode: 409, statusMessage: "Too many pending friend requests" });
+        await expect(
+          social.sendFriendRequest("request-limiter-user", name),
+        ).rejects.toMatchObject({
+          statusCode: 409,
+          statusMessage: "Too many pending friend requests",
+        });
       }
     }
   });
@@ -295,12 +370,21 @@ integration("mobile social service", () => {
   it("makes block and enum-only report operations race-safe and abuse-limited", async () => {
     const blocked = await social.blockPlayer("leader-user", PLAYERS.friend.id);
     expect(blocked.playerId).toBe(PLAYERS.friend.id);
-    await expect(social.sendFriendRequest("friend-user", "Leader"))
-      .rejects.toMatchObject({ statusCode: 409 });
-    const report = await social.reportPlayer("leader-user", PLAYERS.third.id, "cheating");
-    expect(report).toMatchObject({ playerId: PLAYERS.third.id, reason: "cheating" });
-    await expect(social.reportPlayer("leader-user", PLAYERS.third.id, "cheating"))
-      .rejects.toMatchObject({ statusCode: 409 });
+    await expect(
+      social.sendFriendRequest("friend-user", "Leader"),
+    ).rejects.toMatchObject({ statusCode: 409 });
+    const report = await social.reportPlayer(
+      "leader-user",
+      PLAYERS.third.id,
+      "cheating",
+    );
+    expect(report).toMatchObject({
+      playerId: PLAYERS.third.id,
+      reason: "cheating",
+    });
+    await expect(
+      social.reportPlayer("leader-user", PLAYERS.third.id, "cheating"),
+    ).rejects.toMatchObject({ statusCode: 409 });
     await social.unblockPlayer("leader-user", PLAYERS.friend.id);
   });
 
@@ -314,7 +398,10 @@ integration("mobile social service", () => {
       social.inviteToParty("leader-user", PLAYERS.fourth.name),
       social.inviteToParty("leader-user", PLAYERS.fifth.name),
     ]);
-    const duplicate = await social.inviteToParty("leader-user", PLAYERS.fifth.name);
+    const duplicate = await social.inviteToParty(
+      "leader-user",
+      PLAYERS.fifth.name,
+    );
     expect(duplicate.id).toBe(invites[3]!.id);
 
     const outcomes = await Promise.allSettled([
@@ -323,19 +410,34 @@ integration("mobile social service", () => {
       social.acceptPartyInvite("fourth-user", invites[2]!.id),
       social.acceptPartyInvite("fifth-user", invites[3]!.id),
     ]);
-    expect(outcomes.filter((outcome) => outcome.status === "fulfilled")).toHaveLength(3);
-    expect(outcomes.filter((outcome) => outcome.status === "rejected")).toHaveLength(1);
-    const rejectedIndex = outcomes.findIndex((outcome) => outcome.status === "rejected");
+    expect(
+      outcomes.filter((outcome) => outcome.status === "fulfilled"),
+    ).toHaveLength(3);
+    expect(
+      outcomes.filter((outcome) => outcome.status === "rejected"),
+    ).toHaveLength(1);
+    const rejectedIndex = outcomes.findIndex(
+      (outcome) => outcome.status === "rejected",
+    );
     const rejectedInvite = invites[rejectedIndex]!;
-    const rejectedUid = ["friend-user", "third-user", "fourth-user", "fifth-user"][rejectedIndex]!;
+    const rejectedUid = [
+      "friend-user",
+      "third-user",
+      "fourth-user",
+      "fifth-user",
+    ][rejectedIndex]!;
     await setupSql`
       UPDATE player_party_invites
          SET created_at = now() - interval '20 minutes',
              expires_at = now() - interval '1 minute'
        WHERE id = ${rejectedInvite.id}
     `;
-    await expect(social.acceptPartyInvite(rejectedUid, rejectedInvite.id))
-      .rejects.toMatchObject({ statusCode: 409, statusMessage: "Party invite expired" });
+    await expect(
+      social.acceptPartyInvite(rejectedUid, rejectedInvite.id),
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      statusMessage: "Party invite expired",
+    });
     const expired = await setupSql<{ status: string }[]>`
       SELECT status FROM player_party_invites WHERE id = ${rejectedInvite.id}
     `;
@@ -422,12 +524,14 @@ integration("mobile social service", () => {
     `;
 
     await expect(retention.pruneExpiredMobileData()).resolves.toBe(true);
-    const preserved = await setupSql<{
-      users: number;
-      authRows: number;
-      ordinaryRows: number;
-      cooldowns: number;
-    }[]>`
+    const preserved = await setupSql<
+      {
+        users: number;
+        authRows: number;
+        ordinaryRows: number;
+        cooldowns: number;
+      }[]
+    >`
       SELECT
         (SELECT count(*)::int FROM mobile_users WHERE id = ${userId}) AS users,
         (SELECT count(*)::int FROM mobile_notification_outbox WHERE id = ${authOutboxId}) AS "authRows",
@@ -436,7 +540,12 @@ integration("mobile social service", () => {
           WHERE requester_player_id = ${PLAYERS.leader.id}
             AND target_player_id = ${PLAYERS.third.id}) AS cooldowns
     `;
-    expect(preserved[0]).toEqual({ users: 1, authRows: 1, ordinaryRows: 0, cooldowns: 0 });
+    expect(preserved[0]).toEqual({
+      users: 1,
+      authRows: 1,
+      ordinaryRows: 0,
+      cooldowns: 0,
+    });
 
     await setupSql`
       UPDATE mobile_notification_outbox
@@ -452,11 +561,18 @@ integration("mobile social service", () => {
 
   it("delivers a structured rally only to active opted-in installations and deduplicates its ID", async () => {
     firebaseMessaging.sendEachForMulticast.mockClear();
-    firebaseMessaging.sendEachForMulticast.mockImplementationOnce(async (message) => ({
-      responses: message.tokens.map((token) => token === "rally-retry-token"
-        ? { success: false, error: { code: "messaging/server-unavailable" } }
-        : { success: true }),
-    }));
+    firebaseMessaging.sendEachForMulticast.mockImplementationOnce(
+      async (message) => ({
+        responses: message.tokens.map((token) =>
+          token === "rally-retry-token"
+            ? {
+                success: false,
+                error: { code: "messaging/server-unavailable" },
+              }
+            : { success: true },
+        ),
+      }),
+    );
     await setupSql`DELETE FROM mobile_notification_outbox`;
     for (const uid of [
       "rally-enabled-user",
@@ -465,7 +581,10 @@ integration("mobile social service", () => {
       "rally-revoked-device-user",
       "rally-online-user",
     ]) {
-      await provision(uid, uid === "rally-online-user" ? PLAYERS.rallyOnline.id : undefined);
+      await provision(
+        uid,
+        uid === "rally-online-user" ? PLAYERS.rallyOnline.id : undefined,
+      );
     }
     await setupSql`
       UPDATE mobile_notification_preferences preferences
@@ -519,41 +638,51 @@ integration("mobile social service", () => {
       RETURNING id
     `;
 
-    await expect(notificationOutbox.processMobileNotificationOutbox({
-      batchSize: 10,
-      concurrency: 1,
-      maxAttempts: 3,
-      staleLockSeconds: 60,
-      sendTimeoutMs: 5_000,
-    })).resolves.toBe(1);
+    await expect(
+      notificationOutbox.processMobileNotificationOutbox({
+        batchSize: 10,
+        concurrency: 1,
+        maxAttempts: 3,
+        staleLockSeconds: 60,
+        sendTimeoutMs: 5_000,
+      }),
+    ).resolves.toBe(1);
 
     expect(firebaseMessaging.sendEachForMulticast).toHaveBeenCalledTimes(1);
-    expect(firebaseMessaging.sendEachForMulticast).toHaveBeenCalledWith(expect.objectContaining({
-      tokens: expect.arrayContaining(["rally-enabled-token", "rally-retry-token"]),
-      android: expect.objectContaining({
-        collapseKey: "player-rally-pitchout",
-        priority: "high",
-        ttl: 300_000,
-        notification: expect.objectContaining({ channelId: "cookiebuild_rallies" }),
-      }),
-      apns: expect.objectContaining({
-        headers: expect.objectContaining({
-          "apns-collapse-id": "player-rally-pitchout",
-          "apns-priority": "10",
+    expect(firebaseMessaging.sendEachForMulticast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tokens: expect.arrayContaining([
+          "rally-enabled-token",
+          "rally-retry-token",
+        ]),
+        android: expect.objectContaining({
+          collapseKey: "player-rally-pitchout",
+          priority: "high",
+          ttl: 300_000,
+          notification: expect.objectContaining({
+            channelId: "cookiebuild_rallies",
+          }),
+        }),
+        apns: expect.objectContaining({
+          headers: expect.objectContaining({
+            "apns-collapse-id": "player-rally-pitchout",
+            "apns-priority": "10",
+          }),
+        }),
+        notification: {
+          title: "Players needed for Pitchout",
+          body: "1 queued, 3 more needed to start.",
+        },
+        data: expect.objectContaining({
+          type: "player_rally",
+          rallyId,
+          gamemode: "pitchout",
         }),
       }),
-      notification: {
-        title: "Players needed for Pitchout",
-        body: "1 queued, 3 more needed to start.",
-      },
-      data: expect.objectContaining({
-        type: "player_rally",
-        rallyId,
-        gamemode: "pitchout",
-      }),
-    }));
-    expect(firebaseMessaging.sendEachForMulticast.mock.calls[0]?.[0].tokens)
-      .not.toContain("rally-online-token");
+    );
+    expect(
+      firebaseMessaging.sendEachForMulticast.mock.calls[0]?.[0].tokens,
+    ).not.toContain("rally-online-token");
     const pending = await setupSql<{ status: string; retryDevices: number }[]>`
       SELECT status,
              jsonb_array_length(audience -> 'deviceIds') AS "retryDevices"
@@ -565,16 +694,19 @@ integration("mobile social service", () => {
     await setupSql`
       UPDATE mobile_notification_outbox SET available_at = now() WHERE id = ${rows[0]!.id}
     `;
-    await expect(notificationOutbox.processMobileNotificationOutbox({
-      batchSize: 10,
-      concurrency: 1,
-      maxAttempts: 3,
-      staleLockSeconds: 60,
-      sendTimeoutMs: 5_000,
-    })).resolves.toBe(1);
+    await expect(
+      notificationOutbox.processMobileNotificationOutbox({
+        batchSize: 10,
+        concurrency: 1,
+        maxAttempts: 3,
+        staleLockSeconds: 60,
+        sendTimeoutMs: 5_000,
+      }),
+    ).resolves.toBe(1);
     expect(firebaseMessaging.sendEachForMulticast).toHaveBeenCalledTimes(2);
-    expect(firebaseMessaging.sendEachForMulticast.mock.calls[1]?.[0].tokens)
-      .toEqual(["rally-retry-token"]);
+    expect(
+      firebaseMessaging.sendEachForMulticast.mock.calls[1]?.[0].tokens,
+    ).toEqual(["rally-retry-token"]);
     const delivered = await setupSql<{ status: string }[]>`
       SELECT status FROM mobile_notification_outbox WHERE id = ${rows[0]!.id}
     `;
@@ -590,7 +722,8 @@ integration("mobile social service", () => {
     const uid = "rally-preference-api-user";
     await provision(uid);
     h3Mocks.readBody.mockResolvedValueOnce({ rallyEnabled: true });
-    const route = await import("../server/api/mobile/v1/notification-preferences.put");
+    const route =
+      await import("../server/api/mobile/v1/notification-preferences.put");
 
     const response = await route.default(eventFor(uid));
 
@@ -631,9 +764,13 @@ integration("mobile social service", () => {
       )
     `;
 
-    await expect(rallies.getPlayerRally("rally-unlinked-user", loginRallyId))
-      .rejects.toMatchObject({ statusCode: 428 });
-    const initial = await rallies.getPlayerRally("rally-responder-user", loginRallyId);
+    await expect(
+      rallies.getPlayerRally("rally-unlinked-user", loginRallyId),
+    ).rejects.toMatchObject({ statusCode: 428 });
+    const initial = await rallies.getPlayerRally(
+      "rally-responder-user",
+      loginRallyId,
+    );
     expect(initial).toEqual({
       id: loginRallyId,
       source: "login",
@@ -649,23 +786,33 @@ integration("mobile social service", () => {
       loginRallyId,
       "joining",
     );
-    expect(first).toMatchObject({ created: true, data: { response: "joining" } });
+    expect(first).toMatchObject({
+      created: true,
+      data: { response: "joining" },
+    });
     const retry = await rallies.respondToPlayerRally(
       "rally-responder-user",
       loginRallyId,
       "joining",
     );
-    expect(retry).toMatchObject({ created: false, data: { response: "joining" } });
-    await expect(rallies.respondToPlayerRally(
-      "rally-responder-user",
-      loginRallyId,
-      "unavailable",
-    )).rejects.toMatchObject({ statusCode: 409 });
-    await expect(rallies.respondToPlayerRally(
-      "rally-target-user",
-      loginRallyId,
-      "joining",
-    )).rejects.toMatchObject({ statusCode: 409 });
+    expect(retry).toMatchObject({
+      created: false,
+      data: { response: "joining" },
+    });
+    await expect(
+      rallies.respondToPlayerRally(
+        "rally-responder-user",
+        loginRallyId,
+        "unavailable",
+      ),
+    ).rejects.toMatchObject({ statusCode: 409 });
+    await expect(
+      rallies.respondToPlayerRally(
+        "rally-target-user",
+        loginRallyId,
+        "joining",
+      ),
+    ).rejects.toMatchObject({ statusCode: 409 });
 
     const responseCount = await setupSql<{ count: number }[]>`
       SELECT count(*)::int AS count
@@ -695,27 +842,33 @@ integration("mobile social service", () => {
         now() - interval '1 minute', now() + interval '5 minutes'
       )
     `;
-    await expect(rallies.respondToPlayerRally(
-      "rally-blocked-user",
-      automaticRallyId,
-      "unavailable",
-    )).resolves.toMatchObject({ created: true, data: { source: "automatic" } });
+    await expect(
+      rallies.respondToPlayerRally(
+        "rally-blocked-user",
+        automaticRallyId,
+        "unavailable",
+      ),
+    ).resolves.toMatchObject({ created: true, data: { source: "automatic" } });
 
     await setupSql`UPDATE player_rallies SET expires_at = now() - interval '1 second'
                     WHERE id = ${loginRallyId}`;
-    await expect(rallies.getPlayerRally("rally-responder-user", loginRallyId))
-      .rejects.toMatchObject({ statusCode: 410 });
+    await expect(
+      rallies.getPlayerRally("rally-responder-user", loginRallyId),
+    ).rejects.toMatchObject({ statusCode: 410 });
 
     await setupSql`DELETE FROM mobile_notification_outbox WHERE id = ${automaticOutboxId}`;
-    const cascadeCounts = await setupSql<{ rallies: number; responses: number }[]>`
+    const cascadeCounts = await setupSql<
+      { rallies: number; responses: number }[]
+    >`
       SELECT
         (SELECT count(*)::int FROM player_rallies WHERE id = ${automaticRallyId}) AS rallies,
         (SELECT count(*)::int FROM player_rally_responses
           WHERE rally_id = ${automaticRallyId}) AS responses
     `;
     expect(cascadeCounts).toEqual([{ rallies: 0, responses: 0 }]);
-    await expect(rallies.getPlayerRally("rally-blocked-user", automaticRallyId))
-      .rejects.toMatchObject({ statusCode: 404 });
+    await expect(
+      rallies.getPlayerRally("rally-blocked-user", automaticRallyId),
+    ).rejects.toMatchObject({ statusCode: 404 });
 
     const blockedRallyId = "20000000-0000-4000-8000-000000000003";
     const blockedOutboxId = "30000000-0000-4000-8000-000000000003";
@@ -742,13 +895,16 @@ integration("mobile social service", () => {
       INSERT INTO player_blocks (blocker_player_id, blocked_player_id)
       VALUES (${PLAYERS.rallyTarget.id}, ${PLAYERS.rallyBlocked.id})
     `;
-    await expect(rallies.getPlayerRally("rally-blocked-user", blockedRallyId))
-      .rejects.toMatchObject({ statusCode: 404 });
-    await expect(rallies.respondToPlayerRally(
-      "rally-blocked-user",
-      blockedRallyId,
-      "joining",
-    )).rejects.toMatchObject({ statusCode: 404 });
+    await expect(
+      rallies.getPlayerRally("rally-blocked-user", blockedRallyId),
+    ).rejects.toMatchObject({ statusCode: 404 });
+    await expect(
+      rallies.respondToPlayerRally(
+        "rally-blocked-user",
+        blockedRallyId,
+        "joining",
+      ),
+    ).rejects.toMatchObject({ statusCode: 404 });
     await setupSql`
       DELETE FROM player_blocks
        WHERE blocker_player_id = ${PLAYERS.rallyTarget.id}
@@ -758,11 +914,14 @@ integration("mobile social service", () => {
       INSERT INTO player_blocks (blocker_player_id, blocked_player_id)
       VALUES (${PLAYERS.rallyBlocked.id}, ${PLAYERS.rallyTarget.id})
     `;
-    await expect(rallies.getPlayerRally("rally-blocked-user", blockedRallyId))
-      .rejects.toMatchObject({ statusCode: 404 });
-    await expect(rallies.getPlayerRally(
-      "rally-responder-user",
-      "20000000-0000-4000-8000-000000000099",
-    )).rejects.toMatchObject({ statusCode: 404 });
+    await expect(
+      rallies.getPlayerRally("rally-blocked-user", blockedRallyId),
+    ).rejects.toMatchObject({ statusCode: 404 });
+    await expect(
+      rallies.getPlayerRally(
+        "rally-responder-user",
+        "20000000-0000-4000-8000-000000000099",
+      ),
+    ).rejects.toMatchObject({ statusCode: 404 });
   });
 });

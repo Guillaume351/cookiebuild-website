@@ -9,7 +9,7 @@ export default defineNitroPlugin((nitroApp) => {
     running = true;
     try {
       const queued = await enqueueMobileEngagementNotifications();
-      if (queued.daily + queued.weekly + queued.friendOnline > 0) {
+      if (queued.daily + queued.weekly + queued.friendOnline + queued.workerFull + queued.objectiveReady > 0) {
         console.info("[mobile-engagement]", JSON.stringify({ event: "notifications_queued", ...queued }));
       }
     } catch (error) {

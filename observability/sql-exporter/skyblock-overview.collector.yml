@@ -1,0 +1,151 @@
+collector_name: skyblock_overview
+min_interval: 5m
+
+metrics:
+  - metric_name: cookiebuild_skyblock_sessions_24h
+    type: gauge
+    help: Completed and open Skyblock sessions started in the last 24 hours.
+    values: [sessions_24h]
+    query_ref: session_summary
+  - metric_name: cookiebuild_skyblock_active_players_24h
+    type: gauge
+    help: Distinct Skyblock players with a session started in the last 24 hours.
+    values: [active_players_24h]
+    query_ref: session_summary
+  - metric_name: cookiebuild_skyblock_play_seconds_24h
+    type: gauge
+    help: Completed Skyblock play seconds attributed to sessions started in the last 24 hours.
+    values: [play_seconds_24h]
+    query_ref: session_summary
+  - metric_name: cookiebuild_skyblock_session_p50_seconds_7d
+    type: gauge
+    help: Median completed Skyblock session duration over the last seven days.
+    values: [p50_session_seconds_7d]
+    query_ref: session_summary
+  - metric_name: cookiebuild_skyblock_session_p90_seconds_7d
+    type: gauge
+    help: P90 completed Skyblock session duration over the last seven days.
+    values: [p90_session_seconds_7d]
+    query_ref: session_summary
+  - metric_name: cookiebuild_skyblock_open_sessions
+    type: gauge
+    help: Skyblock sessions which have not been closed yet.
+    values: [open_sessions]
+    query_ref: session_summary
+
+  - metric_name: cookiebuild_skyblock_island_accounts
+    type: gauge
+    help: Number of Skyblock island bank accounts.
+    values: [island_accounts]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_total_balance_coins
+    type: gauge
+    help: Total liquid coins held by all Skyblock island banks.
+    values: [total_balance_coins]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_median_balance_coins
+    type: gauge
+    help: Median Skyblock island bank balance.
+    values: [median_balance_coins]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_p90_balance_coins
+    type: gauge
+    help: P90 Skyblock island bank balance.
+    values: [p90_balance_coins]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_largest_balance_coins
+    type: gauge
+    help: Largest Skyblock island bank balance.
+    values: [largest_balance_coins]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_active_market_listings
+    type: gauge
+    help: Non-expired active Skyblock market listings.
+    values: [active_listings]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_market_sales_24h
+    type: gauge
+    help: Completed Skyblock market sales in the last 24 hours.
+    values: [market_sales_24h]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_market_volume_coins_24h
+    type: gauge
+    help: Gross Skyblock market volume in the last 24 hours.
+    values: [market_volume_coins_24h]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_minted_coins_24h
+    type: gauge
+    help: Coins created by actual Skyblock faucets in the last 24 hours, excluding market transfers.
+    values: [minted_coins_24h]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_burned_coins_24h
+    type: gauge
+    help: Coins destroyed by actual Skyblock sinks in the last 24 hours, including market fees.
+    values: [burned_coins_24h]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_market_fee_coins_24h
+    type: gauge
+    help: Skyblock market fees destroyed in the last 24 hours.
+    values: [market_fee_coins_24h]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_accounts_without_ledger
+    type: gauge
+    help: Island accounts with no ledger entry, including legitimate migration opening balances.
+    values: [accounts_without_ledger]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_ledger_balance_drift_coins
+    type: gauge
+    help: Absolute coin drift between island accounts and their latest ledger balances.
+    values: [ledger_balance_drift_coins]
+    query_ref: liquidity
+  - metric_name: cookiebuild_skyblock_ledger_version_drift_accounts
+    type: gauge
+    help: Island accounts whose version differs from their ledger entry count.
+    values: [ledger_version_drift_accounts]
+    query_ref: liquidity
+
+  - metric_name: cookiebuild_skyblock_storage_invariant_violations
+    type: gauge
+    help: Skyblock storage invariant violations by bounded invariant kind.
+    key_labels: [kind]
+    values: [violations]
+    query_ref: invariants
+  - metric_name: cookiebuild_skyblock_expired_active_listings
+    type: gauge
+    help: Active Skyblock listings which are already past their expiry time.
+    values: [expired_active_listings]
+    query_ref: invariant_summary
+  - metric_name: cookiebuild_skyblock_orphan_sessions
+    type: gauge
+    help: Open Skyblock sessions older than the documented twelve-hour safety bound.
+    values: [orphan_sessions]
+    query_ref: invariant_summary
+
+queries:
+  - query_name: session_summary
+    query: |
+      SELECT sessions_24h, active_players_24h, play_seconds_24h,
+             p50_session_seconds_7d, p90_session_seconds_7d, open_sessions
+      FROM metrics.skyblock_session_summary
+  - query_name: liquidity
+    query: |
+      SELECT island_accounts, total_balance_coins, median_balance_coins,
+             p90_balance_coins, largest_balance_coins, accounts_without_ledger,
+             ledger_balance_drift_coins, ledger_version_drift_accounts,
+             active_listings, market_sales_24h, market_volume_coins_24h,
+             minted_coins_24h, burned_coins_24h, market_fee_coins_24h
+      FROM metrics.skyblock_liquidity
+  - query_name: invariants
+    query: |
+      SELECT kind, violations
+      FROM metrics.skyblock_invariants
+      CROSS JOIN LATERAL (VALUES
+        ('negative_storage', negative_storage_rows),
+        ('invalid_reservation', invalid_storage_reservations),
+        ('listing_reservation_mismatch', listing_reservation_mismatches),
+        ('capacity_exceeded', storage_capacity_violations)
+      ) AS invariant(kind, violations)
+  - query_name: invariant_summary
+    query: |
+      SELECT expired_active_listings, orphan_sessions
+      FROM metrics.skyblock_invariants

@@ -55,6 +55,7 @@ const navigation = [
   { to: "/admin", label: "Vue d’ensemble", permission: "dashboard:read" },
   { to: "/admin/runtime", label: "Temps réel", permission: "runtime:read" },
   { to: "/admin/observability", label: "Observabilité", permission: "dashboard:read" },
+  { to: "/admin/skyblock-economy", label: "Économie Skyblock", permission: "dashboard:read" },
   { to: "/admin/reports", label: "Signalements", permission: "reports:read" },
   { to: "/admin/content", label: "Contenus", permission: "content:read" },
   { to: "/admin/notifications", label: "Notifications", permission: "notifications:read" },

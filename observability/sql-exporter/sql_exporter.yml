@@ -1,0 +1,20 @@
+global:
+  scrape_timeout: 8s
+  scrape_timeout_offset: 500ms
+  min_interval: 5m
+  warmup_delay: 2s
+  max_connections: 1
+  max_idle_connections: 1
+  max_connection_lifetime: 10m
+  enable_query_metrics: false
+
+target:
+  name: cookiebuild_skyblock
+  # Runtime overrides this fail-closed placeholder with SQLEXPORTER_TARGET_DSN,
+  # read from the mounted sql_exporter_dsn secret by docker-compose.yml.
+  data_source_name: "postgresql://cookiebuild_metrics@postgres:5432/cookiebuild_prod?sslmode=disable"
+  collectors: [skyblock_overview, skyblock_retention]
+  enable_ping: true
+
+collector_files:
+  - /etc/sql-exporter/*.collector.yml

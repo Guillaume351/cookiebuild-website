@@ -152,6 +152,26 @@ services:
         limits: { cpus: "0.10", memory: 96M }
         reservations: { memory: 16M }
 
+  sql-exporter:
+    image: burningalchemist/sql_exporter:0.24.4
+    user: "65534:65534"
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        test -s /run/secrets/sql_exporter_dsn
+        export SQLEXPORTER_TARGET_DSN="$$(tr -d '\r\n' </run/secrets/sql_exporter_dsn)"
+        exec /bin/sql_exporter --config.file=/etc/sql-exporter/sql_exporter.yml
+    volumes:
+      - /home/ubuntu/Volumes/cookiebuild/observability/config/sql-exporter:/etc/sql-exporter:ro
+      - /home/ubuntu/Volumes/cookiebuild/observability/secrets/sql_exporter_dsn:/run/secrets/sql_exporter_dsn:ro
+    networks: [cookiebuild]
+    deploy:
+      replicas: 1
+      restart_policy: { condition: any, delay: 5s }
+      resources:
+        limits: { cpus: "0.10", memory: 96M }
+        reservations: { memory: 16M }
+
 networks:
   cookiebuild:
     external: true

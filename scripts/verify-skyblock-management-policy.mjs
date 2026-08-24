@@ -35,7 +35,7 @@ const gameplayGenerator = contract.generator.tiers.map((tier) => ({
 assert.deepEqual(gameplayGenerator, contract.generator.tiers, "Generator policy drifted from mobile contract");
 
 const gameplayQuests = [...questSource.matchAll(
-  /new Quest\("([a-z0-9_]+)",\s*(\d+),\s*"([a-z_]+)",\s*"([a-z0-9_]+)",\s*(\d+),\s*(\d+)\)/g,
+  /new Quest\("([a-z0-9_]+)",\s*(\d+),\s*"([a-z_]+)",\s*"([a-z0-9_]+)",\s*(\d+),\s*(\d+),\s*(true|false)\)/g,
 )].map((match) => ({
   id: match[1],
   chapter: Number(match[2]),
@@ -43,12 +43,15 @@ const gameplayQuests = [...questSource.matchAll(
   subject: match[4],
   target: Number(match[5]),
   rewardCoins: Number(match[6]),
+  optional: match[7] === "true",
 }));
 assert.deepEqual(gameplayQuests, contract.quests, "QuestCatalog drifted from mobile contract");
 
 const offlineCap = workerSource.match(/OFFLINE_CAP\s*=\s*Duration\.ofHours\((\d+)\)/);
 const interval = workerSource.match(/Math\.max\((\d+)L,\s*(\d+)L\s*-\s*\(tier\s*-\s*1L\)\s*\*\s*(\d+)L\)/);
-const capacity = workerSource.match(/long capacity\s*=\s*tier\s*\*\s*(\d+)L/);
+const capacity = workerSource.match(/return\s+tier\s*\*\s*(\d+)L/);
+const workerCosts = new Map([...workerSource.matchAll(/case\s+(\d+)\s*->\s*([\d_]+);/g)]
+  .map((match) => [Number(match[1]), Number(match[2].replaceAll("_", ""))]));
 const itemsBlock = workerSource.match(/ITEMS\s*=\s*Map\.of\(([\s\S]*?)\);/);
 assert.ok(offlineCap && interval && capacity && itemsBlock, "Could not parse WorkerProductionPolicy");
 const itemTokens = [...itemsBlock[1].matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
@@ -66,6 +69,7 @@ const gameplayWorkerPolicy = {
       Number(interval[1]),
       Number(interval[2]) - (tier - 1) * Number(interval[3]),
     ),
+    upgradeCostCoins: tier === 1 ? null : workerCosts.get(tier),
   })),
 };
 assert.deepEqual(gameplayWorkerPolicy, contract.workers, "Worker production policy drifted from mobile contract");

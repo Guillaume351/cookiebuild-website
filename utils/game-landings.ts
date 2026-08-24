@@ -57,31 +57,67 @@ export const gameLandings: GameLanding[] = [
     heroImageCaption: "Cookie Colosseum beta preview — Red team's bakery base.",
     heroImageWidth: 1200,
     heroImageHeight: 675,
-    cardDescription: "Protect your bed, collect bakery cookies, upgrade your team, and eliminate every rival.",
+    cardDescription:
+      "Protect your bed, collect bakery cookies, upgrade your team, and eliminate every rival.",
     seoTitle: "BedWars Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play BedWars on Cookie Build, a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP} on Bedrock port ${COOKIE_BUILD_BEDROCK_PORT} for Cookie Colosseum.`,
     h1: "BedWars Minecraft Server for Bedrock & Java",
-    heroIntro: "Play Cookie Build BedWars in the Cookie Colosseum, a bakery-themed floating arena made for Java and Bedrock cross-play. Protect your bed, collect cookies and rare resources, upgrade your team, break enemy beds, and eliminate every rival.",
+    heroIntro:
+      "Play Cookie Build BedWars in the Cookie Colosseum, a bakery-themed floating arena made for Java and Bedrock cross-play. Protect your bed, collect cookies and rare resources, upgrade your team, break enemy beds, and eliminate every rival.",
     joinHeading: "Play BedWars on Minecraft Bedrock",
-    joinIntro: "BedWars is a beta mode on Cookie Build. Supported Bedrock and Java players join the same four-team matches with native menus adapted for each edition; admission may be paused temporarily while beta bugs are investigated.",
+    joinIntro:
+      "BedWars is a beta mode on Cookie Build. Supported Bedrock and Java players join the same four-team matches with native menus adapted for each edition; admission may be paused temporarily while beta bugs are investigated.",
     lobbyLabel: "BedWars",
     gameplayEyebrow: "Beds, bridges and bakery cookies",
     gameplayHeading: "How Cookie Build BedWars works",
     steps: [
-      { title: "Protect your bed", description: "Join a colored team, defend your bakery island and keep your bed alive so teammates can respawn." },
-      { title: "Collect and upgrade", description: "Gather cookies at your base, contest diamond and emerald islands, then buy gear, blocks and team upgrades." },
-      { title: "Break every rival bed", description: "Bridge across the Cookie Colosseum, destroy enemy beds and secure the final eliminations to win." },
+      {
+        title: "Protect your bed",
+        description:
+          "Join a colored team, defend your bakery island and keep your bed alive so teammates can respawn.",
+      },
+      {
+        title: "Collect and upgrade",
+        description:
+          "Gather cookies at your base, contest diamond and emerald islands, then buy gear, blocks and team upgrades.",
+      },
+      {
+        title: "Break every rival bed",
+        description:
+          "Bridge across the Cookie Colosseum, destroy enemy beds and secure the final eliminations to win.",
+      },
     ],
     highlightHeading: "A BedWars shop built for Java and Bedrock",
-    highlightBody: "Java players use familiar inventory shops while Bedrock players get native Bedrock forms with the same items, prices and upgrade rules. Cookie generators power the bakery-themed economy, and the Cookie Colosseum provides four bases, diamond islands and a central emerald objective.",
-    socialDescription: "Protect your bed, collect bakery cookies and conquer the Cookie Colosseum in Cookie Build's Java and Bedrock open beta.",
+    highlightBody:
+      "Java players use familiar inventory shops while Bedrock players get native Bedrock forms with the same items, prices and upgrade rules. Cookie generators power the bakery-themed economy, and the Cookie Colosseum provides four bases, diamond islands and a central emerald objective.",
+    socialDescription:
+      "Protect your bed, collect bakery cookies and conquer the Cookie Colosseum in Cookie Build's Java and Bedrock open beta.",
     faqs: [
-      { question: "Is BedWars available on Minecraft Bedrock?", answer: `BedWars is a beta mode for Bedrock and Java. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose BedWars in the lobby when beta admission is open.` },
+      {
+        question: "Is BedWars available on Minecraft Bedrock?",
+        answer: `BedWars is a beta mode for Bedrock and Java. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose BedWars in the lobby when beta admission is open.`,
+      },
       joinFaq("BedWars"),
-      { question: "Can Java and Bedrock players play BedWars together?", answer: "Yes. Cookie Build is a cross-play server. Java inventory shops and Bedrock forms use the same catalog, prices and match rules." },
-      { question: "What are cookies used for in Cookie Build BedWars?", answer: "Cookies are the main resource generated at each base. Spend them on early blocks and equipment, then use gold, diamonds and emeralds for stronger purchases and team upgrades." },
-      { question: "How do you win BedWars?", answer: "Protect your own bed, destroy the beds belonging to opposing teams, then eliminate every rival who can no longer respawn." },
-      { question: "How can I report a BedWars beta bug?", answer: "Please send the steps, your Minecraft edition and any screenshot or video on the Cookie Build Discord or Twitter/X so the team can investigate quickly." },
+      {
+        question: "Can Java and Bedrock players play BedWars together?",
+        answer:
+          "Yes. Cookie Build is a cross-play server. Java inventory shops and Bedrock forms use the same catalog, prices and match rules.",
+      },
+      {
+        question: "What are cookies used for in Cookie Build BedWars?",
+        answer:
+          "Cookies are the main resource generated at each base. Spend them on early blocks and equipment, then use gold, diamonds and emeralds for stronger purchases and team upgrades.",
+      },
+      {
+        question: "How do you win BedWars?",
+        answer:
+          "Protect your own bed, destroy the beds belonging to opposing teams, then eliminate every rival who can no longer respawn.",
+      },
+      {
+        question: "How can I report a BedWars beta bug?",
+        answer:
+          "Please send the steps, your Minecraft edition and any screenshot or video on the Cookie Build Discord or Twitter/X so the team can investigate quickly.",
+      },
     ],
   },
   {
@@ -90,31 +126,67 @@ export const gameLandings: GameLanding[] = [
     name: "Skyblock",
     icon: "/skyblock-icon.svg",
     badgeLabel: "Beta · Persistent world",
-    cardDescription: "Grow a persistent island, upgrade its generator, complete quests, trade resources and build with friends.",
+    cardDescription:
+      "Grow a persistent island, upgrade its generator, complete quests, trade resources and build with friends.",
     seoTitle: "Skyblock Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play Skyblock on Cookie Build, a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP} on Bedrock port ${COOKIE_BUILD_BEDROCK_PORT} and grow your island.`,
     h1: "Skyblock Minecraft Server for Bedrock & Java",
-    heroIntro: "Start a persistent Cookie Orchard island on Cookie Build Skyblock. Expand over the void, upgrade your generator, complete quests, collect worker output, trade through the player market, and invite trusted friends from Java or Bedrock.",
+    heroIntro:
+      "Start a persistent Cookie Orchard island on Cookie Build Skyblock. Expand over the void, upgrade your generator, complete quests, collect worker output, trade through the player market, and invite trusted friends from Java or Bedrock.",
     joinHeading: "Play Skyblock on Minecraft Bedrock",
-    joinIntro: "Skyblock is a persistent beta mode shared by Bedrock and Java. Native guided menus keep island management, upgrades, storage, quests, co-op and the market usable on both editions.",
+    joinIntro:
+      "Skyblock is a persistent beta mode shared by Bedrock and Java. Native guided menus keep island management, upgrades, storage, quests, co-op and the market usable on both editions.",
     lobbyLabel: "Skyblock",
     gameplayEyebrow: "One island, lasting progression",
     gameplayHeading: "How Cookie Build Skyblock works",
     steps: [
-      { title: "Grow your island", description: "Start on a protected Cookie Orchard island, harvest its resources and expand safely over the void." },
-      { title: "Upgrade and automate", description: "Improve the generator, complete quests and collect worker production to unlock stronger progression." },
-      { title: "Trade and cooperate", description: "List supported items on the player market, buy useful resources and manage trusted co-op members." },
+      {
+        title: "Grow your island",
+        description:
+          "Start on a protected Cookie Orchard island, harvest its resources and expand safely over the void.",
+      },
+      {
+        title: "Upgrade and automate",
+        description:
+          "Improve the generator, complete quests and collect worker production to unlock stronger progression.",
+      },
+      {
+        title: "Trade and cooperate",
+        description:
+          "List supported items on the player market, buy useful resources and manage trusted co-op members.",
+      },
     ],
     highlightHeading: "Manage Skyblock in game and from the mobile app",
-    highlightBody: "The Cookie Build app mirrors safe management actions: inspect your island and inventory, upgrade the generator, collect workers, claim quests, create or cancel listings, buy market offers and accept co-op invitations. Server-side quotes, limits and ownership checks remain authoritative.",
-    socialDescription: "Build a persistent island, upgrade, trade and cooperate in Cookie Build Skyblock on Java, Bedrock and mobile.",
+    highlightBody:
+      "The Cookie Build app can inspect your island and inventory. Generator upgrades, worker collection, quest claims, co-op invitations and Skyblock Merchant trades require the live island-management capability; player-market writes have a separate live capability. Disabled workspaces stay clearly read-only. The minigame kit shop remains a separate service.",
+    socialDescription:
+      "Build a persistent island, upgrade, trade and cooperate in Cookie Build Skyblock on Java, Bedrock and mobile.",
     faqs: [
-      { question: "Can I play Cookie Build Skyblock on Minecraft Bedrock?", answer: `Yes. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose Skyblock in the lobby.` },
+      {
+        question: "Can I play Cookie Build Skyblock on Minecraft Bedrock?",
+        answer: `Yes. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose Skyblock in the lobby.`,
+      },
       joinFaq("Skyblock"),
-      { question: "Does my Skyblock island persist between sessions?", answer: "Yes. Island progression, storage, upgrades, quests, workers, listings and co-op membership are stored persistently." },
-      { question: "What can the Cookie Build app manage?", answer: "After linking your player, the app can show your island and perform approved upgrades, worker collection, quest claims, market actions and co-op invite acceptance." },
-      { question: "Can Java and Bedrock players share a Skyblock island?", answer: "Yes. Supported Java and Bedrock players use the same persistent world and can cooperate through the protected co-op system." },
-      { question: "Is the player market safe to use?", answer: "The server validates item IDs, quantity, price, ownership, balance, inventory capacity and listing state before completing an action." },
+      {
+        question: "Does my Skyblock island persist between sessions?",
+        answer:
+          "Yes. Island progression, storage, upgrades, quests, workers, listings and co-op membership are stored persistently.",
+      },
+      {
+        question: "What can the Cookie Build app manage?",
+        answer:
+          "After linking your player, the app shows your island and the actions currently enabled by the server. Management and player-market writes use separate live switches, so a workspace may be available in read-only mode.",
+      },
+      {
+        question: "Can Java and Bedrock players share a Skyblock island?",
+        answer:
+          "Yes. Supported Java and Bedrock players use the same persistent world and can cooperate through the protected co-op system.",
+      },
+      {
+        question: "Is the player market safe to use?",
+        answer:
+          "The server validates item IDs, quantity, price, ownership, balance, inventory capacity and listing state before completing an action.",
+      },
     ],
   },
   {
@@ -122,29 +194,57 @@ export const gameLandings: GameLanding[] = [
     path: "/build-battle",
     name: "Build Battle",
     icon: "/buildbattle-icon.svg",
-    cardDescription: "Vote for a theme, build on your own plot for five minutes, then judge every creation.",
+    cardDescription:
+      "Vote for a theme, build on your own plot for five minutes, then judge every creation.",
     seoTitle: "Build Battle Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play Build Battle on a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP} on Bedrock port ${COOKIE_BUILD_BEDROCK_PORT} and start building.`,
     h1: "Build Battle Minecraft Server for Bedrock & Java",
-    heroIntro: "Looking for a Build Battle Minecraft Bedrock server? Join Cookie Build to vote for a theme, create your build in five minutes, and score every plot with Java and Bedrock players in the same game. This is a live multiplayer server, not a Marketplace map or download.",
+    heroIntro:
+      "Looking for a Build Battle Minecraft Bedrock server? Join Cookie Build to vote for a theme, create your build in five minutes, and score every plot with Java and Bedrock players in the same game. This is a live multiplayer server, not a Marketplace map or download.",
     joinHeading: "Play Build Battle on Minecraft Bedrock",
-    joinIntro: "Cookie Build supports Minecraft Bedrock on Windows, Android, and iOS, as well as Minecraft Java. Both editions join the same Build Battle games.",
+    joinIntro:
+      "Cookie Build supports Minecraft Bedrock on Windows, Android, and iOS, as well as Minecraft Java. Both editions join the same Build Battle games.",
     lobbyLabel: "Build Battles",
     gameplayEyebrow: "One theme, endless ideas",
     gameplayHeading: "How Cookie Build's Build Battle works",
     steps: [
-      { title: "Vote for a theme", description: "Choose from three proposed themes while players join the game." },
-      { title: "Build for five minutes", description: "Create something memorable on your own plot with the cross-play building palette." },
-      { title: "Judge every plot", description: "Visit the other creations, rate them from 1 to 5, and see the final ranking." },
+      {
+        title: "Vote for a theme",
+        description:
+          "Choose from three proposed themes while players join the game.",
+      },
+      {
+        title: "Build for five minutes",
+        description:
+          "Create something memorable on your own plot with the cross-play building palette.",
+      },
+      {
+        title: "Judge every plot",
+        description:
+          "Visit the other creations, rate them from 1 to 5, and see the final ranking.",
+      },
     ],
     highlightHeading: "A cross-play Build Battle server",
-    highlightBody: "Theme voting, eight private building plots, a cross-play item palette, floor customization, and 1-to-5 judging are designed to work across Bedrock and Java. Match rewards contribute to your Cookie Build progression.",
-    socialDescription: "Vote for a theme, build for five minutes, and judge every plot on Cookie Build's free cross-play server.",
+    highlightBody:
+      "Theme voting, eight private building plots, a cross-play item palette, floor customization, and 1-to-5 judging are designed to work across Bedrock and Java. Match rewards contribute to your Cookie Build progression.",
+    socialDescription:
+      "Vote for a theme, build for five minutes, and judge every plot on Cookie Build's free cross-play server.",
     faqs: [
-      { question: "Is Cookie Build a Build Battle Minecraft Bedrock server?", answer: `Yes. Bedrock players can join ${COOKIE_BUILD_SERVER_IP} on port ${COOKIE_BUILD_BEDROCK_PORT} and play Build Battles with Java players.` },
+      {
+        question: "Is Cookie Build a Build Battle Minecraft Bedrock server?",
+        answer: `Yes. Bedrock players can join ${COOKIE_BUILD_SERVER_IP} on port ${COOKIE_BUILD_BEDROCK_PORT} and play Build Battles with Java players.`,
+      },
       joinFaq("Build Battles"),
-      { question: "Can Minecraft Java and Bedrock players build together?", answer: "Yes. Cookie Build is a cross-play server, so supported Java and Bedrock players share the same Build Battle games." },
-      { question: "How long is the building phase?", answer: "Players get five minutes to complete their themed build before judging begins." },
+      {
+        question: "Can Minecraft Java and Bedrock players build together?",
+        answer:
+          "Yes. Cookie Build is a cross-play server, so supported Java and Bedrock players share the same Build Battle games.",
+      },
+      {
+        question: "How long is the building phase?",
+        answer:
+          "Players get five minutes to complete their themed build before judging begins.",
+      },
     ],
   },
   {
@@ -152,29 +252,57 @@ export const gameLandings: GameLanding[] = [
     path: "/microbattles",
     name: "MicroBattles",
     icon: "/microbattles-icon.svg",
-    cardDescription: "Fight in four compact teams, use your kit and blocks wisely, and be the last team alive.",
+    cardDescription:
+      "Fight in four compact teams, use your kit and blocks wisely, and be the last team alive.",
     seoTitle: "MicroBattles Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play MicroBattles on a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP}:${COOKIE_BUILD_BEDROCK_PORT} for fast four-team battles.`,
     h1: "MicroBattles Minecraft Server for Bedrock & Java",
-    heroIntro: "Play fast four-team Minecraft battles on Cookie Build. Choose a kit, prepare behind the arena walls, then fight to make Blue, Red, Yellow, or Green the last team standing on Bedrock and Java.",
+    heroIntro:
+      "Play fast four-team Minecraft battles on Cookie Build. Choose a kit, prepare behind the arena walls, then fight to make Blue, Red, Yellow, or Green the last team standing on Bedrock and Java.",
     joinHeading: "Play MicroBattles on Minecraft Bedrock",
-    joinIntro: "Join the same MicroBattles queues from Minecraft Bedrock or Java. The game supports four teams of up to three players on compact, purpose-built arenas.",
+    joinIntro:
+      "Join the same MicroBattles queues from Minecraft Bedrock or Java. The game supports four teams of up to three players on compact, purpose-built arenas.",
     lobbyLabel: "MicroBattles",
     gameplayEyebrow: "Compact maps, quick decisions",
     gameplayHeading: "How MicroBattles works",
     steps: [
-      { title: "Join one of four teams", description: "Blue, Red, Yellow, and Green each have room for up to three players." },
-      { title: "Prepare your kit", description: "Start with your selected kit and team-colored wool while the arena walls protect each team." },
-      { title: "Survive the battle", description: "The walls fall after 15 seconds. Eliminate the other teams and keep at least one teammate alive." },
+      {
+        title: "Join one of four teams",
+        description:
+          "Blue, Red, Yellow, and Green each have room for up to three players.",
+      },
+      {
+        title: "Prepare your kit",
+        description:
+          "Start with your selected kit and team-colored wool while the arena walls protect each team.",
+      },
+      {
+        title: "Survive the battle",
+        description:
+          "The walls fall after 15 seconds. Eliminate the other teams and keep at least one teammate alive.",
+      },
     ],
     highlightHeading: "Four teams, eight classic arenas",
-    highlightBody: "MicroBattles combines kit choices, limited building blocks, close combat, team play, kills and assists. Victories and contributions award coins and experience for your persistent progression.",
-    socialDescription: "Join fast four-team MicroBattles games with Minecraft Bedrock and Java players on Cookie Build.",
+    highlightBody:
+      "MicroBattles combines kit choices, limited building blocks, close combat, team play, kills and assists. Victories and contributions award coins and experience for your persistent progression.",
+    socialDescription:
+      "Join fast four-team MicroBattles games with Minecraft Bedrock and Java players on Cookie Build.",
     faqs: [
-      { question: "Can I play MicroBattles on Minecraft Bedrock?", answer: `Yes. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, then choose MicroBattles in the lobby.` },
+      {
+        question: "Can I play MicroBattles on Minecraft Bedrock?",
+        answer: `Yes. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, then choose MicroBattles in the lobby.`,
+      },
       joinFaq("MicroBattles"),
-      { question: "How many players are in a MicroBattles game?", answer: "A full match has up to 12 players split across four teams of three." },
-      { question: "How do you win MicroBattles?", answer: "Eliminate the other teams. The last team with a surviving player wins." },
+      {
+        question: "How many players are in a MicroBattles game?",
+        answer:
+          "A full match has up to 12 players split across four teams of three.",
+      },
+      {
+        question: "How do you win MicroBattles?",
+        answer:
+          "Eliminate the other teams. The last team with a surviving player wins.",
+      },
     ],
   },
   {
@@ -182,29 +310,57 @@ export const gameLandings: GameLanding[] = [
     path: "/pitchout",
     name: "Pitchout",
     icon: "/pitchout-icon.svg",
-    cardDescription: "Use high-knockback weapons to send rivals into the void while protecting your five lives.",
+    cardDescription:
+      "Use high-knockback weapons to send rivals into the void while protecting your five lives.",
     seoTitle: "Pitchout Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play Pitchout on Cookie Build's free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP}:${COOKIE_BUILD_BEDROCK_PORT} and protect your five lives.`,
     h1: "Pitchout Minecraft Server for Bedrock & Java",
-    heroIntro: "Pitchout is Cookie Build's high-knockback survival mini-game. Use a knockback shovel and a punch bow to launch opponents from the arena, protect your five lives, and become the last player standing.",
+    heroIntro:
+      "Pitchout is Cookie Build's high-knockback survival mini-game. Use a knockback shovel and a punch bow to launch opponents from the arena, protect your five lives, and become the last player standing.",
     joinHeading: "Play Pitchout on Minecraft Bedrock",
-    joinIntro: "Minecraft Bedrock and Java players share the same Pitchout arenas, map vote, live scoreboard, match rewards and progression.",
+    joinIntro:
+      "Minecraft Bedrock and Java players share the same Pitchout arenas, map vote, live scoreboard, match rewards and progression.",
     lobbyLabel: "Pitchout",
     gameplayEyebrow: "Five lives, one winner",
     gameplayHeading: "How Pitchout works",
     steps: [
-      { title: "Vote for the next arena", description: "Choose between the available Pitchout maps while the match fills." },
-      { title: "Master the knockback", description: "Use your knockback shovel at close range or the punch bow to strike from a distance." },
-      { title: "Protect five lives", description: "A fall costs one life. Return to the arena and keep fighting until only one player remains." },
+      {
+        title: "Vote for the next arena",
+        description:
+          "Choose between the available Pitchout maps while the match fills.",
+      },
+      {
+        title: "Master the knockback",
+        description:
+          "Use your knockback shovel at close range or the punch bow to strike from a distance.",
+      },
+      {
+        title: "Protect five lives",
+        description:
+          "A fall costs one life. Return to the arena and keep fighting until only one player remains.",
+      },
     ],
     highlightHeading: "A classic Cookie Build original",
-    highlightBody: "Three distinct arenas use different knockback strengths and spawn layouts. The match tracks eliminations, knockbacks and combos, then awards coins and experience to every participant.",
-    socialDescription: "Knock rivals from the arena and protect five lives in Cookie Build's cross-play Pitchout mini-game.",
+    highlightBody:
+      "Three distinct arenas use different knockback strengths and spawn layouts. The match tracks eliminations, knockbacks and combos, then awards coins and experience to every participant.",
+    socialDescription:
+      "Knock rivals from the arena and protect five lives in Cookie Build's cross-play Pitchout mini-game.",
     faqs: [
-      { question: "Can I play Pitchout on Minecraft Bedrock?", answer: `Yes. Join ${COOKIE_BUILD_SERVER_IP} on Bedrock port ${COOKIE_BUILD_BEDROCK_PORT} and choose Pitchout in the lobby.` },
+      {
+        question: "Can I play Pitchout on Minecraft Bedrock?",
+        answer: `Yes. Join ${COOKIE_BUILD_SERVER_IP} on Bedrock port ${COOKIE_BUILD_BEDROCK_PORT} and choose Pitchout in the lobby.`,
+      },
       joinFaq("Pitchout"),
-      { question: "What equipment do you get in Pitchout?", answer: "Every player receives a high-knockback wooden shovel, a punch bow and an infinity arrow." },
-      { question: "How do you win Pitchout?", answer: "Each player starts with five lives. Keep knocking opponents out until you are the last player remaining." },
+      {
+        question: "What equipment do you get in Pitchout?",
+        answer:
+          "Every player receives a high-knockback wooden shovel, a punch bow and an infinity arrow.",
+      },
+      {
+        question: "How do you win Pitchout?",
+        answer:
+          "Each player starts with five lives. Keep knocking opponents out until you are the last player remaining.",
+      },
     ],
   },
   {
@@ -212,30 +368,62 @@ export const gameLandings: GameLanding[] = [
     path: "/skywars",
     name: "SkyWars",
     icon: "/skywars-icon.svg",
-    cardDescription: "Loot your island, bridge toward stronger center chests, and outlast every opponent in the sky.",
+    cardDescription:
+      "Loot your island, bridge toward stronger center chests, and outlast every opponent in the sky.",
     seoTitle: "SkyWars Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play SkyWars on a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP}:${COOKIE_BUILD_BEDROCK_PORT}, loot your island and fight to survive.`,
     h1: "SkyWars Minecraft Server for Bedrock & Java",
-    heroIntro: "Join classic solo SkyWars matches from Minecraft Bedrock or Java. Start on your own floating island, loot chests, build toward the center, fight other players, and survive the void to claim victory.",
+    heroIntro:
+      "Join classic solo SkyWars matches from Minecraft Bedrock or Java. Start on your own floating island, loot chests, build toward the center, fight other players, and survive the void to claim victory.",
     joinHeading: "Play SkyWars on Minecraft Bedrock",
-    joinIntro: "Cookie Build's SkyWars queues, kits, chest loot, maps and progression are shared by supported Bedrock and Java players.",
+    joinIntro:
+      "Cookie Build's SkyWars queues, kits, chest loot, maps and progression are shared by supported Bedrock and Java players.",
     lobbyLabel: "SkyWars",
     gameplayEyebrow: "Loot, bridge, survive",
     gameplayHeading: "How Cookie Build SkyWars works",
     steps: [
-      { title: "Choose your kit", description: "Prepare a play style before the match and spawn on one of the arena's floating islands." },
-      { title: "Loot and bridge", description: "Open island chests, gather blocks and move toward the center for additional loot." },
-      { title: "Be the last survivor", description: "Fight opponents, avoid the void and outlast every other player to win the match." },
+      {
+        title: "Choose your kit",
+        description:
+          "Prepare a play style before the match and spawn on one of the arena's floating islands.",
+      },
+      {
+        title: "Loot and bridge",
+        description:
+          "Open island chests, gather blocks and move toward the center for additional loot.",
+      },
+      {
+        title: "Be the last survivor",
+        description:
+          "Fight opponents, avoid the void and outlast every other player to win the match.",
+      },
     ],
     highlightHeading: "Four restored SkyWars arenas",
-    highlightBody: "Cookie Build preserves four classic island layouts with validated spawns and richer middle chests. Kills, participation and victories award coins and experience for SkyWars progression.",
-    socialDescription: "Loot, bridge and survive classic SkyWars arenas with Minecraft Bedrock and Java players.",
+    highlightBody:
+      "Cookie Build preserves four classic island layouts with validated spawns and richer middle chests. Kills, participation and victories award coins and experience for SkyWars progression.",
+    socialDescription:
+      "Loot, bridge and survive classic SkyWars arenas with Minecraft Bedrock and Java players.",
     faqs: [
-      { question: "Can I play SkyWars on Minecraft Bedrock?", answer: `Yes. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose SkyWars.` },
+      {
+        question: "Can I play SkyWars on Minecraft Bedrock?",
+        answer: `Yes. Add ${COOKIE_BUILD_SERVER_IP} with port ${COOKIE_BUILD_BEDROCK_PORT}, join Cookie Build and choose SkyWars.`,
+      },
       joinFaq("SkyWars"),
-      { question: "Does Cookie Build SkyWars have kits?", answer: "Yes. Players can choose a SkyWars kit before the match to prepare their preferred play style." },
-      { question: "How many SkyWars maps are available?", answer: "Cookie Build currently rotates four restored classic SkyWars arenas." },
-      { question: "Is Cookie Build SkyWars solo or team-based?", answer: "It is a solo free-for-all. Every player starts on a separate island, and the last surviving player wins." },
+      {
+        question: "Does Cookie Build SkyWars have kits?",
+        answer:
+          "Yes. Players can choose a SkyWars kit before the match to prepare their preferred play style.",
+      },
+      {
+        question: "How many SkyWars maps are available?",
+        answer:
+          "Cookie Build currently rotates four restored classic SkyWars arenas.",
+      },
+      {
+        question: "Is Cookie Build SkyWars solo or team-based?",
+        answer:
+          "It is a solo free-for-all. Every player starts on a separate island, and the last surviving player wins.",
+      },
     ],
   },
   {
@@ -243,29 +431,57 @@ export const gameLandings: GameLanding[] = [
     path: "/turfwars",
     name: "TurfWars",
     icon: "/turfwars-icon.svg",
-    cardDescription: "Build defenses, land bow hits and push your team's territory across the arena.",
+    cardDescription:
+      "Build defenses, land bow hits and push your team's territory across the arena.",
     seoTitle: "Turf Wars Minecraft Bedrock Server | Cookie Build",
     metaDescription: `Play Turf Wars on a free Minecraft Bedrock and Java server. Join ${COOKIE_BUILD_SERVER_IP}:${COOKIE_BUILD_BEDROCK_PORT}, build defenses and capture territory.`,
     h1: "Turf Wars Minecraft Server for Bedrock & Java",
-    heroIntro: "Join Blue or Red in Cookie Build's cross-play Turf Wars. Alternate between short building rounds and bow combat, defend your side, and land hits to push your team's territory across the arena.",
+    heroIntro:
+      "Join Blue or Red in Cookie Build's cross-play Turf Wars. Alternate between short building rounds and bow combat, defend your side, and land hits to push your team's territory across the arena.",
     joinHeading: "Play Turf Wars on Minecraft Bedrock",
-    joinIntro: "Turf Wars supports 2 to 10 Bedrock and Java players, shuffled into balanced Blue and Red teams on the same server.",
+    joinIntro:
+      "Turf Wars supports 2 to 10 Bedrock and Java players, shuffled into balanced Blue and Red teams on the same server.",
     lobbyLabel: "TurfWars",
     gameplayEyebrow: "Build, battle, capture",
     gameplayHeading: "How Turf Wars works",
     steps: [
-      { title: "Build for 25 seconds", description: "Use team wool inside your current territory to create cover and firing positions." },
-      { title: "Fight for 90 seconds", description: "Use the unbreakable bow and replenishing arrow to tag opponents during combat." },
-      { title: "Push the turf to 72", description: "Each enemy hit moves two turf columns. Reach 72 points before the other team to win." },
+      {
+        title: "Build for 25 seconds",
+        description:
+          "Use team wool inside your current territory to create cover and firing positions.",
+      },
+      {
+        title: "Fight for 90 seconds",
+        description:
+          "Use the unbreakable bow and replenishing arrow to tag opponents during combat.",
+      },
+      {
+        title: "Push the turf to 72",
+        description:
+          "Each enemy hit moves two turf columns. Reach 72 points before the other team to win.",
+      },
     ],
     highlightHeading: "Balanced cross-play team combat",
-    highlightBody: "Matches alternate BUILD and COMBAT phases for up to 12 minutes. Hits, participation and victory feed Cookie Build progression, while a 60-second reconnect window protects short disconnects.",
-    socialDescription: "Build defenses and capture territory in cross-play Turf Wars for Minecraft Bedrock and Java.",
+    highlightBody:
+      "Matches alternate BUILD and COMBAT phases for up to 12 minutes. Hits, participation and victory feed Cookie Build progression, while a 60-second reconnect window protects short disconnects.",
+    socialDescription:
+      "Build defenses and capture territory in cross-play Turf Wars for Minecraft Bedrock and Java.",
     faqs: [
-      { question: "Can I play Turf Wars on Minecraft Bedrock?", answer: `Yes. Join ${COOKIE_BUILD_SERVER_IP} on port ${COOKIE_BUILD_BEDROCK_PORT} and select TurfWars in the lobby.` },
+      {
+        question: "Can I play Turf Wars on Minecraft Bedrock?",
+        answer: `Yes. Join ${COOKIE_BUILD_SERVER_IP} on port ${COOKIE_BUILD_BEDROCK_PORT} and select TurfWars in the lobby.`,
+      },
       joinFaq("TurfWars"),
-      { question: "How many players can join Turf Wars?", answer: "Turf Wars supports 2 to 10 players, divided into balanced Blue and Red teams." },
-      { question: "How do you win Turf Wars?", answer: "Land bow hits to move the boundary by two columns. The first team to 72 points wins; after 12 minutes, the higher score wins." },
+      {
+        question: "How many players can join Turf Wars?",
+        answer:
+          "Turf Wars supports 2 to 10 players, divided into balanced Blue and Red teams.",
+      },
+      {
+        question: "How do you win Turf Wars?",
+        answer:
+          "Land bow hits to move the boundary by two columns. The first team to 72 points wins; after 12 minutes, the higher score wins.",
+      },
     ],
   },
 ];

@@ -63,7 +63,9 @@ export const minigameProgression = pgTable(
     experience: integer().default(0).notNull(),
     unlockedKits: varchar("unlocked_kits"),
     lastSelectedKitName: varchar("last_selected_kit_name", { length: 255 }),
-    lastSelectedKitLevel: integer("last_selected_kit_level").default(0).notNull(),
+    lastSelectedKitLevel: integer("last_selected_kit_level")
+      .default(0)
+      .notNull(),
   },
   (table) => [
     primaryKey({
@@ -107,7 +109,7 @@ export const playerMatchPerformances = pgTable(
       name: "fklni8aav3fe2p6ep8fq4sc9i94",
     }),
     unique("uk26u03l3ifflmyiat5l43emltl").on(table.matchId, table.playerId),
-  ]
+  ],
 );
 
 export const matchPlayers = pgTable(
@@ -132,7 +134,7 @@ export const matchPlayers = pgTable(
       name: "match_players_pkey",
     }),
     index("idx_match_players_player_match").on(table.playerId, table.matchId),
-  ]
+  ],
 );
 
 export const matchWinners = pgTable(
@@ -156,7 +158,7 @@ export const matchWinners = pgTable(
       columns: [table.matchId, table.playerId],
       name: "match_winners_pkey",
     }),
-  ]
+  ],
 );
 
 export const mobileUsers = pgTable(
@@ -164,19 +166,27 @@ export const mobileUsers = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     firebaseUid: varchar("firebase_uid", { length: 128 }).notNull(),
-    deletedFirebaseUidHash: varchar("deleted_firebase_uid_hash", { length: 64 }),
+    deletedFirebaseUidHash: varchar("deleted_firebase_uid_hash", {
+      length: 64,
+    }),
     email: varchar({ length: 320 }),
     displayName: varchar("display_name", { length: 80 }),
     avatarUrl: varchar("avatar_url", { length: 2048 }),
     locale: varchar({ length: 16 }),
     timezone: varchar({ length: 64 }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     deletedAt: timestamp("deleted_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
     uniqueIndex("mobile_users_firebase_uid_uq").on(table.firebaseUid),
-    uniqueIndex("mobile_users_deleted_firebase_uid_hash_uq").on(table.deletedFirebaseUidHash),
+    uniqueIndex("mobile_users_deleted_firebase_uid_hash_uq").on(
+      table.deletedFirebaseUidHash,
+    ),
   ],
 );
 
@@ -189,7 +199,9 @@ export const mobilePlayerLinks = pgTable(
       .references(() => playerdata.id, { onDelete: "cascade" }),
     edition: varchar({ length: 16 }).notNull(),
     isPrimary: boolean("is_primary").default(false).notNull(),
-    linkedAt: timestamp("linked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    linkedAt: timestamp("linked_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
@@ -201,7 +213,10 @@ export const mobilePlayerLinks = pgTable(
     uniqueIndex("mobile_player_links_active_primary_uq")
       .on(table.firebaseUid)
       .where(sql`${table.isPrimary} AND ${table.revokedAt} IS NULL`),
-    check("mobile_player_links_edition_ck", sql`${table.edition} IN ('java', 'bedrock')`),
+    check(
+      "mobile_player_links_edition_ck",
+      sql`${table.edition} IN ('java', 'bedrock')`,
+    ),
   ],
 );
 
@@ -214,9 +229,14 @@ export const playerLinkChallenges = pgTable(
       .references(() => playerdata.id, { onDelete: "cascade" }),
     edition: varchar({ length: 16 }).notNull(),
     codeHmac: varchar("code_hmac", { length: 64 }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     consumedAt: timestamp("consumed_at", { withTimezone: true, mode: "date" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex("player_link_challenges_code_hmac_uq").on(table.codeHmac),
@@ -224,7 +244,10 @@ export const playerLinkChallenges = pgTable(
       .on(table.playerId)
       .where(sql`${table.consumedAt} is null`),
     index("player_link_challenges_expiry_idx").on(table.expiresAt),
-    check("player_link_challenges_edition_ck", sql`${table.edition} IN ('java', 'bedrock')`),
+    check(
+      "player_link_challenges_edition_ck",
+      sql`${table.edition} IN ('java', 'bedrock')`,
+    ),
   ],
 );
 
@@ -242,17 +265,29 @@ export const mobileDevices = pgTable(
     locale: varchar({ length: 16 }),
     timezone: varchar({ length: 64 }),
     timezoneOffsetMinutes: integer("timezone_offset_minutes"),
-    timezoneObservedAt: timestamp("timezone_observed_at", { withTimezone: true, mode: "date" }),
-    notificationsAuthorized: boolean("notifications_authorized").default(false).notNull(),
-    lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    timezoneObservedAt: timestamp("timezone_observed_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    notificationsAuthorized: boolean("notifications_authorized")
+      .default(false)
+      .notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
     uniqueIndex("mobile_devices_installation_id_uq").on(table.installationId),
     uniqueIndex("mobile_devices_fcm_token_uq").on(table.fcmToken),
     index("mobile_devices_user_idx").on(table.mobileUserId),
-    check("mobile_devices_platform_ck", sql`${table.platform} IN ('ios', 'android')`),
+    check(
+      "mobile_devices_platform_ck",
+      sql`${table.platform} IN ('ios', 'android')`,
+    ),
     check(
       "mobile_devices_timezone_offset_ck",
       sql`${table.timezoneOffsetMinutes} IS NULL OR ${table.timezoneOffsetMinutes} BETWEEN -840 AND 840`,
@@ -260,26 +295,56 @@ export const mobileDevices = pgTable(
   ],
 );
 
-export const mobileNotificationPreferences = pgTable("mobile_notification_preferences", {
-  mobileUserId: uuid("mobile_user_id")
-    .primaryKey()
-    .references(() => mobileUsers.id, { onDelete: "cascade" }),
-  announcementsEnabled: boolean("announcements_enabled").default(true).notNull(),
-  eventsEnabled: boolean("events_enabled").default(true).notNull(),
-  serverStatusEnabled: boolean("server_status_enabled").default(true).notNull(),
-  socialEnabled: boolean("social_enabled").default(true).notNull(),
-  rallyEnabled: boolean("rally_enabled").default(false).notNull(),
-  weeklyDigestEnabled: boolean("weekly_digest_enabled").default(true).notNull(),
-  dailyReminderEnabled: boolean("daily_reminder_enabled").default(false).notNull(),
-  weeklyReminderEnabled: boolean("weekly_reminder_enabled").default(false).notNull(),
-  friendOnlineEnabled: boolean("friend_online_enabled").default(false).notNull(),
-  quietHoursEnabled: boolean("quiet_hours_enabled").default(false).notNull(),
-  timezoneOffsetMinutes: integer("timezone_offset_minutes").default(0).notNull(),
-  onlineVisibility: varchar("online_visibility", { length: 24 }).default("friends_and_party").notNull(),
-  quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
-  quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-});
+export const mobileNotificationPreferences = pgTable(
+  "mobile_notification_preferences",
+  {
+    mobileUserId: uuid("mobile_user_id")
+      .primaryKey()
+      .references(() => mobileUsers.id, { onDelete: "cascade" }),
+    announcementsEnabled: boolean("announcements_enabled")
+      .default(true)
+      .notNull(),
+    eventsEnabled: boolean("events_enabled").default(true).notNull(),
+    serverStatusEnabled: boolean("server_status_enabled")
+      .default(true)
+      .notNull(),
+    socialEnabled: boolean("social_enabled").default(true).notNull(),
+    rallyEnabled: boolean("rally_enabled").default(false).notNull(),
+    weeklyDigestEnabled: boolean("weekly_digest_enabled")
+      .default(true)
+      .notNull(),
+    dailyReminderEnabled: boolean("daily_reminder_enabled")
+      .default(false)
+      .notNull(),
+    weeklyReminderEnabled: boolean("weekly_reminder_enabled")
+      .default(false)
+      .notNull(),
+    friendOnlineEnabled: boolean("friend_online_enabled")
+      .default(false)
+      .notNull(),
+    skyblockMarketSoldEnabled: boolean("skyblock_market_sold_enabled")
+      .default(false)
+      .notNull(),
+    skyblockWorkerFullEnabled: boolean("skyblock_worker_full_enabled")
+      .default(false)
+      .notNull(),
+    skyblockObjectiveReadyEnabled: boolean("skyblock_objective_ready_enabled")
+      .default(false)
+      .notNull(),
+    quietHoursEnabled: boolean("quiet_hours_enabled").default(false).notNull(),
+    timezoneOffsetMinutes: integer("timezone_offset_minutes")
+      .default(0)
+      .notNull(),
+    onlineVisibility: varchar("online_visibility", { length: 24 })
+      .default("friends_and_party")
+      .notNull(),
+    quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
+    quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+);
 
 export const mobileNotificationOutbox = pgTable(
   "mobile_notification_outbox",
@@ -291,22 +356,35 @@ export const mobileNotificationOutbox = pgTable(
     payload: jsonb().notNull(),
     status: varchar({ length: 16 }).default("pending").notNull(),
     attempts: integer().default(0).notNull(),
-    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }),
     lockToken: uuid("lock_token"),
-    deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: "date" }),
+    deliveredAt: timestamp("delivered_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     lastError: text("last_error"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    index("mobile_notification_outbox_pending_idx").on(table.status, table.availableAt),
+    index("mobile_notification_outbox_pending_idx").on(
+      table.status,
+      table.availableAt,
+    ),
     uniqueIndex("mobile_notification_outbox_player_rally_id_uq")
       .on(sql`(${table.payload} ->> 'rallyId')`)
       .where(sql`${table.kind} = 'player_rally'`),
     uniqueIndex("mobile_notification_outbox_dedupe_key_uq")
       .on(table.dedupeKey)
       .where(sql`${table.dedupeKey} IS NOT NULL`),
-    check("mobile_notification_outbox_status_ck", sql`${table.status} IN ('pending', 'processing', 'delivered', 'dead')`),
+    check(
+      "mobile_notification_outbox_status_ck",
+      sql`${table.status} IN ('pending', 'processing', 'delivered', 'dead')`,
+    ),
   ],
 );
 
@@ -324,24 +402,41 @@ export const playerRallies = pgTable(
     gameId: uuid("game_id"),
     source: varchar({ length: 16 }).notNull(),
     gamemode: varchar({ length: 32 }).notNull(),
-    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    availableAt: timestamp("available_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     unique("player_rallies_outbox_id_uq").on(table.outboxId),
-    index("player_rallies_target_expiry_idx").on(table.targetPlayerId, table.expiresAt),
+    index("player_rallies_target_expiry_idx").on(
+      table.targetPlayerId,
+      table.expiresAt,
+    ),
     check(
       "player_rallies_server_id_ck",
       sql`${table.serverId} ~ '^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$'`,
     ),
-    check("player_rallies_source_ck", sql`${table.source} IN ('login', 'player', 'automatic')`),
+    check(
+      "player_rallies_source_ck",
+      sql`${table.source} IN ('login', 'player', 'automatic')`,
+    ),
     check(
       "player_rallies_context_ck",
       sql`(${table.source} = 'login' AND ${table.gamemode} = 'network' AND ${table.gameId} IS NULL)
         OR (${table.source} IN ('player', 'automatic') AND ${table.gamemode} <> 'network' AND ${table.gameId} IS NOT NULL)`,
     ),
-    check("player_rallies_expiry_ck", sql`${table.expiresAt} > ${table.availableAt}`),
+    check(
+      "player_rallies_expiry_ck",
+      sql`${table.expiresAt} > ${table.availableAt}`,
+    ),
   ],
 );
 
@@ -356,12 +451,19 @@ export const playerRallyResponses = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     response: varchar({ length: 16 }).notNull(),
-    respondedAt: timestamp("responded_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: "date" }),
+    respondedAt: timestamp("responded_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    deliveredAt: timestamp("delivered_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
   },
   (table) => [
-    unique("player_rally_responses_rally_responder_uq")
-      .on(table.rallyId, table.responderPlayerId),
+    unique("player_rally_responses_rally_responder_uq").on(
+      table.rallyId,
+      table.responderPlayerId,
+    ),
     index("player_rally_responses_delivery_idx")
       .on(table.respondedAt)
       .where(sql`${table.deliveredAt} IS NULL`),
@@ -373,7 +475,9 @@ export const playerRallyResponses = pgTable(
 );
 
 export const playerGoalProgress = pgTable("player_goal_progress", {
-  playerId: uuid("player_id").primaryKey().references(() => playerdata.id, { onDelete: "cascade" }),
+  playerId: uuid("player_id")
+    .primaryKey()
+    .references(() => playerdata.id, { onDelete: "cascade" }),
   day: date({ mode: "string" }).notNull(),
   dailyMatches: integer("daily_matches").default(0).notNull(),
   dailyWins: integer("daily_wins").default(0).notNull(),
@@ -383,22 +487,35 @@ export const playerGoalProgress = pgTable("player_goal_progress", {
   weeklyWins: integer("weekly_wins").default(0).notNull(),
   weeklyKills: integer("weekly_kills").default(0).notNull(),
   achievements: jsonb().$type<string[]>().default([]).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+    .defaultNow()
+    .notNull(),
 });
 
 export const playerAppPromotionState = pgTable("player_app_promotion_state", {
-  playerId: uuid("player_id").primaryKey().references(() => playerdata.id, { onDelete: "cascade" }),
-  lastShownAt: timestamp("last_shown_at", { withTimezone: true, mode: "date" }).notNull(),
+  playerId: uuid("player_id")
+    .primaryKey()
+    .references(() => playerdata.id, { onDelete: "cascade" }),
+  lastShownAt: timestamp("last_shown_at", {
+    withTimezone: true,
+    mode: "date",
+  }).notNull(),
   showCount: integer("show_count").default(1).notNull(),
 });
 
 export const mobileFriendOnlineAlerts = pgTable(
   "mobile_friend_online_alerts",
   {
-    ownerPlayerId: uuid("owner_player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
-    targetPlayerId: uuid("target_player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    ownerPlayerId: uuid("owner_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    targetPlayerId: uuid("target_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
     enabled: boolean().default(false).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.ownerPlayerId, table.targetPlayerId] }),
@@ -416,28 +533,48 @@ export const mobileNewsPosts = pgTable(
     title: varchar({ length: 160 }).notNull(),
     summary: varchar({ length: 500 }).notNull(),
     body: text().notNull(),
-    contentType: varchar("content_type", { length: 16 }).default("news").notNull(),
+    contentType: varchar("content_type", { length: 16 })
+      .default("news")
+      .notNull(),
     coverImageUrl: varchar("cover_image_url", { length: 2048 }),
     supersedesSlug: varchar("supersedes_slug", { length: 120 }),
     status: varchar({ length: 16 }).default("draft").notNull(),
-    publishedAt: timestamp("published_at", { withTimezone: true, mode: "date" }),
+    publishedAt: timestamp("published_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     foreignKey({
       columns: [table.supersedesSlug],
       foreignColumns: [table.slug],
       name: "mobile_news_posts_supersedes_slug_fk",
-    }).onUpdate("restrict").onDelete("restrict"),
+    })
+      .onUpdate("restrict")
+      .onDelete("restrict"),
     uniqueIndex("mobile_news_posts_slug_uq").on(table.slug),
     uniqueIndex("mobile_news_posts_supersedes_slug_uq")
       .on(table.supersedesSlug)
       .where(sql`${table.supersedesSlug} IS NOT NULL`),
-    index("mobile_news_posts_published_idx").on(table.status, table.publishedAt),
-    check("mobile_news_posts_status_ck", sql`${table.status} IN ('draft', 'published', 'archived')`),
-    check("mobile_news_posts_not_self_superseding_ck", sql`${table.supersedesSlug} IS NULL OR ${table.supersedesSlug} <> ${table.slug}`),
+    index("mobile_news_posts_published_idx").on(
+      table.status,
+      table.publishedAt,
+    ),
+    check(
+      "mobile_news_posts_status_ck",
+      sql`${table.status} IN ('draft', 'published', 'archived')`,
+    ),
+    check(
+      "mobile_news_posts_not_self_superseding_ck",
+      sql`${table.supersedesSlug} IS NULL OR ${table.supersedesSlug} <> ${table.slug}`,
+    ),
   ],
 );
 
@@ -449,14 +586,24 @@ export const adminUsers = pgTable(
     displayName: varchar("display_name", { length: 80 }),
     role: varchar({ length: 16 }).notNull(),
     enabled: boolean().default(true).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    lastLoginAt: timestamp("last_login_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    lastLoginAt: timestamp("last_login_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
   },
   (table) => [
     uniqueIndex("admin_users_email_uq").on(sql`lower(${table.email})`),
     index("admin_users_enabled_role_idx").on(table.enabled, table.role),
-    check("admin_users_role_ck", sql`${table.role} IN ('viewer', 'moderator', 'editor', 'operator', 'owner')`),
+    check(
+      "admin_users_role_ck",
+      sql`${table.role} IN ('viewer', 'moderator', 'editor', 'operator', 'owner')`,
+    ),
   ],
 );
 
@@ -464,7 +611,9 @@ export const adminAuditLog = pgTable(
   "admin_audit_log",
   {
     id: uuid().primaryKey().defaultRandom(),
-    actorUid: varchar("actor_uid", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    actorUid: varchar("actor_uid", { length: 128 })
+      .notNull()
+      .references(() => adminUsers.firebaseUid),
     actorRole: varchar("actor_role", { length: 16 }).notNull(),
     action: varchar({ length: 96 }).notNull(),
     resourceType: varchar("resource_type", { length: 64 }).notNull(),
@@ -473,30 +622,55 @@ export const adminAuditLog = pgTable(
     ipAddress: varchar("ip_address", { length: 64 }),
     userAgent: varchar("user_agent", { length: 512 }),
     metadata: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     index("admin_audit_log_created_idx").on(table.createdAt),
-    index("admin_audit_log_actor_created_idx").on(table.actorUid, table.createdAt),
-    index("admin_audit_log_resource_created_idx").on(table.resourceType, table.resourceId, table.createdAt),
+    index("admin_audit_log_actor_created_idx").on(
+      table.actorUid,
+      table.createdAt,
+    ),
+    index("admin_audit_log_resource_created_idx").on(
+      table.resourceType,
+      table.resourceId,
+      table.createdAt,
+    ),
   ],
 );
 
 export const adminReportCases = pgTable(
   "admin_report_cases",
   {
-    reportId: uuid("report_id").primaryKey().references(() => playerReports.id, { onDelete: "cascade" }),
+    reportId: uuid("report_id")
+      .primaryKey()
+      .references(() => playerReports.id, { onDelete: "cascade" }),
     status: varchar({ length: 16 }).default("open").notNull(),
-    assignedTo: varchar("assigned_to", { length: 128 }).references(() => adminUsers.firebaseUid),
+    assignedTo: varchar("assigned_to", { length: 128 }).references(
+      () => adminUsers.firebaseUid,
+    ),
     resolutionNote: text("resolution_note"),
-    updatedBy: varchar("updated_by", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedBy: varchar("updated_by", { length: 128 })
+      .notNull()
+      .references(() => adminUsers.firebaseUid),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
-    index("admin_report_cases_status_updated_idx").on(table.status, table.updatedAt),
-    check("admin_report_cases_status_ck", sql`${table.status} IN ('open', 'reviewing', 'resolved', 'dismissed')`),
+    index("admin_report_cases_status_updated_idx").on(
+      table.status,
+      table.updatedAt,
+    ),
+    check(
+      "admin_report_cases_status_ck",
+      sql`${table.status} IN ('open', 'reviewing', 'resolved', 'dismissed')`,
+    ),
   ],
 );
 
@@ -504,7 +678,9 @@ export const adminNotificationCampaigns = pgTable(
   "admin_notification_campaigns",
   {
     id: uuid().primaryKey().defaultRandom(),
-    createdBy: varchar("created_by", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    createdBy: varchar("created_by", { length: 128 })
+      .notNull()
+      .references(() => adminUsers.firebaseUid),
     kind: varchar({ length: 32 }).notNull(),
     title: varchar({ length: 120 }).notNull(),
     body: varchar({ length: 500 }),
@@ -513,15 +689,30 @@ export const adminNotificationCampaigns = pgTable(
     audience: jsonb().$type<Record<string, unknown>>().notNull(),
     recipientEstimate: integer("recipient_estimate").default(0).notNull(),
     status: varchar({ length: 16 }).default("queued").notNull(),
-    scheduledAt: timestamp("scheduled_at", { withTimezone: true, mode: "date" }).notNull(),
-    outboxId: uuid("outbox_id").unique().references(() => mobileNotificationOutbox.id, { onDelete: "set null" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    cancelledAt: timestamp("cancelled_at", { withTimezone: true, mode: "date" }),
-    cancelledBy: varchar("cancelled_by", { length: 128 }).references(() => adminUsers.firebaseUid),
+    scheduledAt: timestamp("scheduled_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+    outboxId: uuid("outbox_id")
+      .unique()
+      .references(() => mobileNotificationOutbox.id, { onDelete: "set null" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    cancelledAt: timestamp("cancelled_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    cancelledBy: varchar("cancelled_by", { length: 128 }).references(
+      () => adminUsers.firebaseUid,
+    ),
   },
   (table) => [
     index("admin_notification_campaigns_created_idx").on(table.createdAt),
-    index("admin_notification_campaigns_schedule_idx").on(table.status, table.scheduledAt),
+    index("admin_notification_campaigns_schedule_idx").on(
+      table.status,
+      table.scheduledAt,
+    ),
   ],
 );
 
@@ -534,18 +725,37 @@ export const adminCommands = pgTable(
     targetId: varchar("target_id", { length: 255 }),
     payload: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
     status: varchar({ length: 16 }).default("pending").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    availableAt: timestamp("available_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     startedAt: timestamp("started_at", { withTimezone: true, mode: "date" }),
-    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     result: jsonb().$type<Record<string, unknown>>(),
     error: text(),
-    idempotencyKey: varchar("idempotency_key", { length: 255 }).notNull().unique(),
+    idempotencyKey: varchar("idempotency_key", { length: 255 })
+      .notNull()
+      .unique(),
   },
   (table) => [
-    index("admin_commands_target_idx").on(table.targetType, table.targetId, table.createdAt),
-    check("admin_commands_status_ck", sql`${table.status} IN ('pending', 'running', 'succeeded', 'failed', 'expired', 'cancelled')`),
+    index("admin_commands_target_idx").on(
+      table.targetType,
+      table.targetId,
+      table.createdAt,
+    ),
+    check(
+      "admin_commands_status_ck",
+      sql`${table.status} IN ('pending', 'running', 'succeeded', 'failed', 'expired', 'cancelled')`,
+    ),
   ],
 );
 
@@ -553,23 +763,41 @@ export const moderationActions = pgTable(
   "moderation_actions",
   {
     id: uuid().primaryKey().defaultRandom(),
-    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
     playerName: varchar("player_name", { length: 255 }).notNull(),
     actionType: varchar("action_type", { length: 16 }).notNull(),
     reason: varchar({ length: 500 }).notNull(),
-    actorId: varchar("actor_id", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    actorId: varchar("actor_id", { length: 128 })
+      .notNull()
+      .references(() => adminUsers.firebaseUid),
     actorDisplayName: varchar("actor_display_name", { length: 80 }).notNull(),
-    startsAt: timestamp("starts_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }),
     revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
-    revokedBy: varchar("revoked_by", { length: 128 }).references(() => adminUsers.firebaseUid),
-    sourceCommandId: uuid("source_command_id").unique().references(() => adminCommands.id, { onDelete: "set null" }),
+    revokedBy: varchar("revoked_by", { length: 128 }).references(
+      () => adminUsers.firebaseUid,
+    ),
+    sourceCommandId: uuid("source_command_id")
+      .unique()
+      .references(() => adminCommands.id, { onDelete: "set null" }),
     metadata: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    index("moderation_actions_player_created_idx").on(table.playerId, table.createdAt),
-    check("moderation_actions_type_ck", sql`${table.actionType} IN ('ban', 'mute')`),
+    index("moderation_actions_player_created_idx").on(
+      table.playerId,
+      table.createdAt,
+    ),
+    check(
+      "moderation_actions_type_ck",
+      sql`${table.actionType} IN ('ban', 'mute')`,
+    ),
   ],
 );
 
@@ -577,8 +805,13 @@ export const adminRuntimeSnapshots = pgTable("admin_runtime_snapshots", {
   serverId: varchar("server_id", { length: 64 }).primaryKey(),
   sequence: bigint({ mode: "number" }).default(0).notNull(),
   payload: jsonb().$type<Record<string, unknown>>().notNull(),
-  observedAt: timestamp("observed_at", { withTimezone: true, mode: "date" }).notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  observedAt: timestamp("observed_at", {
+    withTimezone: true,
+    mode: "date",
+  }).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+    .defaultNow()
+    .notNull(),
 });
 
 export const adminRuntimeEvents = pgTable(
@@ -589,12 +822,20 @@ export const adminRuntimeEvents = pgTable(
     serverId: varchar("server_id", { length: 64 }).notNull(),
     kind: varchar({ length: 64 }).notNull(),
     payload: jsonb().$type<Record<string, unknown>>().notNull(),
-    observedAt: timestamp("observed_at", { withTimezone: true, mode: "date" }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    observedAt: timestamp("observed_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     index("admin_runtime_events_created_idx").on(table.createdAt),
-    index("admin_runtime_events_server_observed_idx").on(table.serverId, table.observedAt),
+    index("admin_runtime_events_server_observed_idx").on(
+      table.serverId,
+      table.observedAt,
+    ),
   ],
 );
 
@@ -603,19 +844,29 @@ export const opsActions = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     action: varchar({ length: 64 }).notNull(),
-    requestedBy: varchar("requested_by", { length: 128 }).notNull().references(() => adminUsers.firebaseUid),
+    requestedBy: varchar("requested_by", { length: 128 })
+      .notNull()
+      .references(() => adminUsers.firebaseUid),
     reason: varchar({ length: 500 }).notNull(),
     payload: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
     status: varchar({ length: 16 }).default("pending").notNull(),
-    requestedAt: timestamp("requested_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    requestedAt: timestamp("requested_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     startedAt: timestamp("started_at", { withTimezone: true, mode: "date" }),
-    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     result: jsonb().$type<Record<string, unknown>>(),
     error: text(),
   },
   (table) => [
     index("ops_actions_requested_idx").on(table.requestedAt),
-    check("ops_actions_status_ck", sql`${table.status} IN ('pending', 'running', 'succeeded', 'failed', 'cancelled')`),
+    check(
+      "ops_actions_status_ck",
+      sql`${table.status} IN ('pending', 'running', 'succeeded', 'failed', 'cancelled')`,
+    ),
   ],
 );
 
@@ -627,12 +878,17 @@ export const updateCheckRuns = pgTable(
     summary: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
     reportMarkdown: text("report_markdown"),
     promptMarkdown: text("prompt_markdown"),
-    checkedAt: timestamp("checked_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    checkedAt: timestamp("checked_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     error: text(),
   },
   (table) => [
     index("update_check_runs_checked_idx").on(table.checkedAt),
-    check("update_check_runs_status_ck", sql`${table.status} IN ('running', 'current', 'updates_available', 'failed')`),
+    check(
+      "update_check_runs_status_ck",
+      sql`${table.status} IN ('running', 'current', 'updates_available', 'failed')`,
+    ),
   ],
 );
 
@@ -643,12 +899,20 @@ export const playerChangelogState = pgTable(
       .primaryKey()
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
-    lastSeenPublishedAt: timestamp("last_seen_published_at", { withTimezone: true, mode: "date" }),
+    lastSeenPublishedAt: timestamp("last_seen_published_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     lastSeenPostId: uuid("last_seen_post_id"),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    index("player_changelog_state_cursor_idx").on(table.lastSeenPublishedAt, table.lastSeenPostId),
+    index("player_changelog_state_cursor_idx").on(
+      table.lastSeenPublishedAt,
+      table.lastSeenPostId,
+    ),
     check(
       "player_changelog_state_cursor_ck",
       sql`(${table.lastSeenPublishedAt} IS NULL) = (${table.lastSeenPostId} IS NULL)`,
@@ -665,16 +929,26 @@ export const mobileEvents = pgTable(
     description: text().notNull(),
     gameType: varchar("game_type", { length: 64 }),
     imageUrl: varchar("image_url", { length: 2048 }),
-    startsAt: timestamp("starts_at", { withTimezone: true, mode: "date" }).notNull(),
+    startsAt: timestamp("starts_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true, mode: "date" }),
     status: varchar({ length: 16 }).default("scheduled").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex("mobile_events_slug_uq").on(table.slug),
     index("mobile_events_schedule_idx").on(table.status, table.startsAt),
-    check("mobile_events_status_ck", sql`${table.status} IN ('draft', 'scheduled', 'cancelled', 'completed')`),
+    check(
+      "mobile_events_status_ck",
+      sql`${table.status} IN ('draft', 'scheduled', 'cancelled', 'completed')`,
+    ),
   ],
 );
 
@@ -691,23 +965,39 @@ export const playerFriendships = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     status: varchar({ length: 16 }).default("pending").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     acceptedAt: timestamp("accepted_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
     primaryKey({ columns: [table.playerLowId, table.playerHighId] }),
-    index("player_friendships_low_status_idx").on(table.playerLowId, table.status),
-    index("player_friendships_high_status_idx").on(table.playerHighId, table.status),
+    index("player_friendships_low_status_idx").on(
+      table.playerLowId,
+      table.status,
+    ),
+    index("player_friendships_high_status_idx").on(
+      table.playerHighId,
+      table.status,
+    ),
     index("player_friendships_requester_pending_idx")
       .on(table.requestedByPlayerId)
       .where(sql`${table.status} = 'pending'`),
-    check("player_friendships_order_ck", sql`${table.playerLowId} < ${table.playerHighId}`),
+    check(
+      "player_friendships_order_ck",
+      sql`${table.playerLowId} < ${table.playerHighId}`,
+    ),
     check(
       "player_friendships_requester_ck",
       sql`${table.requestedByPlayerId} IN (${table.playerLowId}, ${table.playerHighId})`,
     ),
-    check("player_friendships_status_ck", sql`${table.status} IN ('pending', 'accepted')`),
+    check(
+      "player_friendships_status_ck",
+      sql`${table.status} IN ('pending', 'accepted')`,
+    ),
     check(
       "player_friendships_accepted_at_ck",
       sql`(${table.status} = 'pending' AND ${table.acceptedAt} IS NULL)
@@ -725,14 +1015,19 @@ export const playerFriendRequestCooldowns = pgTable(
     targetPlayerId: uuid("target_player_id")
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
-    lastRequestedAt: timestamp("last_requested_at", { withTimezone: true, mode: "date" })
+    lastRequestedAt: timestamp("last_requested_at", {
+      withTimezone: true,
+      mode: "date",
+    })
       .defaultNow()
       .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.requesterPlayerId, table.targetPlayerId] }),
-    index("player_friend_request_cooldowns_target_idx")
-      .on(table.targetPlayerId, table.lastRequestedAt),
+    index("player_friend_request_cooldowns_target_idx").on(
+      table.targetPlayerId,
+      table.lastRequestedAt,
+    ),
     check(
       "player_friend_request_cooldowns_self_ck",
       sql`${table.requesterPlayerId} <> ${table.targetPlayerId}`,
@@ -749,12 +1044,17 @@ export const playerBlocks = pgTable(
     blockedPlayerId: uuid("blocked_player_id")
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.blockerPlayerId, table.blockedPlayerId] }),
     index("player_blocks_blocked_idx").on(table.blockedPlayerId),
-    check("player_blocks_self_ck", sql`${table.blockerPlayerId} <> ${table.blockedPlayerId}`),
+    check(
+      "player_blocks_self_ck",
+      sql`${table.blockerPlayerId} <> ${table.blockedPlayerId}`,
+    ),
   ],
 );
 
@@ -769,12 +1069,23 @@ export const playerReports = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     reason: varchar({ length: 32 }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    index("player_reports_reporter_created_idx").on(table.reporterPlayerId, table.createdAt),
-    index("player_reports_reported_created_idx").on(table.reportedPlayerId, table.createdAt),
-    check("player_reports_self_ck", sql`${table.reporterPlayerId} <> ${table.reportedPlayerId}`),
+    index("player_reports_reporter_created_idx").on(
+      table.reporterPlayerId,
+      table.createdAt,
+    ),
+    index("player_reports_reported_created_idx").on(
+      table.reportedPlayerId,
+      table.createdAt,
+    ),
+    check(
+      "player_reports_self_ck",
+      sql`${table.reporterPlayerId} <> ${table.reportedPlayerId}`,
+    ),
     check(
       "player_reports_reason_ck",
       sql`${table.reason} IN ('spam', 'harassment', 'hate_or_discrimination', 'sexual_content', 'threats', 'impersonation', 'cheating', 'inappropriate_name')`,
@@ -790,15 +1101,25 @@ export const playerParties = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     state: varchar({ length: 16 }).default("active").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    disbandedAt: timestamp("disbanded_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    disbandedAt: timestamp("disbanded_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
   },
   (table) => [
     uniqueIndex("player_parties_active_leader_uq")
       .on(table.leaderPlayerId)
       .where(sql`${table.state} = 'active'`),
-    check("player_parties_state_ck", sql`${table.state} IN ('active', 'disbanded')`),
+    check(
+      "player_parties_state_ck",
+      sql`${table.state} IN ('active', 'disbanded')`,
+    ),
     check(
       "player_parties_disbanded_at_ck",
       sql`(${table.state} = 'active' AND ${table.disbandedAt} IS NULL)
@@ -817,7 +1138,9 @@ export const playerPartyMembers = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     role: varchar({ length: 16 }).default("member").notNull(),
-    joinedAt: timestamp("joined_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
     leftAt: timestamp("left_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
@@ -828,7 +1151,10 @@ export const playerPartyMembers = pgTable(
     index("player_party_members_active_party_idx")
       .on(table.partyId)
       .where(sql`${table.leftAt} IS NULL`),
-    check("player_party_members_role_ck", sql`${table.role} IN ('leader', 'member')`),
+    check(
+      "player_party_members_role_ck",
+      sql`${table.role} IN ('leader', 'member')`,
+    ),
   ],
 );
 
@@ -846,19 +1172,36 @@ export const playerPartyInvites = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     status: varchar({ length: 16 }).default("pending").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
-    respondedAt: timestamp("responded_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+    respondedAt: timestamp("responded_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
   },
   (table) => [
     uniqueIndex("player_party_invites_pending_party_invitee_uq")
       .on(table.partyId, table.inviteePlayerId)
       .where(sql`${table.status} = 'pending'`),
-    index("player_party_invites_invitee_status_idx")
-      .on(table.inviteePlayerId, table.status, table.expiresAt),
-    index("player_party_invites_party_status_idx")
-      .on(table.partyId, table.status, table.expiresAt),
-    check("player_party_invites_self_ck", sql`${table.inviterPlayerId} <> ${table.inviteePlayerId}`),
+    index("player_party_invites_invitee_status_idx").on(
+      table.inviteePlayerId,
+      table.status,
+      table.expiresAt,
+    ),
+    index("player_party_invites_party_status_idx").on(
+      table.partyId,
+      table.status,
+      table.expiresAt,
+    ),
+    check(
+      "player_party_invites_self_ck",
+      sql`${table.inviterPlayerId} <> ${table.inviteePlayerId}`,
+    ),
     check(
       "player_party_invites_status_ck",
       sql`${table.status} IN ('pending', 'accepted', 'declined', 'cancelled', 'expired')`,
@@ -868,7 +1211,10 @@ export const playerPartyInvites = pgTable(
       sql`(${table.status} = 'pending' AND ${table.respondedAt} IS NULL)
         OR (${table.status} <> 'pending' AND ${table.respondedAt} IS NOT NULL)`,
     ),
-    check("player_party_invites_expiry_ck", sql`${table.expiresAt} > ${table.createdAt}`),
+    check(
+      "player_party_invites_expiry_ck",
+      sql`${table.expiresAt} > ${table.createdAt}`,
+    ),
   ],
 );
 
@@ -894,20 +1240,46 @@ export const skyblockIslands = pgTable(
     visibility: varchar({ length: 16 }).default("invite_only").notNull(),
     level: integer().default(1).notNull(),
     experience: bigint({ mode: "number" }).default(0).notNull(),
-    storageCapacity: bigint("storage_capacity", { mode: "number" }).default(2304).notNull(),
+    storageCapacity: bigint("storage_capacity", { mode: "number" })
+      .default(2304)
+      .notNull(),
     version: bigint({ mode: "number" }).default(0).notNull(),
-    lastSavedAt: timestamp("last_saved_at", { withTimezone: true, mode: "date" }),
-    lastActiveAt: timestamp("last_active_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    lastSavedAt: timestamp("last_saved_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
+    lastActiveAt: timestamp("last_active_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex("skyblock_islands_owner_uq").on(table.ownerPlayerId),
     uniqueIndex("skyblock_islands_grid_uq").on(table.gridX, table.gridZ),
-    check("skyblock_islands_state_ck", sql`${table.state} IN ('creating', 'active', 'resetting', 'disabled')`),
-    check("skyblock_islands_visibility_ck", sql`${table.visibility} IN ('private', 'invite_only')`),
-    check("skyblock_islands_level_ck", sql`${table.level} >= 1 AND ${table.experience} >= 0`),
-    check("skyblock_islands_limits_ck", sql`${table.generation} > 0 AND ${table.buildRadius} BETWEEN 32 AND 224 AND ${table.storageCapacity} > 0 AND ${table.generatorTier} BETWEEN 1 AND 5 AND ${table.memberLimit} BETWEEN 1 AND 4 AND ${table.version} >= 0`),
+    check(
+      "skyblock_islands_state_ck",
+      sql`${table.state} IN ('creating', 'active', 'resetting', 'disabled')`,
+    ),
+    check(
+      "skyblock_islands_visibility_ck",
+      sql`${table.visibility} IN ('private', 'invite_only')`,
+    ),
+    check(
+      "skyblock_islands_level_ck",
+      sql`${table.level} >= 1 AND ${table.experience} >= 0`,
+    ),
+    check(
+      "skyblock_islands_limits_ck",
+      sql`${table.generation} > 0 AND ${table.buildRadius} BETWEEN 32 AND 224 AND ${table.storageCapacity} > 0 AND ${table.generatorTier} BETWEEN 1 AND 5 AND ${table.memberLimit} BETWEEN 1 AND 4 AND ${table.version} >= 0`,
+    ),
   ],
 );
 
@@ -921,12 +1293,17 @@ export const skyblockIslandMembers = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "restrict" }),
     role: varchar({ length: 16 }).notNull(),
-    joinedAt: timestamp("joined_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    joinedAt: timestamp("joined_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.islandId, table.playerId] }),
     uniqueIndex("skyblock_island_members_player_uq").on(table.playerId),
-    check("skyblock_island_members_role_ck", sql`${table.role} IN ('owner', 'manager', 'member')`),
+    check(
+      "skyblock_island_members_role_ck",
+      sql`${table.role} IN ('owner', 'manager', 'member')`,
+    ),
   ],
 );
 
@@ -944,17 +1321,31 @@ export const skyblockIslandInvites = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "restrict" }),
     status: varchar({ length: 16 }).default("pending").notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex("skyblock_island_invites_pending_uq")
       .on(table.islandId, table.inviteePlayerId)
       .where(sql`${table.status} = 'pending'`),
-    index("skyblock_island_invites_invitee_idx").on(table.inviteePlayerId, table.status),
-    check("skyblock_island_invites_status_ck", sql`${table.status} IN ('pending', 'accepted', 'declined', 'expired', 'revoked')`),
-    check("skyblock_island_invites_players_ck", sql`${table.inviterPlayerId} <> ${table.inviteePlayerId}`),
+    index("skyblock_island_invites_invitee_idx").on(
+      table.inviteePlayerId,
+      table.status,
+    ),
+    check(
+      "skyblock_island_invites_status_ck",
+      sql`${table.status} IN ('pending', 'accepted', 'declined', 'expired', 'revoked')`,
+    ),
+    check(
+      "skyblock_island_invites_players_ck",
+      sql`${table.inviterPlayerId} <> ${table.inviteePlayerId}`,
+    ),
   ],
 );
 
@@ -967,12 +1358,20 @@ export const skyblockSkillProgress = pgTable(
     skill: varchar({ length: 16 }).notNull(),
     level: integer().default(1).notNull(),
     experience: bigint({ mode: "number" }).default(0).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.playerId, table.skill] }),
-    check("skyblock_skill_progress_skill_ck", sql`${table.skill} IN ('mining', 'farming', 'foraging', 'combat')`),
-    check("skyblock_skill_progress_value_ck", sql`${table.level} BETWEEN 1 AND 100 AND ${table.experience} >= 0`),
+    check(
+      "skyblock_skill_progress_skill_ck",
+      sql`${table.skill} IN ('mining', 'farming', 'foraging', 'combat')`,
+    ),
+    check(
+      "skyblock_skill_progress_value_ck",
+      sql`${table.level} BETWEEN 1 AND 100 AND ${table.experience} >= 0`,
+    ),
   ],
 );
 
@@ -984,14 +1383,22 @@ export const skyblockQuestProgress = pgTable(
       .references(() => playerdata.id, { onDelete: "cascade" }),
     questId: varchar("quest_id", { length: 64 }).notNull(),
     progress: integer().default(0).notNull(),
-    completedAt: timestamp("completed_at", { withTimezone: true, mode: "date" }),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     claimedAt: timestamp("claimed_at", { withTimezone: true, mode: "date" }),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.playerId, table.questId] }),
     check("skyblock_quest_progress_value_ck", sql`${table.progress} >= 0`),
-    check("skyblock_quest_progress_claim_ck", sql`${table.claimedAt} IS NULL OR ${table.completedAt} IS NOT NULL`),
+    check(
+      "skyblock_quest_progress_claim_ck",
+      sql`${table.claimedAt} IS NULL OR ${table.completedAt} IS NOT NULL`,
+    ),
   ],
 );
 
@@ -1006,17 +1413,40 @@ export const skyblockWorkers = pgTable(
     tier: integer().default(1).notNull(),
     status: varchar({ length: 16 }).default("active").notNull(),
     bufferItemId: varchar("buffer_item_id", { length: 64 }).notNull(),
-    bufferQuantity: bigint("buffer_quantity", { mode: "number" }).default(0).notNull(),
-    productionCursorAt: timestamp("production_cursor_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    bufferQuantity: bigint("buffer_quantity", { mode: "number" })
+      .default(0)
+      .notNull(),
+    productionCursorAt: timestamp("production_cursor_at", {
+      withTimezone: true,
+      mode: "date",
+    })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     index("skyblock_workers_island_idx").on(table.islandId, table.status),
-    uniqueIndex("skyblock_workers_island_type_uq").on(table.islandId, table.workerType),
-    check("skyblock_workers_type_ck", sql`${table.workerType} IN ('miner', 'farmer', 'lumberjack')`),
-    check("skyblock_workers_status_ck", sql`${table.status} IN ('active', 'paused')`),
-    check("skyblock_workers_values_ck", sql`${table.tier} BETWEEN 1 AND 5 AND ${table.bufferQuantity} >= 0`),
+    uniqueIndex("skyblock_workers_island_type_uq").on(
+      table.islandId,
+      table.workerType,
+    ),
+    check(
+      "skyblock_workers_type_ck",
+      sql`${table.workerType} IN ('miner', 'farmer', 'lumberjack')`,
+    ),
+    check(
+      "skyblock_workers_status_ck",
+      sql`${table.status} IN ('active', 'paused')`,
+    ),
+    check(
+      "skyblock_workers_values_ck",
+      sql`${table.tier} BETWEEN 1 AND 5 AND ${table.bufferQuantity} >= 0`,
+    ),
   ],
 );
 
@@ -1032,15 +1462,30 @@ export const skyblockStorageItems = pgTable(
       .references(() => skyblockIslands.id, { onDelete: "cascade" }),
     itemId: varchar("item_id", { length: 64 }).notNull(),
     quantity: bigint({ mode: "number" }).default(0).notNull(),
-    reservedQuantity: bigint("reserved_quantity", { mode: "number" }).default(0).notNull(),
+    reservedQuantity: bigint("reserved_quantity", { mode: "number" })
+      .default(0)
+      .notNull(),
     version: bigint({ mode: "number" }).default(0).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    uniqueIndex("skyblock_storage_items_island_item_uq").on(table.islandId, table.itemId),
-    index("skyblock_storage_items_owner_idx").on(table.ownerPlayerId, table.updatedAt),
-    check("skyblock_storage_items_quantity_ck", sql`${table.quantity} >= 0 AND ${table.reservedQuantity} >= 0 AND ${table.reservedQuantity} <= ${table.quantity}`),
+    uniqueIndex("skyblock_storage_items_island_item_uq").on(
+      table.islandId,
+      table.itemId,
+    ),
+    index("skyblock_storage_items_owner_idx").on(
+      table.ownerPlayerId,
+      table.updatedAt,
+    ),
+    check(
+      "skyblock_storage_items_quantity_ck",
+      sql`${table.quantity} >= 0 AND ${table.reservedQuantity} >= 0 AND ${table.reservedQuantity} <= ${table.quantity}`,
+    ),
     check("skyblock_storage_items_version_ck", sql`${table.version} >= 0`),
   ],
 );
@@ -1059,9 +1504,16 @@ export const skyblockInventoryTransfers = pgTable(
     itemId: varchar("item_id", { length: 64 }).notNull(),
     quantity: bigint({ mode: "number" }).notNull(),
     state: varchar({ length: 16 }).default("prepared").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    committedAt: timestamp("committed_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    committedAt: timestamp("committed_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
   },
   (table) => [
     index("idx_skyblock_transfer_recovery")
@@ -1070,10 +1522,19 @@ export const skyblockInventoryTransfers = pgTable(
     uniqueIndex("uq_skyblock_open_transfer_player")
       .on(table.playerId)
       .where(sql`${table.state} IN ('prepared', 'marked')`),
-    check("ck_skyblock_transfer_slot", sql`${table.inventorySlot} BETWEEN 0 AND 40`),
+    check(
+      "ck_skyblock_transfer_slot",
+      sql`${table.inventorySlot} BETWEEN 0 AND 40`,
+    ),
     check("ck_skyblock_transfer_quantity", sql`${table.quantity} > 0`),
-    check("ck_skyblock_transfer_state", sql`${table.state} IN ('prepared', 'marked', 'committed', 'cancelled')`),
-    check("ck_skyblock_transfer_commit", sql`(${table.state} = 'committed' AND ${table.committedAt} IS NOT NULL) OR (${table.state} <> 'committed' AND ${table.committedAt} IS NULL)`),
+    check(
+      "ck_skyblock_transfer_state",
+      sql`${table.state} IN ('prepared', 'marked', 'committed', 'cancelled')`,
+    ),
+    check(
+      "ck_skyblock_transfer_commit",
+      sql`(${table.state} = 'committed' AND ${table.committedAt} IS NOT NULL) OR (${table.state} <> 'committed' AND ${table.committedAt} IS NULL)`,
+    ),
   ],
 );
 
@@ -1081,22 +1542,39 @@ export const skyblockMarketQuotes = pgTable(
   "skyblock_market_quotes",
   {
     id: uuid().primaryKey(),
-    sellerPlayerId: uuid("seller_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
-    islandId: uuid("island_id").notNull().references(() => skyblockIslands.id, { onDelete: "cascade" }),
-    storageItemId: uuid("storage_item_id").notNull().references(() => skyblockStorageItems.id, { onDelete: "restrict" }),
+    sellerPlayerId: uuid("seller_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    storageItemId: uuid("storage_item_id")
+      .notNull()
+      .references(() => skyblockStorageItems.id, { onDelete: "restrict" }),
     itemId: varchar("item_id", { length: 64 }).notNull(),
     quantity: bigint({ mode: "number" }).notNull(),
     priceCoins: integer("price_coins").notNull(),
     feeCoins: integer("fee_coins").notNull(),
     netCoins: integer("net_coins").notNull(),
     inventoryVersion: bigint("inventory_version", { mode: "number" }).notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     consumedAt: timestamp("consumed_at", { withTimezone: true, mode: "date" }),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    index("skyblock_market_quotes_seller_expiry_idx").on(table.sellerPlayerId, table.expiresAt),
-    check("skyblock_market_quotes_value_ck", sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins} AND ${table.inventoryVersion} >= 0`),
+    index("skyblock_market_quotes_seller_expiry_idx").on(
+      table.sellerPlayerId,
+      table.expiresAt,
+    ),
+    check(
+      "skyblock_market_quotes_value_ck",
+      sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins} AND ${table.inventoryVersion} >= 0`,
+    ),
   ],
 );
 
@@ -1104,11 +1582,22 @@ export const skyblockMarketListings = pgTable(
   "skyblock_market_listings",
   {
     id: uuid().primaryKey(),
-    sellerPlayerId: uuid("seller_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
-    buyerPlayerId: uuid("buyer_player_id").references(() => playerdata.id, { onDelete: "restrict" }),
-    sellerIslandId: uuid("seller_island_id").notNull().references(() => skyblockIslands.id, { onDelete: "restrict" }),
-    buyerIslandId: uuid("buyer_island_id").references(() => skyblockIslands.id, { onDelete: "restrict" }),
-    storageItemId: uuid("storage_item_id").notNull().references(() => skyblockStorageItems.id, { onDelete: "restrict" }),
+    sellerPlayerId: uuid("seller_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    buyerPlayerId: uuid("buyer_player_id").references(() => playerdata.id, {
+      onDelete: "restrict",
+    }),
+    sellerIslandId: uuid("seller_island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    buyerIslandId: uuid("buyer_island_id").references(
+      () => skyblockIslands.id,
+      { onDelete: "restrict" },
+    ),
+    storageItemId: uuid("storage_item_id")
+      .notNull()
+      .references(() => skyblockStorageItems.id, { onDelete: "restrict" }),
     itemId: varchar("item_id", { length: 64 }).notNull(),
     quantity: bigint({ mode: "number" }).notNull(),
     priceCoins: integer("price_coins").notNull(),
@@ -1116,16 +1605,37 @@ export const skyblockMarketListings = pgTable(
     netCoins: integer("net_coins").notNull(),
     status: varchar({ length: 16 }).default("active").notNull(),
     version: bigint({ mode: "number" }).default(0).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    expiresAt: timestamp("expires_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
     resolvedAt: timestamp("resolved_at", { withTimezone: true, mode: "date" }),
   },
   (table) => [
-    index("skyblock_market_listings_market_idx").on(table.status, table.createdAt),
-    index("skyblock_market_listings_seller_idx").on(table.sellerPlayerId, table.status, table.createdAt),
-    check("skyblock_market_listings_status_ck", sql`${table.status} IN ('active', 'sold', 'cancelled', 'expired')`),
-    check("skyblock_market_listings_value_ck", sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins} AND ${table.version} >= 0`),
-    check("skyblock_market_listings_resolution_ck", sql`(${table.status} = 'active' AND ${table.resolvedAt} IS NULL AND ${table.buyerPlayerId} IS NULL AND ${table.buyerIslandId} IS NULL) OR (${table.status} = 'sold' AND ${table.resolvedAt} IS NOT NULL AND ${table.buyerPlayerId} IS NOT NULL AND ${table.buyerIslandId} IS NOT NULL) OR (${table.status} IN ('cancelled', 'expired') AND ${table.resolvedAt} IS NOT NULL)`),
+    index("skyblock_market_listings_market_idx").on(
+      table.status,
+      table.createdAt,
+    ),
+    index("skyblock_market_listings_seller_idx").on(
+      table.sellerPlayerId,
+      table.status,
+      table.createdAt,
+    ),
+    check(
+      "skyblock_market_listings_status_ck",
+      sql`${table.status} IN ('active', 'sold', 'cancelled', 'expired')`,
+    ),
+    check(
+      "skyblock_market_listings_value_ck",
+      sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins} AND ${table.version} >= 0`,
+    ),
+    check(
+      "skyblock_market_listings_resolution_ck",
+      sql`(${table.status} = 'active' AND ${table.resolvedAt} IS NULL AND ${table.buyerPlayerId} IS NULL AND ${table.buyerIslandId} IS NULL) OR (${table.status} = 'sold' AND ${table.resolvedAt} IS NOT NULL AND ${table.buyerPlayerId} IS NOT NULL AND ${table.buyerIslandId} IS NOT NULL) OR (${table.status} IN ('cancelled', 'expired') AND ${table.resolvedAt} IS NOT NULL)`,
+    ),
   ],
 );
 
@@ -1133,41 +1643,76 @@ export const skyblockMarketSales = pgTable(
   "skyblock_market_sales",
   {
     id: uuid().primaryKey(),
-    listingId: uuid("listing_id").notNull().references(() => skyblockMarketListings.id, { onDelete: "restrict" }),
-    buyerPlayerId: uuid("buyer_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
-    sellerPlayerId: uuid("seller_player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
-    buyerIslandId: uuid("buyer_island_id").notNull().references(() => skyblockIslands.id, { onDelete: "restrict" }),
-    sellerIslandId: uuid("seller_island_id").notNull().references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    listingId: uuid("listing_id")
+      .notNull()
+      .references(() => skyblockMarketListings.id, { onDelete: "restrict" }),
+    buyerPlayerId: uuid("buyer_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    sellerPlayerId: uuid("seller_player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "restrict" }),
+    buyerIslandId: uuid("buyer_island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "restrict" }),
+    sellerIslandId: uuid("seller_island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "restrict" }),
     itemId: varchar("item_id", { length: 64 }).notNull(),
     quantity: bigint({ mode: "number" }).notNull(),
     priceCoins: integer("price_coins").notNull(),
     feeCoins: integer("fee_coins").notNull(),
     netCoins: integer("net_coins").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     uniqueIndex("skyblock_market_sales_listing_uq").on(table.listingId),
-    index("skyblock_market_sales_buyer_idx").on(table.buyerPlayerId, table.createdAt),
-    index("skyblock_market_sales_seller_idx").on(table.sellerPlayerId, table.createdAt),
-    check("skyblock_market_sales_value_ck", sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins}`),
-    check("skyblock_market_sales_players_ck", sql`${table.buyerPlayerId} <> ${table.sellerPlayerId}`),
+    index("skyblock_market_sales_buyer_idx").on(
+      table.buyerPlayerId,
+      table.createdAt,
+    ),
+    index("skyblock_market_sales_seller_idx").on(
+      table.sellerPlayerId,
+      table.createdAt,
+    ),
+    check(
+      "skyblock_market_sales_value_ck",
+      sql`${table.quantity} > 0 AND ${table.priceCoins} > 0 AND ${table.feeCoins} >= 0 AND ${table.feeCoins} <= ${table.priceCoins} AND ${table.netCoins} >= 0 AND ${table.netCoins} + ${table.feeCoins} = ${table.priceCoins}`,
+    ),
+    check(
+      "skyblock_market_sales_players_ck",
+      sql`${table.buyerPlayerId} <> ${table.sellerPlayerId}`,
+    ),
   ],
 );
 
 export const skyblockMobileRequests = pgTable(
   "skyblock_mobile_requests",
   {
-    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
     scope: varchar({ length: 64 }).notNull(),
     idempotencyKey: varchar("idempotency_key", { length: 128 }).notNull(),
     requestHash: varchar("request_hash", { length: 128 }).notNull(),
     responseStatus: integer("response_status").notNull(),
-    responseBody: jsonb("response_body").$type<Record<string, unknown>>().notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    responseBody: jsonb("response_body")
+      .$type<Record<string, unknown>>()
+      .notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
-    primaryKey({ columns: [table.playerId, table.scope, table.idempotencyKey] }),
-    check("skyblock_mobile_requests_status_ck", sql`${table.responseStatus} BETWEEN 100 AND 599`),
+    primaryKey({
+      columns: [table.playerId, table.scope, table.idempotencyKey],
+    }),
+    check(
+      "skyblock_mobile_requests_status_ck",
+      sql`${table.responseStatus} BETWEEN 100 AND 599`,
+    ),
   ],
 );
 
@@ -1176,8 +1721,13 @@ export const mobileRateLimits = pgTable(
   {
     keyHash: varchar("key_hash", { length: 64 }).primaryKey().notNull(),
     requestCount: integer("request_count").default(1).notNull(),
-    resetsAt: timestamp("resets_at", { withTimezone: true, mode: "date" }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    resetsAt: timestamp("resets_at", {
+      withTimezone: true,
+      mode: "date",
+    }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
   },
   (table) => [
     index("mobile_rate_limits_expiry_idx").on(table.resetsAt),

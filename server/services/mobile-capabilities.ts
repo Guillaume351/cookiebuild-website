@@ -31,16 +31,20 @@ function enabled(value: string | undefined) {
   return value?.trim().toLowerCase() === "true";
 }
 
-export function configuredMobileCapabilities(environment = process.env): MobileCapabilities {
+export function configuredMobileCapabilities(
+  environment = process.env,
+): MobileCapabilities {
   const skyblockCompanion = enabled(environment.MOBILE_SKYBLOCK_ENABLED);
   return {
     kitShop: enabled(environment.MOBILE_KIT_SHOP_ENABLED),
     playerDashboard: enabled(environment.MOBILE_PLAYER_DASHBOARD_ENABLED),
     skyblockCompanion,
-    skyblockManagementWrites: skyblockCompanion
-      && enabled(environment.MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED),
-    skyblockMarketWrites: skyblockCompanion
-      && enabled(environment.MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED),
+    skyblockManagementWrites:
+      skyblockCompanion &&
+      enabled(environment.MOBILE_SKYBLOCK_MANAGEMENT_WRITES_ENABLED),
+    skyblockMarketWrites:
+      skyblockCompanion &&
+      enabled(environment.MOBILE_SKYBLOCK_MARKET_WRITES_ENABLED),
   };
 }
 
@@ -86,12 +90,12 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
       AND to_regclass('public.skyblock_workers') IS NOT NULL
       AND to_regclass('public.skyblock_storage_items') IS NOT NULL
       AND to_regclass('public.skyblock_inventory_transfers') IS NOT NULL
+      AND to_regclass('public.skyblock_island_accounts') IS NOT NULL
+      AND to_regclass('public.skyblock_coin_transactions') IS NOT NULL
+      AND to_regclass('public.skyblock_collections') IS NOT NULL
+      AND to_regclass('public.skyblock_periodic_objectives') IS NOT NULL
       AND to_regclass('public.idx_skyblock_transfer_recovery') IS NOT NULL
       AND to_regclass('public.uq_skyblock_open_transfer_player') IS NOT NULL
-      AND EXISTS (
-        SELECT 1 FROM information_schema.columns
-         WHERE table_schema = 'public' AND table_name = 'playerdata' AND column_name = 'coins'
-      )
       AND EXISTS (
         SELECT 1 FROM information_schema.columns
          WHERE table_schema = 'public' AND table_name = 'skyblock_islands'
@@ -107,8 +111,8 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
       AND EXISTS (
         SELECT 1 FROM information_schema.columns
          WHERE table_schema = 'public' AND table_name = 'skyblock_inventory_transfers'
-           AND column_name IN ('state', 'updated_at', 'committed_at')
-         GROUP BY table_name HAVING count(*) = 3
+           AND column_name IN ('state', 'direction', 'updated_at', 'committed_at')
+         GROUP BY table_name HAVING count(*) = 4
       )
     ) AS "skyblockCompanion",
     (
@@ -121,12 +125,11 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
       AND to_regclass('public.skyblock_storage_items') IS NOT NULL
       AND to_regclass('public.skyblock_inventory_transfers') IS NOT NULL
       AND to_regclass('public.skyblock_mobile_requests') IS NOT NULL
-      AND to_regclass('public.coin_transactions') IS NOT NULL
-      AND to_regclass('public.uq_coin_transaction_player_source') IS NOT NULL
-      AND EXISTS (
-        SELECT 1 FROM information_schema.columns
-         WHERE table_schema = 'public' AND table_name = 'playerdata' AND column_name = 'coins'
-      )
+      AND to_regclass('public.skyblock_island_accounts') IS NOT NULL
+      AND to_regclass('public.skyblock_coin_transactions') IS NOT NULL
+      AND to_regclass('public.skyblock_npc_trade_daily') IS NOT NULL
+      AND to_regclass('public.skyblock_collections') IS NOT NULL
+      AND to_regclass('public.skyblock_periodic_objectives') IS NOT NULL
       AND EXISTS (
         SELECT 1 FROM information_schema.columns
          WHERE table_schema = 'public' AND table_name = 'skyblock_islands'
@@ -163,12 +166,8 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
       AND to_regclass('public.skyblock_market_listings') IS NOT NULL
       AND to_regclass('public.skyblock_market_sales') IS NOT NULL
       AND to_regclass('public.skyblock_mobile_requests') IS NOT NULL
-      AND to_regclass('public.coin_transactions') IS NOT NULL
-      AND to_regclass('public.uq_coin_transaction_player_source') IS NOT NULL
-      AND EXISTS (
-        SELECT 1 FROM information_schema.columns
-         WHERE table_schema = 'public' AND table_name = 'playerdata' AND column_name = 'coins'
-      )
+      AND to_regclass('public.skyblock_island_accounts') IS NOT NULL
+      AND to_regclass('public.skyblock_coin_transactions') IS NOT NULL
     ) AS "skyblockMarketWrites"
   `);
   return {
@@ -181,21 +180,30 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
 }
 
 /** Runtime flags and schema prerequisites must both pass before an API is advertised. */
-export async function mobileCapabilities(now = Date.now()): Promise<MobileCapabilities> {
+export async function mobileCapabilities(
+  now = Date.now(),
+): Promise<MobileCapabilities> {
   const configured = configuredMobileCapabilities();
   if (
-    !configured.kitShop
-    && !configured.playerDashboard
-    && !configured.skyblockCompanion
-    && !configured.skyblockManagementWrites
-    && !configured.skyblockMarketWrites
-  ) return configured;
+    !configured.kitShop &&
+    !configured.playerDashboard &&
+    !configured.skyblockCompanion &&
+    !configured.skyblockManagementWrites &&
+    !configured.skyblockMarketWrites
+  )
+    return configured;
 
   if (!cachedSchema || cachedSchema.expiresAt <= now) {
     try {
-      cachedSchema = { value: await databaseCapabilities(), expiresAt: now + 60_000 };
+      cachedSchema = {
+        value: await databaseCapabilities(),
+        expiresAt: now + 60_000,
+      };
     } catch (error) {
-      console.warn("[mobile-capabilities] schema check failed; private features remain disabled", error);
+      console.warn(
+        "[mobile-capabilities] schema check failed; private features remain disabled",
+        error,
+      );
       cachedSchema = {
         value: {
           kitShop: false,
@@ -210,21 +218,28 @@ export async function mobileCapabilities(now = Date.now()): Promise<MobileCapabi
   }
   return {
     kitShop: configured.kitShop && cachedSchema.value.kitShop,
-    playerDashboard: configured.playerDashboard && cachedSchema.value.playerDashboard,
-    skyblockCompanion: configured.skyblockCompanion && cachedSchema.value.skyblockCompanion,
-    skyblockManagementWrites: configured.skyblockManagementWrites
-      && cachedSchema.value.skyblockCompanion
-      && cachedSchema.value.skyblockManagementWrites,
-    skyblockMarketWrites: configured.skyblockMarketWrites
-      && cachedSchema.value.skyblockCompanion
-      && cachedSchema.value.skyblockMarketWrites,
+    playerDashboard:
+      configured.playerDashboard && cachedSchema.value.playerDashboard,
+    skyblockCompanion:
+      configured.skyblockCompanion && cachedSchema.value.skyblockCompanion,
+    skyblockManagementWrites:
+      configured.skyblockManagementWrites &&
+      cachedSchema.value.skyblockCompanion &&
+      cachedSchema.value.skyblockManagementWrites,
+    skyblockMarketWrites:
+      configured.skyblockMarketWrites &&
+      cachedSchema.value.skyblockCompanion &&
+      cachedSchema.value.skyblockMarketWrites,
   };
 }
 
 export async function requireMobileCapability(capability: MobileCapability) {
   const capabilities = await mobileCapabilities();
   if (!capabilities[capability]) {
-    throw createError({ statusCode: 404, statusMessage: "Feature unavailable" });
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Feature unavailable",
+    });
   }
 }
 
