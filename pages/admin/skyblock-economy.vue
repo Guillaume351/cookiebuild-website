@@ -11,7 +11,7 @@
 
     <AdminNotice v-if="error" tone="error" class="mb-6">{{ adminErrorMessage(error) }}</AdminNotice>
     <AdminNotice v-else-if="dashboard && !dashboard.available" tone="error" class="mb-6">
-      Les métriques Skyblock V2 seront disponibles après application de la migration économique.
+      Le schéma économique Skyblock V2 n’est pas présent dans cette base. Applique la migration économique puis actualise.
     </AdminNotice>
 
     <template v-if="dashboard?.available && dashboard.summary">
@@ -74,6 +74,7 @@ interface EconomySummary {
 
 interface Dashboard {
   available: boolean;
+  unavailableReason?: "schema_missing";
   generatedAt: string;
   summary: EconomySummary | null;
   sources: Array<{ source: string; minted: number; burned: number; transactions: number }>;

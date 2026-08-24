@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import db from "../../../db/client";
 import { requireAdminAuth } from "../../utils/admin-auth";
+import { databaseErrorCode } from "../../utils/database-error";
 
 interface SummaryRow extends Record<string, unknown> {
   islands: number | string;
@@ -25,6 +26,7 @@ const numberValue = (value: unknown) => Number(value || 0);
 
 export default defineEventHandler(async (event) => {
   requireAdminAuth(event, "dashboard:read");
+  setHeader(event, "Cache-Control", "no-store");
   try {
     const [summaryRows, sources, items] = await Promise.all([
       db.execute<SummaryRow>(sql`
@@ -92,8 +94,8 @@ export default defineEventHandler(async (event) => {
                sum(quantity) AS quantity,
                sum(price_coins) AS volume,
                round(sum(price_coins)::numeric / nullif(sum(quantity), 0), 2) AS "weightedUnitPrice",
-               round(percentile_cont(0.5) WITHIN GROUP
-                 (ORDER BY price_coins::numeric / nullif(quantity, 0)), 2) AS "medianUnitPrice"
+               round((percentile_cont(0.5) WITHIN GROUP
+                 (ORDER BY price_coins::numeric / nullif(quantity, 0)))::numeric, 2) AS "medianUnitPrice"
           FROM skyblock_market_sales
          WHERE created_at >= now() - interval '7 days'
          GROUP BY item_id
@@ -102,7 +104,6 @@ export default defineEventHandler(async (event) => {
       `),
     ]);
     const row = summaryRows[0]!;
-    setHeader(event, "Cache-Control", "no-store");
     return { data: {
       available: true,
       generatedAt: new Date().toISOString(),
@@ -122,14 +123,22 @@ export default defineEventHandler(async (event) => {
         medianUnitPrice: numberValue(item.medianUnitPrice),
       })),
     } };
-  } catch {
-    setHeader(event, "Cache-Control", "no-store");
-    return { data: {
-      available: false,
-      generatedAt: new Date().toISOString(),
-      summary: null,
-      sources: [],
-      items: [],
-    } };
+  } catch (error) {
+    const code = databaseErrorCode(error);
+    if (code === "42P01") {
+      return { data: {
+        available: false,
+        unavailableReason: "schema_missing" as const,
+        generatedAt: new Date().toISOString(),
+        summary: null,
+        sources: [],
+        items: [],
+      } };
+    }
+    console.error("admin_skyblock_economy_query_failed", { code });
+    throw createError({
+      statusCode: 503,
+      statusMessage: "Les métriques économiques Skyblock sont temporairement indisponibles.",
+    });
   }
 });
