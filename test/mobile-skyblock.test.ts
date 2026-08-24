@@ -14,9 +14,12 @@ import {
 import managementPolicy from "../contracts/skyblock-management-v1.json";
 import {
   SKYBLOCK_MANAGEMENT_POLICY_VERSION,
+  SKYBLOCK_ECONOMY_VERSION,
   SKYBLOCK_QUESTS,
   skyblockBuildRadiusForTier,
   skyblockGeneratorUpgradeCost,
+  skyblockGeneratorDropChances,
+  skyblockGeneratorUpgradeRequirement,
   skyblockWorkerBufferCapacity,
   skyblockWorkerIntervalSeconds,
   skyblockWorkerUpgradeCost,
@@ -128,15 +131,27 @@ describe("mobile Skyblock contract", () => {
 
   it("publishes strict versioned management, generator, worker and quest policies", () => {
     expect(SKYBLOCK_MANAGEMENT_POLICY_VERSION).toBe("skyblock-management-v1");
+    expect(SKYBLOCK_ECONOMY_VERSION).toBe("skyblock-economy-v3");
     expect(SKYBLOCK_QUESTS).toEqual(managementPolicy.quests);
     expect(SKYBLOCK_QUESTS).toHaveLength(12);
     expect(skyblockBuildRadiusForTier(1)).toBe(96);
     expect(skyblockBuildRadiusForTier(5)).toBe(160);
-    expect(skyblockGeneratorUpgradeCost(2)).toBe(250);
-    expect(skyblockGeneratorUpgradeCost(5)).toBe(5_000);
+    expect(skyblockGeneratorUpgradeCost(2)).toBe(500);
+    expect(skyblockGeneratorUpgradeCost(5)).toBe(9_000);
+    expect(skyblockGeneratorUpgradeRequirement(4)).toEqual({
+      costCoins: 4_000,
+      resources: [{ itemId: "iron_ingot", quantity: 96 }],
+    });
+    expect(skyblockGeneratorDropChances(5)).toEqual([
+      { itemId: "cobblestone", percent: 50 },
+      { itemId: "coal", percent: 22 },
+      { itemId: "iron_ingot", percent: 16 },
+      { itemId: "gold_ingot", percent: 9 },
+      { itemId: "diamond", percent: 3 },
+    ]);
     expect(skyblockWorkerUpgradeCost(2)).toBe(250);
     expect(skyblockWorkerUpgradeCost(5)).toBe(4_000);
-    expect(skyblockWorkerBufferCapacity(5)).toBe(1_280);
+    expect(skyblockWorkerBufferCapacity(5)).toBe(1_024);
     expect(skyblockWorkerIntervalSeconds(5)).toBe(27);
   });
 
@@ -145,12 +160,12 @@ describe("mobile Skyblock contract", () => {
       generatorUpgradeBody({
         expectedIslandVersion: 4,
         expectedNextTier: 3,
-        expectedCostCoins: 750,
+        expectedCostCoins: 1_500,
       }),
     ).toEqual({
       expectedIslandVersion: 4,
       expectedNextTier: 3,
-      expectedCostCoins: 750,
+      expectedCostCoins: 1_500,
     });
     expect(emptySkyblockMutationBody({})).toEqual({});
     expect(skyblockQuestId("generator_apprentice")).toBe(
@@ -160,7 +175,7 @@ describe("mobile Skyblock contract", () => {
       generatorUpgradeBody({
         expectedIslandVersion: 4,
         expectedNextTier: 3,
-        expectedCostCoins: 750,
+        expectedCostCoins: 1_500,
         playerId: "forbidden",
       }),
     ).toThrow();

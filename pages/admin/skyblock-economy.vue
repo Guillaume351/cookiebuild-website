@@ -69,6 +69,14 @@ interface EconomySummary {
   volume24h: number;
   npcSoldToday: number;
   npcBoughtToday: number;
+  generatorBrokenToday: number;
+  depositedToday: number;
+  workerCollectedToday: number;
+  npcSaleCoinsToday: number;
+  generatorUpgrades7d: number;
+  averageUpgradeMinutes7d: number;
+  averageStoragePercent7d: number;
+  storageFullPercent7d: number;
   storageInvariantViolations: number;
 }
 
@@ -110,6 +118,14 @@ const metrics = computed(() => {
     { label: "Ventes · 24 h", value: value.sales24h, hint: `${value.volume24h} pièces de volume`, alert: false },
     { label: "Annonces actives", value: value.activeListings, hint: `${value.overdueListings} expirées non résolues`, alert: value.overdueListings > 0 },
     { label: "Vendu au marchand", value: value.npcSoldToday, hint: "Unités aujourd’hui", alert: false },
+    { label: "Blocs générateur", value: value.generatorBrokenToday, hint: "Cassés aujourd’hui", alert: false },
+    { label: "Déposé en entrepôt", value: value.depositedToday, hint: "Unités aujourd’hui", alert: false },
+    { label: "Collecté par les workers", value: value.workerCollectedToday, hint: "Unités aujourd’hui", alert: false },
+    { label: "Pièces marchand", value: value.npcSaleCoinsToday, hint: "Créées aujourd’hui", alert: false },
+    { label: "Upgrades générateur", value: value.generatorUpgrades7d, hint: "Sur 7 jours", alert: false },
+    { label: "Temps moyen d’upgrade", value: `${value.averageUpgradeMinutes7d} min`, hint: "Sur 7 jours", alert: false },
+    { label: "Remplissage moyen", value: `${value.averageStoragePercent7d} %`, hint: "Entrepôt sur 7 jours", alert: false },
+    { label: "Stockage plein", value: `${value.storageFullPercent7d} %`, hint: "Des relevés sur 7 jours", alert: value.storageFullPercent7d > 25 },
     { label: "Acheté au marchand", value: value.npcBoughtToday, hint: "Unités aujourd’hui", alert: false },
     { label: "Invariants stockage", value: value.storageInvariantViolations, hint: "Doit toujours rester à zéro", alert: value.storageInvariantViolations > 0 },
   ];

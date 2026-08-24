@@ -61,7 +61,7 @@ const serviceMocks = vi.hoisted(() => ({
     policyVersion: "skyblock-management-v1",
   })),
   upgradeSkyblockGenerator: vi.fn(async () => ({
-    data: { costCoins: 250 },
+    data: { costCoins: 500 },
     created: true,
   })),
   collectSkyblockWorkers: vi.fn(async () => ({
@@ -357,7 +357,7 @@ describe("mobile Skyblock API routes", () => {
     h3Mocks.readBody.mockResolvedValue({
       expectedIslandVersion: 4,
       expectedNextTier: 2,
-      expectedCostCoins: 250,
+      expectedCostCoins: 500,
     });
     await generatorRoute({ context: {} });
     expect(capabilityMocks.requireMobileCapability).toHaveBeenCalledWith(
@@ -365,7 +365,7 @@ describe("mobile Skyblock API routes", () => {
     );
     expect(serviceMocks.upgradeSkyblockGenerator).toHaveBeenCalledWith(
       "firebase-skyblock-user",
-      { expectedIslandVersion: 4, expectedNextTier: 2, expectedCostCoins: 250 },
+      { expectedIslandVersion: 4, expectedNextTier: 2, expectedCostCoins: 500 },
       IDS.idempotency,
     );
   });

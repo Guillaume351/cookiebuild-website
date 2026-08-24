@@ -19,6 +19,14 @@ interface SummaryRow extends Record<string, unknown> {
   volume24h: number | string;
   npcSoldToday: number | string;
   npcBoughtToday: number | string;
+  generatorBrokenToday: number | string;
+  depositedToday: number | string;
+  workerCollectedToday: number | string;
+  npcSaleCoinsToday: number | string;
+  generatorUpgrades7d: number | string;
+  averageUpgradeMinutes7d: number | string;
+  averageStoragePercent7d: number | string;
+  storageFullPercent7d: number | string;
   storageInvariantViolations: number | string;
 }
 
@@ -60,6 +68,25 @@ export default defineEventHandler(async (event) => {
              WHERE trade_date = current_date) AS "npcSoldToday",
           (SELECT coalesce(sum(bought_quantity), 0) FROM skyblock_npc_trade_daily
              WHERE trade_date = current_date) AS "npcBoughtToday",
+          (SELECT coalesce(sum(generator_items_broken), 0) FROM skyblock_economy_daily
+             WHERE metric_date = current_date) AS "generatorBrokenToday",
+          (SELECT coalesce(sum(storage_items_deposited), 0) FROM skyblock_economy_daily
+             WHERE metric_date = current_date) AS "depositedToday",
+          (SELECT coalesce(sum(worker_items_collected), 0) FROM skyblock_economy_daily
+             WHERE metric_date = current_date) AS "workerCollectedToday",
+          (SELECT coalesce(sum(npc_sale_coins), 0) FROM skyblock_economy_daily
+             WHERE metric_date = current_date) AS "npcSaleCoinsToday",
+          (SELECT coalesce(sum(generator_upgrades), 0) FROM skyblock_economy_daily
+             WHERE metric_date >= current_date - 6) AS "generatorUpgrades7d",
+          (SELECT coalesce(round(sum(generator_upgrade_seconds_total)::numeric
+             / nullif(sum(generator_upgrades), 0) / 60, 1), 0) FROM skyblock_economy_daily
+             WHERE metric_date >= current_date - 6) AS "averageUpgradeMinutes7d",
+          (SELECT coalesce(round(sum(storage_saturation_basis_points_total)::numeric
+             / nullif(sum(storage_saturation_samples), 0) / 100, 1), 0) FROM skyblock_economy_daily
+             WHERE metric_date >= current_date - 6) AS "averageStoragePercent7d",
+          (SELECT coalesce(round(sum(storage_full_samples)::numeric * 100
+             / nullif(sum(storage_saturation_samples), 0), 1), 0) FROM skyblock_economy_daily
+             WHERE metric_date >= current_date - 6) AS "storageFullPercent7d",
           (SELECT count(*) FROM skyblock_storage_items
              WHERE quantity < 0 OR reserved_quantity < 0 OR reserved_quantity > quantity)
              AS "storageInvariantViolations"

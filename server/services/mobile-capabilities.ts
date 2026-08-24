@@ -114,6 +114,12 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
            AND column_name IN ('state', 'direction', 'updated_at', 'committed_at')
          GROUP BY table_name HAVING count(*) = 4
       )
+      AND EXISTS (
+        SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'skyblock_workers'
+           AND column_name IN ('buffer_capacity', 'unlock_source', 'unlocked_at')
+         GROUP BY table_name HAVING count(*) = 3
+      )
     ) AS "skyblockCompanion",
     (
       to_regclass('public.skyblock_islands') IS NOT NULL
@@ -130,6 +136,7 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
       AND to_regclass('public.skyblock_npc_trade_daily') IS NOT NULL
       AND to_regclass('public.skyblock_collections') IS NOT NULL
       AND to_regclass('public.skyblock_periodic_objectives') IS NOT NULL
+      AND to_regclass('public.skyblock_economy_daily') IS NOT NULL
       AND EXISTS (
         SELECT 1 FROM information_schema.columns
          WHERE table_schema = 'public' AND table_name = 'skyblock_islands'
@@ -157,8 +164,9 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
       AND EXISTS (
         SELECT 1 FROM information_schema.columns
          WHERE table_schema = 'public' AND table_name = 'skyblock_workers'
-           AND column_name IN ('worker_type', 'tier', 'status', 'buffer_item_id', 'buffer_quantity', 'production_cursor_at')
-         GROUP BY table_name HAVING count(*) = 6
+           AND column_name IN ('worker_type', 'tier', 'status', 'buffer_item_id', 'buffer_quantity',
+                               'production_cursor_at', 'buffer_capacity', 'unlock_source', 'unlocked_at')
+         GROUP BY table_name HAVING count(*) = 9
       )
     ) AS "skyblockManagementWrites",
     (

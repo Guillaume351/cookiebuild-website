@@ -92,18 +92,28 @@ the reward remains explicitly claimable only through gameplay.
 
 Safe island management is exposed separately from marketplace writes:
 
-- `GET /skyblock/management` returns policy version `skyblock-management-v1`, the authenticated
-  player's balance, active island/version/role, generator and next upgrade, storage capacity,
-  workers with estimated ready quantities, the complete 12-quest arc, coop members, and (when the
-  player has no island) their latest non-expired incoming invitation.
+- `GET /skyblock/management` keeps policy version `skyblock-management-v1` and adds economy version
+  `skyblock-economy-v3`. It returns the authenticated player's balance, active island/version/role,
+  generator drop chances with nullable catalogue-derived NPC sell prices, the next upgrade's coin
+  and warehouse-resource requirements with live availability, storage capacity, workers with their
+  durable buffer capacity and estimated ready quantities, all worker unlock requirements, the
+  complete 12-quest arc, coop members, and (when the player has no island) their latest non-expired
+  incoming invitation.
 - `POST /skyblock/upgrades/generator` requires exactly `expectedIslandVersion`,
-  `expectedNextTier`, and `expectedCostCoins`. Owners and managers may upgrade. Cost, next tier,
-  build radius, quest progression, island version, coin debit, and the unique `coin_transactions`
-  entry are revalidated and committed atomically.
+  `expectedNextTier`, and `expectedCostCoins`. Owners and managers may upgrade. The V3 costs are
+  500 coins + 128 cobblestone, 1,500 + 64 coal, 4,000 + 96 iron ingots, and 9,000 + 64 gold ingots.
+  Cost, next tier, available unreserved warehouse resources, quest progression, island version,
+  resource and coin debits, and the unique `coin_transactions` entry are revalidated and committed
+  atomically. Generator upgrades no longer directly purchase or overwrite `build_radius`; the
+  legacy response field remains for older clients and reports the current radius.
 - `POST /skyblock/workers/collect` accepts only `{}`. Any coop role may collect because gameplay
   grants all members shared-storage access. Island, open inventory transfers, storage rows, and
   workers are locked in canonical order. Collection fills only remaining capacity and leaves any
-  overflow in worker buffers.
+  overflow in worker buffers. Production uses each worker's persisted `buffer_capacity`, including
+  grandfathered V2 capacities.
+- `POST /skyblock/workers/:id/upgrade` keeps the exact expected-tier/next-tier/cost body. Owners and
+  managers may upgrade; elapsed production is settled at the old tier before the coin debit, tier
+  change, and durable capacity increase commit together.
 - `POST /skyblock/quests/:id/claim` accepts only `{}`. Any coop role may claim only their own
   completed, unclaimed catalog quest; the coin credit, ledger entry, and claim timestamp share one
   transaction.
@@ -111,13 +121,14 @@ Safe island management is exposed separately from marketplace writes:
   returned to the authenticated invitee, then revalidates expiry, absence of another island, and
   the locked coop member limit before adding that same authenticated player.
 
-All four management mutations require a canonical UUID `Idempotency-Key`, return `201` on the first
+All five management mutations require a canonical UUID `Idempotency-Key`, return `201` on the first
 commit and `200` with the stored response on an identical retry, and accept no player identity in
 the request body. Generator upgrades use owner/manager permissions; worker collection and quest
 claims allow every active member; invite acceptance is limited to the addressed authenticated
-invitee. Independent warehouse/radius upgrades and worker upgrades do not exist in gameplay V1,
-so the API does not invent them: build radius is a generator-tier effect and warehouse capacity is
-fixed. Outgoing invites, role changes, and kicks remain in-game only because safe mobile target
+  invitee. Worker upgrades preserve the existing request shape and atomically grow persisted
+  capacity to at least the new V3 tier capacity. Independent warehouse/radius upgrades remain
+  unavailable; build radius is earned through island progression rather than bought with a generator
+  tier. Outgoing invites, role changes, and kicks remain in-game only because safe mobile target
 identity and anti-abuse UX are not part of this V1 contract.
 
 All mobile limits use the shared PostgreSQL `mobile_rate_limits` window, keyed by a SHA-256 digest

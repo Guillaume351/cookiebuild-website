@@ -1,30 +1,97 @@
 {
   "schemaVersion": 1,
   "policyVersion": "skyblock-management-v1",
+  "economyVersion": "skyblock-economy-v3",
   "generator": {
     "maxTier": 5,
     "tiers": [
-      { "tier": 1, "buildRadius": 96, "upgradeCostCoins": null },
-      { "tier": 2, "buildRadius": 112, "upgradeCostCoins": 250 },
-      { "tier": 3, "buildRadius": 128, "upgradeCostCoins": 750 },
-      { "tier": 4, "buildRadius": 144, "upgradeCostCoins": 2000 },
-      { "tier": 5, "buildRadius": 160, "upgradeCostCoins": 5000 }
+      {
+        "tier": 1,
+        "buildRadius": 96,
+        "upgradeCostCoins": null,
+        "requiredResources": [],
+        "dropChances": [{ "itemId": "cobblestone", "percent": 100 }]
+      },
+      {
+        "tier": 2,
+        "buildRadius": 112,
+        "upgradeCostCoins": 500,
+        "requiredResources": [{ "itemId": "cobblestone", "quantity": 128 }],
+        "dropChances": [
+          { "itemId": "cobblestone", "percent": 50 },
+          { "itemId": "coal", "percent": 50 }
+        ]
+      },
+      {
+        "tier": 3,
+        "buildRadius": 128,
+        "upgradeCostCoins": 1500,
+        "requiredResources": [{ "itemId": "coal", "quantity": 64 }],
+        "dropChances": [
+          { "itemId": "cobblestone", "percent": 50 },
+          { "itemId": "coal", "percent": 22 },
+          { "itemId": "iron_ingot", "percent": 28 }
+        ]
+      },
+      {
+        "tier": 4,
+        "buildRadius": 144,
+        "upgradeCostCoins": 4000,
+        "requiredResources": [{ "itemId": "iron_ingot", "quantity": 96 }],
+        "dropChances": [
+          { "itemId": "cobblestone", "percent": 50 },
+          { "itemId": "coal", "percent": 22 },
+          { "itemId": "iron_ingot", "percent": 16 },
+          { "itemId": "gold_ingot", "percent": 12 }
+        ]
+      },
+      {
+        "tier": 5,
+        "buildRadius": 160,
+        "upgradeCostCoins": 9000,
+        "requiredResources": [{ "itemId": "gold_ingot", "quantity": 64 }],
+        "dropChances": [
+          { "itemId": "cobblestone", "percent": 50 },
+          { "itemId": "coal", "percent": 22 },
+          { "itemId": "iron_ingot", "percent": 16 },
+          { "itemId": "gold_ingot", "percent": 9 },
+          { "itemId": "diamond", "percent": 3 }
+        ]
+      }
     ]
   },
   "workers": {
     "offlineCapHours": 12,
+    "clockSkewToleranceSeconds": 5,
     "tierBufferCapacityMultiplier": 256,
     "types": [
-      { "type": "miner", "itemId": "cobblestone" },
-      { "type": "farmer", "itemId": "wheat" },
-      { "type": "lumberjack", "itemId": "oak_log" }
+      {
+        "type": "miner",
+        "itemId": "cobblestone",
+        "unlock": { "kind": "collection", "itemId": "cobblestone", "quantity": 100 }
+      },
+      {
+        "type": "farmer",
+        "itemId": "wheat",
+        "unlock": {
+          "kind": "quest_or_collection",
+          "questId": "first_harvest",
+          "itemId": "wheat",
+          "quantity": 12
+        }
+      },
+      {
+        "type": "lumberjack",
+        "itemId": "oak_log",
+        "unlock": { "kind": "island_level", "level": 3 }
+      }
     ],
     "tiers": [
-      { "tier": 1, "intervalSeconds": 75, "upgradeCostCoins": null },
-      { "tier": 2, "intervalSeconds": 63, "upgradeCostCoins": 250 },
-      { "tier": 3, "intervalSeconds": 51, "upgradeCostCoins": 750 },
-      { "tier": 4, "intervalSeconds": 39, "upgradeCostCoins": 1800 },
-      { "tier": 5, "intervalSeconds": 27, "upgradeCostCoins": 4000 }
+      { "tier": 1, "intervalSeconds": 75, "bufferCapacity": 64, "upgradeCostCoins": null },
+      { "tier": 2, "intervalSeconds": 63, "bufferCapacity": 128, "upgradeCostCoins": 250 },
+      { "tier": 3, "intervalSeconds": 51, "bufferCapacity": 256, "upgradeCostCoins": 750 },
+      { "tier": 4, "intervalSeconds": 39, "bufferCapacity": 512, "upgradeCostCoins": 1800 },
+      { "tier": 5, "intervalSeconds": 27, "bufferCapacity": 1024, "upgradeCostCoins": 4000 }
     ]
   },
   "quests": [
