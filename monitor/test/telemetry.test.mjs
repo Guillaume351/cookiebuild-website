@@ -35,6 +35,21 @@ test("uses bounded fallback labels for context-free server events", () => {
   assert.equal(result.counters[funnelCounterKey("kit_purchased", "unknown", "none")], 1);
 });
 
+test("maps allowlisted Skyblock lifecycle events to the bounded persistent mode", () => {
+  const result = recordFunnelTelemetry([
+    "[Skyblock] [funnel] event=skyblock_entry player=private edition=java island_level=1",
+    "[Skyblock] [funnel] event=skyblock_rejoin player=private edition=bedrock island_level=2",
+    "[Skyblock] [funnel] event=skyblock_quest_completed player=private edition=java quest=user-input",
+    "[Skyblock] [funnel] event=skyblock_unbounded player=private edition=java game=user-input",
+  ].join("\n"));
+
+  assert.equal(result.counters[funnelCounterKey("skyblock_entry", "java", "Skyblock")], 1);
+  assert.equal(result.counters[funnelCounterKey("skyblock_rejoin", "bedrock", "Skyblock")], 1);
+  assert.equal(result.counters[funnelCounterKey("skyblock_quest_completed", "java", "Skyblock")], 1);
+  assert.equal(Object.keys(result.counters).length, 3);
+  assert.doesNotMatch(JSON.stringify(result.counters), /private|user-input/);
+});
+
 test("records bounded core tick-delay diagnostics", () => {
   const result = recordFunnelTelemetry([
     "[CookieDough] [performance] event=server_tick_delay delay_ms=4635",

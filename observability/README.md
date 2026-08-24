@@ -93,3 +93,16 @@ The focused test parses every changed YAML/JSON artifact and verifies the SQL
 security boundary, exporter load limits, scrape target and required alerts. A
 successful static check does not replace applying the bootstrap to a staging
 copy of production and verifying `/metrics` plus the provisioned dashboard.
+
+## Cross-mode engagement
+
+The provisioned game-mode dashboard uses aggregate PostgreSQL views for DAU,
+player time, repeat usage and mature D1/D7/D30 cohorts. Competitive player time
+is match duration multiplied by recorded participants, so an early disconnect
+can be over-counted. Skyblock uses its checkpointed activity-session ledger and
+starts accumulating duration/retention history only after that ledger is
+deployed; it cannot be reconstructed from `last_active_at`.
+
+Skyblock marketplace panels aggregate durable listings and sales. Coin volume
+is an in-game economy measure, never real-money revenue. Neither dashboard role
+nor Prometheus receives player, UUID, island, listing or session labels.
