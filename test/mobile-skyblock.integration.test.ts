@@ -1257,6 +1257,67 @@ integration("mobile Skyblock marketplace transactions", () => {
     });
   });
 
+  it("settles worker output at the old tier before upgrading", async () => {
+    const workerId = "92000000-0000-4000-8000-000000000001";
+    await setupSql`UPDATE skyblock_island_accounts SET balance = 1000 WHERE island_id = ${SELLER_ISLAND}`;
+    await setupSql`
+      INSERT INTO skyblock_workers
+        (id, island_id, worker_type, tier, status, buffer_item_id,
+         buffer_quantity, production_cursor_at)
+      VALUES
+        (${workerId}, ${SELLER_ISLAND}, 'miner', 1, 'active',
+         'cobblestone', 0, now() - interval '190 seconds')
+    `;
+
+    const result = await skyblock.upgradeSkyblockWorker(
+      SELLER_UID,
+      workerId,
+      { expectedTier: 1, expectedNextTier: 2, expectedCostCoins: 250 },
+      "93000000-0000-4000-8000-000000000001",
+    );
+
+    expect(result).toMatchObject({
+      created: true,
+      data: {
+        worker: {
+          workerId,
+          tier: 2,
+          bufferQuantity: 2,
+          estimatedReadyQuantity: 2,
+        },
+        costCoins: 250,
+        balanceCoins: 750,
+      },
+    });
+    const [state] = await setupSql<
+      {
+        tier: number;
+        buffer: number;
+        cursorAgeSeconds: number;
+        coins: number;
+        ledgerRows: number;
+      }[]
+    >`
+      SELECT
+        (SELECT tier FROM skyblock_workers WHERE id = ${workerId}) AS tier,
+        (SELECT buffer_quantity::int FROM skyblock_workers WHERE id = ${workerId}) AS buffer,
+        (SELECT extract(epoch FROM (now() - production_cursor_at))::int
+           FROM skyblock_workers WHERE id = ${workerId}) AS "cursorAgeSeconds",
+        (SELECT balance::int FROM skyblock_island_accounts
+          WHERE island_id = ${SELLER_ISLAND}) AS coins,
+        (SELECT count(*)::int FROM skyblock_coin_transactions
+          WHERE actor_player_id = ${SELLER} AND source = 'worker:tier:2') AS "ledgerRows"
+    `;
+    expect(state).toMatchObject({
+      tier: 2,
+      buffer: 2,
+      coins: 750,
+      ledgerRows: 1,
+    });
+    expect(state!.cursorAgeSeconds).toBeGreaterThanOrEqual(38);
+    expect(state!.cursorAgeSeconds).toBeLessThan(50);
+  });
+
   it("collects workers once while prepared and marked transfers reserve the remaining capacity", async () => {
     await setupSql`UPDATE skyblock_islands SET storage_capacity = 112 WHERE id = ${SELLER_ISLAND}`;
     await setupSql`
