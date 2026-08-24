@@ -1500,6 +1500,30 @@ export const skyblockCoinTransactions = pgTable(
   ],
 );
 
+export const skyblockNpcTradeDaily = pgTable(
+  "skyblock_npc_trade_daily",
+  {
+    islandId: uuid("island_id")
+      .notNull()
+      .references(() => skyblockIslands.id, { onDelete: "cascade" }),
+    itemId: varchar("item_id", { length: 64 }).notNull(),
+    tradeDate: date("trade_date", { mode: "string" })
+      .default(sql`CURRENT_DATE`)
+      .notNull(),
+    soldQuantity: bigint("sold_quantity", { mode: "number" })
+      .default(0)
+      .notNull(),
+    boughtQuantity: bigint("bought_quantity", { mode: "number" })
+      .default(0)
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.islandId, table.itemId, table.tradeDate] }),
+    check("ck_skyblock_npc_sold", sql`${table.soldQuantity} >= 0`),
+    check("ck_skyblock_npc_bought", sql`${table.boughtQuantity} >= 0`),
+  ],
+);
+
 export const skyblockCollections = pgTable(
   "skyblock_collections",
   {

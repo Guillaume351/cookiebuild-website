@@ -58,7 +58,7 @@ interface IslandRow extends Record<string, unknown> {
   generatorTier: number;
   buildRadius: number;
   memberLimit: number;
-  visibility: "private" | "invite_only";
+  visibility: "private" | "public";
   version: number;
   memberCount: number;
   createdAt: Date | string;

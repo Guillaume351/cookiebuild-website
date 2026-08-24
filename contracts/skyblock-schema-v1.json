@@ -60,6 +60,13 @@
       "source",
       "reference_id"
     ],
+    "skyblock_npc_trade_daily": [
+      "island_id",
+      "item_id",
+      "trade_date",
+      "sold_quantity",
+      "bought_quantity"
+    ],
     "skyblock_collections": ["player_id", "item_id", "quantity", "updated_at"],
     "skyblock_periodic_objectives": [
       "player_id",

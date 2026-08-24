@@ -42,6 +42,22 @@ const gameplayContracts = [
     label: "Skyblock economy V2",
   },
 ];
+const configuredGameplayContracts = gameplayContracts.filter(
+  (gameplayContract) => gameplayContract.path,
+);
+if (
+  configuredGameplayContracts.length > 0 &&
+  configuredGameplayContracts.length !== gameplayContracts.length
+) {
+  const missingLabels = gameplayContracts
+    .filter((gameplayContract) => !gameplayContract.path)
+    .map((gameplayContract) => gameplayContract.label)
+    .join(", ");
+  throw new Error(
+    `Gameplay schema verification requires both V1 and V2 migrations; missing ${missingLabels}.`,
+  );
+}
+
 let matchedGameplayContracts = 0;
 for (const gameplayContract of gameplayContracts) {
   if (!gameplayContract.path) continue;
