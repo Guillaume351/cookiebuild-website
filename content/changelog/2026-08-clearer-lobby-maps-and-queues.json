@@ -1,0 +1,8 @@
+{
+  "slug": "clearer-lobby-maps-and-queues",
+  "contentType": "changelog",
+  "title": "A clearer, livelier lobby",
+  "summary": "Game selectors now explain which lobby is filling, Skyblock is easier to find while waiting, and Four Corners returns with its complete scenery.",
+  "body": "- Each minigame selector shows the next lobby's fill count and its live countdown when a match is about to start.\n- A subtle nearby chime helps you notice when somebody is already waiting for a mode, while a separate arrival sound announces new players.\n- When the main lobby is quiet, a short trail points toward the Skyblock bee and explains that Skyblock can be played solo.\n- Four Corners has been restored from its newer build with the missing scenery and patterns.\n- Falling from the Pitchout or BedWars waiting area now returns you safely instead of leaving you below the map.\n- /feedback now reaches the team even when no dedicated feedback channel is configured.\n- Trusted creative builders can repair the main lobby while its protections remain active for everyone else.",
+  "publishedAt": "2026-08-26T14:42:01Z"
+}
