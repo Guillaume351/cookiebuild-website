@@ -1,0 +1,9 @@
+{
+  "slug": "skyblock-warehouse-and-hub-inventory",
+  "contentType": "changelog",
+  "title": "A real Skyblock Warehouse Chest and seamless lobby visits",
+  "summary": "Skyblock inventory now follows you safely across lobby visits, while a physical island chest makes shared storage, worker collection and merchant trades much easier to understand.",
+  "body": "- You can now return to the main lobby with an active Skyblock inventory. Your items, armour, experience and selected hotbar slot are isolated safely, then restored exactly when you return to your island.\n- Every home island now has a physical Warehouse Chest. Clicking it opens the same authoritative stock on Java and Bedrock; workers, the merchant, player market and mobile app all use that one protected inventory.\n- The Warehouse Chest shows its contents in the main description and offers clear actions to deposit the held stack, deposit every eligible inventory resource, or withdraw a chosen item and quantity.\n- Merchant screens now state exactly where items come from and go. Selling consumes Warehouse Chest stock, buying delivers to it, and a direct Open Warehouse Chest button lets you retrieve purchases immediately.\n- Members no longer see merchant, market or withdrawal actions that their island role cannot execute, while they can still view and deposit into the shared chest.\n- Worker menus now lead with collection, show unlocked workers, ready output and shared storage usage, and keep overflow safely with the workers when the chest is full.\n- All new guidance is available in English, French, Spanish, Brazilian Portuguese, German, Italian, Bulgarian and Hindi.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "coverImageUrl": "https://www.cookie-build.com/social/skyblock-beta-2026-08.png",
+  "publishedAt": "2026-08-26T16:21:55Z"
+}
