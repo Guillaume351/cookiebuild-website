@@ -1,0 +1,8 @@
+{
+  "slug": "bedrock-and-combat-reliability",
+  "contentType": "changelog",
+  "title": "More reliable Bedrock and combat interactions",
+  "summary": "Bedrock item behaviour and several classic-combat interactions are now more consistent across inventories, hotbar changes, and sword blocking.",
+  "body": "- Bedrock fishing and custom-item fuel behaviour are more consistent with the Java server.\n- Classic-combat cooldown and attack-range handling now follows hotbar and hand changes correctly.\n- Off-hand inventory interactions no longer produce repeated compatibility errors.\n- Sword blocking uses corrected Paper item data, including when items are displayed through chat or inventory plugins.\n- These compatibility updates do not change your progression, inventory, statistics, or saved game data.",
+  "publishedAt": "2026-09-01T19:25:05+02:00"
+}
