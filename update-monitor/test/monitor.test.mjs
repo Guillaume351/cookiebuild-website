@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtemp, readFile } from 'node:fs/promises'
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test from 'node:test'
@@ -15,10 +15,19 @@ test('natural comparison handles release and build versions', () => {
 
 test('check persists report/prompt and replays an idempotency key', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'cookiebuild-monitor-run-'))
+  const now = 1_784_123_456_789
+  const runtimeVersionsFile = join(directory, 'installed-versions.json')
+  await writeFile(runtimeVersionsFile, JSON.stringify({
+    schemaVersion: 1,
+    generatedAt: new Date(now).toISOString(),
+    versions: { paper: '1.21.4-120' },
+  }))
   let collections = 0
   const config = {
-    installedJson: JSON.stringify({ paper: '1.21.4-120' }),
+    installedJson: JSON.stringify({ paper: '1.21.4-100' }),
     installedFile: null,
+    runtimeVersionsFile,
+    runtimeVersionsStaleAfterMs: 900_000,
     reportFile: join(directory, 'report.md'),
     promptFile: join(directory, 'prompt.txt'),
     webhookUrl: null,
@@ -29,13 +38,14 @@ test('check persists report/prompt and replays an idempotency key', async () => 
     collections += 1
     return [{ id: 'paper', name: 'Paper', ok: true, target: '1.21.4-121', sourceUrl: 'https://example.test/api', changelogUrl: 'https://example.test/changelog', downloadUrl: 'https://example.test/download', summary: 'Stable fixes' }]
   }
-  const monitor = new UpdateMonitor({ config, store, collect, now: () => 1_784_123_456_789 })
+  const monitor = new UpdateMonitor({ config, store, collect, now: () => now })
   const first = await monitor.run({ idempotencyKey: 'manual-check-001', trigger: 'test' })
   const second = await monitor.run({ idempotencyKey: 'manual-check-001', trigger: 'test' })
   assert.equal(first.results[0].updateAvailable, true)
   assert.equal(second.replayed, true)
   assert.equal(collections, 1)
   assert.match(await readFile(config.reportFile, 'utf8'), /Paper.*1\.21\.4-120.*1\.21\.4-121/)
+  assert.match(await readFile(config.reportFile, 'utf8'), /runtime observé.*installed-versions\.json/)
   assert.match(await readFile(config.promptFile, 'utf8'), /N’exécute aucune commande/)
   const metrics = await monitor.metrics()
   assert.match(metrics, /cookiebuild_update_available\{component="paper"\} 1/)

@@ -40,7 +40,22 @@ Le chemin comprend la query exacte sans schéma/hôte. Le hash porte sur les oct
 
 ## Versions installées
 
-Montez un objet JSON via `UPDATE_MONITOR_INSTALLED_FILE` (recommandé) ou `UPDATE_MONITOR_INSTALLED_JSON`. Les sept clés attendues figurent dans `installed-versions.example.json`. Les versions Paper utilisent `version-build`, Geyser/Floodgate `version+build`, les releases GitHub leur tag sans `v`. Une valeur absente produit `installed-unknown`, jamais un faux positif.
+En production, CookieDough publie toutes les cinq minutes un snapshot JSON ne contenant que les
+versions réellement chargées par Paper. Configurez dans Minecraft
+`COOKIEBUILD_RUNTIME_VERSIONS_FILE=/data/update-monitor/installed-versions.json`, puis montez
+uniquement ce répertoire dédié en lecture seule dans le moniteur et configurez
+`UPDATE_MONITOR_RUNTIME_VERSIONS_FILE`. Le dossier Paper `plugins` ne doit jamais être monté dans
+le moniteur : il contient notamment la clé Floodgate et des configurations privées.
+
+Le snapshot porte un horodatage et expire après quinze minutes par défaut
+(`UPDATE_MONITOR_RUNTIME_VERSIONS_STALE_AFTER_MS`). S’il est absent, périmé, invalide ou incomplet,
+le composant concerné produit `installed-unknown` et un avertissement, jamais un retour silencieux
+à une ancienne valeur. Les builds Geyser/Floodgate sont normalisés en `version+build`; les autres
+versions, y compris leurs suffixes de prérelease, sont conservées intégralement.
+
+`UPDATE_MONITOR_INSTALLED_FILE` ou `UPDATE_MONITOR_INSTALLED_JSON` reste disponible pour le
+développement et la compatibilité lorsque le snapshot runtime n’est pas configuré. Les sept clés
+acceptées figurent dans `installed-versions.example.json`.
 
 Les sorties persistées sont :
 
@@ -52,7 +67,13 @@ Le prompt contient versions installées/cibles, URLs, résumés de changelog et 
 
 ## Exécution
 
-Voir `docker-compose.example.yml`. Créez le réseau Docker privé externe `cookiebuild-admin` et raccordez-y également le BFF Nuxt ; le nom DNS interne devient alors `cookiebuild-update-monitor:9420`. Configurez `UPDATE_MONITOR_HOST=0.0.0.0` pour l’écoute overlay, sans publier le port sur l’hôte ou Internet. Un check se lance au démarrage puis toutes les six heures par défaut. Tests :
+Voir `docker-compose.example.yml`. Définissez `COOKIEBUILD_RUNTIME_VERSIONS_DIR` avec le répertoire
+hôte dédié au snapshot, par exemple le sous-dossier `update-monitor` du volume Paper. Compose le
+monte sur `/runtime/versions:ro`. Créez le réseau Docker privé externe `cookiebuild-admin` et
+raccordez-y également le BFF Nuxt ; le nom DNS interne devient alors
+`cookiebuild-update-monitor:9420`. Configurez `UPDATE_MONITOR_HOST=0.0.0.0` pour l’écoute overlay,
+sans publier le port sur l’hôte ou Internet. Un check se lance au démarrage puis toutes les six
+heures par défaut. Tests :
 
 ```sh
 npm test

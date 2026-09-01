@@ -34,13 +34,18 @@ function markdownLink(label, url) {
   return `[${label}](${String(url).replace(/[()\s]/g, encodeURIComponent)})`
 }
 
-export function enrichResults(results, installed) {
+export function enrichResults(results, installed, installedEvidence = {}) {
   return results.map((result) => {
     const installedVersion = installed[result.id] || null
+    const evidence = installedEvidence[result.id] || null
     const comparison = result.ok ? compareVersions(installedVersion, result.target) : null
     return {
       ...result,
       installed: installedVersion,
+      installedSource: evidence?.source || (installedVersion ? 'declared-config' : 'unknown'),
+      installedArtifact: evidence?.artifact || null,
+      installedObservedAt: evidence?.generatedAt || null,
+      installedWarning: evidence?.error || null,
       comparison,
       updateAvailable: comparison === -1,
       status: !result.ok ? 'source-error' : !installedVersion ? 'installed-unknown' : comparison === -1 ? 'update-available' : comparison === 0 ? 'current' : 'installed-newer',
@@ -61,6 +66,16 @@ export function renderMarkdown(run) {
   for (const item of run.results) {
     lines.push(`| ${cleanCell(item.name)} | ${cleanCell(item.installed)} | ${cleanCell(item.target)} | ${cleanCell(item.status)} | ${cleanCell(item.sourceState)} | ${markdownLink('source', item.sourceUrl)} · ${markdownLink('changelog', item.changelogUrl)} · ${markdownLink('téléchargement', item.downloadUrl)} |`)
   }
+  const runtimeArtifacts = run.results.filter((item) => item.installedSource === 'runtime-snapshot' && item.installedArtifact && !item.installedWarning)
+  if (runtimeArtifacts.length) {
+    lines.push('', '## Preuves des versions installées', '')
+    for (const item of runtimeArtifacts) lines.push(`- ${cleanCell(item.name)} : runtime observé le ${cleanCell(item.installedObservedAt)} via ${cleanCell(item.installedArtifact)}.`)
+  }
+  const runtimeWarnings = run.results.filter((item) => item.installedWarning)
+  if (runtimeWarnings.length) {
+    lines.push('', '## Métadonnées runtime indisponibles', '')
+    for (const item of runtimeWarnings) lines.push(`- ${cleanCell(item.installedWarning)}`)
+  }
   lines.push('', '## Notes amont', '')
   for (const item of run.results) {
     lines.push(`### ${cleanCell(item.name)}`, '')
@@ -77,7 +92,7 @@ export function renderMarkdown(run) {
 
 export function renderAiPrompt(run) {
   const components = run.results.map((item) => [
-    `- ${item.name}: installé=${item.installed || 'inconnu'}; cible=${item.target || 'inconnue'}; état=${item.status}`,
+    `- ${item.name}: installé=${item.installed || 'inconnu'}; source_installée=${item.installedSource || 'inconnue'}; artefact=${item.installedArtifact || 'aucun'}; cible=${item.target || 'inconnue'}; état=${item.status}`,
     `  source=${item.sourceUrl || 'indisponible'}`,
     `  changelog=${item.changelogUrl || 'indisponible'}`,
     `  téléchargement=${item.downloadUrl || 'indisponible'}`,

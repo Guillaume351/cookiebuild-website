@@ -117,6 +117,11 @@ publication time, release notes excerpt, compatibility warnings, and check statu
 AI prompt includes the immutable facts and the Cookie Build validation checklist, but never a
 credential, webhook, host secret, or database URL.
 
+Production versions come from a short-lived, secret-free snapshot published periodically by the
+running CookieDough plugin. The update monitor sees only that dedicated snapshot directory, never
+the Paper plugin directory, Floodgate key, or plugin configuration. A missing, stale, invalid, or
+incomplete snapshot fails closed as `installed-unknown` instead of reusing a declared value.
+
 ## Audit and privacy
 
 Audit events are append-only and contain actor, action, target, request ID, reason, sanitized

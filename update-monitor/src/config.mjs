@@ -34,6 +34,8 @@ export function loadConfig(env = process.env) {
     promptFile: absolutePath(env.UPDATE_MONITOR_PROMPT_FILE, '/state/update-ai-prompt.txt'),
     installedFile: env.UPDATE_MONITOR_INSTALLED_FILE ? absolutePath(env.UPDATE_MONITOR_INSTALLED_FILE) : null,
     installedJson: env.UPDATE_MONITOR_INSTALLED_JSON || null,
+    runtimeVersionsFile: env.UPDATE_MONITOR_RUNTIME_VERSIONS_FILE ? absolutePath(env.UPDATE_MONITOR_RUNTIME_VERSIONS_FILE) : null,
+    runtimeVersionsStaleAfterMs: integer(env.UPDATE_MONITOR_RUNTIME_VERSIONS_STALE_AFTER_MS, 900_000, 60_000, 86_400_000),
     intervalMs: integer(env.UPDATE_MONITOR_INTERVAL_MS, 21_600_000, 60_000, 86_400_000),
     staleAfterMs: integer(env.UPDATE_MONITOR_STALE_AFTER_MS, 43_200_000, 60_000, 604_800_000),
     requestTimeoutMs: integer(env.UPDATE_MONITOR_REQUEST_TIMEOUT_MS, 15_000, 1_000, 60_000),

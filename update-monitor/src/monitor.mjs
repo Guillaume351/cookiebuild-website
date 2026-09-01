@@ -2,6 +2,7 @@ import { createHash, randomUUID } from 'node:crypto'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname } from 'node:path'
 import { collectSources } from './sources.mjs'
+import { loadInstalledVersions } from './installed-versions.mjs'
 import { enrichResults, renderAiPrompt, renderMarkdown } from './report.mjs'
 import { pruneState } from './state-store.mjs'
 import { safeError, sanitizeText, sanitizeValue } from './sanitize.mjs'
@@ -20,15 +21,6 @@ async function atomicWrite(file, content) {
   const temp = `${file}.${process.pid}.${Date.now()}.tmp`
   await writeFile(temp, content, { mode: 0o600 })
   await rename(temp, file)
-}
-
-async function loadInstalled(config) {
-  let value = config.installedJson
-  if (config.installedFile) value = await readFile(config.installedFile, 'utf8')
-  if (!value) return {}
-  const installed = JSON.parse(value)
-  if (!installed || Array.isArray(installed) || typeof installed !== 'object') throw new Error('Installed versions must be a JSON object')
-  return Object.fromEntries(Object.entries(installed).filter(([, version]) => typeof version === 'string' && version.length <= 128))
 }
 
 function alertHash(run) {
@@ -98,8 +90,8 @@ export class UpdateMonitor {
     const started = await this.begin(idempotencyKey, trigger)
     if (started.replay) return { ...started.run, replayed: true }
     try {
-      const installed = await loadInstalled(this.config)
-      const results = enrichResults(await this.collect(this.config, this.store), installed)
+      const installed = await loadInstalledVersions(this.config, { now: this.now })
+      const results = enrichResults(await this.collect(this.config, this.store), installed.versions, installed.evidence)
       const checkedAt = new Date(this.now()).toISOString()
       const successfulSources = results.filter((item) => item.ok && item.sourceUp !== false).length
       const run = sanitizeValue({ checkedAt, trigger, operationId: started.operationId, successfulSources, totalSources: results.length, results })
@@ -179,4 +171,4 @@ export class UpdateMonitor {
   }
 }
 
-export const internals = { atomicWrite, loadInstalled, alertHash, sendWebhook }
+export const internals = { atomicWrite, loadInstalledVersions, alertHash, sendWebhook }

@@ -16,9 +16,13 @@ tant que la base, RabbitMQ et le BFF ne sont pas prêts.
 
 1. Appliquer `drizzle/0007_admin_control_center.sql`. Le fichier est réexécutable et le journal
    d’audit refuse ensuite tout `UPDATE`/`DELETE`.
-2. Déployer CookieDough avec `ADMIN_BRIDGE_ENABLED=false`, puis exécuter ses canaris habituels.
+2. Déployer CookieDough avec `ADMIN_BRIDGE_ENABLED=false` et
+   `COOKIEBUILD_RUNTIME_VERSIONS_FILE=/data/update-monitor/installed-versions.json`, puis exécuter
+   ses canaris habituels et vérifier que le snapshot est renouvelé.
 3. Déployer `operator/` et `update-monitor/` avec deux secrets HMAC distincts de 32 caractères ou
-   plus, les versions réellement installées, la garde joueurs et les canaris Java/Bedrock/HTTP.
+   plus. Monter uniquement le répertoire dédié au snapshot runtime dans l’update-monitor, en
+   lecture seule ; ne jamais lui monter le dossier Paper `plugins`. Conserver la garde joueurs et
+   les canaris Java/Bedrock/HTTP.
 4. Déployer le site avec les variables admin de `.env.example`, sans encore exposer `/admin` dans
    la navigation publique.
 5. Vérifier dans Firebase Console que le fournisseur **E-mail/Mot de passe** est activé et que
@@ -59,11 +63,14 @@ tant que la base, RabbitMQ et le BFF ne sont pas prêts.
   `NUXT_UPDATE_MONITOR_URL`, `NUXT_UPDATE_MONITOR_HMAC_SECRET`,
   `NUXT_PUBLIC_FIREBASE_API_KEY` et `NUXT_FIREBASE_PROJECT_ID`.
 - CookieDough : `ADMIN_BRIDGE_ENABLED`, `ADMIN_BRIDGE_SERVER_ID`, `RABBITMQ_URL`,
-  `ADMIN_BRIDGE_EXCHANGE`, `ADMIN_BRIDGE_COMMAND_QUEUE`.
+  `ADMIN_BRIDGE_EXCHANGE`, `ADMIN_BRIDGE_COMMAND_QUEUE`,
+  `COOKIEBUILD_RUNTIME_VERSIONS_FILE`.
 - Operator : variables du `operator/docker-compose.example.yml`, avec compteur joueurs fail-closed
   et au moins un canari Java, Bedrock et HTTP.
-- Update monitor : variables de `update-monitor/docker-compose.example.yml`, ainsi qu’un fichier
-  `installed-versions.json` renseigné depuis les artefacts réellement déployés.
+- Update monitor : variables de `update-monitor/docker-compose.example.yml`, avec le répertoire
+  secret-free du snapshot monté en lecture seule via `COOKIEBUILD_RUNTIME_VERSIONS_DIR`. Le
+  `installed-versions.json` déclaré ne sert qu’au développement lorsque le snapshot runtime n’est
+  pas configuré.
 
 ## Rollback
 

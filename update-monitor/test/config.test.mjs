@@ -26,3 +26,17 @@ test('refuses ambiguous webhook configuration', () => {
     UPDATE_MONITOR_WEBHOOK_URL: 'https://discord.com/api/webhooks/example/token',
   }), /not both/)
 })
+
+test('accepts only an absolute runtime version snapshot path', () => {
+  const config = loadConfig({
+    UPDATE_MONITOR_HMAC_SECRET: 'x'.repeat(32),
+    UPDATE_MONITOR_RUNTIME_VERSIONS_FILE: '/runtime/versions/installed-versions.json',
+  })
+  assert.equal(config.runtimeVersionsFile, '/runtime/versions/installed-versions.json')
+  assert.equal(config.runtimeVersionsStaleAfterMs, 900_000)
+
+  assert.throws(() => loadConfig({
+    UPDATE_MONITOR_HMAC_SECRET: 'x'.repeat(32),
+    UPDATE_MONITOR_RUNTIME_VERSIONS_FILE: './installed-versions.json',
+  }), /Expected an absolute path/)
+})
