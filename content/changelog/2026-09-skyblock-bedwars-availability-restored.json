@@ -1,0 +1,8 @@
+{
+  "slug": "skyblock-bedwars-availability-restored",
+  "contentType": "changelog",
+  "title": "Skyblock and BedWars are available again",
+  "summary": "Skyblock reconnects now resume safely and BedWars arenas are open again after a deployment configuration issue.",
+  "body": "- Players returning from Skyblock can resume their island normally with their saved inventory and progression.\n- BedWars is available again from the lobby, with its active and standby arenas restored.\n- The safety lock that protected Skyblock inventories during the interruption worked as intended; no progression or inventory reset was required.\n- The deployment configuration has been corrected at its source so these game services remain enabled during future reconciliations.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "publishedAt": "2026-09-02T09:19:21+02:00"
+}
