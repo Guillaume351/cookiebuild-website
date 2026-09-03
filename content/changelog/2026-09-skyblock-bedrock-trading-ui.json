@@ -1,0 +1,8 @@
+{
+  "slug": "skyblock-bedrock-trading-ui",
+  "contentType": "changelog",
+  "title": "Smoother Skyblock trading on Bedrock",
+  "summary": "Skyblock merchant menus now move reliably from Sell or Buy to resource and quantity selection on Bedrock.",
+  "body": "- Bedrock players no longer get trapped behind a server-data loading screen while navigating the Skyblock merchant.\n- Sell and Buy now move cleanly through resource selection, quantity selection, and the final result.\n- Closing or receiving an invalid native form response now releases that menu correctly, so it can be reopened immediately.\n- Duplicate interaction signals are safely coalesced, and outdated merchant characters are consolidated automatically.\n- Java inventory menus keep their existing loading and transaction safeguards.",
+  "publishedAt": "2026-09-03T12:34:07+02:00"
+}
