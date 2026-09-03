@@ -1,0 +1,8 @@
+{
+  "slug": "bedrock-connection-resilience",
+  "contentType": "changelog",
+  "title": "More resilient Bedrock connections",
+  "summary": "Bedrock players now benefit from an additional connection fallback when the primary route is temporarily unavailable.",
+  "body": "- Bedrock connection setup can now use an alternative route if the primary route is temporarily unavailable.\n- This reduces avoidable connection failures without changing inventories, progression, statistics, or game rules.\n- Java players and the server address remain unchanged.\n\nJava: play.cookie-build.com\nBedrock: play.cookie-build.com, port 19132",
+  "publishedAt": "2026-09-03T10:16:21+02:00"
+}
