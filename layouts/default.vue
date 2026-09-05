@@ -6,6 +6,7 @@
     </main>
     <AppFooter />
     <AnalyticsConsent />
+    <SiteAnalytics />
   </div>
 </template>
 

@@ -49,7 +49,7 @@
 
         <div class="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button
-            @click="showJoinGuide = true"
+            @click="showJoinGuide = true; siteAnalytics.track('join_guide_open')"
             size="lg"
             class="w-full bg-orange-600 px-8 text-lg font-bold hover:bg-orange-700 sm:w-auto animate-pulse hover:animate-none"
           >
@@ -75,7 +75,7 @@
         <h2 id="shop-promo-title" class="mt-2 text-2xl font-black text-white">{{ locale.code === "fr" ? "Fais briller ton passage avec Étincelles de cookie" : "Leave a little glow with Cookie Sparkles" }}</h2>
         <p class="mt-3 text-zinc-400">{{ locale.code === "fr" ? "Découvre ton effet gratuit pour le lobby et les cosmétiques facultatifs. Aucun achat nécessaire pour jouer ou activer les étincelles." : "Discover your free lobby effect and optional cosmetics. No purchase needed to play or equip your sparkles." }}</p>
       </div>
-      <NuxtLink :to="localizePath('/shop')" @click="shopAnalytics.track('free_effect_click', { source: 'home' })" class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ locale.code === "fr" ? "Découvrir la boutique" : "Explore the shop" }}</NuxtLink>
+      <NuxtLink :to="localizePath('/shop')" @click="shopAnalytics.track('free_effect_click', { source: 'home' }); siteAnalytics.track('shop_entry')" class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ locale.code === "fr" ? "Découvrir la boutique" : "Explore the shop" }}</NuxtLink>
     </section>
 
     <Teleport to="body">
@@ -349,6 +349,7 @@ const bedrockPort = "19132";
 const showJoinGuide = ref(false);
 const selectedEdition = ref("java");
 const shopAnalytics = useShopAnalytics();
+const siteAnalytics = useSiteAnalytics();
 const { locale, copy, localizePath } = useSiteLocale();
 const editions = computed(() => [
   { id: "java", label: "Java" },
@@ -459,14 +460,17 @@ const copyIP = () => {
 
 const copyText = async (value, label) => {
   await navigator.clipboard.writeText(value);
+  if (value === serverIP.value) siteAnalytics.track("server_address_copy");
   alert(`${label} ${copy.value.common.copied}!`);
 };
 
 const openBedrockLink = () => {
+  siteAnalytics.track("bedrock_server_add");
   window.location.href = `minecraft://?addExternalServer=CookieBuild|${serverIP.value}:${bedrockPort}`;
 };
 
 const joinDiscord = () => {
+  siteAnalytics.track("discord_open");
   window.open("https://discord.gg/ajmPnwh9g8", "_blank", "noopener,noreferrer");
 };
 

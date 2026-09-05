@@ -20,7 +20,7 @@
           >{{ copy.navigation.playerStats }}</NuxtLink
         >
         <NuxtLink :to="localizePath('/updates')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
-        <NuxtLink :to="localizePath('/shop')" class="text-white hover:text-gray-300 transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
+        <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-white hover:text-gray-300 transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
         <NuxtLink :to="localizePath('/status')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.status }}</NuxtLink>
         <label class="relative">
           <span class="sr-only">{{ copy.navigation.language }}</span>
@@ -82,7 +82,7 @@
         >
           {{ copy.navigation.updates }}
         </NuxtLink>
-        <NuxtLink :to="localizePath('/shop')" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
+        <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry'); mobileMenuOpen = false" class="rounded-lg px-3 py-3 text-white hover:bg-white/10">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
         <NuxtLink
           :to="localizePath('/status')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
@@ -112,6 +112,7 @@
 import { Menu, X } from "@lucide/vue";
 import { SITE_LOCALES, type SiteLocaleCode } from "@/utils/site-locales";
 
+const siteAnalytics = useSiteAnalytics();
 const mobileMenuOpen = ref(false);
 const route = useRoute();
 const { locale, copy, localizePath, switchLocalePath } = useSiteLocale();

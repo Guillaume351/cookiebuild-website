@@ -31,7 +31,7 @@
                 >{{ copy.navigation.updates }}</NuxtLink
               >
             </li>
-            <li><NuxtLink :to="localizePath('/shop')" class="text-gray-400 hover:text-white transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-gray-400 hover:text-white transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink></li>
             <li>
               <NuxtLink to="/status" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.serverStatus }}</NuxtLink
@@ -90,6 +90,7 @@
 </template>
 
 <script setup lang="ts">
+const siteAnalytics = useSiteAnalytics();
 const analytics = useShopAnalytics();
 const { copy, locale, localizePath } = useSiteLocale();
 </script>

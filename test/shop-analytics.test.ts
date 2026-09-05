@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { dispatchSiteAnalytics, trafficSourceGroup } from "../utils/site-analytics";
 import { dispatchShopAnalytics, shopAnalyticsPayload, validAnalyticsId } from "../utils/shop-analytics";
 
 describe("consent-gated shop analytics", () => {
@@ -35,16 +36,16 @@ import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import { ref, watch, nextTick, effectScope } from "vue";
 
-async function browserFixture() {
+async function browserFixture(previousConsent: "granted" | "denied" | null = null) {
   const source = (await readFile(new URL("../composables/useShopAnalytics.ts", import.meta.url), "utf8"))
     .replace(/^import .*;\n/gm, "").replace("export function", "function").replaceAll("import.meta.client", "true");
   const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
   const target: Record<string, any> = {};
   const append = vi.fn(); const state = new Map(); const savedConsent = ref(null);
-  const document = { cookie: "_ga=fixture; _ga_TEST123456=fixture; essential=retained", createElement: () => ({}), head: { append } };
-  const factory = new Function("window", "document", "location", "useRuntimeConfig", "useCookie", "useState", "dispatchShopAnalytics", "validAnalyticsId", javascript + "\nreturn useShopAnalytics;");
-  const useAnalytics = factory(target, document, { hostname: "www.cookie-build.com" }, () => ({ public: { gaMeasurementId: "G-TEST123456" } }), () => savedConsent,
-    (key: string, init: () => unknown) => { if (!state.has(key)) state.set(key, ref(init())); return state.get(key); }, dispatchShopAnalytics, validAnalyticsId);
+  const document = { referrer: "https://www.google.fr/search?q=private", cookie: "_ga=fixture; _ga_TEST123456=fixture; essential=retained", createElement: () => ({}), head: { append } };
+  const factory = new Function("window", "document", "location", "useRuntimeConfig", "useCookie", "useState", "dispatchShopAnalytics", "validAnalyticsId", "dispatchSiteAnalytics", "trafficSourceGroup", javascript + "\nreturn useShopAnalytics;");
+  const useAnalytics = factory(target, document, { hostname: "www.cookie-build.com" }, () => ({ public: { gaMeasurementId: "G-TEST123456" } }), (name: string, options: any) => name === "cb_analytics_consent" ? ref(previousConsent) : (savedConsent.value ??= options.default(), savedConsent),
+    (key: string, init: () => unknown) => { if (!state.has(key)) state.set(key, ref(init())); return state.get(key); }, dispatchShopAnalytics, validAnalyticsId, dispatchSiteAnalytics, trafficSourceGroup);
   return { useAnalytics, target, append, savedConsent };
 }
 
@@ -67,10 +68,11 @@ describe("browser consent lifecycle", () => {
     banner.setConsent("granted");
     expect(target["ga-disable-G-TEST123456"]).toBe(false);
     expect(append).toHaveBeenCalledTimes(1);
+    expect(Object.prototype.toString.call(target.dataLayer[0])).toBe("[object Arguments]");
     const commands = target.dataLayer.map((args: IArguments) => Array.from(args));
     expect(commands[0]).toEqual(["consent", "default", expect.objectContaining({ analytics_storage: "denied", ad_storage: "denied" })]);
     expect(commands.at(-1)).toEqual(["consent", "update", { analytics_storage: "granted" }]);
-    expect(commands.find((args: unknown[]) => args[0] === "config")?.[2]).toMatchObject({ send_page_view: false, page_location: "https://www.cookie-build.com/shop", page_referrer: "", allow_google_signals: false });
+    expect(commands.find((args: unknown[]) => args[0] === "config")?.[2]).toMatchObject({ send_page_view: false, page_location: "https://www.cookie-build.com/", page_referrer: "", allow_google_signals: false, cookie_expires: 15552000, cookie_update: false });
   });
 });
 
@@ -100,4 +102,49 @@ it("tracks the already-open shop once when permission is granted without navigat
     await nextTick();
     expect(events()).toHaveLength(1);
   } finally { scope.stop(); }
+});
+
+
+it("tracks public navigation once per path, including acceptance on an already open page", async () => {
+  const { useAnalytics, target } = await browserFixture();
+  const source = await readFile(new URL("../components/SiteAnalytics.vue", import.meta.url), "utf8");
+  const script = source.split('<script setup lang="ts">')[1]!.split("</script>")[0]!;
+  const javascript = ts.transpileModule(script, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const route = ref({ path: "/fr/skyblock" });
+  const setup = new Function("useShopAnalytics", "useRoute", "onMounted", "watch", javascript);
+  const mounted: Array<() => void> = [];
+  const scope = effectScope();
+  const events = () => (target.dataLayer || []).map((args: IArguments) => Array.from(args)).filter((args: unknown[]) => args[0] === "event");
+  try {
+    scope.run(() => setup(useAnalytics, () => route.value, (callback: () => void) => mounted.push(callback), watch));
+    for (const callback of mounted) callback();
+    expect(events()).toHaveLength(0);
+    const banner = useAnalytics();
+    banner.setConsent("granted"); await nextTick();
+    expect(events()).toHaveLength(1);
+    expect(events()[0][2]).toMatchObject({ page_location: "https://www.cookie-build.com/skyblock", site_language: "fr", traffic_source_group: "google" });
+    route.value.path = "/fr/shop"; await nextTick();
+    expect(events()).toHaveLength(2);
+    banner.setConsent("denied"); await nextTick();
+    route.value.path = "/fr/games"; await nextTick();
+    expect(events()).toHaveLength(2);
+    banner.setConsent("granted"); await nextTick();
+    expect(events()).toHaveLength(3);
+    route.value.path = "/admin/commerce"; await nextTick();
+    route.value.path = "/player/private-name"; await nextTick();
+    expect(events()).toHaveLength(3);
+    expect(JSON.stringify(events())).not.toContain("private");
+  } finally { scope.stop(); }
+});
+
+
+it("preserves previous refusal but renews permission for the expanded site scope", async () => {
+  const denied = await browserFixture("denied");
+  expect(denied.useAnalytics().consent.value).toBe("denied");
+  expect(denied.useAnalytics().trackSite("page_view", "/")).toBe(false);
+  expect(denied.append).not.toHaveBeenCalled();
+  const granted = await browserFixture("granted");
+  expect(granted.useAnalytics().consent.value).toBeNull();
+  expect(granted.useAnalytics().trackSite("page_view", "/")).toBe(false);
+  expect(granted.append).not.toHaveBeenCalled();
 });

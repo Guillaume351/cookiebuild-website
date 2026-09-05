@@ -1,0 +1,8 @@
+{
+  "slug": "site-audience-preferences",
+  "contentType": "changelog",
+  "title": "Optional audience measurement across the website",
+  "summary": "Choose whether to share website visit and navigation statistics, with a compact preference panel.",
+  "body": "- Optional audience measurement now covers public pages and clicks towards the game, Discord and the shop.\n- A compact panel lets you allow or decline Google Analytics cookies. Both choices keep the website, games and purchases available.\n- Change your choice at any time from Analytics preferences in the footer. Existing visitors can choose again for this expanded scope.\n- Our events exclude player names, linking codes, payment details and URL search parameters.",
+  "publishedAt": "2026-09-05T13:17:11.416925+00:00"
+}

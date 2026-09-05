@@ -134,7 +134,7 @@
 
     <section class="space-y-3 rounded-xl border border-gray-700 p-5" lang="en">
       <h2 class="text-2xl font-bold">Optional website analytics</h2>
-      <p>With your permission, Google Analytics uses cookies to measure shop visits and steps such as selecting a recipient or starting checkout. Our events contain only predefined actions, product identifiers and edition (Java or Bedrock), without Minecraft names, player identifiers, login codes, payment URLs or email addresses. No Google Analytics tag loads before permission. You can decline or withdraw permission from “Analytics preferences” in the footer. We remember your choice for up to 180 days. These consent-based measurements do not represent every visit or purchase.</p>
+      <p>With your permission, Google Analytics uses cookies to measure public page visits, broad visitor-source categories, clicks towards the game or Discord, and shop steps such as selecting a recipient or starting checkout. Our events contain only predefined page categories and actions, site language, broad visitor-source categories, product identifiers and edition (Java or Bedrock), without Minecraft names, player identifiers, login codes, payment URLs, email addresses, URL queries or raw referrers. No Google Analytics tag loads before permission. You can decline or withdraw permission from “Analytics preferences” in the footer. We remember your choice for up to 180 days. These consent-based measurements do not represent every visit or purchase. Google receives technical connection data to provide this service; our reporting does not use advertising signals or cross-site user identifiers. The analytics cookie lifetime is limited to 180 days. Google may process data outside the EEA under its applicable transfer safeguards.</p>
     </section>
 
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
@@ -184,7 +184,7 @@
           les objectifs, la gestion de l’île, du stockage et du marché Skyblock avec les pièces
           gagnées en jeu, les achats de kits avec ces pièces, la présence restreinte,
           les amis et suggestions de joueurs récents, groupes et événements. Le consentement couvre
-          uniquement les notifications facultatives, dont les appels de joueurs, rappels d’objectifs
+          les notifications facultatives, dont les appels de joueurs, rappels d’objectifs
           et alertes d’amis acceptés configurables séparément. Les heures calmes les suppriment. L’intérêt
           légitime couvre la sécurité, l’anti-abus, la modération, l’équité et les incidents. Les
           obligations légales peuvent imposer la conservation ou la communication de certains éléments.
@@ -263,7 +263,7 @@
     </section>
     <section class="space-y-3 rounded-xl border border-gray-700 p-5" lang="fr">
       <h2 class="text-2xl font-bold">Mesure d’audience web facultative</h2>
-      <p>Avec votre accord, Google Analytics utilise des cookies pour mesurer les visites de la boutique et des étapes comme le choix d’un destinataire ou l’ouverture du paiement. Nos événements contiennent uniquement des actions prédéfinies, des identifiants de produit et l’édition (Java ou Bedrock), sans pseudo Minecraft, identifiant joueur, code de connexion, URL de paiement ou adresse e-mail. Aucune balise Google Analytics ne se charge avant votre accord. Vous pouvez refuser ou retirer cet accord depuis « Préférences de mesure d’audience » dans le pied de page. Nous mémorisons ce choix jusqu’à 180 jours. Ces mesures soumises au consentement ne couvrent pas toutes les visites ni tous les achats.</p>
+      <p>Avec votre accord, Google Analytics utilise des cookies pour mesurer les visites des pages publiques, de grandes catégories de provenance, les clics vers le jeu ou Discord et des étapes de la boutique comme le choix d’un destinataire ou l’ouverture du paiement. Nos événements contiennent uniquement des catégories de pages et actions prédéfinies, la langue du site, de grandes catégories de provenance, des identifiants de produit et l’édition (Java ou Bedrock), sans pseudo Minecraft, identifiant joueur, code de connexion, URL de paiement, adresse e-mail, paramètres d’URL ou URL de provenance complète. Aucune balise Google Analytics ne se charge avant votre accord. Vous pouvez refuser ou retirer cet accord depuis « Préférences de mesure d’audience » dans le pied de page. Nous mémorisons ce choix jusqu’à 180 jours. Ces mesures soumises au consentement ne couvrent pas toutes les visites ni tous les achats. Google reçoit les données techniques de connexion nécessaires au service ; notre suivi n’utilise ni signaux publicitaires ni identifiants utilisateur entre sites. La durée des cookies de mesure est limitée à 180 jours. Google peut traiter des données hors EEE selon ses garanties de transfert applicables.</p>
     </section>
   </article>
 </template>

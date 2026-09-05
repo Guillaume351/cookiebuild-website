@@ -142,10 +142,12 @@ defineProps<{ game: GameLanding }>();
 const serverIP = COOKIE_BUILD_SERVER_IP;
 const bedrockPort = COOKIE_BUILD_BEDROCK_PORT;
 const copiedLabel = ref("");
+const siteAnalytics = useSiteAnalytics();
 const { copy, localizePath } = useSiteLocale();
 
 const copyText = async (value: string, label: string) => {
   await navigator.clipboard.writeText(value);
+  if (value === serverIP) siteAnalytics.track("server_address_copy");
   copiedLabel.value = `${label} ${copy.value.common.copied}`;
   window.setTimeout(() => {
     copiedLabel.value = "";
@@ -155,6 +157,7 @@ const copyText = async (value: string, label: string) => {
 const copyServerAddress = () => copyText(serverIP, copy.value.gameUi.serverAddress);
 
 const openBedrockLink = () => {
+  siteAnalytics.track("bedrock_server_add");
   window.location.href = `minecraft://?addExternalServer=CookieBuild|${serverIP}:${bedrockPort}`;
 };
 </script>

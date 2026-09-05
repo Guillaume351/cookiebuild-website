@@ -1,3 +1,4 @@
+import { dispatchSiteAnalytics, trafficSourceGroup, type SiteAnalyticsEvent } from "../utils/site-analytics";
 import { dispatchShopAnalytics, validAnalyticsId, type AnalyticsConsent, type GoogleTag, type ShopAnalyticsEvent, type ShopAnalyticsOptions } from "../utils/shop-analytics";
 
 type AnalyticsWindow = Window & { dataLayer?: unknown[]; gtag?: GoogleTag; [key: `ga-disable-${string}`]: boolean };
@@ -7,8 +8,12 @@ export function useShopAnalytics() {
   const config = useRuntimeConfig();
   const measurementId = config.public.gaMeasurementId;
   const enabled = validAnalyticsId(measurementId);
-  const consentCookie = useCookie<AnalyticsConsent>("cb_analytics_consent", { default: () => null, maxAge: 180 * 86400, sameSite: "lax", path: "/" });
-  const consent = useState<AnalyticsConsent>("shop-analytics-consent", () => consentCookie.value === "granted" || consentCookie.value === "denied" ? consentCookie.value : null);
+  const previousConsent = useCookie<AnalyticsConsent>("cb_analytics_consent", { readonly: true });
+  const consentCookie = useCookie<AnalyticsConsent>("cb_analytics_consent_v2", {
+    default: () => previousConsent.value === "denied" ? "denied" : null,
+    maxAge: 180 * 86400, sameSite: "lax", path: "/",
+  });
+  const consent = useState<AnalyticsConsent>("site-analytics-consent-v2", () => consentCookie.value === "granted" || consentCookie.value === "denied" ? consentCookie.value : null);
   const preferencesOpen = useState("analytics-preferences-open", () => false);
 
   function initialize() {
@@ -25,7 +30,8 @@ export function useShopAnalytics() {
     tag("consent", "update", { analytics_storage: "granted" });
     tag("js", new Date());
     tag("config", measurementId, { send_page_view: false, allow_google_signals: false, allow_ad_personalization_signals: false,
-      page_location: "https://www.cookie-build.com/shop", page_referrer: "", page_title: "Cookie Build Shop" });
+      cookie_expires: 180 * 86400, cookie_update: false,
+      page_location: "https://www.cookie-build.com/", page_referrer: "", page_title: "Cookie Build" });
     const script = document.createElement("script");
     script.id = "cookiebuild-google-analytics";
     script.async = true;
@@ -62,5 +68,13 @@ export function useShopAnalytics() {
     catch { return false; } // Analytics must never interrupt an account or checkout action.
   }
 
-  return { enabled, consent, preferencesOpen, setConsent, track };
+  function trackSite(event: SiteAnalyticsEvent, path: string) {
+    if (!import.meta.client || consent.value !== "granted") return false;
+    try {
+      return dispatchSiteAnalytics({ id: measurementId, consent: consent.value, event, path,
+        source: trafficSourceGroup(document.referrer), initialize });
+    } catch { return false; }
+  }
+
+  return { enabled, consent, preferencesOpen, setConsent, track, trackSite };
 }
