@@ -1,6 +1,7 @@
 # Consent-based site and shop analytics
 
 `NUXT_PUBLIC_GA_MEASUREMENT_ID` defaults to empty. Set only the verified GA4 web-stream ID.
+Only `cookie-build.com` and `www.cookie-build.com` can load or emit to the live stream. Local and preview hosts are disabled. DNT/GPC default to refusal when no current choice exists.
 Before enabling it, turn off every Enhanced Measurement automatic event in the GA4 stream
 (page views, outbound clicks, forms, search, scroll, downloads and video). This integration emits
 explicit events only: automatic outbound/form capture could otherwise include a checkout URL or
@@ -10,7 +11,7 @@ Google's basic consent mode is used: the tag is not loaded and no events are que
 Decline and Allow have equal prominence; footer preferences allow withdrawal. The first-party choice
 expires after 180 days; GA cookie expiry is also limited to 180 days without renewal on visits.
 The expanded site-wide scope uses `cb_analytics_consent_v2`: previous shop-only permission is not reused, while an existing refusal is preserved. Withdrawal disables the tag, updates consent and removes GA cookies for this
-site. Previously sent measurements are not retroactively removed by withdrawing permission.
+site. If withdrawal happens while the tag is still loading, pending events are discarded and its script is detached. Previously sent measurements are not retroactively removed by withdrawing permission.
 
 | Event | Trigger | Allowed business fields |
 | --- | --- | --- |

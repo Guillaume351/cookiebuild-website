@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { dispatchSiteAnalytics, trafficSourceGroup } from "../utils/site-analytics";
+import { analyticsProductionHost, defaultAnalyticsConsent, dispatchSiteAnalytics, trafficSourceGroup } from "../utils/site-analytics";
 import { dispatchShopAnalytics, shopAnalyticsPayload, validAnalyticsId } from "../utils/shop-analytics";
 
 describe("consent-gated shop analytics", () => {
@@ -36,17 +36,17 @@ import { readFile } from "node:fs/promises";
 import ts from "typescript";
 import { ref, watch, nextTick, effectScope } from "vue";
 
-async function browserFixture(previousConsent: "granted" | "denied" | null = null) {
+async function browserFixture(previousConsent: "granted" | "denied" | null = null, hostname = "www.cookie-build.com", signals = {}) {
   const source = (await readFile(new URL("../composables/useShopAnalytics.ts", import.meta.url), "utf8"))
     .replace(/^import .*;\n/gm, "").replace("export function", "function").replaceAll("import.meta.client", "true");
   const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
   const target: Record<string, any> = {};
   const append = vi.fn(); const state = new Map(); const savedConsent = ref(null);
-  const document = { referrer: "https://www.google.fr/search?q=private", cookie: "_ga=fixture; _ga_TEST123456=fixture; essential=retained", createElement: () => ({}), head: { append } };
-  const factory = new Function("window", "document", "location", "useRuntimeConfig", "useCookie", "useState", "dispatchShopAnalytics", "validAnalyticsId", "dispatchSiteAnalytics", "trafficSourceGroup", javascript + "\nreturn useShopAnalytics;");
-  const useAnalytics = factory(target, document, { hostname: "www.cookie-build.com" }, () => ({ public: { gaMeasurementId: "G-TEST123456" } }), (name: string, options: any) => name === "cb_analytics_consent" ? ref(previousConsent) : (savedConsent.value ??= options.default(), savedConsent),
-    (key: string, init: () => unknown) => { if (!state.has(key)) state.set(key, ref(init())); return state.get(key); }, dispatchShopAnalytics, validAnalyticsId, dispatchSiteAnalytics, trafficSourceGroup);
-  return { useAnalytics, target, append, savedConsent };
+  const document = { referrer: "https://www.google.fr/search?q=private", cookie: "_ga=fixture; _ga_TEST123456=fixture; essential=retained", createElement: () => ({ remove: vi.fn() }), head: { append } };
+  const factory = new Function("window", "document", "location", "navigator", "useRuntimeConfig", "useCookie", "useState", "dispatchShopAnalytics", "validAnalyticsId", "dispatchSiteAnalytics", "trafficSourceGroup", "analyticsProductionHost", "defaultAnalyticsConsent", javascript + "\nreturn useShopAnalytics;");
+  const useAnalytics = factory(target, document, { hostname }, signals, () => ({ public: { gaMeasurementId: "G-TEST123456" } }), (name: string, options: any) => name === "cb_analytics_consent" ? ref(previousConsent) : (savedConsent.value ??= options.default(), savedConsent),
+    (key: string, init: () => unknown) => { if (!state.has(key)) state.set(key, ref(init())); return state.get(key); }, dispatchShopAnalytics, validAnalyticsId, dispatchSiteAnalytics, trafficSourceGroup, analyticsProductionHost, defaultAnalyticsConsent);
+  return { useAnalytics, target, append, savedConsent, state };
 }
 
 describe("browser consent lifecycle", () => {
@@ -60,6 +60,7 @@ describe("browser consent lifecycle", () => {
     expect(page.consent.value).toBe("granted");
     expect(savedConsent.value).toBe("granted");
     expect(append).toHaveBeenCalledTimes(1);
+    append.mock.calls[0]![0].onload();
     expect(page.track("shop_view")).toBe(true);
     expect(append).toHaveBeenCalledTimes(1);
     banner.setConsent("denied");
@@ -78,7 +79,7 @@ describe("browser consent lifecycle", () => {
 
 
 it("tracks the already-open shop once when permission is granted without navigation", async () => {
-  const { useAnalytics, target } = await browserFixture();
+  const { useAnalytics, target, append } = await browserFixture();
   const source = await readFile(new URL("../pages/shop/index.vue", import.meta.url), "utf8");
   const start = source.indexOf("const shopAnalytics = useShopAnalytics();");
   const end = source.indexOf("const french =", start);
@@ -92,6 +93,7 @@ it("tracks the already-open shop once when permission is granted without navigat
     expect(target.dataLayer).toBeUndefined();
     const banner = useAnalytics();
     banner.setConsent("granted");
+    append.mock.calls[0]![0].onload();
     await nextTick();
     const events = () => target.dataLayer.map((args: IArguments) => Array.from(args)).filter((args: unknown[]) => args[0] === "event");
     expect(events()).toHaveLength(1);
@@ -99,6 +101,7 @@ it("tracks the already-open shop once when permission is granted without navigat
     banner.setConsent("denied");
     await nextTick();
     banner.setConsent("granted");
+    append.mock.calls[0]![0].onload();
     await nextTick();
     expect(events()).toHaveLength(1);
   } finally { scope.stop(); }
@@ -106,7 +109,7 @@ it("tracks the already-open shop once when permission is granted without navigat
 
 
 it("tracks public navigation once per path, including acceptance on an already open page", async () => {
-  const { useAnalytics, target } = await browserFixture();
+  const { useAnalytics, target, append } = await browserFixture();
   const source = await readFile(new URL("../components/SiteAnalytics.vue", import.meta.url), "utf8");
   const script = source.split('<script setup lang="ts">')[1]!.split("</script>")[0]!;
   const javascript = ts.transpileModule(script, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
@@ -120,7 +123,7 @@ it("tracks public navigation once per path, including acceptance on an already o
     for (const callback of mounted) callback();
     expect(events()).toHaveLength(0);
     const banner = useAnalytics();
-    banner.setConsent("granted"); await nextTick();
+    banner.setConsent("granted"); append.mock.calls[0]![0].onload(); await nextTick();
     expect(events()).toHaveLength(1);
     expect(events()[0][2]).toMatchObject({ page_location: "https://www.cookie-build.com/skyblock", site_language: "fr", traffic_source_group: "google" });
     route.value.path = "/fr/shop"; await nextTick();
@@ -128,7 +131,7 @@ it("tracks public navigation once per path, including acceptance on an already o
     banner.setConsent("denied"); await nextTick();
     route.value.path = "/fr/games"; await nextTick();
     expect(events()).toHaveLength(2);
-    banner.setConsent("granted"); await nextTick();
+    banner.setConsent("granted"); append.mock.calls[0]![0].onload(); await nextTick();
     expect(events()).toHaveLength(3);
     route.value.path = "/admin/commerce"; await nextTick();
     route.value.path = "/player/private-name"; await nextTick();
@@ -147,4 +150,46 @@ it("preserves previous refusal but renews permission for the expanded site scope
   expect(granted.useAnalytics().consent.value).toBeNull();
   expect(granted.useAnalytics().trackSite("page_view", "/")).toBe(false);
   expect(granted.append).not.toHaveBeenCalled();
+});
+
+
+it("never loads or sends the live stream from local or preview hosts", async () => {
+  for (const hostname of ["localhost", "127.0.0.1", "preview.cookie-build.com", "cookie-build.com.evil.example"]) {
+    const fixture = await browserFixture(null, hostname);
+    const analytics = fixture.useAnalytics();
+    analytics.setConsent("granted");
+    expect(analytics.enabled).toBe(false);
+    expect(analytics.track("shop_view")).toBe(false);
+    expect(analytics.trackSite("page_view", "/")).toBe(false);
+    expect(fixture.append).not.toHaveBeenCalled();
+  }
+});
+
+it("defaults to refusal for DNT or GPC without a stored choice", async () => {
+  for (const signals of [{ doNotTrack: "1" }, { globalPrivacyControl: true }]) {
+    const fixture = await browserFixture(null, "www.cookie-build.com", signals);
+    fixture.state.set("site-analytics-consent-v2", ref(null)); // Simulate an undecided SSR payload.
+    expect(fixture.useAnalytics().consent.value).toBe("denied");
+    expect(fixture.append).not.toHaveBeenCalled();
+  }
+});
+
+it("discards pending events on withdrawal and tolerates blocked tag insertion", async () => {
+  const { useAnalytics, target, append } = await browserFixture();
+  const analytics = useAnalytics();
+  analytics.setConsent("granted");
+  analytics.track("shop_view");
+  const oldScript = append.mock.calls[0]![0];
+  analytics.setConsent("denied");
+  expect(target.dataLayer).toHaveLength(0);
+  expect(oldScript.remove).toHaveBeenCalledOnce();
+  expect(target["ga-disable-G-TEST123456"]).toBe(true);
+  // A late callback from the detached script cannot mark a newly created script as loaded.
+  oldScript.onload();
+  analytics.setConsent("granted");
+  expect(append).toHaveBeenCalledTimes(2);
+  expect(target.dataLayer.map((args: IArguments) => Array.from(args)).some((args: unknown[]) => args[0] === "event")).toBe(false);
+  analytics.setConsent("denied");
+  append.mockImplementation(() => { throw new Error("Blocked"); });
+  expect(() => analytics.setConsent("granted")).not.toThrow();
 });

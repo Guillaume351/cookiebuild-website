@@ -59,3 +59,12 @@ export function dispatchSiteAnalytics(input: {
   });
   return true;
 }
+
+
+export function analyticsProductionHost(hostname: string) {
+  return hostname === "cookie-build.com" || hostname === "www.cookie-build.com";
+}
+
+export function defaultAnalyticsConsent(previous: AnalyticsConsent, signals: { globalPrivacyControl?: boolean; doNotTrack?: string | null }): AnalyticsConsent {
+  return previous === "denied" || signals.globalPrivacyControl === true || signals.doNotTrack === "1" ? "denied" : null;
+}
