@@ -1994,11 +1994,22 @@ export const commerceCustomers = pgTable(
   ],
 );
 
+export const commerceGuestPayers = pgTable("commerce_guest_payers", {
+  id: uuid().primaryKey().defaultRandom(),
+  tokenHash: varchar("token_hash", { length: 64 }).notNull().unique(),
+  expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  stripeTestCustomerId: varchar("stripe_test_customer_id", { length: 255 }).unique(),
+  stripeLiveCustomerId: varchar("stripe_live_customer_id", { length: 255 }).unique(),
+});
+
 export const commerceOrders = pgTable(
   "commerce_orders",
   {
     id: uuid().primaryKey().defaultRandom(),
     playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    payerPlayerId: uuid("payer_player_id").references(() => playerdata.id, { onDelete: "restrict" }),
+    payerGuestId: uuid("payer_guest_id").references(() => commerceGuestPayers.id, { onDelete: "restrict" }),
     productId: varchar("product_id", { length: 128 }).notNull(),
     productVersion: integer("product_version").notNull(),
     productName: varchar("product_name", { length: 255 }).notNull(),

@@ -75,7 +75,7 @@ export interface CommerceInventory {
   selections: Array<{ slot: CosmeticSlot; cosmeticId: string; selectedAt: string }>;
 }
 export interface CommerceOrder {
-  id: string; productId: string; productName: string; access: string;
+  id: string; recipientId: string; recipientName: string | null; productId: string; productName: string; access: string;
   amountTtcCents: number; currency: string; status: string;
   noticeVersion: string; noticeText: string; termsAcceptedAt: string; createdAt: string;
   immediatePerformanceConsentedAt: string | null; withdrawalWaiverAcknowledgedAt: string | null;

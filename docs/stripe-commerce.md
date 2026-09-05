@@ -163,3 +163,31 @@ Automatic tax is a configurable Stripe feature, not a mandatory paid-service pre
 Every minute the worker reconciles pending Checkouts, recovers sessions whose creation response was lost, and queues matching canonical Stripe Events through the same idempotent worker. It never creates a second checkout or grants access directly. Sessions explicitly expire after 31 minutes (including a minute of margin above Stripe’s minimum); an ambiguous transport failure retains the active-order guard until recovery.
 
 Mobile-account deletion leaves the Minecraft player row and separate commerce records intact. Commerce authentication expires after 30 days; no automatic statutory-billing purge is claimed. Retention/privacy requests require operator processing against actual record obligations.
+
+
+## Guest purchases and gifts
+
+`commerce_orders.player_id` is the recipient of fulfillment. Billing authority is
+`payer_player_id` for linked buyers or `payer_guest_id` for anonymous buyers.
+Migration 0018 backfills existing orders to their original linked payer. Never
+use the recipient identity to authorize history, a portal, withdrawal, or a
+pending Checkout URL. Stripe customers for guests are distinct from the player's
+existing customer; an unverified email must never merge customers.
+
+A guest capability is generated from 32 random bytes, stored only as a SHA-256
+hash, and carried in a Secure/HttpOnly/SameSite=Lax cookie in production for 30
+days. An existing guest capability remains the billing identity if a Minecraft
+player is linked later; linking controls inventory independently. The history
+page can explicitly expire the guest capability on a shared browser.
+
+Set `COMMERCE_PORTAL_LOGIN_URL` to the enabled Stripe no-code portal login URL.
+After cookie loss/expiry, email verification on Stripe can recover subscription
+management. Stripe may select only the most recent active customer when one
+email has multiple customer records; support with the relevant Stripe receipt
+is the fallback for missing older subscriptions. Checkout IDs and recipient
+nicknames are never authentication credentials.
+
+**Rollback:** after gift orders exist, the previous recipient-authorized billing
+backend is unsafe. Retain the payer authorization changes when rolling back, or
+disable checkout/history/portal/withdrawal routes. Do not revert to exposing
+orders by recipient UUID.

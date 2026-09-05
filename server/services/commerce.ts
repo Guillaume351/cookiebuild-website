@@ -5,6 +5,7 @@ import type Stripe from "stripe";
 import db from "../../db/client";
 import {
   commerceCustomers,
+  commerceGuestPayers,
   commerceOrderHistory,
   commerceOrders,
   commercePayments,
@@ -14,7 +15,8 @@ import {
   playerdata,
 } from "../../db/schema";
 import { COSMETIC_CATALOG, COSMETIC_PRODUCTS, cosmeticById, isCosmeticSlot, isFreeCosmetic } from "../../shared/cosmetics-catalog";
-import type { CommerceAuthContext } from "./commerce-session";
+import { payerOrderFilter, payerOwnsOrder, type CommercePayer } from "./commerce-payer";
+import { requireCommerceRecipient } from "./commerce-recipients";
 import {
   requireCommerceReadiness,
   resolveStripePrice,
@@ -30,6 +32,7 @@ const SUBSCRIPTION_NOTICE = "L’abonnement mensuel peut être résilié depuis 
 
 export interface CheckoutInput {
   productId?: unknown;
+  recipientId?: unknown;
   termsAccepted?: unknown;
   immediatePerformanceConsent?: unknown;
   withdrawalWaiverAcknowledged?: unknown;
@@ -67,7 +70,17 @@ function orderNotice(product: CosmeticProduct) {
   return parts.join("\n\n");
 }
 
-async function ensureStripeCustomer(client: Stripe, auth: CommerceAuthContext, stripeMode: "test" | "live") {
+async function ensureStripeCustomer(client: Stripe, auth: CommercePayer, stripeMode: "test" | "live") {
+  if ("guestId" in auth) {
+    const [guest] = await db.select().from(commerceGuestPayers).where(eq(commerceGuestPayers.id, auth.guestId)).limit(1);
+    if (!guest) throw createError({ statusCode: 401, statusMessage: "Purchase session required" });
+    const field = stripeMode === "live" ? "stripeLiveCustomerId" : "stripeTestCustomerId";
+    if (guest[field]) return guest[field]!;
+    const customer = await client.customers.create({ metadata: { cookiebuild_payer_id: guest.id } },
+      { idempotencyKey: `commerce-guest:${stripeMode}:${guest.id}` });
+    await db.update(commerceGuestPayers).set({ [field]: customer.id }).where(eq(commerceGuestPayers.id, guest.id));
+    return customer.id;
+  }
   const [existing] = await db
     .select({ stripeCustomerId: commerceCustomers.stripeCustomerId })
     .from(commerceCustomers)
@@ -87,8 +100,9 @@ async function ensureStripeCustomer(client: Stripe, auth: CommerceAuthContext, s
   return customer.id;
 }
 
-export async function createCommerceCheckout(auth: CommerceAuthContext, input: CheckoutInput, now = new Date()) {
+export async function createCommerceCheckout(auth: CommercePayer, input: CheckoutInput, now = new Date()) {
   const product = validateCheckoutInput(input);
+  const recipient = await requireCommerceRecipient(input.recipientId ?? ("playerId" in auth ? auth.playerId : null));
   const readiness = requireCommerceReadiness();
   const client = stripeClient();
   const price = await resolveStripePrice(client, product, readiness.mode);
@@ -97,11 +111,11 @@ export async function createCommerceCheckout(auth: CommerceAuthContext, input: C
       ? ["created", "checkout_open", "active", "past_due", "canceling", "disputed"]
       : ["created", "checkout_open", "paid", "active", "disputed", "partially_refunded"];
     const [existingOrder] = await db.select().from(commerceOrders).where(and(
-      eq(commerceOrders.playerId, auth.playerId),
+      eq(commerceOrders.playerId, recipient.id),
       eq(commerceOrders.productId, product.id),
       inArray(commerceOrders.status, guardedStatuses),
     )).limit(1);
-    if (existingOrder?.status === "checkout_open" && existingOrder.stripeCheckoutSessionId && existingOrder.stripeMode === readiness.mode) {
+    if (existingOrder && payerOwnsOrder(auth, existingOrder) && existingOrder.status === "checkout_open" && existingOrder.stripeCheckoutSessionId && existingOrder.stripeMode === readiness.mode) {
       const pending = await client.checkout.sessions.retrieve(existingOrder.stripeCheckoutSessionId);
       if (pending.status === "open" && pending.url) return { orderId: existingOrder.id, url: pending.url };
     }
@@ -126,7 +140,9 @@ export async function createCommerceCheckout(auth: CommerceAuthContext, input: C
   try {
     await db.insert(commerceOrders).values({
       id: orderId,
-      playerId: auth.playerId,
+      playerId: recipient.id,
+      payerPlayerId: "playerId" in auth ? auth.playerId : null,
+      payerGuestId: "guestId" in auth ? auth.guestId : null,
       productId: product.id,
       productVersion: product.productVersion,
       productName: product.name,
@@ -159,7 +175,7 @@ export async function createCommerceCheckout(auth: CommerceAuthContext, input: C
     await db.update(commerceOrders).set({ stripeCustomerId: customerId }).where(eq(commerceOrders.id, orderId));
     const metadata = {
       cookiebuild_order_id: orderId,
-      cookiebuild_player_id: auth.playerId,
+      cookiebuild_player_id: recipient.id,
       cookiebuild_product_id: product.id,
       cookiebuild_product_version: String(product.productVersion),
       cookiebuild_entitlement_source: entitlementSource,
@@ -213,20 +229,23 @@ export async function createCommerceCheckout(auth: CommerceAuthContext, input: C
   }
 }
 
-export async function createCommercePortal(auth: CommerceAuthContext) {
+export async function createCommercePortal(auth: CommercePayer) {
   const readiness = requireCommerceReadiness();
-  const [customer] = await db.select().from(commerceCustomers)
-    .where(and(
-      eq(commerceCustomers.playerId, auth.playerId),
-      eq(commerceCustomers.stripeMode, readiness.mode),
-    )).limit(1);
-  if (!customer) throw createError({ statusCode: 404, statusMessage: "No Stripe customer exists for this player" });
+  let customerId: string | null = null;
+  if ("guestId" in auth) {
+    const [guest] = await db.select().from(commerceGuestPayers).where(eq(commerceGuestPayers.id, auth.guestId)).limit(1);
+    customerId = (readiness.mode === "live" ? guest?.stripeLiveCustomerId : guest?.stripeTestCustomerId) || null;
+  } else {
+    const [customer] = await db.select().from(commerceCustomers).where(and(eq(commerceCustomers.playerId, auth.playerId), eq(commerceCustomers.stripeMode, readiness.mode))).limit(1);
+    customerId = customer?.stripeCustomerId || null;
+  }
+  if (!customerId) throw createError({ statusCode: 404, statusMessage: "No billing customer exists for this payer" });
   const client = stripeClient();
   const configurations = await client.billingPortal.configurations.list({ active: true, limit: 100 });
   const matches = configurations.data.filter((entry) => entry.metadata?.cookiebuild === "commerce-v1");
   if (matches.length !== 1) throw createError({ statusCode: 503, statusMessage: "The Cookie Build billing portal is not uniquely configured" });
   const session = await client.billingPortal.sessions.create({
-    customer: customer.stripeCustomerId,
+    customer: customerId,
     configuration: matches[0]!.id,
     return_url: `${readiness.publicBaseUrl}/shop/history`,
   });
@@ -301,9 +320,11 @@ export async function selectCommerceCosmetic(playerId: string, input: { slot?: u
   return commerceInventory(playerId, now);
 }
 
-export async function commerceHistory(playerId: string) {
+export async function commerceHistory(auth: CommercePayer) {
   const orders = await db.select({
     id: commerceOrders.id,
+    recipientId: commerceOrders.playerId,
+    recipientName: playerdata.name,
     productId: commerceOrders.productId,
     productVersion: commerceOrders.productVersion,
     productName: commerceOrders.productName,
@@ -321,7 +342,7 @@ export async function commerceHistory(playerId: string) {
     withdrawalStatus: commerceOrders.withdrawalStatus,
     purchasedAt: commerceOrders.purchasedAt,
     createdAt: commerceOrders.createdAt,
-  }).from(commerceOrders).where(eq(commerceOrders.playerId, playerId)).orderBy(desc(commerceOrders.createdAt));
+  }).from(commerceOrders).leftJoin(playerdata, eq(playerdata.id, commerceOrders.playerId)).where(payerOrderFilter(auth)).orderBy(desc(commerceOrders.createdAt));
 
   const orderIds = orders.map((order) => order.id);
   if (!orderIds.length) return { orders: [], subscriptions: [], payments: [], events: [] };
@@ -334,13 +355,13 @@ export async function commerceHistory(playerId: string) {
       cancelAtPeriodEnd: commerceSubscriptions.cancelAtPeriodEnd,
       endedAt: commerceSubscriptions.endedAt,
       updatedAt: commerceSubscriptions.updatedAt,
-    }).from(commerceSubscriptions).where(eq(commerceSubscriptions.playerId, playerId)).orderBy(desc(commerceSubscriptions.updatedAt)),
+    }).from(commerceSubscriptions).where(inArray(commerceSubscriptions.orderId, orderIds)).orderBy(desc(commerceSubscriptions.updatedAt)),
     db.execute(sql`
       SELECT payment.id, payment.order_id, payment.amount_cents, payment.refunded_amount_cents,
              payment.currency, payment.status, payment.paid_at, payment.created_at
         FROM commerce_payments payment
         JOIN commerce_orders orders ON orders.id = payment.order_id
-       WHERE orders.player_id = ${playerId}::uuid
+       WHERE orders.id IN (${sql.join(orderIds.map(id => sql`${id}::uuid`), sql`, `)})
        ORDER BY payment.created_at DESC
     `),
     db.execute(sql`
@@ -348,18 +369,18 @@ export async function commerceHistory(playerId: string) {
              history.occurred_at
         FROM commerce_order_history history
         JOIN commerce_orders orders ON orders.id = history.order_id
-       WHERE orders.player_id = ${playerId}::uuid
+       WHERE orders.id IN (${sql.join(orderIds.map(id => sql`${id}::uuid`), sql`, `)})
        ORDER BY history.occurred_at DESC
     `),
   ]);
   return { orders, subscriptions, payments: [...payments], events: [...events] };
 }
 
-export async function requestSubscriptionWithdrawal(auth: CommerceAuthContext, orderId: string, now = new Date()) {
+export async function requestSubscriptionWithdrawal(auth: CommercePayer, orderId: string, now = new Date()) {
   const claimed = await db.transaction(async (tx) => {
     const [order] = await tx.select().from(commerceOrders).where(and(
       eq(commerceOrders.id, orderId),
-      eq(commerceOrders.playerId, auth.playerId),
+      payerOrderFilter(auth),
     )).limit(1).for("update");
     if (order && order.stripeMode !== process.env.COMMERCE_STRIPE_MODE) throw createError({ statusCode: 409, statusMessage: "This purchase belongs to a different payment environment" });
     if (!order || order.access !== "subscription" || !order.stripeSubscriptionId || order.withdrawalStatus !== "eligible"

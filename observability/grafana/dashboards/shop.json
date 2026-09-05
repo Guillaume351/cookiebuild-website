@@ -1,0 +1,649 @@
+{
+  "id": null,
+  "uid": "cookiebuild-shop",
+  "title": "Cookie Build · Shop activation",
+  "description": "Durable server-side aggregate counts. Anonymous GA web analytics is a separate consent-dependent population and must not be used as an automatic conversion denominator.",
+  "editable": false,
+  "schemaVersion": 41,
+  "version": 1,
+  "timezone": "Europe/Paris",
+  "refresh": "5m",
+  "time": {
+    "from": "now-28d/d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "tags": [
+    "cookie-build",
+    "shop",
+    "product-analytics"
+  ],
+  "links": [
+    {
+      "title": "Players and reliability",
+      "type": "link",
+      "url": "/d/cookiebuild-overview",
+      "keepTime": true
+    }
+  ],
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Free sparkles · ever observed",
+      "description": "All-time distinct Minecraft accounts, including the initial baseline. Not a count of clicks or purchases; deletion of an account removes its contribution.",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT COALESCE(sum(activated_accounts), 0) AS accounts FROM metrics.shop_activation_summary WHERE cosmetic_id = 'cookie_sparkle_trail'"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Free sparkles · currently equipped",
+      "description": "Current selection state, independent of the time picker. Unequipping reduces this count but does not erase the first observed activation.",
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT COALESCE(sum(equipped_accounts), 0) AS accounts FROM metrics.shop_equipped_current WHERE cosmetic_id = 'cookie_sparkle_trail'"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Linked shop accounts · current",
+      "description": "Distinct accounts with at least one unexpired, non-revoked shop session. This is a current stock, not a link event count or a funnel denominator.",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT COALESCE(sum(linked_accounts), 0) AS accounts FROM metrics.shop_linked_current WHERE link_type = 'commerce_session'"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "Subscriptions · current period",
+      "description": "Current billing periods not ended, including scheduled cancellation and past-due subscriptions until period end. Billing state is not proof of entitlement access. Live mode only.",
+      "gridPos": {
+        "x": 18,
+        "y": 0,
+        "w": 6,
+        "h": 5
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT COALESCE(sum(subscriptions), 0) AS subscriptions FROM metrics.shop_subscriptions_current WHERE current_period AND status IN ('active', 'trialing', 'past_due')"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "First observed free activations · account edition",
+      "description": "New first observations after measurement began. Retries, re-equipping and web/game paths deduplicate by account and cosmetic. Java/Bedrock describes the Minecraft account, not browser or input device; unknown is retained. Full Europe/Paris calendar-day buckets, up to 180 days.",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT time, edition AS metric, activated_accounts AS value FROM metrics.shop_activation_daily WHERE cosmetic_id = 'cookie_sparkle_trail' AND observed_source = 'selection' AND time >= date_trunc('day', $__timeFrom()::timestamptz, 'Europe/Paris') AND time <= $__timeTo()::timestamptz ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Initial free selection baseline · separate",
+      "description": "Selections already present when the migration was applied, observed on that day. Their original acquisition date is unknown. Never add this series to post-launch acquisition totals.",
+      "gridPos": {
+        "x": 12,
+        "y": 5,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT time, edition AS metric, activated_accounts AS value FROM metrics.shop_activation_daily WHERE cosmetic_id = 'cookie_sparkle_trail' AND observed_source = 'baseline' AND time >= date_trunc('day', $__timeFrom()::timestamptz, 'Europe/Paris') AND time <= $__timeTo()::timestamptz ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "type": "table",
+      "title": "Cosmetics currently equipped",
+      "description": "Current stock per cosmetic and account edition. Paid selections require a currently valid entitlement; duplicate entitlement sources never double count. An account can appear under several cosmetics. Edition was recorded at its first observed selection.",
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT cosmetic_id AS cosmetic, edition, equipped_accounts AS accounts FROM metrics.shop_equipped_current ORDER BY cosmetic_id, edition"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "First observations · all cosmetics",
+      "description": "Account/cosmetic pairs, not global unique players. Baseline and new observations stay separate. Daily Europe/Paris buckets; 180-day chart window.",
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT time, cosmetic_id || ' / ' || observed_source AS metric, sum(activated_accounts) AS value FROM metrics.shop_activation_daily WHERE time >= date_trunc('day', $__timeFrom()::timestamptz, 'Europe/Paris') AND time <= $__timeTo()::timestamptz GROUP BY time, cosmetic_id, observed_source ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "Checkout orders created",
+      "description": "Unique live order rows attributed to creation day. Reusing the same order is not another attempt. Checkout-session presence is the current state of that cohort; not a separate session creation time. Anonymous and linked payer populations are mixed: no ratio with GA traffic or linked accounts.",
+      "gridPos": {
+        "x": 0,
+        "y": 21,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT time, created_orders AS \"Created orders\", checkout_session_orders AS \"Orders with checkout session\" FROM metrics.shop_orders_daily WHERE time >= date_trunc('day', $__timeFrom()::timestamptz, 'Europe/Paris') AND time <= $__timeTo()::timestamptz ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "Paid orders",
+      "description": "Live orders first paid on each Europe/Paris day. Renewals belong to payment receipts, not new orders. Later refunds do not erase the original paid-order count.",
+      "gridPos": {
+        "x": 12,
+        "y": 21,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT time, paid_orders AS \"First-paid orders\" FROM metrics.shop_paid_orders_daily WHERE time >= date_trunc('day', $__timeFrom()::timestamptz, 'Europe/Paris') AND time <= $__timeTo()::timestamptz ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "type": "timeseries",
+      "title": "EUR receipts · current refund adjustment",
+      "description": "Live payment receipts including subscription renewals. Refunds are cumulative current amounts attributed to the original payment day, so historical points can change. Before Stripe fees; includes VAT; not accounting revenue, refund-date cash flow or net settled disputes.",
+      "gridPos": {
+        "x": 0,
+        "y": 29,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyEUR",
+          "decimals": 2,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawSql": "SELECT time, gross_cents / 100.0 AS \"Gross paid TTC\", refunded_cents / 100.0 AS \"Refunds attributed to payment day\", refund_adjusted_cents / 100.0 AS \"Paid TTC less current refunds\" FROM metrics.shop_receipts_daily WHERE currency = 'EUR' AND time >= date_trunc('day', $__timeFrom()::timestamptz, 'Europe/Paris') AND time <= $__timeTo()::timestamptz ORDER BY time"
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "type": "table",
+      "title": "Subscriptions · current billing state",
+      "description": "Current subscription records by Stripe status, scheduled cancellation and unended current period. Independent of time picker. Live orders only.",
+      "gridPos": {
+        "x": 12,
+        "y": 29,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "postgres",
+        "uid": "cookiebuild-postgres"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "value",
+        "graphMode": "none",
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawSql": "SELECT status, cancel_at_period_end, current_period, subscriptions FROM metrics.shop_subscriptions_current ORDER BY status, cancel_at_period_end, current_period"
+        }
+      ]
+    }
+  ]
+}

@@ -135,6 +135,8 @@ export async function bootstrapStripeCommerce({
   if (portalMatches.length > 1) throw new Error("Duplicate active Cookie Build customer portal configurations");
   const portal = portalMatches[0];
   const portalPayload = {
+    login_page: { enabled: true },
+    default_return_url: `${baseUrl}/shop/history`,
     business_profile: {
       headline: "Gérer les paiements et l’abonnement Cookie Build",
       privacy_policy_url: `${baseUrl}/privacy`,

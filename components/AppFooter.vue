@@ -83,9 +83,13 @@
         </p>
       </div>
     </div>
+    <div v-if="analytics.enabled" class="container mx-auto px-4 pb-6 text-center">
+      <button class="min-h-11 px-3 text-sm text-zinc-400 underline hover:text-white" @click="analytics.preferencesOpen.value = true">{{ locale.code === "fr" ? "Préférences de mesure d’audience" : "Analytics preferences" }}</button>
+    </div>
   </footer>
 </template>
 
 <script setup lang="ts">
+const analytics = useShopAnalytics();
 const { copy, locale, localizePath } = useSiteLocale();
 </script>

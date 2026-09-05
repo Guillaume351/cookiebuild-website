@@ -29,7 +29,7 @@
         <h2 id="free-title" class="mt-3 text-3xl font-black text-white">{{ french ? "Étincelles de cookie" : "Cookie Sparkles" }}</h2>
         <p class="mt-4 max-w-2xl text-zinc-300">{{ french ? "Une petite trace lumineuse pour tes déplacements dans le lobby. Aucun achat, abonnement ni carte bancaire : cet effet est déjà disponible pour chaque joueur." : "A little sparkle trail as you move around the lobby. No purchase, subscription or payment card: every player already has access." }}</p>
         <p class="mt-3 text-sm text-zinc-400">{{ french ? "Active-la dans le menu /shop en jeu ou lie ton joueur pour l’équiper depuis ton inventaire web. Java et Bedrock, sans avantage compétitif." : "Equip it from /shop in game, or link your player to use your web inventory. Java and Bedrock, with no competitive advantage." }}</p>
-        <NuxtLink to="/shop/history" class="mt-6 inline-flex min-h-11 items-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ french ? "Activer mon effet gratuit" : "Equip my free effect" }}</NuxtLink>
+        <NuxtLink to="/shop/history" @click="shopAnalytics.track('free_effect_click', { source: 'shop' })" class="mt-6 inline-flex min-h-11 items-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ french ? "Activer mon effet gratuit" : "Equip my free effect" }}</NuxtLink>
       </div>
       <CosmeticPreview v-if="freeItem" :item="freeItem" />
     </section>
@@ -135,6 +135,13 @@ const { data: catalogResponse } = await useFetch("/api/cosmetics/catalog", {
   key: "public-cosmetics-catalog",
 });
 const { locale } = useSiteLocale();
+const shopAnalytics = useShopAnalytics();
+let viewTracked = false;
+function trackShopView() {
+  if (!viewTracked) viewTracked = shopAnalytics.track("shop_view");
+}
+onMounted(trackShopView);
+watch(shopAnalytics.consent, trackShopView);
 const french = computed(() => locale.value.code === "fr");
 const freeItem = computed(() => catalog.value.items.find((item) => item.id === "cookie_sparkle_trail"));
 const catalog = computed(() => catalogResponse.value?.data ?? COSMETIC_CATALOG_RESPONSE);

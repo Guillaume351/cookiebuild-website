@@ -6,7 +6,7 @@
       <p class="text-sm font-black uppercase tracking-widest text-orange-300">Connexion sans email</p>
       <h1 class="mt-3 text-4xl font-black text-white">Lier ton joueur Minecraft</h1>
       <ol class="mt-6 space-y-3 text-zinc-300">
-        <li>1. Connecte-toi à Cookie Build avec le joueur qui recevra l’accès.</li>
+        <li>1. Connecte-toi à Cookie Build avec ton propre joueur pour consulter et équiper tes effets.</li>
         <li>2. Lance <code class="rounded bg-black/40 px-2 py-1 text-orange-200">/support link</code>.</li>
         <li>3. Saisis ici le code de 8 caractères, valable 10 minutes.</li>
       </ol>
@@ -23,6 +23,7 @@
 
 <script setup lang="ts">
 definePageMeta({ alias: ["/fr/shop/connect", "/de/shop/connect", "/it/shop/connect", "/bg/shop/connect", "/es/shop/connect", "/hi/shop/connect", "/pt-br/shop/connect"] });
+const shopAnalytics = useShopAnalytics();
 const route = useRoute();
 const nuxtApp = useNuxtApp();
 const player = useCommercePlayer();
@@ -37,6 +38,7 @@ async function connect() {
       method: "POST", credentials: "include", body: { code: code.value.trim().toUpperCase() },
     });
     player.value = response.data.player;
+    shopAnalytics.track("player_link_success");
     await nuxtApp.runWithContext(() => navigateTo(commerceReturnPath(route.query.next)));
   } catch (caught) { error.value = commerceErrorMessage(caught); }
   finally { loading.value = false; }

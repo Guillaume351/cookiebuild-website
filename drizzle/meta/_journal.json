@@ -120,6 +120,20 @@
       "when": 1788606000000,
       "tag": "0017_free_cookie_sparkles",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788610000000,
+      "tag": "0018_guest_commerce",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788610000001,
+      "tag": "0019_shop_activation_metrics",
+      "breakpoints": true
     }
   ]
 }

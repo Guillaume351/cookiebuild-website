@@ -28,6 +28,8 @@ export default defineEventHandler(async (event) => {
     enforceCommerceCsrf(getCookie(event, commerceCsrfCookieName()), getHeader(event, "x-csrf-token"));
   }
 
-  if (path === "/api/commerce/csrf" || isSessionClaim) return;
+  if (path === "/api/commerce/csrf" || isSessionClaim || path === "/api/commerce/recipients"
+    || path === "/api/commerce/recovery" || path === "/api/commerce/payer" || path === "/api/commerce/checkout" || path === "/api/commerce/history" || path === "/api/commerce/portal"
+    || /^\/api\/commerce\/orders\/[^/]+\/withdraw$/.test(path)) return;
   await verifyCommerceSession(event);
 });

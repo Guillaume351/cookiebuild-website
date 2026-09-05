@@ -75,7 +75,7 @@
         <h2 id="shop-promo-title" class="mt-2 text-2xl font-black text-white">{{ locale.code === "fr" ? "Fais briller ton passage avec Étincelles de cookie" : "Leave a little glow with Cookie Sparkles" }}</h2>
         <p class="mt-3 text-zinc-400">{{ locale.code === "fr" ? "Découvre ton effet gratuit pour le lobby et les cosmétiques facultatifs. Aucun achat nécessaire pour jouer ou activer les étincelles." : "Discover your free lobby effect and optional cosmetics. No purchase needed to play or equip your sparkles." }}</p>
       </div>
-      <NuxtLink :to="localizePath('/shop')" class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ locale.code === "fr" ? "Découvrir la boutique" : "Explore the shop" }}</NuxtLink>
+      <NuxtLink :to="localizePath('/shop')" @click="shopAnalytics.track('free_effect_click', { source: 'home' })" class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ locale.code === "fr" ? "Découvrir la boutique" : "Explore the shop" }}</NuxtLink>
     </section>
 
     <Teleport to="body">
@@ -348,6 +348,7 @@ const serverIP = ref("play.cookie-build.com");
 const bedrockPort = "19132";
 const showJoinGuide = ref(false);
 const selectedEdition = ref("java");
+const shopAnalytics = useShopAnalytics();
 const { locale, copy, localizePath } = useSiteLocale();
 const editions = computed(() => [
   { id: "java", label: "Java" },

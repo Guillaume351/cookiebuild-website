@@ -1,0 +1,8 @@
+{
+  "slug": "shop-gifts-and-analytics-preferences",
+  "contentType": "changelog",
+  "title": "Shop gifts and clearer payment access",
+  "summary": "Choose an existing player for a gift, manage your payments separately, and choose whether to share shop statistics.",
+  "body": "- Buy for yourself or give a gift by choosing a player who has already joined Cookie Build. Search by Minecraft name and confirm the suggested recipient before payment.\n- Java and Bedrock names are supported. For Bedrock players, searching with or without the initial dot finds the same player.\n- The selected player receives the cosmetic access. The payer keeps separate access to their order and billing management; choosing a recipient does not give access to that player’s account.\n- Optional shop statistics now have clear Allow and Decline choices. Change your choice at any time from Analytics preferences in the footer. Declining does not affect play, gifts or purchases.\n- Existing shop prices and the free Cookie Sparkles trail remain unchanged.",
+  "publishedAt": "2026-09-05T12:17:58.056971+00:00"
+}

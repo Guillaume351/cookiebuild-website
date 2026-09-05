@@ -13,6 +13,8 @@ async function pageSetup(name: string, overrides: Record<string, unknown> = {}) 
   const navigateTo = vi.fn();
   const request = vi.fn().mockImplementation((url: string) => Promise.resolve({ data: url.includes("inventory") ? { entitlements: [], selections: [] } : { orders: [], subscriptions: [], payments: [], events: [] } }));
   const globals = {
+    useShopAnalytics: () => ({ track: vi.fn() }),
+    window: { location: { assign: vi.fn() } },
     ref, computed, reactive, watch, definePageMeta: () => {}, useSeoMeta: () => {},
     useNuxtApp: () => ({ runWithContext: (callback: () => unknown) => callback() }),
     useCommercePlayer: () => player,
@@ -20,11 +22,11 @@ async function pageSetup(name: string, overrides: Record<string, unknown> = {}) 
     commerceRequest: request, commerceUnauthorized, commerceReturnPath,
     commerceErrorMessage: () => "Service indisponible", navigateTo,
     useRoute: () => ({ fullPath: "/shop/checkout?product=supporter_permanent", query: { product: "supporter_permanent" } }),
-    useFetch: async () => ({ data: ref({ data: { ...COSMETIC_CATALOG_RESPONSE, purchaseEnabled: true } }) }),
+    useFetch: async () => ({ data: ref({ data: { ...COSMETIC_CATALOG_RESPONSE, purchaseEnabled: true, portalLoginUrl: null } }) }),
     COSMETIC_CATALOG_RESPONSE,
     ...overrides,
   };
-  const expose = name === "connect" ? "{ code, connect, error }" : name === "history" ? "{ logout, select, load, player, inventory, error }" : "{ checkout, linkedPlayer, termsAccepted, immediatePerformanceConsent, withdrawalWaiverAcknowledged, error }";
+  const expose = name === "connect" ? "{ code, connect, error }" : name === "history" ? "{ logout, select, load, player, inventory, error }" : "{ checkout, recipient, chooseRecipient, termsAccepted, immediatePerformanceConsent, withdrawalWaiverAcknowledged, error }";
   const AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
   const page = await new AsyncFunction(...Object.keys(globals), `${javascript}\nreturn ${expose};`)(...Object.values(globals));
   return { page, player, request, navigateTo };
@@ -99,16 +101,16 @@ describe("commerce navigation and state", () => {
     expect(request).not.toHaveBeenCalled();
   });
 
-  it("does not turn a session outage into a linking redirect or permit payment", async () => {
+  it("requires an explicit recipient instead of treating a nickname as authentication", async () => {
     const { page, request, navigateTo } = await pageSetup("checkout", { loadCommerceSession: async () => { throw { statusCode: 503 }; } });
     expect(navigateTo).not.toHaveBeenCalled();
-    expect(page.linkedPlayer.value).toBeNull();
+    expect(page.recipient.value).toBeNull();
     page.termsAccepted.value = true;
     page.immediatePerformanceConsent.value = true;
     page.withdrawalWaiverAcknowledged.value = true;
     await page.checkout();
     expect(request).not.toHaveBeenCalled();
-    expect(page.error.value).toBe("Service indisponible");
+    expect(page.error.value).toBe("");
   });
 
   it("keeps a disabled checkout readable without forcing account linking", async () => {
@@ -127,6 +129,15 @@ describe("commerce navigation and state", () => {
     page.termsAccepted.value = true;
     await page.checkout();
     expect(request).not.toHaveBeenCalled();
+  });
+
+  it("allows a selected gift recipient without any Minecraft linking session", async () => {
+    const { page, request } = await pageSetup("checkout", { loadCommerceSession: async () => { throw { statusCode: 401 }; } });
+    page.chooseRecipient({ id: "recipient-id", name: ".Friend", edition: "bedrock" });
+    page.termsAccepted.value = true; page.immediatePerformanceConsent.value = true; page.withdrawalWaiverAcknowledged.value = true;
+    request.mockResolvedValue({ data: { url: "https://checkout.stripe.com/fixture" } });
+    await page.checkout();
+    expect(request).toHaveBeenCalledWith("/api/commerce/checkout", expect.objectContaining({ body: expect.objectContaining({ recipientId: "recipient-id" }) }));
   });
 
   it("does not promise renewal for canceled or expired subscription snapshots", () => {

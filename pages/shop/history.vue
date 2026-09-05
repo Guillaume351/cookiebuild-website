@@ -2,17 +2,18 @@
   <div class="mx-auto max-w-5xl py-12">
     <LanguageFallbackNotice :available-locales="['fr']" />
     <div class="flex flex-wrap items-end justify-between gap-4">
-      <div><p class="text-sm font-black uppercase text-orange-300">Espace joueur</p><h1 class="mt-2 text-4xl font-black">Inventaire et historique</h1><p class="mt-2 text-zinc-400">{{ player?.name || "Joueur lié" }}</p></div>
+      <div><p class="text-sm font-black uppercase text-orange-300">Espace joueur</p><h1 class="mt-2 text-4xl font-black">Inventaire et historique</h1><p class="mt-2 text-zinc-400">{{ player?.name || "Achats de ce navigateur" }}</p></div>
       <div class="flex flex-wrap gap-3">
         <NuxtLink to="/shop" class="rounded-xl border border-zinc-700 px-4 py-3 font-bold">Catalogue</NuxtLink>
         <button :disabled="busy" class="rounded-xl border border-zinc-700 px-4 py-3 font-bold disabled:opacity-50" @click="load">Actualiser</button>
-        <button :disabled="busy" class="rounded-xl border border-red-500/30 px-4 py-3 font-bold text-red-200 disabled:opacity-50" @click="logout">Déconnecter ce joueur</button>
+        <button :disabled="busy" class="rounded-xl border border-zinc-700 px-4 py-3 font-bold" @click="forgetPurchases">Oublier les achats de ce navigateur</button>
+        <button v-if="player" :disabled="busy" class="rounded-xl border border-red-500/30 px-4 py-3 font-bold text-red-200 disabled:opacity-50" @click="logout">Déconnecter ce joueur</button>
       </div>
     </div>
     <p v-if="error" role="alert" class="mt-6 rounded-xl border border-red-500/30 bg-red-950/20 p-4 text-red-200">{{ error }}</p>
     <p v-if="notice" role="status" class="mt-6 rounded-xl border border-emerald-500/30 p-4 text-emerald-200">{{ notice }}</p>
     <p v-if="loading" role="status" class="mt-6 text-zinc-400">Chargement de ton espace…</p>
-    <template v-if="inventory && history">
+    <template v-if="history">
       <section class="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-6" aria-labelledby="subscription-title">
         <h2 id="subscription-title" class="text-2xl font-black">Abonnements</h2>
         <article v-for="subscription in history.subscriptions" :key="subscription.orderId" class="mt-4 rounded-xl bg-zinc-950 p-4">
@@ -24,7 +25,7 @@
         <p v-if="!history.subscriptions.length" class="mt-4 text-zinc-400">Aucun abonnement enregistré.</p>
         <button v-if="history.orders.length" :disabled="busy" class="mt-5 min-h-11 rounded-xl border border-orange-400/50 px-4 py-3 font-bold text-orange-200 disabled:opacity-50" @click="portal">Gérer les paiements ou résilier sur Stripe</button>
       </section>
-      <section class="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-6" aria-labelledby="inventory-title">
+      <section v-if="inventory" class="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-6" aria-labelledby="inventory-title">
         <h2 id="inventory-title" class="text-2xl font-black">Accès actifs</h2>
         <p class="mt-2 text-sm text-zinc-400">Choisis les effets à activer. Le vol et les effets de lobby restent réservés au lobby ; le cadre apparaît sur le site.</p>
         <ul class="mt-4 grid gap-4 md:grid-cols-2">
@@ -43,6 +44,7 @@
         <div class="mt-4 space-y-4">
           <article v-for="order in history.orders" :key="order.id" class="rounded-xl border border-zinc-800 bg-zinc-950 p-5">
             <div class="flex flex-wrap justify-between gap-3"><div><h3 class="font-black">{{ order.productName }}</h3><p class="mt-1 text-sm text-zinc-400">{{ formatDate(order.createdAt) }} · {{ commerceStatusLabel(order.status) }}</p></div><strong>{{ euros(order.amountTtcCents) }}</strong></div>
+            <p class="mt-3 text-sm text-zinc-300">Destinataire : {{ order.recipientName || order.recipientId }}</p>
             <p class="mt-3 break-all text-xs text-zinc-400">Référence : {{ order.id }}</p>
             <ul class="mt-3 space-y-2 text-sm text-zinc-300"><li v-for="payment in history.payments.filter((payment) => payment.order_id === order.id)" :key="payment.id">{{ formatDate(payment.paid_at || payment.created_at) }} · {{ euros(payment.amount_cents) }} · {{ commerceStatusLabel(payment.status) }}<span v-if="payment.refunded_amount_cents"> · Remboursé : {{ euros(payment.refunded_amount_cents) }}</span></li></ul>
             <details class="mt-4 text-sm text-zinc-400"><summary class="min-h-11 cursor-pointer py-3">Informations et consentements de commande</summary><pre class="whitespace-pre-wrap break-words font-sans">{{ order.noticeText }}</pre><p class="mt-2 text-xs">Version {{ order.noticeVersion }} · accepté le {{ formatDate(order.termsAcceptedAt) }}</p></details>
@@ -52,6 +54,12 @@
         </div>
       </section>
     </template>
+    <section class="mt-8 rounded-xl border border-zinc-700 p-4">
+      <h2 class="font-bold">Retrouver un abonnement</h2>
+      <p class="mt-2 text-sm text-zinc-400">Après 30 jours ou sur un autre navigateur, utilise l’adresse e-mail saisie sur Stripe. Si tu as plusieurs achats avec la même adresse et qu’un abonnement manque, contacte le support avec le reçu concerné.</p>
+      <a v-if="recovery?.data.portalLoginUrl" :href="recovery.data.portalLoginUrl" class="mt-3 inline-block min-h-11 py-3 text-orange-300 underline">Recevoir un lien de gestion par e-mail sur Stripe</a>
+    </section>
+    <p v-if="!inventory" class="mt-8 text-sm text-zinc-400">Pour voir et équiper tes effets, <NuxtLink to="/shop/connect" class="underline">lie ton propre joueur</NuxtLink>. Les cadeaux reçus ne donnent pas accès aux paiements de leur acheteur.</p>
     <p class="mt-8 text-sm text-zinc-400">Besoin d’aide ? <NuxtLink to="/support" class="text-orange-300 underline">Contacte le support</NuxtLink> avec ta référence de commande.</p>
   </div>
 </template>
@@ -61,7 +69,9 @@ definePageMeta({ alias: ["/fr/shop/history", "/de/shop/history", "/it/shop/histo
 import CosmeticPreview from "../../components/cosmetics/CosmeticPreview.vue";
 import type { CommerceEntitlement, CommerceHistory, CommerceInventory, CommerceOrder } from "../../composables/useCommerce";
 
+const shopAnalytics = useShopAnalytics();
 const nuxtApp = useNuxtApp();
+const { data: recovery } = await useFetch("/api/commerce/recovery");
 const player = useCommercePlayer();
 const inventory = ref<CommerceInventory | null>(null);
 const history = ref<CommerceHistory | null>(null);
@@ -73,7 +83,7 @@ const busy = computed(() => loading.value || action.value);
 async function handleError(caught: unknown) {
   if (commerceUnauthorized(caught)) {
     player.value = null;
-    await nuxtApp.runWithContext(() => navigateTo("/shop/connect?next=/shop/history"));
+    error.value = "Cet historique nécessite le navigateur de l’achat (30 jours) ou une liaison joueur. Utilise aussi l’e-mail Stripe pour gérer un abonnement, ou contacte le support avec ta référence.";
   } else error.value = commerceErrorMessage(caught);
 }
 async function load() {
@@ -81,9 +91,9 @@ async function load() {
   loading.value = true;
   error.value = "";
   try {
-    player.value = (await loadCommerceSession()).player;
+    try { player.value = (await loadCommerceSession()).player; } catch (caught) { if (!commerceUnauthorized(caught)) throw caught; player.value = null; }
     const [items, orders] = await Promise.all([
-      commerceRequest<{ data: CommerceInventory }>("/api/commerce/inventory"),
+      player.value ? commerceRequest<{ data: CommerceInventory }>("/api/commerce/inventory") : Promise.resolve({ data: null }),
       commerceRequest<{ data: CommerceHistory }>("/api/commerce/history"),
     ]);
     inventory.value = items.data;
@@ -100,8 +110,13 @@ async function perform(work: () => Promise<void>) {
 async function portal() {
   await perform(async () => {
     const result = await commerceRequest<{ data: { url: string } }>("/api/commerce/portal", { method: "POST" });
+    shopAnalytics.track("portal_open");
     window.location.assign(result.data.url);
   });
+}
+async function forgetPurchases() {
+  if (!window.confirm("Retirer l’accès aux achats invités de ce navigateur ? Conserve tes e-mails Stripe pour gérer tes abonnements.")) return;
+  await perform(async () => { await commerceRequest("/api/commerce/payer", { method: "DELETE" }); await load(); });
 }
 async function logout() {
   await perform(async () => {

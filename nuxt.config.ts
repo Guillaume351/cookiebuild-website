@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 const publicSecurityHeaders = process.env.NODE_ENV === "production"
   ? {
-      "Content-Security-Policy": "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https:; object-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests",
+      "Content-Security-Policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://*.google-analytics.com https://*.analytics.google.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https:; object-src 'none'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests",
       "Permissions-Policy": "camera=(), geolocation=(), microphone=()",
       "Referrer-Policy": "strict-origin-when-cross-origin",
       "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -14,6 +14,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-07-13",
   devtools: { enabled: process.env.NODE_ENV !== "production" },
   modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
+  runtimeConfig: { public: { gaMeasurementId: "" } },
   routeRules: {
     "/**": { headers: publicSecurityHeaders },
     "/news": { redirect: { to: "/updates", statusCode: 301 } },

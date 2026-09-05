@@ -24,9 +24,10 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
     scoped.searchParams.set("search_path", testSchema);
     client = postgres(scoped.toString(), { prepare: false, max: 8, onnotice: () => {} });
     await client.unsafe(`CREATE TABLE playerdata (id uuid PRIMARY KEY, name varchar(255));
+      CREATE TABLE player_sessions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), player_id uuid REFERENCES playerdata(id));
       CREATE TABLE player_link_challenges (id uuid PRIMARY KEY, player_id uuid REFERENCES playerdata(id), edition varchar(16),
         code_hmac varchar(64), expires_at timestamptz, consumed_at timestamptz, created_at timestamptz DEFAULT now());`);
-    for (const file of ["0015_cosmetic_entitlements.sql", "0016_stripe_commerce.sql", "0017_free_cookie_sparkles.sql"]) {
+    for (const file of ["0015_cosmetic_entitlements.sql", "0016_stripe_commerce.sql", "0017_free_cookie_sparkles.sql", "0018_guest_commerce.sql"]) {
       await client.unsafe((await readFile(new URL(`../drizzle/${file}`, import.meta.url), "utf8")).replaceAll("--> statement-breakpoint", ""));
     }
     db = drizzle(client, { schema });
@@ -73,6 +74,7 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
   it.each(["raced-success", "lost-response"])("keeps a Checkout safe after %s", async (scenario) => {
     const playerId = randomUUID();
     await client`INSERT INTO playerdata(id,name) VALUES (${playerId}, 'CheckoutFixture')`;
+    await client`INSERT INTO player_sessions(player_id) VALUES (${playerId})`;
     const stripeUtils = await import("../server/utils/stripe-commerce");
     const originalEnv = { ...process.env };
     Object.assign(process.env, { NODE_ENV: "test", COMMERCE_STRIPE_MODE: "test", STRIPE_SECRET_KEY: "rk_test_fixture", STRIPE_WEBHOOK_SECRET: "whsec_fixture",
@@ -105,6 +107,76 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
       expect(order?.status).toBe(scenario === "lost-response" ? "created" : "paid");
       expect(await activeGrants(playerId)).toHaveLength(scenario === "lost-response" ? 0 : 1);
       if (scenario === "raced-success") expect(order?.stripeCheckoutSessionId).toBe(`cs_${createdOrderId}`);
+    } finally { stripeUtils.setStripeClientForTests(null); process.env = originalEnv; }
+  });
+
+  it("uses a hashed HttpOnly guest capability and rejects expired, missing or forged cookies", async () => {
+    const { createApp, eventHandler, toNodeListener } = await import("h3");
+    const { createServer } = await import("node:http");
+    const { resolveCommercePayer, guestCookieName } = await import("../server/services/commerce-payer");
+    const app = createApp();
+    app.use(eventHandler(event => resolveCommercePayer(event, event.method === "POST")));
+    const server = createServer(toNodeListener(app));
+    await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
+    const address = server.address() as { port: number }; const url = `http://127.0.0.1:${address.port}`;
+    try {
+      expect((await fetch(url)).status).toBe(401);
+      const created = await fetch(url, { method: "POST" });
+      const cookie = created.headers.get("set-cookie")!;
+      expect(cookie).toContain("HttpOnly"); expect(cookie).toContain("SameSite=Lax"); expect(cookie).toContain("Max-Age=2592000");
+      const payer = await created.json() as { guestId: string };
+      const token = cookie.split(";")[0]!.split("=")[1]!;
+      const [row] = await db.select().from(schema.commerceGuestPayers).where(eq(schema.commerceGuestPayers.id, payer.guestId));
+      expect(row!.tokenHash).toHaveLength(64); expect(row!.tokenHash).not.toBe(token);
+      expect((await fetch(url, { headers: { cookie } })).status).toBe(200);
+      expect((await fetch(url, { headers: { cookie: `${guestCookieName()}=${"a".repeat(43)}` } })).status).toBe(401);
+      await db.update(schema.commerceGuestPayers).set({ expiresAt: new Date(0) }).where(eq(schema.commerceGuestPayers.id, payer.guestId));
+      expect((await fetch(url, { headers: { cookie } })).status).toBe(401);
+    } finally { await new Promise<void>(resolve => server.close(() => resolve())); }
+  });
+
+  it("keeps a guest gift customer, history and pending URL private from the recipient", async () => {
+    const recipient = randomUUID(); const other = randomUUID();
+    await client`INSERT INTO playerdata(id,name) VALUES (${recipient}, '.Gift_Player'), (${other}, 'Gift_Player')`;
+    await client`INSERT INTO player_sessions(player_id) VALUES (${recipient}), (${other})`;
+    const [guest] = await db.insert(schema.commerceGuestPayers).values({ tokenHash: randomUUID(), expiresAt: new Date(Date.now()+86400000) }).returning();
+    await db.insert(schema.commerceCustomers).values({ playerId: recipient, stripeMode: "test", stripeCustomerId: "cus_recipient_private" });
+    const stripeUtils = await import("../server/utils/stripe-commerce");
+    const originalEnv = { ...process.env };
+    Object.assign(process.env, { NODE_ENV: "test", COMMERCE_STRIPE_MODE: "test", STRIPE_SECRET_KEY: "rk_test_fixture", STRIPE_WEBHOOK_SECRET: "whsec_fixture", COMMERCE_PUBLIC_BASE_URL: "http://localhost:3000", COMMERCE_STRIPE_AUTOMATIC_TAX: "false", COMMERCE_LEGAL_NAME: "Fixture", COMMERCE_LEGAL_ADDRESS: "Fixture", COMMERCE_SUPPORT_EMAIL: "fixture@example.com", COMMERCE_BUSINESS_STATUS: "test", COMMERCE_VAT_STATUS: "not_applicable" });
+    const retrieve = vi.fn(async () => ({ status: "open", url: "https://checkout.stripe.com/private_guest" }));
+    const customerCreate = vi.fn(async () => ({ id: "cus_guest_private" }));
+    const portalCreate = vi.fn(async () => ({ url: "https://billing.stripe.com/p/session/private" }));
+    const fakeStripe = {
+      prices: { list: async () => ({ data: [{ id: "price_fixture", active: true, livemode: false, lookup_key: "cookiebuild_supporter_permanent_eur_v1", currency: "eur", unit_amount: 499, tax_behavior: "inclusive", type: "one_time", product: { metadata: { cookiebuild_product_id: "supporter_permanent", cookiebuild_product_version: "1", cookiebuild_access: "permanent", cookiebuild_grants: "supporter_badge" } } }] }) },
+      customers: { create: customerCreate },
+      billingPortal: { configurations: { list: async () => ({ data: [{ id: "bpc_fixture", metadata: { cookiebuild: "commerce-v1" } }] }) }, sessions: { create: portalCreate } },
+      checkout: { sessions: { retrieve, create: async (input: any) => { expect(input.customer).toBe("cus_guest_private"); expect(input.metadata.cookiebuild_player_id).toBe(recipient); return { id: "cs_guest", url: "https://checkout.stripe.com/private_guest" }; } } },
+    };
+    stripeUtils.setStripeClientForTests(fakeStripe as any);
+    const payer = { guestId: guest!.id, expiresAt: guest!.expiresAt };
+    const recipientAuth = { playerId: recipient, playerName: "Gift_Player" } as any;
+    const input = { recipientId: recipient, productId: "supporter_permanent", termsAccepted: true, immediatePerformanceConsent: true, withdrawalWaiverAcknowledged: true };
+    try {
+      const order = await commerce.createCommerceCheckout(payer, input);
+      expect(customerCreate).toHaveBeenCalledOnce();
+      await commerce.createCommercePortal(payer);
+      expect(portalCreate).toHaveBeenLastCalledWith(expect.objectContaining({ customer: "cus_guest_private" }));
+      await commerce.createCommercePortal(recipientAuth);
+      expect(portalCreate).toHaveBeenLastCalledWith(expect.objectContaining({ customer: "cus_recipient_private" }));
+      await expect(commerce.createCommerceCheckout(recipientAuth, input)).rejects.toMatchObject({ statusCode: 409 });
+      expect(retrieve).not.toHaveBeenCalled();
+      expect((await commerce.createCommerceCheckout(payer, input)).url).toBe(order.url);
+      expect((await commerce.commerceHistory(recipientAuth)).orders).toHaveLength(0);
+      expect((await commerce.commerceHistory(payer)).orders).toHaveLength(1);
+      const [row] = await db.select().from(schema.commerceOrders).where(eq(schema.commerceOrders.id, order.orderId));
+      await apply("checkout.session.completed", { ...checkout(row!), id: "cs_guest" });
+      expect(await activeGrants(recipient)).toHaveLength(1);
+      expect((await commerce.commerceHistory(recipientAuth)).payments).toHaveLength(0);
+      const recipients = await import("../server/services/commerce-recipients");
+      const results = await recipients.lookupCommerceRecipients("Gift Player");
+      expect(results.map(x=>x.edition).sort()).toEqual(["bedrock", "java"]);
+      expect(await recipients.lookupCommerceRecipients(".Gift Player")).toEqual(results);
     } finally { stripeUtils.setStripeClientForTests(null); process.env = originalEnv; }
   });
 

@@ -132,6 +132,11 @@
 
     <hr class="border-gray-800" />
 
+    <section class="space-y-3 rounded-xl border border-gray-700 p-5" lang="en">
+      <h2 class="text-2xl font-bold">Optional website analytics</h2>
+      <p>With your permission, Google Analytics uses cookies to measure shop visits and steps such as selecting a recipient or starting checkout. Our events contain only predefined actions, product identifiers and edition (Java or Bedrock), without Minecraft names, player identifiers, login codes, payment URLs or email addresses. No Google Analytics tag loads before permission. You can decline or withdraw permission from “Analytics preferences” in the footer. We remember your choice for up to 180 days. These consent-based measurements do not represent every visit or purchase.</p>
+    </section>
+
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
@@ -255,6 +260,10 @@
           Toute modification importante sera publiée ici avec une nouvelle date d’effet.
         </p>
       </section>
+    </section>
+    <section class="space-y-3 rounded-xl border border-gray-700 p-5" lang="fr">
+      <h2 class="text-2xl font-bold">Mesure d’audience web facultative</h2>
+      <p>Avec votre accord, Google Analytics utilise des cookies pour mesurer les visites de la boutique et des étapes comme le choix d’un destinataire ou l’ouverture du paiement. Nos événements contiennent uniquement des actions prédéfinies, des identifiants de produit et l’édition (Java ou Bedrock), sans pseudo Minecraft, identifiant joueur, code de connexion, URL de paiement ou adresse e-mail. Aucune balise Google Analytics ne se charge avant votre accord. Vous pouvez refuser ou retirer cet accord depuis « Préférences de mesure d’audience » dans le pied de page. Nous mémorisons ce choix jusqu’à 180 jours. Ces mesures soumises au consentement ne couvrent pas toutes les visites ni tous les achats.</p>
     </section>
   </article>
 </template>

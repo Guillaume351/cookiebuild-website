@@ -106,3 +106,64 @@ deployed; it cannot be reconstructed from `last_active_at`.
 Skyblock marketplace panels aggregate durable listings and sales. Coin volume
 is an in-game economy measure, never real-money revenue. Neither dashboard role
 nor Prometheus receives player, UUID, island, listing or session labels.
+
+## Shop activation
+
+Migration `drizzle/0019_shop_activation_metrics.sql` adds an internal
+`cosmetic_first_activations` ledger and eight aggregate `metrics.shop_*` views.
+Apply it in one transaction after migration 0018, with `lock_timeout` set by the
+deployment runner. It briefly locks `cosmetic_selections` while taking the
+baseline and installing the trigger; it does not require a Minecraft restart.
+The migration can be replayed without duplicating or reclassifying observations.
+Do not replay the historical observability bootstrap just to install shop views:
+it also handles credentials and unrelated views.
+
+An account/cosmetic pair is recorded once, regardless of selection changes,
+retries, deselection/reselection, or whether the write came from Java, Bedrock
+or the website. Existing selections are labeled `baseline` and timestamped at
+the initial observation. Their original acquisition time is unknown. Subsequent
+first observations use `selection`; this is an observed state transition, not
+proof the effect ran or a marketing acquisition. Account deletion cascades into
+the ledger, so these totals are not an immutable accounting record.
+
+Edition is captured at observation from a persisted server link challenge or
+active mobile link, falling back to Floodgate's documented zero-prefix UUID
+format for Bedrock, an authenticated Java UUID v4, or `unknown` otherwise. It
+describes the Minecraft account, not the web browser or device. Linked Bedrock
+accounts can have Java UUIDs, so persisted server evidence takes precedence.
+The aggregate current-equipment view uses that recorded edition snapshot.
+
+`grafana/dashboards/shop.json` provisions UID `cookiebuild-shop` using the existing
+`cookiebuild-postgres` datasource. Copy it atomically into the existing dashboard
+bind mount; the provider loads it within 30 seconds. The dashboard refreshes
+every five minutes. No new exporter, scrape job or service restart is needed.
+The actual production stack may omit the separately prepared SQL Exporter and
+Skyblock dashboard; do not replace its whole compose/config directory to add
+this dashboard.
+
+Current stock panels explicitly ignore the time picker. Daily charts select
+whole Europe/Paris calendar days touched by the picker, within a 180-day bound;
+PostgreSQL stores observation and commerce times as `timestamptz`. The free
+activation summary counts distinct accounts for that one cosmetic; totals
+across different cosmetics are account/cosmetic pairs and must not be called
+unique players. Paid current selections require an unexpired, non-revoked
+entitlement. Free sparkle selections do not require a paid grant.
+
+Checkout charts count unique live order rows, not request attempts. Paid orders
+are first-payment cohorts, while receipts include renewal payments. Refunds
+adjust the original payment day's receipts using their current cumulative
+amount; this is TTC before fees, not refund-date cash flow or accounting
+revenue. Guest gifts do not change these order/payment counts: payer and
+recipient identifiers are never projected by the views. Subscriptions show
+current billing state, which is not proof of entitlement access.
+
+The ledger, helper functions and source tables are not readable by the Grafana
+role. Only security-barrier aggregate views receive `SELECT`. Anonymous GA
+traffic is a separate, consent-dependent population; do not divide these server
+counts by GA visitors and label the result a measured conversion funnel.
+
+Validate with `npx vitest run test/shop-observability.test.ts
+test/shop-observability.integration.test.ts`, setting
+`COMMERCE_INTEGRATION_DATABASE_URL` to an isolated local test database for the
+integration suite. It creates and removes unique schemas and a non-login role;
+it never runs against production.
