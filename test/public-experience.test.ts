@@ -59,6 +59,24 @@ describe("public experience", () => {
     expect(sitemap).toContain("https://www.cookie-build.com/rules");
   });
 
+  it("exposes the cosmetics inventory without technical preview claims", async () => {
+    const [catalog, history, header] = await Promise.all([
+      source("../pages/cosmetics/index.vue"), source("../pages/cosmetics/history.vue"), source("../components/AppHeader.vue"),
+    ]);
+    expect(header).toContain('to="/cosmetics"');
+    expect(catalog).not.toContain("platformSupport.java.implementation");
+    expect(catalog).toContain("Visible sur le site · aucun effet en jeu");
+    expect(history).toContain("/api/commerce/selections");
+    expect(history).toContain("Télécharger mon historique");
+  });
+
+  it("describes commerce retention as individual request review", async () => {
+    const privacy = await source("../pages/privacy.vue");
+    expect(privacy).toContain("Requests are reviewed individually");
+    expect(privacy).toContain("Son expiration ne supprime pas les transactions associées");
+    expect(privacy).not.toContain("Data no longer required for those purposes is deleted or anonymised");
+  });
+
   it("uses the cleaned lobby artwork for the responsive hero", async () => {
     const home = await source("../pages/index.vue");
 

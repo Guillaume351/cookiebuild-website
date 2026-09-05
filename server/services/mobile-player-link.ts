@@ -33,6 +33,7 @@ export async function claimPlayerLink(firebaseUid: string, code: string) {
         .from(playerLinkChallenges)
         .where(and(
           eq(playerLinkChallenges.codeHmac, codeHmac),
+          eq(playerLinkChallenges.purpose, "mobile_link"),
           isNull(playerLinkChallenges.consumedAt),
         ))
         .limit(1);
@@ -61,6 +62,7 @@ export async function claimPlayerLink(firebaseUid: string, code: string) {
           eq(playerLinkChallenges.id, candidate.id),
           eq(playerLinkChallenges.playerId, player.id),
           eq(playerLinkChallenges.codeHmac, codeHmac),
+          eq(playerLinkChallenges.purpose, "mobile_link"),
           isNull(playerLinkChallenges.consumedAt),
         ))
         .limit(1)
@@ -224,6 +226,7 @@ export async function beginMobileAccountDeletionByLinkCode(code: string) {
       .from(playerLinkChallenges)
       .where(and(
         eq(playerLinkChallenges.codeHmac, codeHmac),
+        eq(playerLinkChallenges.purpose, "mobile_link"),
         isNull(playerLinkChallenges.consumedAt),
       ))
       .limit(1);
@@ -267,6 +270,7 @@ export async function beginMobileAccountDeletionByLinkCode(code: string) {
       .where(and(
         eq(playerLinkChallenges.id, candidate.id),
         eq(playerLinkChallenges.codeHmac, codeHmac),
+        eq(playerLinkChallenges.purpose, "mobile_link"),
         isNull(playerLinkChallenges.consumedAt),
       ))
       .limit(1)

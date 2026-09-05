@@ -31,6 +31,7 @@
                 >{{ copy.navigation.updates }}</NuxtLink
               >
             </li>
+            <li><NuxtLink to="/cosmetics" class="text-gray-400 hover:text-white transition-colors">{{ locale.code === "fr" ? "Cosmétiques" : "Cosmetics" }}</NuxtLink></li>
             <li>
               <NuxtLink to="/status" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.serverStatus }}</NuxtLink
@@ -86,5 +87,5 @@
 </template>
 
 <script setup lang="ts">
-const { copy, localizePath } = useSiteLocale();
+const { copy, locale, localizePath } = useSiteLocale();
 </script>

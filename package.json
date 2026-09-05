@@ -19,7 +19,9 @@
     "test:integration:mobile": "vitest run test/mobile-account-concurrency.test.ts",
     "test:integration:platform": "vitest run test/mobile-platform.integration.test.ts",
     "typecheck": "nuxt typecheck",
-    "audit:prod": "npm audit --omit=dev"
+    "audit:prod": "npm audit --omit=dev",
+    "commerce:bootstrap": "node --experimental-strip-types scripts/bootstrap-stripe-commerce.mjs",
+    "commerce:reconcile": "node scripts/reconcile-stripe-commerce.mjs"
   },
   "dependencies": {
     "@lucide/vue": "^1.24.0",
@@ -32,7 +34,8 @@
     "postgres": "^3.4.9",
     "radix-vue": "^1.9.17",
     "tailwind-merge": "^2.6.0",
-    "vue": "^3.5.39"
+    "vue": "^3.5.39",
+    "stripe": "^22.5.0"
   },
   "devDependencies": {
     "@nuxtjs/tailwindcss": "^6.14.0",

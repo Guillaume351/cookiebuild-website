@@ -228,6 +228,7 @@ export const playerLinkChallenges = pgTable(
       .notNull()
       .references(() => playerdata.id, { onDelete: "cascade" }),
     edition: varchar({ length: 16 }).notNull(),
+    purpose: varchar({ length: 24 }).default("mobile_link").notNull(),
     codeHmac: varchar("code_hmac", { length: 64 }).notNull(),
     expiresAt: timestamp("expires_at", {
       withTimezone: true,
@@ -240,8 +241,8 @@ export const playerLinkChallenges = pgTable(
   },
   (table) => [
     uniqueIndex("player_link_challenges_code_hmac_uq").on(table.codeHmac),
-    uniqueIndex("player_link_challenges_active_player_uq")
-      .on(table.playerId)
+    uniqueIndex("player_link_challenges_active_player_purpose_uq")
+      .on(table.playerId, table.purpose)
       .where(sql`${table.consumedAt} is null`),
     index("player_link_challenges_expiry_idx").on(table.expiresAt),
     check(
@@ -1893,5 +1894,277 @@ export const mobileRateLimits = pgTable(
   (table) => [
     index("mobile_rate_limits_expiry_idx").on(table.resetsAt),
     check("mobile_rate_limits_count_ck", sql`${table.requestCount} > 0`),
+  ],
+);
+
+export const cosmeticEntitlements = pgTable(
+  "cosmetic_entitlements",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    cosmeticId: varchar("cosmetic_id", { length: 64 }).notNull(),
+    source: varchar({ length: 128 }).notNull(),
+    grantedAt: timestamp("granted_at", { mode: "date" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date" }),
+    revokedAt: timestamp("revoked_at", { mode: "date" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.cosmeticId, table.source] }),
+    index("cosmetic_entitlements_active_player_idx")
+      .on(table.playerId, table.grantedAt)
+      .where(sql`${table.revokedAt} IS NULL`),
+    check(
+      "cosmetic_entitlements_id_ck",
+      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair')`,
+    ),
+    check("cosmetic_entitlements_source_ck", sql`length(btrim(${table.source})) > 0`),
+    check(
+      "cosmetic_entitlements_expiry_ck",
+      sql`${table.expiresAt} IS NULL OR ${table.expiresAt} > ${table.grantedAt}`,
+    ),
+    check(
+      "cosmetic_entitlements_revocation_ck",
+      sql`${table.revokedAt} IS NULL OR ${table.revokedAt} >= ${table.grantedAt}`,
+    ),
+  ],
+);
+
+export const cosmeticSelections = pgTable(
+  "cosmetic_selections",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    slot: varchar({ length: 32 }).notNull(),
+    cosmeticId: varchar("cosmetic_id", { length: 64 }).notNull(),
+    selectedAt: timestamp("selected_at", { mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.slot] }),
+    check(
+      "cosmetic_selections_slot_cosmetic_ck",
+      sql`(${table.slot}, ${table.cosmeticId}) IN (
+        ('BADGE', 'supporter_badge'),
+        ('HUB_TRAIL', 'cookie_crumb_trail'),
+        ('EMOTE', 'cookie_cheer'),
+        ('VICTORY_EFFECT', 'golden_cookie_burst'),
+        ('PROFILE_FRAME', 'supporter_profile_frame'),
+        ('LOBBY_FLIGHT', 'lobby_flight'),
+        ('JOIN_FLAIR', 'supporter_join_flair')
+      )`,
+    ),
+  ],
+);
+
+export const commerceSessions = pgTable(
+  "commerce_sessions",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    uniqueIndex("commerce_sessions_token_hash_uq").on(table.tokenHash),
+    index("commerce_sessions_active_player_idx")
+      .on(table.playerId, table.expiresAt)
+      .where(sql`${table.revokedAt} IS NULL`),
+    check("commerce_sessions_expiry_ck", sql`${table.expiresAt} > ${table.createdAt}`),
+  ],
+);
+
+export const commerceCustomers = pgTable(
+  "commerce_customers",
+  {
+    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    stripeMode: varchar("stripe_mode", { length: 8 }).notNull(),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.stripeMode] }),
+    uniqueIndex("commerce_customers_stripe_customer_mode_uq").on(table.stripeCustomerId, table.stripeMode),
+    check("commerce_customers_stripe_mode_ck", sql`${table.stripeMode} IN ('test', 'live')`),
+  ],
+);
+
+export const commerceOrders = pgTable(
+  "commerce_orders",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    productId: varchar("product_id", { length: 128 }).notNull(),
+    productVersion: integer("product_version").notNull(),
+    productName: varchar("product_name", { length: 255 }).notNull(),
+    access: varchar({ length: 24 }).notNull(),
+    grantsSnapshot: jsonb("grants_snapshot").$type<string[]>().notNull(),
+    amountTtcCents: integer("amount_ttc_cents").notNull(),
+    currency: varchar({ length: 3 }).default("EUR").notNull(),
+    status: varchar({ length: 32 }).default("created").notNull(),
+    stripeMode: varchar("stripe_mode", { length: 8 }).notNull(),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 }),
+    stripeCheckoutSessionId: varchar("stripe_checkout_session_id", { length: 255 }),
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }),
+    entitlementSource: varchar("entitlement_source", { length: 128 }).notNull(),
+    consumerNoticeVersion: varchar("consumer_notice_version", { length: 64 }).notNull(),
+    consumerNoticeText: text("consumer_notice_text").notNull(),
+    termsAcceptedAt: timestamp("terms_accepted_at", { withTimezone: true, mode: "date" }).notNull(),
+    immediatePerformanceConsentedAt: timestamp("immediate_performance_consented_at", { withTimezone: true, mode: "date" }),
+    withdrawalWaiverAcknowledgedAt: timestamp("withdrawal_waiver_acknowledged_at", { withTimezone: true, mode: "date" }),
+    withdrawalDeadline: timestamp("withdrawal_deadline", { withTimezone: true, mode: "date" }),
+    withdrawalStatus: varchar("withdrawal_status", { length: 32 }).default("not_applicable").notNull(),
+    withdrawalRequestedAt: timestamp("withdrawal_requested_at", { withTimezone: true, mode: "date" }),
+    withdrawalPaymentId: uuid("withdrawal_payment_id"),
+    purchasedAt: timestamp("purchased_at", { withTimezone: true, mode: "date" }),
+    canceledAt: timestamp("canceled_at", { withTimezone: true, mode: "date" }),
+    refundedAt: timestamp("refunded_at", { withTimezone: true, mode: "date" }),
+    disputedAt: timestamp("disputed_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("commerce_orders_checkout_session_uq")
+      .on(table.stripeCheckoutSessionId)
+      .where(sql`${table.stripeCheckoutSessionId} IS NOT NULL`),
+    uniqueIndex("commerce_orders_subscription_uq")
+      .on(table.stripeSubscriptionId)
+      .where(sql`${table.stripeSubscriptionId} IS NOT NULL`),
+    uniqueIndex("commerce_orders_entitlement_source_uq").on(table.entitlementSource),
+    uniqueIndex("commerce_orders_active_product_uq")
+      .on(table.playerId, table.productId)
+      .where(sql`${table.access} <> 'none' AND ${table.status} IN ('created', 'checkout_open', 'paid', 'active', 'past_due', 'canceling', 'disputed', 'partially_refunded')`),
+    index("commerce_orders_player_created_idx").on(table.playerId, table.createdAt),
+    check("commerce_orders_access_ck", sql`${table.access} IN ('permanent', 'subscription', 'none')`),
+    check("commerce_orders_product_version_ck", sql`${table.productVersion} > 0`),
+    check(
+      "commerce_orders_grants_snapshot_ck",
+      sql`CASE
+        WHEN jsonb_typeof(${table.grantsSnapshot}) <> 'array' THEN false
+        WHEN ${table.access} = 'none' THEN jsonb_array_length(${table.grantsSnapshot}) = 0
+        ELSE jsonb_array_length(${table.grantsSnapshot}) > 0
+      END`,
+    ),
+    check("commerce_orders_amount_ck", sql`${table.amountTtcCents} > 0`),
+    check("commerce_orders_currency_ck", sql`${table.currency} = upper(${table.currency})`),
+    check("commerce_orders_stripe_mode_ck", sql`${table.stripeMode} IN ('test', 'live')`),
+    check(
+      "commerce_orders_status_ck",
+      sql`${table.status} IN ('created', 'checkout_open', 'paid', 'active', 'past_due', 'canceling', 'canceled', 'expired', 'partially_refunded', 'refunded', 'disputed', 'failed')`,
+    ),
+    check(
+      "commerce_orders_withdrawal_status_ck",
+      sql`${table.withdrawalStatus} IN ('not_applicable', 'eligible', 'waived', 'requested', 'completed', 'expired')`,
+    ),
+  ],
+);
+
+export const commerceSubscriptions = pgTable(
+  "commerce_subscriptions",
+  {
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 }).primaryKey(),
+    orderId: uuid("order_id").notNull().references(() => commerceOrders.id, { onDelete: "restrict" }),
+    playerId: uuid("player_id").notNull().references(() => playerdata.id, { onDelete: "restrict" }),
+    productId: varchar("product_id", { length: 128 }).notNull(),
+    status: varchar({ length: 32 }).notNull(),
+    currentPeriodEnd: timestamp("current_period_end", { withTimezone: true, mode: "date" }),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+    endedAt: timestamp("ended_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("commerce_subscriptions_order_uq").on(table.orderId),
+    index("commerce_subscriptions_player_idx").on(table.playerId, table.updatedAt),
+  ],
+);
+
+export const commercePayments = pgTable(
+  "commerce_payments",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    orderId: uuid("order_id").notNull().references(() => commerceOrders.id, { onDelete: "restrict" }),
+    stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 }),
+    stripeChargeId: varchar("stripe_charge_id", { length: 255 }),
+    stripeInvoiceId: varchar("stripe_invoice_id", { length: 255 }),
+    entitlementSource: varchar("entitlement_source", { length: 128 }),
+    coverageExpiresAt: timestamp("coverage_expires_at", { withTimezone: true, mode: "date" }),
+    restorationSource: varchar("restoration_source", { length: 128 }),
+    amountCents: integer("amount_cents").notNull(),
+    refundedAmountCents: integer("refunded_amount_cents").default(0).notNull(),
+    currency: varchar({ length: 3 }).notNull(),
+    status: varchar({ length: 32 }).notNull(),
+    paidAt: timestamp("paid_at", { withTimezone: true, mode: "date" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("commerce_payments_payment_intent_uq")
+      .on(table.stripePaymentIntentId)
+      .where(sql`${table.stripePaymentIntentId} IS NOT NULL`),
+    uniqueIndex("commerce_payments_charge_uq")
+      .on(table.stripeChargeId)
+      .where(sql`${table.stripeChargeId} IS NOT NULL`),
+    uniqueIndex("commerce_payments_invoice_uq")
+      .on(table.stripeInvoiceId)
+      .where(sql`${table.stripeInvoiceId} IS NOT NULL`),
+    index("commerce_payments_order_idx").on(table.orderId, table.createdAt),
+    check("commerce_payments_amount_ck", sql`${table.amountCents} > 0`),
+    check(
+      "commerce_payments_refund_ck",
+      sql`${table.refundedAmountCents} >= 0 AND ${table.refundedAmountCents} <= ${table.amountCents}`,
+    ),
+  ],
+);
+
+// Declared after commercePayments to avoid a circular table initializer while
+// the SQL migration enforces the order-owned payment reference.
+
+export const commerceWebhookEvents = pgTable(
+  "commerce_webhook_events",
+  {
+    stripeEventId: varchar("stripe_event_id", { length: 255 }).primaryKey(),
+    eventType: varchar("event_type", { length: 128 }).notNull(),
+    objectId: varchar("object_id", { length: 255 }),
+    livemode: boolean().notNull(),
+    status: varchar({ length: 16 }).default("received").notNull(),
+    attempts: integer().default(0).notNull(),
+    nextAttemptAt: timestamp("next_attempt_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    lockedAt: timestamp("locked_at", { withTimezone: true, mode: "date" }),
+    lockToken: uuid("lock_token"),
+    processedAt: timestamp("processed_at", { withTimezone: true, mode: "date" }),
+    lastError: varchar("last_error", { length: 500 }),
+    receivedAt: timestamp("received_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("commerce_webhook_events_pending_idx").on(table.status, table.nextAttemptAt),
+    check(
+      "commerce_webhook_events_status_ck",
+      sql`${table.status} IN ('received', 'processing', 'processed', 'failed')`,
+    ),
+  ],
+);
+
+export const commerceOrderHistory = pgTable(
+  "commerce_order_history",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    orderId: uuid("order_id").notNull().references(() => commerceOrders.id, { onDelete: "cascade" }),
+    dedupeKey: varchar("dedupe_key", { length: 320 }).notNull(),
+    eventId: varchar("event_id", { length: 255 }),
+    kind: varchar({ length: 64 }).notNull(),
+    status: varchar({ length: 32 }).notNull(),
+    amountCents: integer("amount_cents"),
+    details: jsonb().$type<Record<string, unknown>>().default({}).notNull(),
+    occurredAt: timestamp("occurred_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("commerce_order_history_dedupe_uq").on(table.dedupeKey),
+    index("commerce_order_history_order_idx").on(table.orderId, table.occurredAt),
   ],
 );

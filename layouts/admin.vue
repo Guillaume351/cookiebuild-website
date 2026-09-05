@@ -61,6 +61,7 @@ const navigation = [
   { to: "/admin/notifications", label: "Notifications", permission: "notifications:read" },
   { to: "/admin/audit", label: "Audit", permission: "audit:read" },
   { to: "/admin/operations", label: "Opérations", permission: "operations:read" },
+  { to: "/admin/commerce", label: "Commerce", permission: "commerce:read" },
   { to: "/admin/updates", label: "Mises à jour", permission: "updates:read" },
 ];
 const visibleNavigation = computed(() => navigation.filter((item) => user.value?.permissions.includes(item.permission)));

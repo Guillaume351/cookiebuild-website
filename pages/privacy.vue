@@ -9,7 +9,7 @@
     <section id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Privacy Policy</h1>
-        <p>Effective and last updated: August 22, 2026</p>
+        <p>Effective and last updated: September 5, 2026</p>
       </header>
 
       <section>
@@ -37,13 +37,14 @@
           <li>A limited in-game app-reminder counter and last-display date, used to avoid repeatedly promoting the app to an unlinked player.</li>
           <li>While legacy version 1.2.3 remains available to older Android devices: Minecraft nickname, Google Play product and purchase history, purchase token and signature, and app-view interactions used by the former shop and Google App Indexing integration.</li>
           <li>Short-lived security information such as IP-based rate-limit counters and operational logs.</li>
+          <li>For web commerce: the Minecraft player UUID and name used for the commerce session, a hash of the session token, order and product references, total price and currency, Stripe customer/Checkout/subscription/payment/invoice/charge/refund/dispute identifiers and statuses, entitlement source, purchase history, and the exact version and timestamps of terms, immediate-performance, withdrawal-waiver, cancellation, and withdrawal actions.</li>
         </ul>
         <p class="mt-3">
           The current app does not use advertising identifiers, cross-app tracking, Firebase Analytics,
           Crashlytics, precise location, contacts, microphone, camera, or payment data. Legacy
           version 1.2.3 transmitted its shop requests over an unencrypted connection; the update
           replaces that implementation on compatible devices.
-          Public Minecraft names and gameplay statistics can appear in leaderboards.
+          This statement concerns the mobile app only. Web payments are hosted by Stripe: Stripe processes contact, billing and card/payment details. Cookie Build does not receive or store full card numbers or card security codes. Public Minecraft names and gameplay statistics can appear in leaderboards.
         </p>
       </section>
 
@@ -51,9 +52,11 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Purposes and legal bases</h2>
         <ul class="list-disc space-y-2 pl-6">
           <li><strong>Contract:</strong> authenticate the app, link the correct player, provide stats, history, rank, goal progression, Skyblock island/storage and earned-coin marketplace management, earned-coin kit unlocks and selections, privacy-scoped presence, friends and recent-player suggestions, parties, events, and requested account controls.</li>
+          <li><strong>Contract and pre-contractual steps:</strong> link the purchasing player, fulfil web orders and subscriptions, show purchase history, and provide cancellation and support.</li>
+          <li><strong>Legal obligations:</strong> retain transaction and consent evidence for applicable accounting, tax and consumer-law periods.</li>
           <li><strong>Consent:</strong> send push notifications, including separately configurable player calls, goal reminders, and selected accepted-friend online alerts, only after the corresponding in-app opt-in. Consent can be withdrawn in Settings. Quiet hours suppress these notifications.</li>
           <li><strong>Legitimate interests:</strong> secure accounts, prevent abuse, moderate reports, keep games fair, diagnose incidents, and protect service availability.</li>
-          <li><strong>Legal obligations:</strong> respond to lawful requests and preserve evidence when required.</li>
+          <li><strong>Legitimate interests:</strong> reconcile Stripe events, prevent duplicate or fraudulent orders, secure sessions, handle payment disputes, and preserve minimal evidence needed to defend legal claims.</li>
         </ul>
         <p class="mt-3">Cookie Build does not sell personal data or use it for targeted advertising.</p>
       </section>
@@ -72,6 +75,7 @@
           may process data outside the EEA using applicable transfer mechanisms such as adequacy
           decisions or standard contractual clauses.
         </p>
+        <p class="mt-3">Stripe provides hosted Checkout, billing, invoicing, refunds, disputes and the Customer Portal. Stripe acts under its own privacy information for payment data and may process data outside the EEA using its applicable transfer safeguards. Cookie Build sends Stripe the Minecraft player UUID and name, along with the order and product references needed to process and reconcile the transaction.</p>
       </section>
 
       <section>
@@ -87,6 +91,8 @@
           <li>Delivered notification jobs and deleted-account tombstones are removed after 90 days and 30 days respectively.</li>
           <li>Match results and aggregate gameplay statistics remain for the life of the server for public leaderboards, fair-play, and match integrity, unless law requires earlier deletion.</li>
           <li>Daily/weekly goal progress, achievements, XP, coins, and the app-promotion limiter are Minecraft gameplay records and follow the game-statistics retention period.</li>
+          <li>Access through a web commerce session is valid for up to 30 days and can be revoked earlier by the player. Expiry does not delete the associated transaction records.</li>
+          <li>Orders, payment status, refunds, disputes, invoices and consent evidence may need to be retained for accounting, tax, consumer-protection and legal claims. Contact support to request a review or erasure of your commerce records. Requests are reviewed individually, taking account of applicable retention obligations.</li>
           <li>Skyblock island progress, storage, market transactions, and crash-recovery deposit records are Minecraft gameplay and integrity records and follow the game-statistics retention period.</li>
         </ul>
       </section>
@@ -111,6 +117,7 @@
           The no-app deletion flow is available on the
           <NuxtLink class="text-orange-400" to="/account/delete">account-deletion page</NuxtLink>.
         </p>
+        <p class="mt-3">Deleting the mobile account does not delete the separate Minecraft-linked commerce history. A privacy request can cover it, subject to mandatory invoice, accounting, fraud-prevention and legal-claims retention.</p>
       </section>
 
       <section>
@@ -128,7 +135,7 @@
     <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
-        <p>Applicable et mise à jour le 22 août 2026</p>
+        <p>Applicable et mise à jour le 5 septembre 2026</p>
       </header>
 
       <section>
@@ -155,12 +162,13 @@
           <li>Compteur limité et date du dernier rappel de l’app en jeu, afin de ne pas répéter sa promotion auprès d’un joueur non associé.</li>
           <li>Tant que l’ancienne version 1.2.3 reste disponible sur de vieux appareils Android : pseudo Minecraft, produit et historique d’achat Google Play, jeton et signature d’achat, ainsi que les interactions de consultation utilisées par l’ancienne boutique et Google App Indexing.</li>
           <li>Données de sécurité temporaires, notamment les compteurs de limitation par IP et journaux techniques.</li>
+          <li>Pour le commerce web : UUID et pseudo Minecraft de la session, hash du jeton de session, références commande/produit, prix total et devise, identifiants et statuts Stripe client/Checkout/abonnement/paiement/facture/charge/remboursement/litige, source d’accès, historique, ainsi que texte, version et dates des CGV, consentements de livraison immédiate, renonciation, résiliation et rétractation.</li>
         </ul>
         <p class="mt-3">
           L’app actuelle n’utilise ni identifiant publicitaire, ni suivi inter-apps, ni Analytics,
           ni Crashlytics, ni localisation précise, contacts, caméra, microphone ou paiement.
           L’ancienne version 1.2.3 transmettait ses demandes de boutique sans chiffrement ; la mise
-          à jour remplace cette implémentation sur les appareils compatibles.
+          à jour remplace cette implémentation sur les appareils compatibles. Cette phrase concerne uniquement l’app mobile. Les paiements web sont hébergés par Stripe, qui traite les coordonnées, l’adresse de facturation et les données de carte/paiement. Cookie Build ne reçoit ni ne stocke le numéro complet de carte ou son cryptogramme.
         </p>
       </section>
 
@@ -175,6 +183,11 @@
           et alertes d’amis acceptés configurables séparément. Les heures calmes les suppriment. L’intérêt
           légitime couvre la sécurité, l’anti-abus, la modération, l’équité et les incidents. Les
           obligations légales peuvent imposer la conservation ou la communication de certains éléments.
+          Le contrat et les mesures précontractuelles couvrent également l’association du joueur acheteur,
+          la commande web ou l’abonnement, la livraison, l’inventaire, l’historique, le portail, la
+          résiliation, la rétractation et le support. Les obligations comptables, fiscales et de
+          consommation fondent la conservation des factures, transactions et preuves de consentement.
+          L’intérêt légitime couvre la réconciliation Stripe, les doublons/fraudes, litiges et la défense des droits.
           Aucune donnée n’est vendue ni utilisée pour de la publicité ciblée.
         </p>
       </section>
@@ -191,6 +204,7 @@
           la base, le monitoring et le serveur. Certains services peuvent traiter des données hors
           EEE avec les garanties applicables, notamment décision d’adéquation ou clauses contractuelles types.
         </p>
+        <p class="mt-3">Stripe fournit Checkout hébergé, facturation, remboursements, litiges et portail client. Stripe traite les données de paiement selon sa propre politique et ses garanties de transfert. Cookie Build lui transmet l’UUID et le pseudo Minecraft du joueur, ainsi que les références de commande et de produit nécessaires au traitement et au rapprochement du paiement.</p>
       </section>
 
       <section>
@@ -206,6 +220,8 @@
           <li>Tâches de notification livrées : 90 jours ; marqueur de compte supprimé : 30 jours.</li>
           <li>Résultats et statistiques agrégées : pendant la durée de vie du serveur pour le classement, l’équité et l’intégrité des matchs.</li>
           <li>Objectifs quotidiens/hebdomadaires, succès, XP, pièces et limiteur de promotion de l’app : données de jeu conservées selon la même durée que les statistiques Minecraft.</li>
+          <li>L’accès par une session commerce web est valable 30 jours au maximum et peut être révoqué avant. Son expiration ne supprime pas les transactions associées.</li>
+          <li>Les commandes, paiements, remboursements, litiges, factures et preuves de consentement peuvent devoir être conservés pour les obligations comptables, fiscales, de consommation et la défense des droits. Contactez le support pour demander l’examen ou l’effacement de vos données de commerce. Chaque demande est examinée selon les obligations de conservation applicables.</li>
           <li>Progression d’île, stockage, transactions du marché et dépôts de reprise Skyblock : données de jeu et d’intégrité conservées selon la même durée que les statistiques Minecraft.</li>
         </ul>
       </section>
@@ -221,6 +237,7 @@
           <NuxtLink class="text-orange-400" to="/account/delete">page de suppression</NuxtLink>.
           Vous pouvez saisir votre autorité locale ; en France, la CNIL.
         </p>
+        <p class="mt-3">La suppression du compte mobile n’efface pas l’historique commerce distinct lié au joueur Minecraft. Une demande de droits peut le couvrir, sous réserve des conservations obligatoires de facture, comptabilité, antifraude et défense des droits.</p>
         <p class="mt-3">
           La suppression du compte mobile efface le profil mobile pseudonyme, les appareils,
           préférences, alertes d’amis et associations mobiles. Elle n’efface pas le rang, l’XP, les

@@ -83,11 +83,16 @@
         <section
           v-if="selectedPlayer"
           class="rounded-2xl border border-orange-500/30 bg-gradient-to-br from-orange-500/10 to-zinc-900 p-6"
+          :class="selectedPlayer.supporterProfileFrame ? 'ring-2 ring-amber-300 shadow-[0_0_42px_rgba(251,191,36,.24)]' : ''"
+          :aria-label="selectedPlayer.supporterProfileFrame ? `Player profile for ${formatPlayerName(selectedPlayer.name)}, Supporter Biscuit frame active` : `Player profile for ${formatPlayerName(selectedPlayer.name)}`"
         >
           <div class="mb-5 flex items-start justify-between gap-4">
             <div>
               <p class="text-xs font-black uppercase tracking-widest text-orange-500">Player profile</p>
               <h2 class="mt-1 text-2xl font-black text-white">{{ formatPlayerName(selectedPlayer.name) }}</h2>
+              <p v-if="selectedPlayer.supporterProfileFrame" class="mt-2 inline-flex items-center gap-2 rounded-full border border-amber-300/50 bg-amber-400/10 px-3 py-1 text-xs font-black uppercase tracking-widest text-amber-200">
+                <span aria-hidden="true">🍪</span> Cadre Biscuit doré actif
+              </p>
               <p class="mt-1 text-sm text-zinc-500">
                 {{ selectedPlayer.lastMatchAt ? `Last completed match ${formatDate(selectedPlayer.lastMatchAt)}` : 'No completed match yet' }}
               </p>
@@ -166,8 +171,10 @@
                   :key="stat.id"
                   class="group cursor-pointer hover:bg-orange-500/5 transition-colors"
                   tabindex="0"
+                  :aria-label="`Open player profile for ${formatPlayerName(stat.name)}${stat.supporterProfileFrame ? ', Supporter frame active' : ''}`"
                   @click="selectedPlayer = stat"
                   @keydown.enter="selectedPlayer = stat"
+                  @keydown.space.prevent="selectedPlayer = stat"
                 >
                   <td class="px-6 py-4">
                     <div class="flex items-center justify-center w-8 h-8 rounded-lg font-black text-sm shadow-inner"
@@ -178,15 +185,17 @@
                   </td>
                   <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
-                      <div class="relative">
+                      <div class="relative rounded-xl" :class="stat.supporterProfileFrame ? 'ring-2 ring-amber-300 ring-offset-2 ring-offset-zinc-900' : ''">
                         <img
                           v-if="!isBedrockPlayer(stat.name) && stat.name"
                           :src="`/api/player-avatar/${encodeURIComponent(stat.id)}?size=32`"
+                          :alt="`${formatPlayerName(stat.name)} avatar`"
                           class="w-10 h-10 rounded-lg shadow-lg group-hover:scale-110 transition-transform"
                         />
                         <div v-else class="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-600">
                            <User class="w-5 h-5" />
                         </div>
+                        <span v-if="stat.supporterProfileFrame" aria-hidden="true" class="absolute -bottom-2 -right-2 grid h-5 w-5 place-items-center rounded-full border border-amber-200 bg-amber-500 text-[10px] shadow-lg">🍪</span>
                       </div>
                       <span class="font-bold text-zinc-200 group-hover:text-white transition-colors">
                         {{ formatPlayerName(stat.name) }}
@@ -311,6 +320,7 @@ interface PlayerStat {
   coins: number;
   playtime?: number;
   lastMatchAt: string | null;
+  supporterProfileFrame: boolean;
   progression: ProgressionSummary[];
 }
 

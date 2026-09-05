@@ -13,13 +13,14 @@
           <span class="text-xl font-bold text-white">Cookie Build</span>
         </NuxtLink>
       </div>
-      <div class="hidden items-center space-x-6 md:flex">
+      <div class="hidden items-center space-x-4 text-sm lg:flex">
         <NuxtLink :to="localizePath('/')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.home }}</NuxtLink>
         <NuxtLink :to="localizePath('/games')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.games }}</NuxtLink>
         <NuxtLink :to="localizePath('/player-stats')" class="text-white hover:text-gray-300 transition-colors"
           >{{ copy.navigation.playerStats }}</NuxtLink
         >
         <NuxtLink :to="localizePath('/updates')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
+        <NuxtLink to="/cosmetics" class="text-white hover:text-gray-300 transition-colors">{{ locale.code === "fr" ? "Cosmétiques" : "Cosmetics" }}</NuxtLink>
         <NuxtLink :to="localizePath('/status')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.status }}</NuxtLink>
         <label class="relative">
           <span class="sr-only">{{ copy.navigation.language }}</span>
@@ -37,7 +38,7 @@
       </div>
       <button
         type="button"
-        class="rounded-lg border border-white/15 p-2 text-white transition-colors hover:bg-white/10 md:hidden"
+        class="rounded-lg border border-white/15 p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
         :aria-expanded="mobileMenuOpen"
         aria-controls="mobile-navigation"
         :aria-label="copy.navigation.toggle"
@@ -50,7 +51,7 @@
     <div
       v-if="mobileMenuOpen"
       id="mobile-navigation"
-      class="border-t border-white/10 bg-zinc-950/95 px-4 py-3 md:hidden"
+      class="border-t border-white/10 bg-zinc-950/95 px-4 py-3 lg:hidden"
     >
       <div class="container mx-auto flex flex-col gap-1">
         <NuxtLink
@@ -81,6 +82,7 @@
         >
           {{ copy.navigation.updates }}
         </NuxtLink>
+        <NuxtLink to="/cosmetics" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">{{ locale.code === "fr" ? "Cosmétiques" : "Cosmetics" }}</NuxtLink>
         <NuxtLink
           :to="localizePath('/status')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"

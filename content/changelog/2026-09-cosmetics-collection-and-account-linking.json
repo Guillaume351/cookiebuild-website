@@ -1,0 +1,8 @@
+{
+  "slug": "cosmetics-collection-and-account-linking",
+  "contentType": "changelog",
+  "title": "Your cosmetics collection",
+  "summary": "Browse the cosmetics collection in game and manage your equipment on the website.",
+  "body": "- Open /cosmetics to discover badges, trails, emotes, victory effects, profile frames, lobby flight and arrival effects. Bedrock players use native forms.\n- Equip owned cosmetics and preview your emote or victory effect in the lobby. Subscription effects stop when access expires.\n- Lobby flight hands control safely to Skyblock and minigame loading protection.\n- Use /support link to connect your Minecraft account to the website and manage your collection.",
+  "publishedAt": "2026-09-05T09:22:12.645730+00:00"
+}

@@ -158,6 +158,21 @@ export async function loadPlayerStats(query: Record<string, unknown>) {
           AND m.endtime IS NOT NULL
           AND (${gamemode ? sql`m.gametype = ${gamemode}` : sql`TRUE`})
         )`.as("lastMatchAt"),
+        supporterProfileFrame: sql<boolean>`EXISTS (
+          SELECT 1
+          FROM cosmetic_selections frame_selection
+          JOIN cosmetic_entitlements frame_entitlement
+            ON frame_entitlement.player_id = frame_selection.player_id
+           AND frame_entitlement.cosmetic_id = frame_selection.cosmetic_id
+          WHERE frame_selection.player_id = ${OUTER_PLAYER_ID}
+            AND frame_selection.slot = 'PROFILE_FRAME'
+            AND frame_selection.cosmetic_id = 'supporter_profile_frame'
+            AND frame_entitlement.revoked_at IS NULL
+            AND (
+              frame_entitlement.expires_at IS NULL
+              OR frame_entitlement.expires_at > NOW()
+            )
+        )`.as("supporterProfileFrame"),
         progression: sql<Array<{
           minigame: string;
           level: number;

@@ -422,3 +422,7 @@ repository must also set `COOKIEBUILD_GAMEPLAY_SCHEMA_SQL` to
 `Cookies/ops/add-skyblock-v1.sql`; the command then requires its reviewed SHA-256
 to match. A gameplay migration change must update the website model and contract
 in the same release, never by silently accepting a new hash.
+
+## Web commerce boundary
+
+The current mobile app exposes no cosmetic catalog, real-money checkout, external-payment CTA, or receipt verification. Commerce is a separate web session linked by `/support link`; `/app link` remains mobile-only. The public player profile can show an active selected web frame.

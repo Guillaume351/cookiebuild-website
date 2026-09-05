@@ -20,6 +20,8 @@ export const ADMIN_PERMISSIONS = [
   "operations:write",
   "updates:read",
   "updates:write",
+  "commerce:read",
+  "commerce:write",
 ] as const;
 export type AdminPermission = typeof ADMIN_PERMISSIONS[number];
 
@@ -33,10 +35,11 @@ const VIEWER_PERMISSIONS: AdminPermission[] = [
   "moderation:read",
   "operations:read",
   "updates:read",
+  "commerce:read",
 ];
 const MODERATOR_PERMISSIONS: AdminPermission[] = [...VIEWER_PERMISSIONS, "reports:write", "moderation:write"];
 const EDITOR_PERMISSIONS: AdminPermission[] = [...MODERATOR_PERMISSIONS, "content:write", "notifications:write"];
-const OPERATOR_PERMISSIONS: AdminPermission[] = [...EDITOR_PERMISSIONS, "runtime:write", "operations:write", "updates:write"];
+const OPERATOR_PERMISSIONS: AdminPermission[] = [...EDITOR_PERMISSIONS, "runtime:write", "operations:write", "updates:write", "commerce:write"];
 
 const ROLE_PERMISSIONS: Record<AdminRole, ReadonlySet<AdminPermission>> = {
   viewer: new Set(VIEWER_PERMISSIONS),

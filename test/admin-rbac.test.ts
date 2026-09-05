@@ -7,6 +7,8 @@ describe("admin RBAC", () => {
     expect(hasAdminPermission("viewer", "runtime:read")).toBe(true);
     expect(hasAdminPermission("viewer", "audit:read")).toBe(true);
     expect(hasAdminPermission("viewer", "updates:read")).toBe(true);
+    expect(hasAdminPermission("viewer", "commerce:read")).toBe(true);
+    expect(hasAdminPermission("viewer", "commerce:write")).toBe(false);
     expect(hasAdminPermission("viewer", "content:write")).toBe(false);
     expect(hasAdminPermission("viewer", "operations:write")).toBe(false);
   });
@@ -18,9 +20,10 @@ describe("admin RBAC", () => {
     expect(hasAdminPermission("editor", "operations:write")).toBe(false);
     expect(hasAdminPermission("operator", "operations:write")).toBe(true);
     expect(hasAdminPermission("operator", "updates:write")).toBe(true);
+    expect(hasAdminPermission("operator", "commerce:write")).toBe(true);
   });
 
   it("grants owners every declared permission", () => {
-    expect(permissionsForAdminRole("owner")).toHaveLength(16);
+    expect(permissionsForAdminRole("owner")).toHaveLength(18);
   });
 });
