@@ -16,6 +16,7 @@ describe("web cosmetic catalog", () => {
       { id: "supporter_profile_frame", slot: "PROFILE_FRAME" },
       { id: "lobby_flight", slot: "LOBBY_FLIGHT" },
       { id: "supporter_join_flair", slot: "JOIN_FLAIR" },
+      { id: "cookie_sparkle_trail", slot: "HUB_TRAIL" },
     ]);
     expect(new Set(COSMETIC_CATALOG.map((item) => item.slot)).size).toBe(7);
     expect(COSMETIC_CATALOG.every((item) => !("permanent" in item))).toBe(true);
@@ -121,7 +122,7 @@ describe("cosmetic schema and web rendering", () => {
 
   it("renders an accessible web-only catalog with reduced-motion support", async () => {
     const [page, preview] = await Promise.all([
-      readFile(new URL("../pages/cosmetics/index.vue", import.meta.url), "utf8"),
+      readFile(new URL("../pages/shop/index.vue", import.meta.url), "utf8"),
       readFile(new URL("../components/cosmetics/CosmeticPreview.vue", import.meta.url), "utf8"),
     ]);
     expect(page).toContain('useFetch("/api/cosmetics/catalog"');

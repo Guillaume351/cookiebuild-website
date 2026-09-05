@@ -150,8 +150,23 @@ export const COSMETIC_CATALOG = [
       },
     },
   },
+  {
+    id: "cookie_sparkle_trail",
+    slot: "HUB_TRAIL",
+    free: true,
+    name: "Étincelles de cookie",
+    nameEn: "Cookie Sparkles",
+    description: "Une petite étincelle lumineuse pendant tes déplacements dans le lobby, offerte à tous les joueurs.",
+    preview: { kind: "sparkle-trail", label: "Étincelles" },
+    platformSupport: {
+      java: { mode: "native", implementation: "Une particule END_ROD par déplacement significatif dans le lobby", fallback: null },
+      bedrock: { mode: "native", implementation: "END_ROD transmis par Geyser via minecraft:endrod", fallback: "Le rendu peut varier selon le client, sans effet sur le gameplay." },
+    },
+  },
 ] as const satisfies ReadonlyArray<{
   id: string;
+  free?: boolean;
+  nameEn?: string;
   slot: CosmeticSlot;
   name: string;
   description: string;
@@ -251,4 +266,9 @@ export function cosmeticById(value: string) {
 
 export function isCosmeticSlot(value: string): value is CosmeticSlot {
   return COSMETIC_SLOTS.includes(value as CosmeticSlot);
+}
+
+export function isFreeCosmetic(value: string) {
+  const item = cosmeticById(value);
+  return !!item && "free" in item && item.free === true;
 }

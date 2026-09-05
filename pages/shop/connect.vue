@@ -1,7 +1,7 @@
 <template>
   <div class="mx-auto max-w-2xl py-12">
     <LanguageFallbackNotice :available-locales="['fr']" />
-    <NuxtLink to="/cosmetics" class="text-sm font-bold text-orange-300">← Catalogue</NuxtLink>
+    <NuxtLink to="/shop" class="text-sm font-bold text-orange-300">← Catalogue</NuxtLink>
     <section class="mt-6 rounded-3xl border border-zinc-800 bg-zinc-900 p-6 md:p-10">
       <p class="text-sm font-black uppercase tracking-widest text-orange-300">Connexion sans email</p>
       <h1 class="mt-3 text-4xl font-black text-white">Lier ton joueur Minecraft</h1>
@@ -22,6 +22,7 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ alias: ["/fr/shop/connect", "/de/shop/connect", "/it/shop/connect", "/bg/shop/connect", "/es/shop/connect", "/hi/shop/connect", "/pt-br/shop/connect"] });
 const route = useRoute();
 const nuxtApp = useNuxtApp();
 const player = useCommercePlayer();

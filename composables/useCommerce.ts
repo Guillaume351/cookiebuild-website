@@ -54,11 +54,11 @@ export function commerceUnauthorized(error: unknown): boolean {
   return (failure.statusCode ?? failure.status ?? failure.response?.status) === 401;
 }
 
-export function commerceReturnPath(value: unknown, fallback = "/cosmetics/history") {
+export function commerceReturnPath(value: unknown, fallback = "/shop/history") {
   if (typeof value !== "string") return fallback;
   try {
-    const url = new URL(value, "https://www.cookie-build.com");
-    const routes = ["/cosmetics", "/cosmetics/checkout", "/cosmetics/history"];
+    const url = new URL(value.replace(/^\/cosmetics(?=\/|\?|$)/, "/shop"), "https://www.cookie-build.com");
+    const routes = ["/shop", "/shop/checkout", "/shop/history", "/fr/shop", "/fr/shop/checkout", "/fr/shop/history"];
     if (!value.startsWith("/") || url.origin !== "https://www.cookie-build.com" || !routes.includes(url.pathname)) return fallback;
     return `${url.pathname}${url.search}`;
   } catch { return fallback; }
@@ -66,7 +66,7 @@ export function commerceReturnPath(value: unknown, fallback = "/cosmetics/histor
 
 export interface CommerceEntitlement {
   cosmeticId: string;
-  grantedAt: string;
+  grantedAt: string | null;
   expiresAt: string | null;
   item: (typeof COSMETIC_CATALOG)[number] | null;
 }

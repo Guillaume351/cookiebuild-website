@@ -1916,7 +1916,7 @@ export const cosmeticEntitlements = pgTable(
       .where(sql`${table.revokedAt} IS NULL`),
     check(
       "cosmetic_entitlements_id_ck",
-      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair')`,
+      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail')`,
     ),
     check("cosmetic_entitlements_source_ck", sql`length(btrim(${table.source})) > 0`),
     check(
@@ -1947,6 +1947,7 @@ export const cosmeticSelections = pgTable(
       sql`(${table.slot}, ${table.cosmeticId}) IN (
         ('BADGE', 'supporter_badge'),
         ('HUB_TRAIL', 'cookie_crumb_trail'),
+        ('HUB_TRAIL', 'cookie_sparkle_trail'),
         ('EMOTE', 'cookie_cheer'),
         ('VICTORY_EFFECT', 'golden_cookie_burst'),
         ('PROFILE_FRAME', 'supporter_profile_frame'),

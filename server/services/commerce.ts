@@ -13,7 +13,7 @@ import {
   cosmeticSelections,
   playerdata,
 } from "../../db/schema";
-import { COSMETIC_CATALOG, COSMETIC_PRODUCTS, cosmeticById, isCosmeticSlot } from "../../shared/cosmetics-catalog";
+import { COSMETIC_CATALOG, COSMETIC_PRODUCTS, cosmeticById, isCosmeticSlot, isFreeCosmetic } from "../../shared/cosmetics-catalog";
 import type { CommerceAuthContext } from "./commerce-session";
 import {
   requireCommerceReadiness,
@@ -172,8 +172,8 @@ export async function createCommerceCheckout(auth: CommerceAuthContext, input: C
       expires_at: Math.floor(Date.now() / 1_000) + 1_860,
       customer: customerId,
       line_items: [{ price: price.id, quantity: 1 }],
-      success_url: `${readiness.publicBaseUrl}/cosmetics/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${readiness.publicBaseUrl}/cosmetics/cancel?order=${orderId}`,
+      success_url: `${readiness.publicBaseUrl}/shop/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${readiness.publicBaseUrl}/shop/cancel?order=${orderId}`,
       billing_address_collection: "required",
       customer_update: { address: "auto", name: "auto" },
       automatic_tax: { enabled: readiness.automaticTax },
@@ -228,7 +228,7 @@ export async function createCommercePortal(auth: CommerceAuthContext) {
   const session = await client.billingPortal.sessions.create({
     customer: customer.stripeCustomerId,
     configuration: matches[0]!.id,
-    return_url: `${readiness.publicBaseUrl}/cosmetics/history`,
+    return_url: `${readiness.publicBaseUrl}/shop/history`,
   });
   return { url: session.url };
 }
@@ -249,17 +249,20 @@ export async function commerceInventory(playerId: string, now = new Date()) {
     cosmeticId: cosmeticSelections.cosmeticId,
     selectedAt: cosmeticSelections.selectedAt,
   }).from(cosmeticSelections).where(eq(cosmeticSelections.playerId, playerId));
-  const aggregated = new Map<string, { cosmeticId: string; grantedAt: Date; expiresAt: Date | null }>();
+  const aggregated = new Map<string, { cosmeticId: string; grantedAt: Date | null; expiresAt: Date | null }>();
   for (const entry of entitlements) {
     const current = aggregated.get(entry.cosmeticId);
     if (!current) {
       aggregated.set(entry.cosmeticId, { cosmeticId: entry.cosmeticId, grantedAt: entry.grantedAt, expiresAt: entry.expiresAt });
     } else {
-      current.grantedAt = current.grantedAt < entry.grantedAt ? current.grantedAt : entry.grantedAt;
+      current.grantedAt = current.grantedAt && current.grantedAt < entry.grantedAt ? current.grantedAt : entry.grantedAt;
       current.expiresAt = current.expiresAt === null || entry.expiresAt === null
         ? null
         : current.expiresAt > entry.expiresAt ? current.expiresAt : entry.expiresAt;
     }
+  }
+  for (const item of COSMETIC_CATALOG) {
+    if (isFreeCosmetic(item.id)) aggregated.set(item.id, { cosmeticId: item.id, grantedAt: null, expiresAt: null });
   }
   return {
     entitlements: [...aggregated.values()].map((entry) => ({
@@ -290,7 +293,7 @@ export async function selectCommerceCosmetic(playerId: string, input: { slot?: u
       eq(cosmeticEntitlements.playerId, playerId), eq(cosmeticEntitlements.cosmeticId, cosmeticId),
       isNull(cosmeticEntitlements.revokedAt), or(isNull(cosmeticEntitlements.expiresAt), gt(cosmeticEntitlements.expiresAt, now)),
     )).limit(1).for("share");
-    if (!grant) throw createError({ statusCode: 403, statusMessage: "An active cosmetic entitlement is required" });
+    if (!grant && !isFreeCosmetic(cosmeticId)) throw createError({ statusCode: 403, statusMessage: "An active cosmetic entitlement is required" });
     await tx.insert(cosmeticSelections).values({ playerId, slot, cosmeticId, selectedAt: now }).onConflictDoUpdate({
       target: [cosmeticSelections.playerId, cosmeticSelections.slot], set: { cosmeticId, selectedAt: now },
     });

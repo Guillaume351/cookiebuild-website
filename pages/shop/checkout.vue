@@ -2,7 +2,7 @@
   <div class="mx-auto max-w-3xl py-12">
     <LanguageFallbackNotice :available-locales="['fr']" />
     <p v-if="response?.data.commerce?.mode === 'test'" role="status" class="rounded-xl border border-sky-400/40 bg-sky-950/30 p-4 text-sky-100">Mode test : aucun paiement réel. Les accès de test ne sont pas des achats définitifs.</p>
-    <NuxtLink to="/cosmetics" class="text-sm font-bold text-orange-300">← Catalogue public</NuxtLink>
+    <NuxtLink to="/shop" class="text-sm font-bold text-orange-300">← Catalogue public</NuxtLink>
     <section v-if="product" class="mt-6 rounded-3xl border border-zinc-800 bg-zinc-900 p-6 md:p-10">
       <p class="text-sm font-black uppercase tracking-widest text-orange-300">Commande sécurisée</p>
       <h1 class="mt-3 text-4xl font-black text-white">{{ product.name }}</h1>
@@ -28,6 +28,7 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ alias: ["/fr/shop/checkout", "/de/shop/checkout", "/it/shop/checkout", "/bg/shop/checkout", "/es/shop/checkout", "/hi/shop/checkout", "/pt-br/shop/checkout"] });
 import { COSMETIC_CATALOG_RESPONSE } from "#shared/cosmetics-catalog";
 const route = useRoute();
 const nuxtApp = useNuxtApp();
@@ -40,7 +41,7 @@ const immediatePerformanceConsent = ref(false);
 const withdrawalWaiverAcknowledged = ref(false);
 const loading = ref(false);
 const error = ref("");
-const connectPath = computed(() => `/cosmetics/connect?next=${encodeURIComponent(route.fullPath)}`);
+const connectPath = computed(() => `/shop/connect?next=${encodeURIComponent(route.fullPath)}`);
 const consentComplete = computed(() => termsAccepted.value && (product.value?.access !== "permanent" || (immediatePerformanceConsent.value && withdrawalWaiverAcknowledged.value)));
 watch(() => product.value?.id, () => { termsAccepted.value = false; immediatePerformanceConsent.value = false; withdrawalWaiverAcknowledged.value = false; error.value = ""; });
 const euros = (cents: number) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: "EUR" }).format(cents / 100);

@@ -69,6 +69,15 @@
       </div>
     </section>
 
+    <section aria-labelledby="shop-promo-title" class="flex flex-col gap-6 rounded-2xl border border-emerald-300/30 bg-gradient-to-r from-zinc-900 to-emerald-950/30 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+      <div class="max-w-2xl">
+        <p class="text-sm font-bold uppercase tracking-wider text-emerald-300">{{ locale.code === "fr" ? "Boutique · un effet offert à tous" : "Shop · a free effect for everyone" }}</p>
+        <h2 id="shop-promo-title" class="mt-2 text-2xl font-black text-white">{{ locale.code === "fr" ? "Fais briller ton passage avec Étincelles de cookie" : "Leave a little glow with Cookie Sparkles" }}</h2>
+        <p class="mt-3 text-zinc-400">{{ locale.code === "fr" ? "Découvre ton effet gratuit pour le lobby et les cosmétiques facultatifs. Aucun achat nécessaire pour jouer ou activer les étincelles." : "Discover your free lobby effect and optional cosmetics. No purchase needed to play or equip your sparkles." }}</p>
+      </div>
+      <NuxtLink :to="localizePath('/shop')" class="inline-flex min-h-11 shrink-0 items-center justify-center rounded-xl bg-emerald-300 px-5 py-3 font-black text-zinc-950 hover:bg-emerald-200">{{ locale.code === "fr" ? "Découvrir la boutique" : "Explore the shop" }}</NuxtLink>
+    </section>
+
     <Teleport to="body">
       <div
         v-if="showJoinGuide"

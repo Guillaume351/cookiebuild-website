@@ -4,7 +4,7 @@
     <div class="flex flex-wrap items-end justify-between gap-4">
       <div><p class="text-sm font-black uppercase text-orange-300">Espace joueur</p><h1 class="mt-2 text-4xl font-black">Inventaire et historique</h1><p class="mt-2 text-zinc-400">{{ player?.name || "Joueur lié" }}</p></div>
       <div class="flex flex-wrap gap-3">
-        <NuxtLink to="/cosmetics" class="rounded-xl border border-zinc-700 px-4 py-3 font-bold">Catalogue</NuxtLink>
+        <NuxtLink to="/shop" class="rounded-xl border border-zinc-700 px-4 py-3 font-bold">Catalogue</NuxtLink>
         <button :disabled="busy" class="rounded-xl border border-zinc-700 px-4 py-3 font-bold disabled:opacity-50" @click="load">Actualiser</button>
         <button :disabled="busy" class="rounded-xl border border-red-500/30 px-4 py-3 font-bold text-red-200 disabled:opacity-50" @click="logout">Déconnecter ce joueur</button>
       </div>
@@ -31,12 +31,12 @@
           <li v-for="entry in inventory.entitlements" :key="entry.cosmeticId" class="overflow-hidden rounded-xl bg-zinc-950 p-4">
             <CosmeticPreview v-if="entry.item" :item="entry.item" />
             <h3 class="mt-4 font-bold">{{ entry.item?.name || entry.cosmeticId }}</h3>
-            <p class="mt-1 text-sm text-zinc-400">{{ entry.expiresAt ? `Accès jusqu’au ${formatDate(entry.expiresAt)}` : "Accès permanent" }}</p>
+            <p class="mt-1 text-sm text-zinc-400">{{ entry.item && "free" in entry.item && entry.item.free ? "Offert à tous · sans achat" : entry.expiresAt ? `Accès jusqu’au ${formatDate(entry.expiresAt)}` : "Accès permanent" }}</p>
             <p v-if="entry.item?.slot === 'JOIN_FLAIR'" class="mt-4 rounded-xl border border-emerald-400/30 p-3 text-sm text-emerald-200">Automatique à la connexion tant que cet accès est actif.</p>
             <button v-else-if="entry.item" :disabled="busy" :aria-pressed="isSelected(entry.cosmeticId)" class="mt-4 min-h-11 w-full rounded-xl border px-4 py-3 font-bold disabled:opacity-50" :class="isSelected(entry.cosmeticId) ? 'border-emerald-400 text-emerald-200' : 'border-orange-400/50 text-orange-200'" @click="select(entry)">{{ isSelected(entry.cosmeticId) ? "Activé · Désactiver" : "Activer" }}</button>
           </li>
         </ul>
-        <p v-if="!inventory.entitlements.length" class="mt-4 text-zinc-400">Aucun accès actif. Découvre les effets dans le <NuxtLink to="/cosmetics" class="text-orange-300 underline">catalogue</NuxtLink>.</p>
+        <p v-if="!inventory.entitlements.length" class="mt-4 text-zinc-400">Aucun accès actif. Découvre les effets dans le <NuxtLink to="/shop" class="text-orange-300 underline">catalogue</NuxtLink>.</p>
       </section>
       <section class="mt-8 rounded-3xl border border-zinc-800 bg-zinc-900 p-6" aria-labelledby="orders-title">
         <div class="flex flex-wrap items-center justify-between gap-3"><h2 id="orders-title" class="text-2xl font-black">Commandes</h2><button v-if="history.orders.length" class="min-h-11 rounded-xl border border-zinc-700 px-4 py-3 text-sm font-bold" @click="downloadHistory">Télécharger mon historique</button></div>
@@ -57,6 +57,7 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({ alias: ["/fr/shop/history", "/de/shop/history", "/it/shop/history", "/bg/shop/history", "/es/shop/history", "/hi/shop/history", "/pt-br/shop/history"] });
 import CosmeticPreview from "../../components/cosmetics/CosmeticPreview.vue";
 import type { CommerceEntitlement, CommerceHistory, CommerceInventory, CommerceOrder } from "../../composables/useCommerce";
 
@@ -72,7 +73,7 @@ const busy = computed(() => loading.value || action.value);
 async function handleError(caught: unknown) {
   if (commerceUnauthorized(caught)) {
     player.value = null;
-    await nuxtApp.runWithContext(() => navigateTo("/cosmetics/connect?next=/cosmetics/history"));
+    await nuxtApp.runWithContext(() => navigateTo("/shop/connect?next=/shop/history"));
   } else error.value = commerceErrorMessage(caught);
 }
 async function load() {
@@ -106,7 +107,7 @@ async function logout() {
   await perform(async () => {
     await commerceRequest("/api/commerce/session", { method: "DELETE" });
     player.value = null;
-    await nuxtApp.runWithContext(() => navigateTo("/cosmetics/connect"));
+    await nuxtApp.runWithContext(() => navigateTo("/shop/connect"));
   });
 }
 const isSelected = (cosmeticId: string) => inventory.value?.selections.some((selection) => selection.cosmeticId === cosmeticId) === true;

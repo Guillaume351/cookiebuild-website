@@ -26,7 +26,7 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
     await client.unsafe(`CREATE TABLE playerdata (id uuid PRIMARY KEY, name varchar(255));
       CREATE TABLE player_link_challenges (id uuid PRIMARY KEY, player_id uuid REFERENCES playerdata(id), edition varchar(16),
         code_hmac varchar(64), expires_at timestamptz, consumed_at timestamptz, created_at timestamptz DEFAULT now());`);
-    for (const file of ["0015_cosmetic_entitlements.sql", "0016_stripe_commerce.sql"]) {
+    for (const file of ["0015_cosmetic_entitlements.sql", "0016_stripe_commerce.sql", "0017_free_cookie_sparkles.sql"]) {
       await client.unsafe((await readFile(new URL(`../drizzle/${file}`, import.meta.url), "utf8")).replaceAll("--> statement-breakpoint", ""));
     }
     db = drizzle(client, { schema });
@@ -161,6 +161,30 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
     const remaining=await activeGrants(order.playerId);
     expect(remaining).toHaveLength(1);
     expect(new Date(remaining[0]!.expires_at).getTime()).toBe(second.lines.data[0]!.period.end*1000);
+  });
+
+  it("provides free sparkles without a purchase or grant and keeps paid access protected", async () => {
+    const playerId = randomUUID();
+    await client`INSERT INTO playerdata(id,name) VALUES (${playerId}, 'FreeSparklesFixture')`;
+    const inventory = await commerce.commerceInventory(playerId);
+    expect(inventory.entitlements).toEqual([expect.objectContaining({ cosmeticId: "cookie_sparkle_trail", grantedAt: null, expiresAt: null })]);
+    expect(await activeGrants(playerId)).toHaveLength(0);
+    expect((await commerce.selectCommerceCosmetic(playerId, { slot: "HUB_TRAIL", cosmeticId: "cookie_sparkle_trail" })).selections)
+      .toEqual([expect.objectContaining({ slot: "HUB_TRAIL", cosmeticId: "cookie_sparkle_trail" })]);
+    await expect(commerce.selectCommerceCosmetic(playerId, { slot: "HUB_TRAIL", cosmeticId: "cookie_crumb_trail" })).rejects.toMatchObject({ statusCode: 403 });
+    await expect(commerce.selectCommerceCosmetic(playerId, { slot: "BADGE", cosmeticId: "cookie_sparkle_trail" })).rejects.toMatchObject({ statusCode: 400 });
+    expect((await commerce.selectCommerceCosmetic(playerId, { slot: "HUB_TRAIL", cosmeticId: null })).selections).toHaveLength(0);
+    expect(await activeGrants(playerId)).toHaveLength(0);
+    // Replaying the new migration must retain the persisted free selection and pair constraints.
+    await commerce.selectCommerceCosmetic(playerId, { slot: "HUB_TRAIL", cosmeticId: "cookie_sparkle_trail" });
+    await client.unsafe((await readFile(new URL("../drizzle/0017_free_cookie_sparkles.sql", import.meta.url), "utf8")).replaceAll("--> statement-breakpoint", ""));
+    expect((await commerce.commerceInventory(playerId)).selections).toHaveLength(1);
+    await client`INSERT INTO cosmetic_entitlements(player_id,cosmetic_id,source,granted_at,revoked_at)
+      VALUES (${playerId}, 'cookie_sparkle_trail', 'fixture:historical', now() - interval '1 day', now())`;
+    expect((await commerce.commerceInventory(playerId)).entitlements).toEqual([
+      expect.objectContaining({ cosmeticId: "cookie_sparkle_trail", grantedAt: null, expiresAt: null }),
+    ]);
+    expect((await commerce.selectCommerceCosmetic(playerId, { slot: "HUB_TRAIL", cosmeticId: "cookie_sparkle_trail" })).selections).toHaveLength(1);
   });
 
   it("only equips an owned active item in its canonical slot and can clear it", async () => {

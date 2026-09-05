@@ -267,7 +267,7 @@ describe("commerce implementation contracts", () => {
   });
 
   it("requires separate unselected digital-consent controls and explicit payment CTAs", async () => {
-    const checkout = await readFile(new URL("../pages/cosmetics/checkout.vue", import.meta.url), "utf8");
+    const checkout = await readFile(new URL("../pages/shop/checkout.vue", import.meta.url), "utf8");
     expect(checkout).toContain('v-model="immediatePerformanceConsent"');
     expect(checkout).toContain('v-model="withdrawalWaiverAcknowledged"');
     expect(checkout).not.toContain("checked");

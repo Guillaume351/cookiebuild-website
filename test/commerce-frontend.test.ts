@@ -6,20 +6,20 @@ import { commerceReturnPath, commerceSubscriptionSummary, commerceUnauthorized }
 import { COSMETIC_CATALOG_RESPONSE } from "../shared/cosmetics-catalog";
 
 async function pageSetup(name: string, overrides: Record<string, unknown> = {}) {
-  const source = await readFile(new URL(`../pages/cosmetics/${name}.vue`, import.meta.url), "utf8");
+  const source = await readFile(new URL(`../pages/shop/${name}.vue`, import.meta.url), "utf8");
   const script = source.match(/<script setup lang="ts">([\s\S]*?)<\/script>/)![1]!.replace(/^import .+;\n/gm, "");
   const javascript = ts.transpileModule(script, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext } }).outputText;
   const player = ref({ id: "player-1", name: "CookiePlayer" });
   const navigateTo = vi.fn();
   const request = vi.fn().mockImplementation((url: string) => Promise.resolve({ data: url.includes("inventory") ? { entitlements: [], selections: [] } : { orders: [], subscriptions: [], payments: [], events: [] } }));
   const globals = {
-    ref, computed, reactive, watch, useSeoMeta: () => {},
+    ref, computed, reactive, watch, definePageMeta: () => {}, useSeoMeta: () => {},
     useNuxtApp: () => ({ runWithContext: (callback: () => unknown) => callback() }),
     useCommercePlayer: () => player,
     loadCommerceSession: async () => ({ player: player.value }),
     commerceRequest: request, commerceUnauthorized, commerceReturnPath,
     commerceErrorMessage: () => "Service indisponible", navigateTo,
-    useRoute: () => ({ fullPath: "/cosmetics/checkout?product=supporter_permanent", query: { product: "supporter_permanent" } }),
+    useRoute: () => ({ fullPath: "/shop/checkout?product=supporter_permanent", query: { product: "supporter_permanent" } }),
     useFetch: async () => ({ data: ref({ data: { ...COSMETIC_CATALOG_RESPONSE, purchaseEnabled: true } }) }),
     COSMETIC_CATALOG_RESPONSE,
     ...overrides,
@@ -43,9 +43,10 @@ describe("commerce navigation and state", () => {
   });
 
   it("allows only local checkout/catalog/history destinations", () => {
-    expect(commerceReturnPath("/cosmetics/checkout?product=supporter_permanent")).toBe("/cosmetics/checkout?product=supporter_permanent");
-    for (const path of ["//evil.test/cosmetics/checkout", "https://evil.test", "/cosmetics/../admin", "/cosmetics/connect", ["/cosmetics/history"]]) {
-      expect(commerceReturnPath(path)).toBe("/cosmetics/history");
+    expect(commerceReturnPath("/cosmetics/checkout?product=supporter_permanent")).toBe("/shop/checkout?product=supporter_permanent");
+    expect(commerceReturnPath("/shop/checkout?product=supporter_permanent")).toBe("/shop/checkout?product=supporter_permanent");
+    for (const path of ["//evil.test/cosmetics/checkout", "https://evil.test", "/shop/../admin", "/shop/connect", ["/shop/history"]]) {
+      expect(commerceReturnPath(path)).toBe("/shop/history");
     }
   });
 

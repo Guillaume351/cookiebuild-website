@@ -31,7 +31,7 @@
                 >{{ copy.navigation.updates }}</NuxtLink
               >
             </li>
-            <li><NuxtLink to="/cosmetics" class="text-gray-400 hover:text-white transition-colors">{{ locale.code === "fr" ? "Cosmétiques" : "Cosmetics" }}</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/shop')" class="text-gray-400 hover:text-white transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink></li>
             <li>
               <NuxtLink to="/status" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.serverStatus }}</NuxtLink

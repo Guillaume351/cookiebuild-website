@@ -37,6 +37,7 @@ export const LOCALIZED_MARKETING_PATHS = [
   "/support",
   "/status",
   "/rules",
+  "/shop",
   "/privacy",
   "/terms",
 ] as const;

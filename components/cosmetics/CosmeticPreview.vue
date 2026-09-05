@@ -11,8 +11,8 @@
       <span class="rounded-md border border-amber-300/70 bg-amber-400/10 px-3 py-1 font-mono text-sm font-black tracking-[0.14em] text-amber-200">[SUPPORTER]</span>
     </div>
 
-    <div v-else-if="item.preview.kind === 'trail'" class="relative z-10 h-28 w-52">
-      <span v-for="index in 7" :key="index" class="crumb absolute h-2.5 w-2.5 rounded-sm bg-amber-500" :style="crumbStyle(index)" />
+    <div v-else-if="item.preview.kind === 'trail' || item.preview.kind === 'sparkle-trail'" class="relative z-10 h-28 w-52">
+      <span v-for="index in 7" :key="index" class="crumb absolute h-2.5 w-2.5" :class="item.preview.kind === 'sparkle-trail' ? 'rounded-full bg-yellow-100 shadow-[0_0_10px_rgba(254,249,195,.9)]' : 'rounded-sm bg-amber-500'" :style="crumbStyle(index)" />
       <div class="walker absolute right-7 top-5 grid h-16 w-12 place-items-center rounded-md border-2 border-orange-300 bg-orange-900 text-2xl">🍪</div>
     </div>
 
