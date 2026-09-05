@@ -1,8 +1,10 @@
+import { boundedResponseText } from "../utils/bounded-response";
+
 const MAX_TELEMETRY_RESPONSE_BYTES = 2_097_152;
 
 const REDACTIONS: Array<[RegExp, string]> = [
   [/\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+\/-]+=*/gi, "[REDACTED_AUTH]"],
-  [/(?:password|passwd|secret|token|api[_-]?key|webhook)\s*[=:]\s*[^\s,;]+/gi, "$1=[REDACTED]"],
+  [/(password|passwd|secret|token|api[_-]?key|webhook)\s*[=:]\s*[^\s,;]+/gi, "$1=[REDACTED]"],
   [/\b(?:postgres(?:ql)?|amqps?|redis):\/\/[^\s]+/gi, "[REDACTED_URL]"],
   [/\b(?:\d{1,3}\.){3}\d{1,3}\b/g, "[REDACTED_IP]"],
   [/\beyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}(?:\.[A-Za-z0-9_-]{10,})?\b/g, "[REDACTED_TOKEN]"],
@@ -67,14 +69,11 @@ async function boundedJson<T>(url: URL, timeoutMs = 5_000): Promise<T> {
     signal: AbortSignal.timeout(Math.min(Math.max(timeoutMs, 500), 15_000)),
     headers: { Accept: "application/json" },
   });
-  const declaredLength = Number(response.headers.get("content-length") ?? 0);
-  if (declaredLength > MAX_TELEMETRY_RESPONSE_BYTES) {
-    throw new Error("Telemetry response exceeded the size limit");
-  }
-  const text = await response.text();
-  if (Buffer.byteLength(text, "utf8") > MAX_TELEMETRY_RESPONSE_BYTES) {
-    throw new Error("Telemetry response exceeded the size limit");
-  }
+  const text = await boundedResponseText(
+    response,
+    MAX_TELEMETRY_RESPONSE_BYTES,
+    "Telemetry response exceeded the size limit",
+  );
   if (!response.ok) throw new Error(`Telemetry request failed with HTTP ${response.status}`);
   try {
     return JSON.parse(text) as T;
@@ -84,12 +83,12 @@ async function boundedJson<T>(url: URL, timeoutMs = 5_000): Promise<T> {
 }
 
 export function metricExpression(key: string) {
-  if (!(key in ADMIN_METRIC_QUERIES)) throw new Error("Unsupported metric key");
+  if (!Object.hasOwn(ADMIN_METRIC_QUERIES, key)) throw new Error("Unsupported metric key");
   return ADMIN_METRIC_QUERIES[key as AdminMetricKey];
 }
 
 export function logExpression(key: string) {
-  if (!(key in ADMIN_LOG_QUERIES)) throw new Error("Unsupported log key");
+  if (!Object.hasOwn(ADMIN_LOG_QUERIES, key)) throw new Error("Unsupported log key");
   return ADMIN_LOG_QUERIES[key as AdminLogKey];
 }
 
@@ -120,5 +119,5 @@ export async function queryAdminLogs(input: {
   url.searchParams.set("end", String(end * 1_000_000));
   url.searchParams.set("limit", String(limit));
   url.searchParams.set("direction", "backward");
-  return boundedJson<Record<string, unknown>>(url);
+  return redactAdminTelemetry(await boundedJson<Record<string, unknown>>(url));
 }

@@ -1,0 +1,8 @@
+{
+  "slug": "turfwars-match-transition-reliability",
+  "contentType": "changelog",
+  "title": "More reliable transitions after TurfWars",
+  "summary": "Leaving a TurfWars match no longer lets that old match interfere with your next game.",
+  "body": "- Your current game state is preserved when a TurfWars match you previously left finishes.\n- Moving from TurfWars into another game is more reliable, including when the previous match is interrupted.",
+  "publishedAt": "2026-09-05T06:53:32.613161+00:00"
+}

@@ -1,4 +1,5 @@
 import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
+import { boundedResponseText } from "../utils/bounded-response";
 
 const MAX_INTERNAL_RESPONSE_BYTES = 1_048_576;
 
@@ -113,14 +114,11 @@ export async function internalTextRequest(input: InternalServiceRequest): Promis
     ...(method === "POST" ? { body } : {}),
   });
 
-  const declaredLength = Number(response.headers.get("content-length") ?? 0);
-  if (declaredLength > MAX_INTERNAL_RESPONSE_BYTES) {
-    throw new Error("Internal service response exceeded the size limit");
-  }
-  const text = await response.text();
-  if (Buffer.byteLength(text, "utf8") > MAX_INTERNAL_RESPONSE_BYTES) {
-    throw new Error("Internal service response exceeded the size limit");
-  }
+  const text = await boundedResponseText(
+    response,
+    MAX_INTERNAL_RESPONSE_BYTES,
+    "Internal service response exceeded the size limit",
+  );
   if (!response.ok) {
     throw new Error(`Internal service request failed with HTTP ${response.status}`);
   }
