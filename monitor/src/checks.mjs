@@ -73,13 +73,16 @@ export async function checkJava({ host, port, timeoutMs = 5_000, protocolVersion
       try {
         const status = parseJavaStatus(Buffer.concat(chunks));
         if (!status) return;
+        if (!Number.isInteger(status.players?.online) || status.players.online < 0) {
+          throw new Error("Java player count is missing or invalid");
+        }
         settled = true;
         clearTimeout(timer);
         socket.end();
         resolve({
           ok: true,
           latencyMs: Date.now() - started,
-          players: Number(status.players?.online ?? 0),
+          players: status.players.online,
           maximumPlayers: Number(status.players?.max ?? 0),
           version: String(status.version?.name ?? "unknown"),
         });

@@ -8,7 +8,22 @@ async function fetchOnce(url, { headers, timeoutMs }) {
     const requested = new URL(url)
     const resolved = new URL(response.url)
     if (resolved.protocol !== requested.protocol || resolved.hostname !== requested.hostname) throw new Error('Upstream redirected outside its official host')
-    return response
+    if (response.status === 304) {
+      await response.body?.cancel()
+      return { response, text: null }
+    }
+    if (!response.ok) {
+      await response.body?.cancel()
+      throw new Error(`Upstream returned HTTP ${response.status}`)
+    }
+    const chunks = []
+    let size = 0
+    for await (const chunk of response.body || []) {
+      size += chunk.byteLength
+      if (size > MAX_RESPONSE_BYTES) throw new Error('Upstream response is too large')
+      chunks.push(chunk)
+    }
+    return { response, text: Buffer.concat(chunks, size).toString('utf8') }
   } finally {
     clearTimeout(timeout)
   }
@@ -25,12 +40,11 @@ export async function fetchCachedJson({ id, url, store, headers = {}, timeoutMs 
   let lastError
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      response = await fetchOnce(url, { headers: requestHeaders, timeoutMs })
+      const fetched = await fetchOnce(url, { headers: requestHeaders, timeoutMs })
+      response = fetched.response
       if (response.status === 304 && cached?.payload) return { payload: cached.payload, cache: 'revalidated' }
       if (!response.ok) throw new Error(`Upstream ${id} returned HTTP ${response.status}`)
-      const text = await response.text()
-      if (Buffer.byteLength(text) > MAX_RESPONSE_BYTES) throw new Error(`Upstream ${id} response is too large`)
-      const payload = JSON.parse(text)
+      const payload = JSON.parse(fetched.text)
       await store.mutate((next) => {
         next.sources[id] ||= {}
         next.sources[id].cache = {

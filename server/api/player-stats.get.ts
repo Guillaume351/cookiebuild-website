@@ -2,6 +2,7 @@ import { and, count, ilike, sql } from "drizzle-orm";
 import { getQuery } from "h3";
 import db from "../../db/client";
 import { playerdata } from "../../db/schema";
+import { positiveInteger } from "../utils/mobile-validation";
 
 const PROGRESSION_GAMEMODES = new Map([
   ["MicroBattles", "microbattles"],
@@ -12,12 +13,6 @@ const PROGRESSION_GAMEMODES = new Map([
   ["BedWars", "bedwars"],
 ]);
 const OUTER_PLAYER_ID = sql.raw('"playerdata"."id"');
-
-function positiveInteger(value: unknown, fallback: number, maximum: number) {
-  const parsed = Number.parseInt(String(value ?? ""), 10);
-  if (!Number.isFinite(parsed) || parsed < 1) return fallback;
-  return Math.min(parsed, maximum);
-}
 
 function beginningOfPeriod(period: string | undefined) {
   const now = new Date();

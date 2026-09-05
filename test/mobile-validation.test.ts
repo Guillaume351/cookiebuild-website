@@ -10,6 +10,8 @@ import {
   optionalQuietHour,
   positiveInteger,
   requiredInteger,
+  requiredString,
+  optionalString,
 } from "../server/utils/mobile-validation";
 import {
   enforceLinkClaimRateLimit,
@@ -18,6 +20,27 @@ import {
 } from "../server/utils/mobile-rate-limit";
 
 describe("mobile API validation", () => {
+  it.each([{}, ["ios"], 12345678, true, null, undefined])("rejects non-string device fields: %j", (value) => {
+    expect(() => requiredString(value, "installationId", { minimum: 8, maximum: 128 }))
+      .toThrow("Invalid installationId");
+  });
+
+  it("preserves trimmed string fields and explicitly absent optional fields", () => {
+    expect(requiredString(" installation-1 ", "installationId", { minimum: 8, maximum: 128 })).toBe("installation-1");
+    expect(optionalString(null, "locale", 16)).toBeNull();
+    expect(optionalString(undefined, "locale", 16)).toBeNull();
+    expect(optionalString("", "locale", 16)).toBeNull();
+    expect(() => optionalString({}, "locale", 16)).toThrow("Invalid locale");
+  });
+
+  it("continues limiting private reads while the shared store is unavailable", async () => {
+    const store: MobileRateLimitStore = { consume: async () => { throw new Error("unavailable"); } };
+    const key = `fallback-${crypto.randomUUID()}`;
+    await expect(enforceMobileRequestRateLimit(key, 1, 1_000, { now: 1, store })).resolves.toBeUndefined();
+    await expect(enforceMobileRequestRateLimit(key, 1, 1_000, { now: 2, store })).rejects.toMatchObject({ statusCode: 429 });
+    await expect(enforceMobileRequestRateLimit(key, 1, 1_000, { now: 1_001, store })).resolves.toBeUndefined();
+  });
+
   it("extracts only a well-formed bearer token", () => {
     expect(bearerToken("Bearer firebase-token")).toBe("firebase-token");
     expect(bearerToken("bearer firebase-token")).toBe("firebase-token");

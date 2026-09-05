@@ -1,0 +1,8 @@
+{
+  "slug": "skyblock-progression-reliability",
+  "contentType": "changelog",
+  "title": "More reliable Skyblock progression",
+  "summary": "Skyblock progress stays consistent when a skill notification cannot be loaded.",
+  "body": "- Saved Skyblock experience, collections, and generator progress are no longer applied twice when a notification lookup fails.\n- Mobile device registration rejects malformed identifiers, keeping device records consistent.",
+  "publishedAt": "2026-09-05T07:54:48.277361+00:00"
+}

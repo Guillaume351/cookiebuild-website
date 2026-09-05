@@ -56,3 +56,17 @@ test("website and database API checks validate useful content", async (context) 
   assert.equal((await checkWebsite({ baseUrl })).ok, true);
   assert.equal((await checkDatabaseApi({ baseUrl })).databaseLatencyMs, 4);
 });
+
+for (const online of [undefined, null, false, "", "0", -1, 0.5]) {
+  test(`rejects invalid Java player count ${JSON.stringify(online)}`, async (context) => {
+    const server = net.createServer((socket) => {
+      socket.once("data", () => {
+        const json = Buffer.from(JSON.stringify({ players: { online, max: 100 } }));
+        socket.end(packet(Buffer.concat([Buffer.from([0]), internals.encodeVarInt(json.length), json])));
+      });
+    });
+    await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+    context.after(() => server.close());
+    await assert.rejects(checkJava({ host: "127.0.0.1", port: server.address().port }), /Java player count is missing or invalid/);
+  });
+}

@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { createError, setHeader, type H3Event } from "h3";
+import { createMemoryRateLimitStore } from "./mobile-memory-rate-limit";
 
 export interface MobileRateLimitResult {
   allowed: boolean;
@@ -22,30 +23,11 @@ interface RateLimitOptions {
   store?: MobileRateLimitStore;
 }
 
-const attempts = new Map<string, { count: number; resetsAt: number }>();
+const fallbackStore = createMemoryRateLimitStore();
 
 async function defaultStore(): Promise<MobileRateLimitStore> {
   const { postgresMobileRateLimitStore } = await import("../services/mobile-rate-limit-store");
   return postgresMobileRateLimitStore;
-}
-
-function memoryConsume(keyHash: string, limit: number, windowMs: number, now: number) {
-  if (attempts.size > 10_000) {
-    for (const [attemptKey, attempt] of attempts) {
-      if (attempt.resetsAt <= now) attempts.delete(attemptKey);
-    }
-  }
-  const current = attempts.get(keyHash);
-  if (!current || current.resetsAt <= now) {
-    const resetsAt = now + windowMs;
-    attempts.set(keyHash, { count: 1, resetsAt });
-    return { allowed: true, resetsAt: new Date(resetsAt) };
-  }
-  if (current.count >= limit) {
-    return { allowed: false, resetsAt: new Date(current.resetsAt) };
-  }
-  current.count += 1;
-  return { allowed: true, resetsAt: new Date(current.resetsAt) };
 }
 
 export async function enforceMobileRequestRateLimit(
@@ -71,7 +53,7 @@ export async function enforceMobileRequestRateLimit(
         statusMessage: "Request protection is temporarily unavailable. Try again later.",
       });
     }
-    result = memoryConsume(keyHash, limit, windowMs, now);
+    result = await fallbackStore.consume({ keyHash, limit, windowMs, now: new Date(now) });
   }
 
   if (!result.allowed) {

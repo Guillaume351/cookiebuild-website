@@ -58,3 +58,12 @@ test('completed mutation is idempotent and maintenance is cleared', async (t) =>
   assert.equal(context.restarts(), 1)
   await assert.rejects(() => readFile(join(context.directory, 'maintenance.json')), { code: 'ENOENT' })
 })
+
+for (const players of [null, false, '', [], '0', -1, 0.5]) {
+  test(`restart is refused for invalid player count ${JSON.stringify(players)}`, async (t) => {
+    const context = await fixture(players)
+    t.after(() => context.monitor.server.close())
+    await assert.rejects(() => context.service.restartMinecraft('restart-key-invalid', {}), /Player monitor unavailable/)
+    assert.equal(context.restarts(), 0)
+  })
+}

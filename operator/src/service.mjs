@@ -57,7 +57,7 @@ async function fetchPlayerCount(config) {
   try {
     const response = await fetch(url, { signal: controller.signal, redirect: 'error' })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const players = Number(jsonPointer(await response.json(), config.monitorPlayersPointer))
+    const players = jsonPointer(await response.json(), config.monitorPlayersPointer)
     if (!Number.isInteger(players) || players < 0) throw new Error('Player count is missing or invalid')
     return { available: true, players }
   } catch (error) {

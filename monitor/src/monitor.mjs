@@ -5,7 +5,7 @@ import { dirname } from "node:path";
 import { AlertState, sendDiscord } from "./alerts.mjs";
 import { checkBedrock, checkDatabaseApi, checkJava, checkWebsite } from "./checks.mjs";
 import { parseClientConnectionCounterKey, recordClientConnections } from "./client-versions.mjs";
-import { readNewLogChunk, selectNewFatalLines } from "./logs.mjs";
+import { deliverPendingFatalAlerts, enqueueFatalAlerts, readNewLogChunk } from "./logs.mjs";
 import { parseFunnelCounterKey, recordFunnelTelemetry } from "./telemetry.mjs";
 import { loadAlertWebhook } from "./webhook.mjs";
 
@@ -39,6 +39,7 @@ let logRunning = false;
 let state = await loadState(config.stateFile);
 state.checks ||= {};
 state.logFingerprints ||= {};
+state.pendingFatalAlerts ||= [];
 state.funnelCounters ||= {};
 state.clientVersionConnections ||= {};
 state.queueStates ||= {};
@@ -116,7 +117,7 @@ async function notify(message) {
   const content = `${config.alertMention ? `${config.alertMention} ` : ""}${message}`;
   if (!config.webhook) {
     console.error(`[alert without webhook] ${content}`);
-    return true;
+    return false;
   }
   try {
     await sendDiscord(config.webhook, content);
@@ -153,12 +154,7 @@ async function scanLogs() {
       state.latestSlowGameTickObservedAt = Date.now();
     }
     if (state.maintenance) return;
-    const fatalLines = selectNewFatalLines(chunk.text, state.logFingerprints);
-    if (fatalLines.length > 0) {
-      const lines = fatalLines.slice(0, 5).map((line) => `• ${line}`).join("\n");
-      const extra = fatalLines.length > 5 ? `\n• …and ${fatalLines.length - 5} more` : "";
-      await notify(`🔥 **Cookie Build fatal game/server log**\n${lines}${extra}`);
-    }
+    enqueueFatalAlerts(state, chunk.text);
   } catch (error) {
     console.warn(`[log scan unavailable] ${safeError(error)}`);
   }
@@ -190,6 +186,9 @@ async function runLogCycle() {
   try {
     state.maintenance = await inMaintenance();
     await scanLogs();
+    if (!state.maintenance && Date.now() - startedAt >= config.startupGraceMs) {
+      await deliverPendingFatalAlerts(state, notify, queueStateSave);
+    }
     await queueStateSave();
   } catch (error) {
     console.error(`[monitor log cycle failure] ${safeError(error)}`);

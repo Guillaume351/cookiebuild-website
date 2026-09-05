@@ -40,7 +40,10 @@ export function requiredString(
   field: string,
   { minimum = 1, maximum }: { minimum?: number; maximum: number },
 ) {
-  const result = String(value ?? "").trim();
+  if (typeof value !== "string") {
+    throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
+  }
+  const result = value.trim();
   if (result.length < minimum || result.length > maximum) {
     throw createError({ statusCode: 400, statusMessage: `Invalid ${field}` });
   }

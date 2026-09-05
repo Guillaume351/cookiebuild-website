@@ -31,3 +31,39 @@ test('upstream ETag is persisted and revalidated', async (t) => {
   assert.equal(second.payload.version, '1.0.0')
   assert.equal(requests, 2)
 })
+
+function memoryStore() {
+  const state = { sources: {} }
+  return { read: async () => state, mutate: async (fn) => fn(state) }
+}
+
+test('body deadline remains active after upstream headers arrive', { timeout: 4_000 }, async (t) => {
+  let requests = 0
+  const server = http.createServer((_request, response) => {
+    requests += 1
+    response.writeHead(200, { 'content-type': 'application/json' })
+    response.flushHeaders()
+    response.write('{"version":"')
+    const timer = setInterval(() => response.write('x'), 10)
+    response.once('close', () => clearInterval(timer))
+  })
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+  t.after(() => { server.closeAllConnections(); server.close() })
+  await assert.rejects(fetchCachedJson({ id: 'slow', url: `http://127.0.0.1:${server.address().port}/release`, timeoutMs: 60, store: memoryStore() }), /abort/i)
+  assert.equal(requests, 3)
+})
+
+test('oversized streaming bodies are cancelled before upstream finishes', { timeout: 4_000 }, async (t) => {
+  let requests = 0
+  const server = http.createServer((_request, response) => {
+    requests += 1
+    response.writeHead(200, { 'content-type': 'application/json' })
+    const chunk = Buffer.alloc(256 * 1024, 'x')
+    const timer = setInterval(() => response.write(chunk), 5)
+    response.once('close', () => clearInterval(timer))
+  })
+  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve))
+  t.after(() => { server.closeAllConnections(); server.close() })
+  await assert.rejects(fetchCachedJson({ id: 'large', url: `http://127.0.0.1:${server.address().port}/release`, timeoutMs: 1_000, store: memoryStore() }), /response is too large/)
+  assert.equal(requests, 3)
+})
