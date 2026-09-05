@@ -83,7 +83,7 @@
           <p class="text-sm font-black uppercase tracking-widest text-orange-300">{{ purchaseEnabled ? "Tarifs TTC" : "Tarifs proposés TTC" }}</p>
           <h2 id="offers-title" class="mt-2 text-3xl font-black text-white">{{ purchaseEnabled ? "Achats uniques" : "Achats uniques proposés" }}</h2>
         </div>
-        <p class="max-w-xl text-sm text-zinc-400">Consulte le contenu et le prix avant de lier ton joueur. Le paiement s’effectue sur Stripe.</p>
+        <p class="max-w-xl text-sm text-zinc-400">Choisis ton pseudo ou celui d’un ami déjà venu sur Cookie Build. Aucune liaison n’est nécessaire pour acheter. Le paiement s’effectue sur Stripe.</p>
       </div>
 
       <div class="mt-8 grid gap-5 lg:grid-cols-3">
