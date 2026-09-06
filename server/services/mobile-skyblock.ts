@@ -38,6 +38,7 @@ import {
   skyblockNotificationMarketBodySql,
   skyblockNotificationTextSql,
 } from "./mobile-skyblock-notification-copy";
+import { skyblockPeriodicObjective } from "./mobile-skyblock-periodic-policy";
 import {
   decodeSkyblockCursor,
   encodeSkyblockCursor,
@@ -753,7 +754,38 @@ async function recordManagementQuestEvent(
     `);
     if (rows[0]?.completedAt) completed.push(quest.id);
   }
+  if (amount > 0) {
+    await ensurePeriodicObjectives(tx, playerId);
+    await tx.execute(sql`
+      UPDATE skyblock_periodic_objectives
+         SET progress = LEAST(target::bigint, progress::bigint + ${amount}),
+             completed_at = CASE WHEN progress::bigint + ${amount} >= target
+               THEN COALESCE(completed_at, now()) ELSE completed_at END,
+             updated_at = now()
+       WHERE player_id = ${playerId}
+         AND ((cadence = 'daily' AND period_start = timezone('UTC', now())::date)
+           OR (cadence = 'weekly' AND period_start = date_trunc('week', timezone('UTC', now()))::date))
+         AND event = ${event} AND (subject = ${subject} OR subject = 'any')
+         AND completed_at IS NULL
+    `);
+  }
   return completed;
+}
+
+async function ensurePeriodicObjectives(tx: MobileDbTransaction, playerId: string) {
+  const dates = await tx.execute<{ today: string } & Record<string, unknown>>(sql`
+    SELECT to_char(timezone('UTC', now()), 'YYYY-MM-DD') AS today
+  `);
+  for (const cadence of ["daily", "weekly"] as const) {
+    const objective = skyblockPeriodicObjective(playerId, cadence, dates[0]!.today);
+    await tx.execute(sql`
+      INSERT INTO skyblock_periodic_objectives
+        (player_id, cadence, period_start, objective_id, event, subject, target, reward_coins)
+      VALUES (${playerId}, ${cadence}, ${objective.periodStart}::date, ${objective.id},
+        ${objective.event}, ${objective.subject}, ${objective.target}, ${objective.rewardCoins})
+      ON CONFLICT (player_id, cadence, period_start) DO NOTHING
+    `);
+  }
 }
 
 async function pendingInvite(
@@ -1904,6 +1936,9 @@ export async function skyblockPeriodicObjectives(
 ) {
   return db.transaction(async (tx) => {
     const actor = await requirePrimaryLinkedPlayer(tx, firebaseUid);
+    if (await activeIsland(tx, actor.playerId)) {
+      await ensurePeriodicObjectives(tx, actor.playerId);
+    }
     const rows = await tx.execute<PeriodicObjectiveRow>(sql`
       SELECT cadence, period_start AS "periodStart", objective_id AS "objectiveId",
              event, subject, target, reward_coins AS "rewardCoins", progress,
@@ -1962,6 +1997,7 @@ export async function claimSkyblockPeriodicObjective(
         "Objective period expired; refresh before claiming",
       );
     }
+    await ensurePeriodicObjectives(tx, actor.playerId);
     const rows = await tx.execute<PeriodicObjectiveRow>(sql`
       SELECT cadence, period_start AS "periodStart", objective_id AS "objectiveId",
              event, subject, target, reward_coins AS "rewardCoins", progress,
@@ -2025,6 +2061,7 @@ export async function claimSkyblockPeriodicObjective(
         "OBJECTIVE_ALREADY_CLAIMED",
         "Objective reward already claimed",
       );
+    await recalculateIslandProgress(tx, island.islandId);
     const data = {
       cadence,
       periodStart: input.periodStart,
@@ -2660,6 +2697,30 @@ export async function sellToSkyblockMerchant(
       `merchant:sell:${itemId}`,
       stock.id,
     );
+    await recordManagementQuestEvent(tx, actor.playerId, "merchant_sale", "any", input.quantity);
+    await tx.execute(sql`
+      INSERT INTO skyblock_economy_daily
+        (metric_date, island_id, npc_items_sold, npc_sale_coins, updated_at)
+      VALUES (CURRENT_DATE, ${island.islandId}, ${input.quantity}, ${totalCoins}, now())
+      ON CONFLICT (metric_date, island_id) DO UPDATE
+        SET npc_items_sold = skyblock_economy_daily.npc_items_sold + EXCLUDED.npc_items_sold,
+            npc_sale_coins = skyblock_economy_daily.npc_sale_coins + EXCLUDED.npc_sale_coins,
+            updated_at = now()
+    `);
+    await tx.execute(sql`
+      INSERT INTO skyblock_economy_daily
+        (metric_date, island_id, storage_saturation_samples,
+         storage_saturation_basis_points_total, storage_full_samples, updated_at)
+      SELECT CURRENT_DATE, ${island.islandId}, 1,
+             LEAST(10000, floor(COALESCE(sum(quantity), 0)::numeric * 10000 / ${number(island.storageCapacity)}))::bigint,
+             CASE WHEN COALESCE(sum(quantity), 0) >= ${number(island.storageCapacity)} THEN 1 ELSE 0 END, now()
+        FROM skyblock_storage_items WHERE island_id = ${island.islandId}
+      ON CONFLICT (metric_date, island_id) DO UPDATE
+        SET storage_saturation_samples = skyblock_economy_daily.storage_saturation_samples + 1,
+            storage_saturation_basis_points_total = skyblock_economy_daily.storage_saturation_basis_points_total + EXCLUDED.storage_saturation_basis_points_total,
+            storage_full_samples = skyblock_economy_daily.storage_full_samples + EXCLUDED.storage_full_samples,
+            updated_at = now()
+    `);
     const data = {
       item: itemView(itemId)!,
       quantity: input.quantity,

@@ -419,6 +419,70 @@ integration("mobile Skyblock marketplace transactions", () => {
     expect(state).toEqual({ quotes: 1, reserved: 0 });
   });
 
+  it("creates current companion objectives without overwriting existing progress", async () => {
+    const first = await skyblock.skyblockPeriodicObjectives(SELLER_UID, true);
+    expect(first.objectives).toHaveLength(2);
+    expect(first.objectives.map((objective) => objective.cadence)).toEqual(["daily", "weekly"]);
+    await setupSql`UPDATE skyblock_periodic_objectives SET progress = 3 WHERE player_id = ${SELLER}`;
+    const second = await skyblock.skyblockPeriodicObjectives(SELLER_UID, true);
+    expect(second.objectives.every((objective) => objective.progress === 3)).toBe(true);
+    const [count] = await setupSql`SELECT count(*)::int AS n FROM skyblock_periodic_objectives WHERE player_id = ${SELLER}`;
+    expect(count!.n).toBe(2);
+  });
+
+  it("records mobile merchant objective and economy progress exactly once, leaving expired daily objectives untouched", async () => {
+    await setupSql`
+      INSERT INTO skyblock_periodic_objectives
+        (player_id, cadence, period_start, objective_id, event, subject, target, reward_coins)
+      VALUES
+        (${MANAGER}, 'weekly', date_trunc('week', timezone('UTC', now()))::date,
+         'weekly_merchant', 'merchant_sale', 'any', 8, 500),
+        (${MANAGER}, 'daily', LEAST(date_trunc('week', timezone('UTC', now()))::date, timezone('UTC', now())::date - 1),
+         'expired_daily_merchant', 'merchant_sale', 'any', 8, 75)
+    `;
+    const input = { inventoryItemId: STORAGE, expectedStorageVersion: 0, quantity: 8, expectedUnitPrice: 2 };
+    const key = "ad000000-0000-4000-8000-000000000001";
+    const responses = await Promise.all([
+      skyblock.sellToSkyblockMerchant(MANAGER_UID, "coal", input, key),
+      skyblock.sellToSkyblockMerchant(MANAGER_UID, "coal", input, key),
+    ]);
+    expect(responses.map((response) => response.created).sort()).toEqual([false, true]);
+    const [state] = await setupSql`
+      SELECT
+        (SELECT progress FROM skyblock_periodic_objectives WHERE player_id = ${MANAGER} AND objective_id = 'weekly_merchant') AS progress,
+        (SELECT completed_at IS NOT NULL FROM skyblock_periodic_objectives WHERE player_id = ${MANAGER} AND objective_id = 'weekly_merchant') AS completed,
+        (SELECT progress FROM skyblock_periodic_objectives WHERE player_id = ${MANAGER} AND objective_id = 'expired_daily_merchant') AS expired,
+        npc_items_sold::int AS sold, npc_sale_coins::int AS coins, storage_saturation_samples::int AS samples
+        FROM skyblock_economy_daily WHERE island_id = ${SELLER_ISLAND} AND metric_date = CURRENT_DATE
+    `;
+    expect(state).toEqual({ progress: 8, completed: true, expired: 0, sold: 8, coins: 16, samples: 1 });
+  });
+
+  it("recalculates island level when a periodic reward is claimed and retries without duplicate credit", async () => {
+    const [period] = await setupSql`SELECT to_char(date_trunc('week', timezone('UTC', now())), 'YYYY-MM-DD') AS start`;
+    await setupSql`
+      INSERT INTO skyblock_periodic_objectives
+        (player_id, cadence, period_start, objective_id, event, subject, target, reward_coins, progress, completed_at)
+      VALUES (${SELLER}, 'weekly', ${period!.start}::date, 'weekly_merchant', 'merchant_sale', 'any', 256, 500, 256, now())
+    `;
+    await setupSql`INSERT INTO skyblock_collections (player_id, item_id, quantity) VALUES (${SELLER}, 'oak_log', 600)`;
+    await setupSql`UPDATE skyblock_islands SET experience = 600, level = 1 WHERE id = ${SELLER_ISLAND}`;
+    const input = { objectiveId: "weekly_merchant", periodStart: String(period!.start) };
+    const key = "ae000000-0000-4000-8000-000000000001";
+    const responses = await Promise.all([
+      skyblock.claimSkyblockPeriodicObjective(SELLER_UID, "weekly", input, key),
+      skyblock.claimSkyblockPeriodicObjective(SELLER_UID, "weekly", input, key),
+    ]);
+    expect(responses.map((response) => response.created).sort()).toEqual([false, true]);
+    const [state] = await setupSql`
+      SELECT level, experience::int AS experience,
+        (SELECT balance::int FROM skyblock_island_accounts WHERE island_id = ${SELLER_ISLAND}) AS balance,
+        (SELECT count(*)::int FROM skyblock_coin_transactions WHERE island_id = ${SELLER_ISLAND}) AS credits
+      FROM skyblock_islands WHERE id = ${SELLER_ISLAND}
+    `;
+    expect(state).toEqual({ level: 2, experience: 1100, balance: 600, credits: 1 });
+  });
+
   it("settles merchant sales and purchases against the shared island bank", async () => {
     const sale = await skyblock.sellToSkyblockMerchant(
       MANAGER_UID,
@@ -1449,6 +1513,12 @@ integration("mobile Skyblock marketplace transactions", () => {
   });
 
   it("collects workers once while prepared and marked transfers reserve the remaining capacity", async () => {
+    await setupSql`
+      INSERT INTO skyblock_periodic_objectives
+        (player_id, cadence, period_start, objective_id, event, subject, target, reward_coins)
+      VALUES (${MANAGER}, 'weekly', date_trunc('week', timezone('UTC', now()))::date,
+        'weekly_worker', 'collect_worker', 'any', 384, 500)
+    `;
     await setupSql`UPDATE skyblock_islands SET storage_capacity = 112 WHERE id = ${SELLER_ISLAND}`;
     await setupSql`
       INSERT INTO skyblock_inventory_transfers
@@ -1488,6 +1558,7 @@ integration("mobile Skyblock marketplace transactions", () => {
         questProgress: number;
         requests: number;
         economyItems: number;
+        periodicProgress: number;
       }[]
     >`
       SELECT
@@ -1500,7 +1571,9 @@ integration("mobile Skyblock marketplace transactions", () => {
         (SELECT count(*)::int FROM skyblock_mobile_requests
           WHERE player_id = ${MANAGER} AND scope = 'skyblock:management:workers-collect') AS requests,
         (SELECT worker_items_collected::int FROM skyblock_economy_daily
-          WHERE island_id = ${SELLER_ISLAND} AND metric_date = CURRENT_DATE) AS "economyItems"
+          WHERE island_id = ${SELLER_ISLAND} AND metric_date = CURRENT_DATE) AS "economyItems",
+        (SELECT progress FROM skyblock_periodic_objectives
+          WHERE player_id = ${MANAGER} AND objective_id = 'weekly_worker') AS "periodicProgress"
     `;
     expect(state).toEqual({
       stored: 105,
@@ -1508,6 +1581,7 @@ integration("mobile Skyblock marketplace transactions", () => {
       questProgress: 5,
       requests: 1,
       economyItems: 5,
+      periodicProgress: 5,
     });
   });
 
