@@ -1,0 +1,8 @@
+{
+  "slug": "bedrock-menu-images-restored",
+  "contentType": "changelog",
+  "title": "Bedrock menu images restored",
+  "summary": "Game, action and shop icons are back in Bedrock menus.",
+  "body": "- Restored the images in Bedrock menus, including the game selector, Skyblock actions and shops.\n- Reconnect to the server to load the menus with their icons.",
+  "publishedAt": "2026-09-06T15:59:46.257995+00:00"
+}
