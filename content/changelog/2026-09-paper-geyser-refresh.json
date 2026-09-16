@@ -1,0 +1,8 @@
+{
+  "slug": "september-java-bedrock-compatibility-refresh",
+  "contentType": "changelog",
+  "title": "Refreshed Java and Bedrock compatibility",
+  "summary": "A server update brings current Bedrock compatibility and a fix for furnace updates on Bedrock.",
+  "body": "- Updated the Java server engine to Paper 26.2 build 124.\n- Updated Bedrock connectivity to Geyser 2.11.3 build 1240, supporting Bedrock 26.30–26.34, 26.40–26.45, 26.50 and 26.51.\n- Included a Bedrock compatibility fix for furnace updates.",
+  "publishedAt": "2026-09-16T05:57:51Z"
+}
