@@ -1,0 +1,1 @@
+window.nomadInitialHash=window.location.hash;
