@@ -3,6 +3,6 @@
   "contentType": "changelog",
   "title": "Minecraft Java 26.3 support",
   "summary": "You can now join Cookie Build using Minecraft Java 26.3.",
-  "body": "- Players using Minecraft Java 26.3 can now join Cookie Build.\n- Join the same games and keep your existing player progress.\n- The server continues to use Minecraft 26.2 gameplay; this connection update does not add Minecraft 26.3 blocks or mechanics.",
+  "body": "- Players using Minecraft Java 26.3 can now join Cookie Build.\n- Previously supported older Java clients can continue to connect.\n- Join the same games and keep your existing player progress.\n- The server continues to use Minecraft 26.2 gameplay; this connection update does not add Minecraft 26.3 blocks or mechanics.",
   "publishedAt": "2026-09-20T20:08:09Z"
 }
