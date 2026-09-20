@@ -11,8 +11,8 @@
 
     <NuxtLink :to="locale.code === 'fr' ? '/fr/updates/fat-king-preview' : '/updates/fat-king-preview'" class="block overflow-hidden rounded-3xl border border-amber-500/30 bg-zinc-900 p-7 transition hover:border-amber-400 sm:p-10">
       <p class="font-bold uppercase tracking-wider text-amber-400">{{ locale.code === 'fr' ? 'Bêta publique · Jouable maintenant' : 'Public beta · Play now' }}</p>
-      <h2 class="mt-3 text-4xl font-black text-white">{{ locale.code === 'fr' ? 'Fat King : la bêta est ouverte' : 'Fat King: the beta is open' }}</h2>
-      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ locale.code === 'fr' ? 'Récoltez l’or, protégez votre roi et prenez des risques pour marquer. Découvrez les règles et la vraie map en 3D.' : 'Mine gold, defend your king and take risks to score. Explore the rules and the real map in 3D.' }}</p>
+      <h2 class="mt-3 text-4xl font-black text-white">{{ locale.code === 'fr' ? 'Fat King : les caprices du roi' : 'Fat King: royal whims' }}</h2>
+      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ locale.code === 'fr' ? 'Ravitaillez votre roi, relevez ses défis et défendez le sanctuaire. Quinze minutes pour faire les bons choix sur une map enrichie.' : 'Feed your king, answer royal challenges and defend the sanctuary. Fifteen minutes to make the right choices across four richer districts.' }}</p>
       <span class="mt-5 inline-flex min-h-11 items-center font-bold text-amber-300">{{ locale.code === 'fr' ? 'Découvrir Fat King' : 'Discover Fat King' }} →</span>
     </NuxtLink>
     <NuxtLink :to="locale.code === 'fr' ? '/fr/updates/nomad-wars-preview' : '/updates/nomad-wars-preview'" class="block rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400">

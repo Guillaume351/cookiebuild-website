@@ -1,0 +1,9 @@
+{
+  "slug": "fat-king-royal-objectives",
+  "contentType": "changelog",
+  "title": "Fat King : ravitaillement, caprices et sanctuaire",
+  "summary": "Des manches de 15 minutes, de nouveaux objectifs d’équipe et quatre quartiers enrichis pour la bêta publique.",
+  "body": "Fat King enrichit sa bêta publique pour 4 à 8 joueurs. Rejoignez une partie depuis le menu des jeux ou avec /fatking play, sur Java et Bedrock.\n\nLes manches durent désormais 15 minutes : le score final décide du vainqueur. Tous les porteurs d’or ralentissent. Nourrissez votre roi avec les rations des quatre quartiers pour alléger sa charge, tout en conservant les points produits par son or.\n\nToutes les 2 minutes, un caprice royal lance un défi : livrer des rations à l’autel, remporter un combat près de son roi ou tenir une zone de conquête. La première équipe à réussir reçoit un titre temporaire et une aura de vitesse autour du roi.\n\nLe sanctuaire devient un objectif à défendre. Payez un lingot, capturez-le sans adversaire et gardez un joueur sur place pour détourner 10 % du revenu du roi adverse en tête. Les ennemis interrompent ce revenu et une zone abandonnée redevient neutre.\n\nLa Couronne des Profondeurs conserve ses 289 × 289 blocs et ses quatre ambiances : hameau forestier, ruines, carrière et jardins. Chaque quartier accueille un stand de rations et un lieu de conquête ; l’autel et le sanctuaire sont accessibles au centre. Retrouvez la vraie map en 3D et les règles détaillées sur /fr/fat-king.\n\nLa bêta se rejoint volontairement, hors Quick Play automatique, et ne donne pas de monnaie du serveur. Le terrain reste protégé et les tirs alliés désactivés. Les règles et l’équilibrage pourront évoluer après vos parties.",
+  "coverImageUrl": "https://www.cookie-build.com/maps/fat-king-crown.webp",
+  "publishedAt": "2026-09-20T20:22:00Z"
+}
