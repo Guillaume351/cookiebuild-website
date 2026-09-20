@@ -4,6 +4,7 @@
       <div class="flex gap-2" aria-label="Map view">
         <button v-for="view in views" :key="view.label" type="button" :aria-pressed="topDown === view.topDown" class="min-h-11 rounded-xl px-4 text-sm font-bold focus-visible:outline focus-visible:outline-2 focus-visible:outline-orange-400" :class="topDown === view.topDown ? 'bg-orange-600 text-white' : 'bg-zinc-800 text-zinc-300'" @click="topDown = view.topDown">{{ view.label }}</button>
       </div>
+      <button v-if="active" type="button" class="inline-flex min-h-11 items-center rounded-xl border border-zinc-600 px-3 text-sm font-bold text-zinc-200 hover:border-orange-400" @click="active = false">Show still image</button>
       <a :href="viewerUrl" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center text-sm font-bold text-orange-300">Open full screen ↗</a>
     </div>
     <div class="relative h-[min(70vh,700px)] min-h-[360px]">

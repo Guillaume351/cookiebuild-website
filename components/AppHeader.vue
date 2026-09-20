@@ -19,7 +19,6 @@
         <NuxtLink to="/maps" class="text-white hover:text-gray-300 transition-colors">Maps</NuxtLink>
         <NuxtLink :to="localizePath('/player-stats')" class="text-white hover:text-gray-300 transition-colors"
           >{{ copy.navigation.playerStats }}</NuxtLink
-
         >
         <NuxtLink :to="localizePath('/updates')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
         <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-white hover:text-gray-300 transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
