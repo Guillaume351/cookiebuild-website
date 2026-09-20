@@ -8,6 +8,12 @@
       </p>
     </header>
 
+    <NuxtLink :to="locale.code === 'fr' ? '/fr/fat-king' : '/fat-king'" class="block overflow-hidden rounded-3xl border border-amber-500/30 bg-zinc-900 p-7 transition hover:border-amber-400 sm:p-10">
+      <p class="font-bold uppercase tracking-wider text-amber-400">{{ locale.code === 'fr' ? 'Bientôt disponible · Préversion privée' : 'Coming soon · Private preview' }}</p>
+      <h2 class="mt-3 text-4xl font-black text-white">{{ locale.code === 'fr' ? 'Fat King' : 'Fat King' }}</h2>
+      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ locale.code === 'fr' ? 'Récoltez l’or, protégez votre roi et prenez des risques pour marquer. Découvrez les règles et la vraie map en 3D.' : 'Mine gold, defend your king and take risks to score. Explore the rules and the real map in 3D.' }}</p>
+      <span class="mt-5 inline-flex min-h-11 items-center font-bold text-amber-300">{{ locale.code === 'fr' ? 'Découvrir Fat King' : 'Discover Fat King' }} →</span>
+    </NuxtLink>
     <NuxtLink :to="locale.code === 'fr' ? '/fr/nomad-wars' : '/nomad-wars'" class="block overflow-hidden rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400 sm:p-10">
       <p class="font-bold uppercase tracking-wider text-orange-400">Coming soon · Preview</p>
       <h2 class="mt-3 text-4xl font-black text-white">Nomad Wars</h2>

@@ -14,6 +14,12 @@ export interface MapPreview {
 // Only publish deliberately exported map snapshots; never connect this to a live world.
 export const mapCatalog: MapPreview[] = [
   {
+    slug: "fat-king-crown", name: "La Couronne des Profondeurs", game: "Fat King", status: "preview",
+    description: "A 289-block world of woodland houses, ruined arches, a great quarry and gardens. Separate districts, contested gold mines and routes through the hills.",
+    image: "/maps/fat-king-crown.webp", viewerId: "fatking_crown", center: [0, 70, 0], distance: 360,
+    districts: [{ name: "Woodland village", role: "Houses and groves" }, { name: "Ruined sanctuary", role: "Arches and cover" }, { name: "Great quarry", role: "Stone terraces" }, { name: "Gardens and orangery", role: "Paths and walkways" }],
+  },
+  {
     slug: "nomad-oasis", name: "Sunken Oasis", game: "Nomad Wars", status: "preview",
     description: "Blue domes, a bustling bazaar, palm gardens and a stepped necropolis surround a sunlit arena.",
     image: "/maps/nomad-oasis.webp", viewerId: "oasis_v2",
