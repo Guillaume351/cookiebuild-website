@@ -6,7 +6,7 @@ import {
   localizedAbsoluteUrl,
 } from "./site-locales";
 
-export const MAP_PREVIEW_PATHS = ["/nomad-wars", "/fr/nomad-wars", "/maps", "/updates/nomad-wars-preview", "/fr/updates/nomad-wars-preview", ...mapCatalog.map((map) => `/maps/${map.slug}`)];
+export const MAP_PREVIEW_PATHS = ["/fat-king", "/fr/fat-king", "/updates/fat-king-preview", "/fr/updates/fat-king-preview", "/nomad-wars", "/fr/nomad-wars", "/maps", "/updates/nomad-wars-preview", "/fr/updates/nomad-wars-preview", ...mapCatalog.map((map) => `/maps/${map.slug}`)];
 
 const escapeXml = (value: string) => value
   .replaceAll("&", "&amp;")

@@ -5,6 +5,8 @@ import { buildMarketingSitemap } from "../utils/marketing-sitemap";
 describe("public world previews", () => {
   it("keeps the unpublished mode distinct from existing game maps", () => {
     expect(nomadMaps).toHaveLength(3);
+    expect(findMapPreview("fat-king-crown")?.status).toBe("preview");
+    expect(mapCatalog.filter((map) => map.game === "Fat King")).toHaveLength(1);
     expect(nomadMaps.every((map) => map.status === "preview")).toBe(true);
     expect(mapCatalog.filter((map) => map.status === "available")).toHaveLength(18);
     expect(new Set(mapCatalog.map((map) => map.slug)).size).toBe(mapCatalog.length);

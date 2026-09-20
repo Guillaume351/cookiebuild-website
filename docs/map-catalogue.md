@@ -1,6 +1,6 @@
 # Offline map catalogue
 
-The public catalogue contains 21 real map renders: 8 MicroBattles, 3 Pitchout, 4 SkyWars, BuildBattles, TurfWars, BedWars, and the 3 Nomad Wars previews. Personal Skyblock islands are excluded.
+The public catalogue contains 22 real map renders: 8 MicroBattles, 3 Pitchout, 4 SkyWars, BuildBattles, TurfWars, BedWars, the 3 Nomad Wars previews, and Fat King’s Crown of the Depths. Personal Skyblock islands are excluded.
 
 BlueMap 5.23 renders disposable copies of the configured arena ZIPs with Minecraft 26.1.2 resources. The legacy MicroBattles game-5 map and legacy chunks of game-2 require conversion before rendering; the source archive remains untouched. Nomad maps come from the versioned `NomadWars/maps` ZIPs in Cookies.
 
@@ -19,3 +19,11 @@ The viewer is loaded only on request and can be unloaded with the still-image bu
 Static geometry is exported uncompressed: Nitro creates HTTP gzip/Brotli variants during the production build. BlueMap client decompression is disabled to avoid decoding HTTP-compressed responses twice. Low-resolution heightfield rendering is disabled because it distorts floating islands. SkyWars 1 also requires `remove-caves-below-y: -10000` in its BlueMap render configuration: cave culling otherwise hides islands below tree canopies.
 
 BlueMap attribution remains in the viewer. Upstream: https://github.com/BlueMap-Minecraft/BlueMap (MIT).
+
+## Fat King private preview
+
+`fatking_crown` is the real generated world for the private Fat King prototype.
+The source generator, world ZIP and map metadata are versioned with `Cookies/FatKing`.
+The website publishes only its offline BlueMap geometry, overview and top-down cover.
+Pages `/fr/fat-king` and `/fr/updates/fat-king-preview` describe prototype rules;
+publication does not register or deploy the mode on the public Minecraft server.
