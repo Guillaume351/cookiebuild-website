@@ -1,0 +1,9 @@
+{
+  "slug": "nomad-wars-fat-king-public-beta",
+  "contentType": "changelog",
+  "title": "Nomad Wars et Fat King ouvrent leur bêta publique",
+  "summary": "Deux nouveaux mini-jeux à tester entre amis : zones mouvantes ou course à l’or, avec quatre maps à explorer en 3D.",
+  "body": "Nomad Wars et Fat King sont maintenant accessibles en bêta sur play.cookie-build.com, depuis le menu des jeux ou avec leur commande dédiée. Java et Bedrock peuvent rejoindre le même serveur (port Bedrock 19132).\n\nNomad Wars : /nomadwars play, de 2 à 8 joueurs. Suivez les zones sûres mobiles, récoltez pendant deux passages et survivez à l’affrontement central. Trois maps sont proposées : Oasis, Ruins et Canyon.\n\nFat King : /fatking play, de 4 à 8 joueurs, dans deux équipes de 2 à 4. Minez l’or et confiez-le à votre roi : il rapporte des points mais ralentit. Utilisez /fatking give à proximité de votre roi pour transférer l’or et /fatking crown pour retrouver votre équipe et votre roi. La Couronne des Profondeurs accueille les premières parties.\n\nCes bêtas se rejoignent volontairement : elles ne sont pas incluses dans le Quick Play automatique et ne donnent pas de monnaie du serveur. Les règles et l’équilibrage pourront évoluer après les essais. Utilisez /leave pour quitter.\n\nRetrouvez les règles sur /fr/nomad-wars et /fr/fat-king, et les 22 rendus de maps dans le catalogue /maps. Les anciens articles de préversion restent dans l’historique ; cette note annonce leur ouverture en bêta.",
+  "coverImageUrl": "https://www.cookie-build.com/maps/fat-king-crown.webp",
+  "publishedAt": "2026-09-20T19:22:25Z"
+}

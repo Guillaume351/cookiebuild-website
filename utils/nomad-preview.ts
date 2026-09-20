@@ -1,8 +1,8 @@
 export const nomadPreviewCopy = {
   en: {
-    badge: "Coming soon · Gameplay preview", headline: "Keep moving. Choose your moment.",
-    intro: "A moving safe zone, four districts to explore and one final showdown. Nomad Wars is a new survival mini-game in development for Cookie Build.",
-    status: "Public preview — not available to play yet. Rules, timings and map balance may change. No release date has been announced.",
+    badge: "Public beta · Play now", headline: "Keep moving. Choose your moment.",
+    intro: "A moving safe zone, four districts to explore and one final showdown. Nomad Wars is a survival mini-game now playable in beta on Cookie Build.",
+    status: "Public beta for 2–8 players. Join deliberately through the game menu or /nomadwars play; automatic Quick Play does not include this beta. Matches award no server currency. Rules, timings and balance may change.",
     rulesTitle: "One match. Two passes. One survivor.",
     steps: [
       { title: "Follow a safe zone", text: "Stay inside any moving circle. Every zone protects every player. The first pass is peaceful; player combat opens on the second pass. At a crossing, switch routes, escape or fight once combat is enabled. An on-screen warning helps you return when you step outside." },
@@ -11,15 +11,15 @@ export const nomadPreviewCopy = {
     ],
     workshopTitle: "Leave a preparation. Take a risk.", workshop: "An optional timed workshop can turn ore into an upgrade. Leave it working and return later — another player can claim the result first. Shared caches keep their contents during the match and can be looted. You can also ignore them and focus on moving and fighting.",
     fairnessTitle: "Different districts, a fair start", fairness: "Food, wood, ore and workshops give each district a purpose. Basic starting supplies keep the first route from deciding the match. Crossings are scheduled, common supplies refill once when the second pass begins, and private player-triggered refills are not part of the rules.",
-    editionTitle: "Designed for Java and Bedrock", edition: "The game uses visible zone markers and on-screen guidance. The maps below are real Minecraft worlds; their interactive previews show the terrain, not the moving zones. Cross-play readability and balance still need playtesting before release.",
+    editionTitle: "Designed for Java and Bedrock", edition: "The game uses visible zone markers and on-screen guidance. The maps below are real Minecraft worlds; their interactive previews show the terrain, not the moving zones. Use the beta to test zone readability and balance together on Java and Bedrock.",
     mapsTitle: "Three worlds to discover", mapsIntro: "Explore the actual builds in 3D or as a tiny map. These are world renders, not concept art.",
-    feedbackTitle: "Help shape the first expedition", feedback: "Which map would you choose? Are the moving zones easy to understand? Would you risk leaving an upgrade behind? Share this preview with a friend and compare your ideas.",
-    share: "Copy preview link", copied: "Preview link copied.", article: "Read the design preview", atlas: "Open the map catalogue", discord: "Discuss on Discord",
+    feedbackTitle: "Help improve the beta", feedback: "Which map would you choose? Are the moving zones easy to understand? Would you risk leaving an upgrade behind? Play with a friend and compare your experiences.",
+    share: "Copy game link", copied: "Game link copied.", article: "Read the game guide", atlas: "Open the map catalogue", discord: "Discuss on Discord",
   },
   fr: {
-    badge: "Bientôt disponible · Aperçu du gameplay", headline: "Reste en mouvement. Choisis ton moment.",
-    intro: "Une zone sûre en mouvement, quatre quartiers à explorer et un affrontement final. Nomad Wars est un nouveau mini-jeu de survie en développement pour Cookie Build.",
-    status: "Aperçu public — le mode n’est pas encore jouable. Les règles, les durées et l’équilibrage peuvent évoluer. Aucune date de sortie n’est annoncée.",
+    badge: "Bêta publique · Jouable maintenant", headline: "Reste en mouvement. Choisis ton moment.",
+    intro: "Une zone sûre en mouvement, quatre quartiers à explorer et un affrontement final. Nomad Wars est un mini-jeu de survie maintenant jouable en bêta sur Cookie Build.",
+    status: "Bêta publique pour 2 à 8 joueurs. Rejoins le mode dans le menu des jeux ou avec /nomadwars play ; le Quick Play automatique ne propose pas cette bêta. Les parties ne donnent pas de monnaie du serveur. Les règles, les durées et l’équilibrage peuvent évoluer.",
     rulesTitle: "Une manche. Deux passages. Un survivant.",
     steps: [
       { title: "Suis une zone sûre", text: "Reste dans un cercle en mouvement. Toutes les zones protègent tous les joueurs. Le premier passage est sans combat entre joueurs ; les combats commencent au second. Aux croisements, change de trajectoire, échappe-toi ou combats une fois le PvP activé. Un avertissement à l’écran t’aide à revenir si tu sors." },
@@ -28,9 +28,9 @@ export const nomadPreviewCopy = {
     ],
     workshopTitle: "Laisse une préparation. Prends un risque.", workshop: "Un atelier facultatif transforme des minerais en amélioration après un délai. Laisse-le travailler et reviens plus tard : un autre joueur peut récupérer le résultat avant toi. Les caches partagées conservent leur contenu pendant la manche et peuvent être pillées. Tu peux aussi les ignorer pour te concentrer sur le déplacement et les combats.",
     fairnessTitle: "Des quartiers différents, un départ équitable", fairness: "Nourriture, bois, minerais et ateliers donnent un rôle à chaque quartier. Les provisions de départ évitent que le premier trajet décide de la partie. Les croisements sont programmés et les ressources courantes reviennent une seule fois au début du second passage, sans réapprovisionnement privé déclenché par un joueur.",
-    editionTitle: "Pensé pour Java et Bedrock", edition: "Le jeu utilise des limites de zone visibles et des indications à l’écran. Les maps ci-dessous sont de vrais mondes Minecraft : l’aperçu interactif montre le terrain, pas les zones mouvantes. La lisibilité en cross-play et l’équilibrage restent à valider en parties de test avant la sortie.",
+    editionTitle: "Pensé pour Java et Bedrock", edition: "Le jeu utilise des limites de zone visibles et des indications à l’écran. Les maps ci-dessous sont de vrais mondes Minecraft : l’aperçu interactif montre le terrain, pas les zones mouvantes. Profitez de la bêta pour tester ensemble la lisibilité des zones et l’équilibrage sur Java et Bedrock.",
     mapsTitle: "Trois mondes à découvrir", mapsIntro: "Explore les vraies constructions en 3D ou en tiny map. Ce sont des rendus des mondes, pas des illustrations de concept.",
-    feedbackTitle: "Imagine la première expédition avec nous", feedback: "Quelle map choisirais-tu ? Les zones mouvantes sont-elles faciles à comprendre ? Prendrais-tu le risque de laisser une amélioration derrière toi ? Partage cet aperçu avec un ami pour comparer vos idées.",
-    share: "Copier le lien de l’aperçu", copied: "Lien de l’aperçu copié.", article: "Lire la présentation du concept", atlas: "Ouvrir le catalogue de maps", discord: "En discuter sur Discord",
+    feedbackTitle: "Améliore la bêta avec nous", feedback: "Quelle map choisirais-tu ? Les zones mouvantes sont-elles faciles à comprendre ? Prendrais-tu le risque de laisser une amélioration derrière toi ? Joue avec un ami pour comparer vos expériences.",
+    share: "Copier le lien du jeu", copied: "Lien du jeu copié.", article: "Lire les règles du jeu", atlas: "Ouvrir le catalogue de maps", discord: "En discuter sur Discord",
   },
 } as const;
