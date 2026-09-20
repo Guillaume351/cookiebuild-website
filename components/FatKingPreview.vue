@@ -19,6 +19,7 @@
       </div>
     </header>
     <p class="rounded-2xl border border-amber-500/25 bg-amber-950/20 p-5 leading-relaxed text-amber-200">{{ copy.status }}</p>
+    <BetaPlayInstructions command="/fatking play" :french="language === 'fr'" />
     <section aria-labelledby="fat-rules"><h2 id="fat-rules" class="mb-8 text-3xl font-black text-white sm:text-4xl">{{ copy.rulesTitle }}</h2><div class="grid gap-5 md:grid-cols-3"><div v-for="(step, index) in copy.steps" :key="step.title" class="rounded-3xl border border-zinc-800 bg-zinc-900 p-7"><p class="text-4xl font-black text-amber-400/70">0{{ index + 1 }}</p><h3 class="mt-5 text-xl font-bold text-white">{{ step.title }}</h3><p class="mt-4 leading-relaxed text-zinc-300">{{ step.text }}</p></div></div></section>
     <section class="grid gap-8 lg:grid-cols-2">
       <div class="rounded-3xl border border-amber-500/25 bg-gradient-to-br from-zinc-900 to-amber-950/30 p-7 sm:p-9"><h2 class="text-2xl font-black text-white">{{ copy.riskTitle }}</h2><p class="mt-5 leading-relaxed text-zinc-300">{{ copy.risk }}</p><div class="mt-7 grid grid-cols-3 gap-3" :aria-label="language === 'fr' ? 'Or et points par seconde' : 'Gold and points per second'"><div v-for="sample in [{gold:1,points:1},{gold:16,points:4},{gold:64,points:8}]" :key="sample.gold" class="rounded-xl border border-amber-500/20 bg-black/25 p-4 text-center"><p class="text-3xl font-black text-amber-300">{{ sample.gold }}</p><p class="text-xs text-zinc-300">{{ language === 'fr' ? 'lingots' : 'ingots' }}</p><p class="mt-3 font-bold text-white">{{ sample.points }} pt/s</p></div></div></div>
@@ -46,6 +47,6 @@ async function share() {
   catch { shareStatus.value = url; }
 }
 watch(language, () => { shareStatus.value = ''; });
-useSeoMeta({ title: () => `${props.article ? copy.value.articleTitle : 'Fat King'} — ${language.value === 'fr' ? 'Bientôt disponible' : 'Coming soon'} | Cookie Build`, description: () => copy.value.intro, ogTitle: () => `${props.article ? copy.value.articleTitle : 'Fat King'} — ${copy.value.badge}`, ogDescription: () => copy.value.intro, ogImage: 'https://www.cookie-build.com/maps/fat-king-crown.webp', twitterCard: 'summary_large_image' });
+useSeoMeta({ title: () => `${props.article ? copy.value.articleTitle : 'Fat King'} — ${language.value === 'fr' ? 'Bêta publique' : 'Public beta'} | Cookie Build`, description: () => copy.value.intro, ogTitle: () => `${props.article ? copy.value.articleTitle : 'Fat King'} — ${copy.value.badge}`, ogDescription: () => copy.value.intro, ogImage: 'https://www.cookie-build.com/maps/fat-king-crown.webp', twitterCard: 'summary_large_image' });
 useHead(() => ({ htmlAttrs: { lang: language.value }, link: [{ rel: 'canonical', href: `https://www.cookie-build.com${route.path}` }] }));
 </script>

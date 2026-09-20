@@ -1,6 +1,6 @@
 # Offline map catalogue
 
-The public catalogue contains 22 real map renders: 8 MicroBattles, 3 Pitchout, 4 SkyWars, BuildBattles, TurfWars, BedWars, the 3 Nomad Wars previews, and Fat King’s Crown of the Depths. Personal Skyblock islands are excluded.
+The public catalogue contains 22 real map renders: 8 MicroBattles, 3 Pitchout, 4 SkyWars, BuildBattles, TurfWars, BedWars, the 3 Nomad Wars maps, and Fat King’s Crown of the Depths. Personal Skyblock islands are excluded.
 
 BlueMap 5.23 renders disposable copies of the configured arena ZIPs with Minecraft 26.1.2 resources. The legacy MicroBattles game-5 map and legacy chunks of game-2 require conversion before rendering; the source archive remains untouched. Nomad maps come from the versioned `NomadWars/maps` ZIPs in Cookies.
 
@@ -20,10 +20,15 @@ Static geometry is exported uncompressed: Nitro creates HTTP gzip/Brotli variant
 
 BlueMap attribution remains in the viewer. Upstream: https://github.com/BlueMap-Minecraft/BlueMap (MIT).
 
-## Fat King private preview
+## Public beta games
 
-`fatking_crown` is the real generated world for the private Fat King prototype.
+`fatking_crown` is the real generated world for the Fat King beta.
 The source generator, world ZIP and map metadata are versioned with `Cookies/FatKing`.
 The website publishes only its offline BlueMap geometry, overview and top-down cover.
-Pages `/fr/fat-king` and `/fr/updates/fat-king-preview` describe prototype rules;
-publication does not register or deploy the mode on the public Minecraft server.
+The English and French Fat King and Nomad Wars pages now describe the public beta.
+Fat King opens with two teams of 2–4 players (4–8 total); Nomad Wars accepts 2–8 players.
+Players opt in through the game menu or `/fatking play` and `/nomadwars play`.
+Automatic Quick Play excludes both betas; matches award no server currency.
+Coordinate website publication with the Minecraft release: website copy alone does not deploy the plugins.
+Historical JSON release notes stay immutable; the beta opening is recorded in
+`content/changelog/2026-09-minigames-public-beta.json`.

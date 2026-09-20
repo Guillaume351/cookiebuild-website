@@ -2,7 +2,7 @@ export interface MapPreview {
   slug: string;
   name: string;
   game: string;
-  status: "preview" | "available";
+  status: "preview" | "beta" | "available";
   description: string;
   image: string;
   viewerId: string;
@@ -14,25 +14,25 @@ export interface MapPreview {
 // Only publish deliberately exported map snapshots; never connect this to a live world.
 export const mapCatalog: MapPreview[] = [
   {
-    slug: "fat-king-crown", name: "La Couronne des Profondeurs", game: "Fat King", status: "preview",
+    slug: "fat-king-crown", name: "La Couronne des Profondeurs", game: "Fat King", status: "beta",
     description: "A 289-block world of woodland houses, ruined arches, a great quarry and gardens. Separate districts, contested gold mines and routes through the hills.",
     image: "/maps/fat-king-crown.webp", viewerId: "fatking_crown", center: [0, 70, 0], distance: 360,
     districts: [{ name: "Woodland village", role: "Houses and groves" }, { name: "Ruined sanctuary", role: "Arches and cover" }, { name: "Great quarry", role: "Stone terraces" }, { name: "Gardens and orangery", role: "Paths and walkways" }],
   },
   {
-    slug: "nomad-oasis", name: "Sunken Oasis", game: "Nomad Wars", status: "preview",
+    slug: "nomad-oasis", name: "Sunken Oasis", game: "Nomad Wars", status: "beta",
     description: "Blue domes, a bustling bazaar, palm gardens and a stepped necropolis surround a sunlit arena.",
     image: "/maps/nomad-oasis.webp", viewerId: "oasis_v2",
     districts: [{ name: "Palace", role: "Workshop" }, { name: "Bazaar", role: "Food" }, { name: "Palm gardens", role: "Wood" }, { name: "Necropolis quarry", role: "Ore" }],
   },
   {
-    slug: "nomad-ruins", name: "Forgotten Kingdom", game: "Nomad Wars", status: "preview",
+    slug: "nomad-ruins", name: "Forgotten Kingdom", game: "Nomad Wars", status: "beta",
     description: "A ruined cathedral, monastery gardens, timber village and ancient aqueduct reclaim an overgrown kingdom.",
     image: "/maps/nomad-ruins.webp", viewerId: "ruins_v2",
     districts: [{ name: "Cathedral", role: "Workshop" }, { name: "Monastery", role: "Food" }, { name: "Timber village", role: "Wood" }, { name: "Aqueduct quarry", role: "Ore" }],
   },
   {
-    slug: "nomad-canyon", name: "Redrock Frontier", game: "Nomad Wars", status: "preview",
+    slug: "nomad-canyon", name: "Redrock Frontier", game: "Nomad Wars", status: "beta",
     description: "A frontier town, terraced mesa mine, adobe fortress and ravine sawmill meet around a red-sand colosseum.",
     image: "/maps/nomad-canyon.webp", viewerId: "canyon_v2",
     districts: [{ name: "Frontier town", role: "Food" }, { name: "Mesa mine", role: "Ore" }, { name: "Adobe fortress", role: "Workshop" }, { name: "Ravine sawmill", role: "Wood" }],

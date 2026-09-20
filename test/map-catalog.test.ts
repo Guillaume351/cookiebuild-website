@@ -3,11 +3,11 @@ import { findMapPreview, mapCatalog, mapViewerUrl, nomadMaps } from "../utils/ma
 import { buildMarketingSitemap } from "../utils/marketing-sitemap";
 
 describe("public world previews", () => {
-  it("keeps the unpublished mode distinct from existing game maps", () => {
+  it("labels the four beta maps distinctly while retaining all existing game maps", () => {
     expect(nomadMaps).toHaveLength(3);
-    expect(findMapPreview("fat-king-crown")?.status).toBe("preview");
+    expect(findMapPreview("fat-king-crown")?.status).toBe("beta");
     expect(mapCatalog.filter((map) => map.game === "Fat King")).toHaveLength(1);
-    expect(nomadMaps.every((map) => map.status === "preview")).toBe(true);
+    expect(nomadMaps.every((map) => map.status === "beta")).toBe(true);
     expect(mapCatalog.filter((map) => map.status === "available")).toHaveLength(18);
     expect(new Set(mapCatalog.map((map) => map.slug)).size).toBe(mapCatalog.length);
     expect(findMapPreview("../../admin")).toBeUndefined();

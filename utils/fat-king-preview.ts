@@ -1,11 +1,11 @@
 export const fatKingPreviewCopy = {
   fr: {
-    badge: "En développement · Bientôt disponible", headline: "Plus d’or. Plus de points. Plus de risques.",
+    badge: "Bêta publique · Jouable maintenant", headline: "Plus d’or. Plus de points. Plus de risques.",
     intro: "Mine de l’or, confie-le à ton roi et protège sa couronne. Face à vous : des équipes qui veulent la même richesse… et une boussole qui désigne le roi le plus chargé.",
-    status: "Préversion privée. Le jeu n’est pas encore ouvert au public et aucune date de sortie n’est annoncée. Explore la vraie map et partage les règles avec un ami : les valeurs pourront évoluer après les essais.",
+    status: "Bêta publique pour 4 à 8 joueurs, répartis en deux équipes de 2 à 4. Rejoins le menu des jeux ou utilise /fatking play. Le Quick Play automatique ne propose pas cette bêta et les parties ne donnent pas de monnaie du serveur. Les réglages pourront évoluer après vos essais.",
     rulesTitle: "Une couronne. Toute une équipe.",
     steps: [
-      { title: "Récoltez ensemble", text: "La partie commence avec au moins deux équipes de deux joueurs. Les équipes ont la même taille. Le prototype propose deux ou quatre équipes, de deux à quatre joueurs chacune par défaut. Chaque équipe reçoit un roi choisi au hasard." },
+      { title: "Récoltez ensemble", text: "La bêta se joue à deux équipes de 2 à 4 joueurs et démarre à partir de 4 joueurs. Chaque équipe reçoit un roi choisi au hasard. Utilise /fatking crown pour retrouver ton équipe et ton roi." },
       { title: "Chargez votre roi", text: "Seuls les lingots récoltés pendant la partie comptent. Interagis avec ton roi à proximité pour lui donner ton or ; la commande /fatking give fait aussi le transfert. Son or rapporte des points chaque seconde, sans être consommé." },
       { title: "Défendez la couronne", text: "Plus votre roi porte d’or, plus il marque… et plus il ralentit. La première équipe à 600 points gagne. À sa mort, un autre coéquipier vivant reçoit la couronne au hasard : le rôle tourne, les points restent." },
     ],
@@ -17,7 +17,7 @@ export const fatKingPreviewCopy = {
     mines: "Un filon récolté devient une roche sombre incassable pendant 30 secondes. Des étincelles annoncent son retour pendant les 5 dernières secondes. Les mines sont communes : tenir un passage, escorter un mineur ou tendre une embuscade compte autant que la pioche. Les bases ne fabriquent pas d’or gratuit.",
     deathTitle: "Tomber coûte cher, mais ne termine pas la partie",
     death: "À la mort, l’or porté est perdu : la moitié tombe au sol, le reste disparaît. Aucun bonus n’est donné pour tuer. Après 8 secondes, tu réapparais avec ton équipement de base et une courte protection qui s’arrête si tu agis. Une déconnexion fait aussi perdre l’or et transmet la couronne ; tu peux retrouver ton équipe sous 90 secondes avec /fatking, sans récupérer la richesse perdue.",
-    ending: "Une manche dure au maximum 15 minutes. Le score départage les équipes, puis l’or porté par leur roi. Une égalité sur ces deux critères donne une manche nulle entre les équipes concernées. Ces réglages constituent le point de départ des essais privés.",
+    ending: "Une manche dure au maximum 15 minutes. Le score départage les équipes, puis l’or porté par leur roi. Une égalité sur ces deux critères donne une manche nulle entre les équipes concernées. Ces réglages constituent le point de départ de la bêta.",
     mapsTitle: "La Couronne des Profondeurs", mapsIntro: "Un monde de 289 × 289 blocs, avec des bases éloignées, des quartiers distincts et des chemins entre les bois et les collines. Explore les blocs en 3D ou prends du recul avec la tiny map.",
     districtsTitle: "Des coins à connaître, des routes à choisir",
     districts: [
@@ -27,18 +27,18 @@ export const fatKingPreviewCopy = {
       { slug: "gardens", title: "Les jardins et l’orangerie", text: "Serre, passerelles et végétation offrent une autre route autour de la couronne centrale." },
     ],
     atlas: "Toutes les maps", mapLink: "Voir la fiche de la map", tiny: "La map vue du dessus", editionTitle: "Pensé pour Java et Bedrock",
-    edition: "Le prototype utilise des blocs, une boussole, des messages et des interactions Minecraft classiques. Les essais multijoueurs se déroulent en privé. La validation visuelle sur un vrai client Bedrock reste une étape distincte avant l’ouverture.",
+    edition: "Le jeu utilise des blocs, une boussole, des messages et des interactions Minecraft classiques. Testez la bêta ensemble sur Java et Bedrock et signalez les difficultés de lecture ou de contrôle.",
     feedbackTitle: "À discuter avec ton prochain coéquipier",
     questions: ["Tu préfères escorter un roi très riche ou garder une équipe plus mobile ?", "Faut-il attaquer le roi en tête ou prendre le contrôle des mines ?", "30 secondes avant le retour d’un filon : assez pour encourager les déplacements ?", "La perte de la moitié du butin vous donne-t-elle envie de tenter une revanche ?"],
-    share: "Copier le lien pour un ami", copied: "Lien copié.", article: "Lire l’annonce", back: "Retour aux actualités", articleTitle: "Fat King : la couronne qui pèse lourd", articleIntro: "Bientôt sur Cookie Build : un jeu d’équipe où accumuler de l’or rend à la fois plus puissant et plus vulnérable.",
+    share: "Copier le lien pour un ami", copied: "Lien copié.", article: "Lire l’annonce", back: "Retour aux actualités", articleTitle: "Fat King : la couronne qui pèse lourd", articleIntro: "En bêta sur Cookie Build : un jeu d’équipe où accumuler de l’or rend à la fois plus puissant et plus vulnérable.",
   },
   en: {
-    badge: "In development · Coming soon", headline: "More gold. More points. More risk.",
+    badge: "Public beta · Play now", headline: "More gold. More points. More risk.",
     intro: "Mine gold, hand it to your king and defend the crown. Rival teams want the same riches… and everyone’s compass points to the king carrying the most gold.",
-    status: "Private preview. The game is not open to the public and no release date has been announced. Explore the real map and share the rules with a friend. Values may change after playtesting.",
+    status: "Public beta for 4–8 players in two teams of 2–4. Join through the game menu or use /fatking play. Automatic Quick Play does not include this beta, and matches award no server currency. Settings may change after your playtests.",
     rulesTitle: "One crown. A whole team.",
     steps: [
-      { title: "Gather together", text: "Matches need at least two teams of two players. Teams have equal sizes. The prototype supports two or four teams, with two to four players per team by default. One king is chosen randomly from each team." },
+      { title: "Gather together", text: "The beta has two teams of 2–4 players and needs at least 4 players to start. One king is chosen randomly from each team. Use /fatking crown to check your team and king." },
       { title: "Give gold to your king", text: "Only gold earned during the match counts. Interact with your nearby king or use /fatking give to transfer your gold. The king’s gold earns points every second without being consumed." },
       { title: "Defend the crown", text: "A heavier king scores faster but moves slower. The first team to 600 points wins. When the king dies, another living teammate receives the crown randomly. Your team keeps its points." },
     ],
@@ -50,7 +50,7 @@ export const fatKingPreviewCopy = {
     mines: "Mined gold becomes dark unbreakable rock for 30 seconds. Sparks signal its return during the final 5 seconds. Mines are shared: holding a route, escorting a miner or setting an ambush matters as much as digging. Bases do not generate free gold.",
     deathTitle: "A setback, not the end",
     death: "On death, all carried gold is lost: half drops as loot and the rest disappears. Kills give no bonus. You respawn after 8 seconds with basic gear and brief protection that ends when you act. Disconnecting also loses your gold and passes on the crown; you can rejoin your team within 90 seconds with /fatking, without the lost wealth.",
-    ending: "A round lasts at most 15 minutes. The highest score wins, with the king’s carried gold breaking a score tie. A tie on both criteria is a draw between those teams. These settings are the starting point for private playtests.",
+    ending: "A round lasts at most 15 minutes. The highest score wins, with the king’s carried gold breaking a score tie. A tie on both criteria is a draw between those teams. These settings are the starting point for the beta.",
     mapsTitle: "Crown of the Depths", mapsIntro: "A 289 × 289-block world with separated bases, distinct districts and paths through woodland and hills. Inspect the blocks in 3D or switch to the tiny map.",
     districtsTitle: "Places to learn. Routes to choose.",
     districts: [
@@ -60,9 +60,9 @@ export const fatKingPreviewCopy = {
       { slug: "gardens", title: "The gardens and orangery", text: "A glasshouse, walkways and vegetation provide another route around the central crown." },
     ],
     atlas: "All maps", mapLink: "Open the map page", tiny: "The map from above", editionTitle: "Designed for Java and Bedrock",
-    edition: "The prototype uses ordinary Minecraft blocks, a compass, messages and interactions. Multiplayer testing is private. Visual testing on a real Bedrock client remains a separate step before public access.",
+    edition: "The game uses ordinary Minecraft blocks, a compass, messages and interactions. Play the beta together on Java and Bedrock and report any readability or control issues.",
     feedbackTitle: "Talk it over with your next teammate",
     questions: ["Would you escort a very rich king or keep your team mobile?", "Hunt the leading king or control the mines?", "Does a 30-second refill encourage enough movement?", "Does losing half the loot make a revenge attack worth trying?"],
-    share: "Copy link for a friend", copied: "Link copied.", article: "Read the announcement", back: "Back to updates", articleTitle: "Fat King: a crown worth its weight", articleIntro: "Coming to Cookie Build: a team game where collecting gold makes you stronger and more vulnerable at the same time.",
+    share: "Copy link for a friend", copied: "Link copied.", article: "Read the announcement", back: "Back to updates", articleTitle: "Fat King: a crown worth its weight", articleIntro: "Now in beta on Cookie Build: a team game where collecting gold makes you stronger and more vulnerable at the same time.",
   },
 };
