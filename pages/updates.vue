@@ -9,6 +9,12 @@
       </p>
     </section>
 
+    <NuxtLink :to="locale.code === 'fr' ? '/fr/updates/nomad-wars-preview' : '/updates/nomad-wars-preview'" class="block rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400">
+      <p class="text-sm font-bold uppercase tracking-wider text-orange-400">In development · Coming soon</p>
+      <h2 class="mt-3 text-3xl font-black text-white">A first look at Nomad Wars</h2>
+      <p class="mt-4 text-zinc-300">Moving safe zones, a final showdown and three worlds to explore in 3D. Read the proposed rules and help shape the game.</p>
+      <span class="mt-4 inline-flex min-h-11 items-center font-bold text-orange-300">Read the preview →</span>
+    </NuxtLink>
     <section
       v-if="nextEvent"
       aria-labelledby="next-event-title"

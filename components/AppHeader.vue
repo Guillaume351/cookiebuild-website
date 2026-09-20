@@ -16,6 +16,7 @@
       <div class="hidden items-center space-x-4 text-sm lg:flex">
         <NuxtLink :to="localizePath('/')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.home }}</NuxtLink>
         <NuxtLink :to="localizePath('/games')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.games }}</NuxtLink>
+        <NuxtLink to="/maps" class="text-white hover:text-gray-300 transition-colors">Maps</NuxtLink>
         <NuxtLink :to="localizePath('/player-stats')" class="text-white hover:text-gray-300 transition-colors"
           >{{ copy.navigation.playerStats }}</NuxtLink
         >
@@ -68,6 +69,7 @@
         >
           {{ copy.navigation.games }}
         </NuxtLink>
+        <NuxtLink to="/maps" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">Maps</NuxtLink>
         <NuxtLink
           :to="localizePath('/player-stats')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"

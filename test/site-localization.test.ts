@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { gameLandings } from "../utils/game-landings";
 import { localizedGameLandings } from "../utils/game-landings-localized";
-import { buildMarketingSitemap } from "../utils/marketing-sitemap";
+import { buildMarketingSitemap, MAP_PREVIEW_PATHS } from "../utils/marketing-sitemap";
 import {
   LOCALIZED_MARKETING_PATHS,
   SITE_LOCALES,
@@ -109,7 +109,7 @@ describe("country-targeted public-site localization", () => {
   it("generates one indexable URL per locale and page with complete alternates", () => {
     const sitemap = buildMarketingSitemap();
     const localizedUrlCount = LOCALIZED_MARKETING_PATHS.length * SITE_LOCALES.length;
-    expect((sitemap.match(/<loc>/g) || []).length).toBe(localizedUrlCount);
+    expect((sitemap.match(/<loc>/g) || []).length).toBe(localizedUrlCount + MAP_PREVIEW_PATHS.length);
     expect(sitemap).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
 
     for (const path of LOCALIZED_MARKETING_PATHS) {

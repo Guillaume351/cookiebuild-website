@@ -1,8 +1,12 @@
+import { mapCatalog } from "./map-catalog";
+
 import {
   LOCALIZED_MARKETING_PATHS,
   SITE_LOCALES,
   localizedAbsoluteUrl,
 } from "./site-locales";
+
+export const MAP_PREVIEW_PATHS = ["/nomad-wars", "/fr/nomad-wars", "/maps", "/updates/nomad-wars-preview", "/fr/updates/nomad-wars-preview", ...mapCatalog.map((map) => `/maps/${map.slug}`)];
 
 const escapeXml = (value: string) => value
   .replaceAll("&", "&amp;")
@@ -35,6 +39,7 @@ export function buildMarketingSitemap() {
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
     ...localizedEntries,
+    ...MAP_PREVIEW_PATHS.map((path) => `  <url><loc>https://www.cookie-build.com${escapeXml(path)}</loc></url>`),
     "</urlset>",
     "",
   ].join("\n");

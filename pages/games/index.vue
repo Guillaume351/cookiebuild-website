@@ -8,6 +8,12 @@
       </p>
     </header>
 
+    <NuxtLink :to="locale.code === 'fr' ? '/fr/nomad-wars' : '/nomad-wars'" class="block overflow-hidden rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400 sm:p-10">
+      <p class="font-bold uppercase tracking-wider text-orange-400">Coming soon · Preview</p>
+      <h2 class="mt-3 text-4xl font-black text-white">Nomad Wars</h2>
+      <p class="mt-4 max-w-2xl text-lg text-zinc-300">Follow moving safe zones, explore four districts and survive the final showdown. Discover the rules and three real map previews.</p>
+      <span class="mt-5 inline-flex min-h-11 items-center font-bold text-orange-300">Explore the preview →</span>
+    </NuxtLink>
     <section aria-labelledby="all-games-title">
       <h2 id="all-games-title" class="sr-only">{{ copy.catalog.allModes }}</h2>
       <div class="grid gap-6 md:grid-cols-2">

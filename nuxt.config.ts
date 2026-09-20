@@ -14,9 +14,16 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-07-13",
   devtools: { enabled: process.env.NODE_ENV !== "production" },
   modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
+  nitro: { compressPublicAssets: true },
   runtimeConfig: { public: { gaMeasurementId: "" } },
   routeRules: {
     "/**": { headers: publicSecurityHeaders },
+    "/map-viewer/**": {
+      headers: {
+        "Content-Security-Policy": "default-src 'self'; base-uri 'self'; connect-src 'self'; font-src 'self' data:; frame-ancestors 'self'; img-src 'self' data: blob:; object-src 'none'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:",
+        "X-Frame-Options": "SAMEORIGIN",
+      },
+    },
     "/news": { redirect: { to: "/updates", statusCode: 301 } },
     "/changelog": { redirect: { to: "/updates", statusCode: 301 } },
     "/lobby.webp": { redirect: { to: "/lobby-hero-clean-1600.webp", statusCode: 301 } },
