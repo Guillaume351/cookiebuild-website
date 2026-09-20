@@ -14,6 +14,7 @@ export default defineNuxtConfig({
   compatibilityDate: "2026-07-13",
   devtools: { enabled: process.env.NODE_ENV !== "production" },
   modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
+  nitro: { compressPublicAssets: true },
   runtimeConfig: { public: { gaMeasurementId: "" } },
   routeRules: {
     "/**": { headers: publicSecurityHeaders },
