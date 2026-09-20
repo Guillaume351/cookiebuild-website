@@ -21,6 +21,7 @@
                 >{{ copy.navigation.games }}</NuxtLink
               >
             </li>
+            <li><NuxtLink to="/maps" class="text-gray-400 hover:text-white transition-colors">Map catalogue</NuxtLink></li>
             <li>
               <NuxtLink to="/player-stats" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.navigation.playerStats }}</NuxtLink
