@@ -7,6 +7,7 @@
       <button v-if="active" type="button" class="inline-flex min-h-11 items-center rounded-xl border border-zinc-600 px-3 text-sm font-bold text-zinc-200 hover:border-orange-400" @click="active = false">Show still image</button>
       <a :href="viewerUrl" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-11 items-center text-sm font-bold text-orange-300">Open full screen ↗</a>
     </div>
+    <p v-if="active" role="status" class="border-b border-zinc-800 px-4 py-3 text-sm text-orange-200">{{ loadingHint }}</p>
     <div class="relative h-[min(70vh,700px)] min-h-[360px]">
       <iframe v-if="active" :key="viewerUrl" :src="viewerUrl" :title="`${map.name} — ${topDown ? 'top-down' : '3D'} map`" class="absolute inset-0 h-full w-full border-0" loading="lazy" allow="fullscreen" referrerpolicy="same-origin" />
       <template v-else>
@@ -22,6 +23,10 @@
 <script setup lang="ts">
 import { mapViewerUrl, type MapPreview } from "@/utils/map-catalog";
 const props = defineProps<{ map: MapPreview }>();
+const { locale } = useSiteLocale();
+const loadingHint = computed(() => locale.value.code === "fr"
+  ? "Le premier chargement peut prendre quelques dizaines de secondes. Si la vue reste vide, utilise l’image fixe ci-dessous."
+  : "The first load can take a few dozen seconds. If the view stays blank, use the still image below.");
 const active = ref(false);
 const topDown = ref(false);
 const views = [{ label: "3D world", topDown: false }, { label: "Tiny map", topDown: true }];
