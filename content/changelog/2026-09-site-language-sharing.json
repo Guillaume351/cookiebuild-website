@@ -1,0 +1,9 @@
+{
+  "slug": "site-language-navigation-and-sharing",
+  "contentType": "changelog",
+  "title": "Un site plus cohérent, dans votre langue",
+  "summary": "Navigation simplifiée, traductions complétées et liens de partage des mini-jeux corrigés.",
+  "body": "Le choix de langue se fait désormais depuis le menu principal. Les sélecteurs redondants des pages ont été retirés et les pages des nouveaux mini-jeux ainsi que le catalogue de cartes suivent la langue choisie.\n\nChanger de langue conserve la page visitée et ses paramètres. Les métadonnées de partage des pages de mini-jeux et de cartes pointent vers leur propre adresse, au lieu de l’accueil. Les liens directs sont vérifiés sur les profils de navigateurs mobiles.\n\nLe sitemap inclut les pages et cartes localisées, avec leurs liens vers les autres langues. Les anciennes notes de mise à jour conservent leur texte publié.",
+  "coverImageUrl": "https://www.cookie-build.com/maps/nomad-oasis.webp",
+  "publishedAt": "2026-09-21T06:48:18Z"
+}

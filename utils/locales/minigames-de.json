@@ -1,0 +1,52 @@
+{
+  "nomad": {
+    "badge": "Öffentliche Beta · Jetzt spielen", "headline": "Bleib in Bewegung. Nutze deinen Moment.",
+    "intro": "Bewegliche Schutzzonen, vier Viertel und ein letzter Kampf: Nomad Wars ist das neue Überlebensminispiel von Cookie Build, jetzt als Beta spielbar.",
+    "status": "Öffentliche Beta für 2–8 Spieler. Wähle das Spiel im Menü oder nutze /nomadwars play. Die automatische Schnellsuche schließt diese Beta aus. Partien geben keine Serverwährung. Regeln, Zeiten und Balance können sich ändern.",
+    "rulesTitle": "Eine Partie. Zwei Runden. Ein Überlebender.",
+    "steps": [
+      {"title":"Folge einer Schutzzone","text":"Bleib in einem der beweglichen Kreise. Jede Zone schützt alle Spieler. In der ersten Runde gibt es kein PvP; in der zweiten beginnen die Kämpfe. An Kreuzungen kannst du die Route wechseln, fliehen oder kämpfen. Außerhalb der Zone hilft dir eine Bildschirmwarnung zurück."},
+      {"title":"Nutze beide Runden","text":"Sammle Nahrung, Holz und Erz in den Vierteln. Alle starten mit derselben Grundausrüstung; Eisen ist die höchste Ausrüstungsstufe. Gemeinsame Vorräte werden einmal zu Beginn der zweiten Runde aufgefüllt. Starke Belohnungen bleiben begrenzt."},
+      {"title":"Trefft euch in der Mitte","text":"Nach zwei Runden ziehen die Zonen für den Endkampf ins Zentrum. Der letzte Überlebende gewinnt. Leben nach dem 90-sekündigen Finale noch mehrere Spieler, endet die Partie unentschieden."}
+    ],
+    "workshopTitle":"Lass etwas herstellen. Geh ein Risiko ein.","workshop":"Eine optionale Werkstatt verarbeitet Erz mit Verzögerung zu einer Verbesserung. Komm später zurück – vielleicht holt ein anderer Spieler das Ergebnis zuerst ab. Gemeinsame Verstecke behalten ihren Inhalt während der Partie und können geplündert werden. Du kannst dich auch ganz auf Bewegung und Kämpfe konzentrieren.",
+    "fairnessTitle":"Verschiedene Viertel, gleiche Startchancen","fairness":"Nahrung, Holz, Erz und Werkstätten geben jedem Viertel eine Aufgabe. Die Startvorräte verhindern, dass schon die erste Route entscheidet. Kreuzungen sind geplant; gemeinsame Ressourcen kommen einmal zum Beginn der zweiten Runde zurück. Private, von Spielern ausgelöste Auffüllungen gibt es nicht.",
+    "editionTitle":"Für Java und Bedrock gedacht","edition":"Sichtbare Zonenmarkierungen und Bildschirmhinweise helfen dir. Die Vorschauen zeigen echte Minecraft-Welten mit ihrem Gelände, jedoch keine beweglichen Zonen. Testet Lesbarkeit und Balance gemeinsam auf Java und Bedrock.",
+    "mapsTitle":"Drei Welten entdecken","mapsIntro":"Erkunde die echten Bauten in 3D oder von oben. Dies sind gerenderte Spielwelten, keine Konzeptbilder.",
+    "feedbackTitle":"Hilf, die Beta zu verbessern","feedback":"Welche Karte gefällt dir? Sind die beweglichen Zonen verständlich? Würdest du eine Verbesserung zurücklassen? Spielt zusammen und vergleicht eure Erfahrungen.",
+    "share":"Spiellink kopieren","copied":"Spiellink kopiert.","article":"Spielregeln lesen","atlas":"Kartenkatalog öffnen","discord":"Auf Discord diskutieren"
+  },
+  "fatKing": {
+    "badge":"Öffentliche Beta · Jetzt spielen","headline":"Mehr Gold. Mehr Punkte. Mehr Risiko.",
+    "intro":"Baue Gold ab, gib es deinem König und schütze seine Krone. Andere Teams wollen denselben Reichtum – und jeder Kompass zeigt auf den König mit dem meisten Gold.",
+    "status":"Öffentliche Beta für 4–8 Spieler in zwei Teams mit je 2–4 Spielern. Tritt über das Spielmenü oder /fatking play bei. Die automatische Schnellsuche schließt diese Beta aus; Partien geben keine Serverwährung. Einstellungen können sich nach euren Tests ändern.",
+    "rulesTitle":"Eine Krone. Ein ganzes Team.",
+    "steps":[
+      {"title":"Sammelt gemeinsam","text":"Die Beta hat zwei Teams mit je 2–4 Spielern und startet ab 4 Spielern. Jedes Team erhält einen zufällig bestimmten König. Mit /fatking crown findest du dein Team und deinen König."},
+      {"title":"Gebt dem König Gold","text":"Nur Gold aus dieser Partie zählt. Interagiere in der Nähe mit deinem König oder nutze /fatking give zur Übergabe. Sein Gold erzeugt jede Sekunde Punkte, ohne verbraucht zu werden."},
+      {"title":"Verteidigt die Krone","text":"Mehr Gold bringt dem König mehr Punkte, macht ihn aber langsamer. Nach 15 Minuten gewinnt das Team mit den meisten Punkten. Ein lebender Erbe wird vorher bestimmt und übernimmt beim Tod des Königs. Die Teampunkte bleiben erhalten."}
+    ],
+    "riskTitle":"Wann sind die Taschen des Königs voll genug?","risk":"1 Barren bringt 1 Punkt pro Sekunde, 16 bringen 4, 64 bringen 8. Der zusätzliche Ertrag sinkt. Die Grenze liegt bei 64 Barren. Jeder Goldträger wird langsamer: Untertanen um bis zu 40 %, Könige um bis zu 55 %. Nahrung verringert das Goldgewicht des Königs, ohne Punkte zu senken. Plant also auch die Versorgung.",
+    "compassTitle":"Reichtum lockt Jäger an","compass":"Jeder Kompass zeigt auf den König mit dem meisten Gold, auch auf einen Verbündeten. Bei Gleichstand wechselt das Ziel zwischen den Königen. Trägt keiner Gold, zeigt er zur Kartenmitte. Team und Richtung sind sichtbar, gegnerische Inventare bleiben verborgen.",
+    "minesTitle":"Minen, um die sich erneutes Kämpfen lohnt","mines":"Abgebautes Gold wird für 30 Sekunden zu dunklem, unzerstörbarem Gestein. In den letzten 5 Sekunden kündigen Funken seine Rückkehr an. Die Minen sind gemeinsam: Wege sichern, Bergleute eskortieren und Hinterhalte legen zählen ebenso wie der Abbau. Basen erzeugen kein kostenloses Gold.",
+    "objectivesTitle":"Die Krone stellt neue Forderungen",
+    "objectives":[
+      {"title":"Versorgt den König","text":"Jedes Viertel hat einen Essensstand. Interagiere mit dem Fass, nimm eine Ration in die Hand und gib sie deinem König aus höchstens 4 Blöcken Entfernung. Du kannst 3 Rationen tragen und standübergreifend alle 20 Sekunden eine holen. Eine Ration gibt 40 Sättigung; sie sinkt jede Sekunde um 1 und gleicht das Gewicht von bis zu 16 Barren aus."},
+      {"title":"Erfüllt königliche Launen","text":"Alle 2 Minuten beginnt eine 90-sekündige Aufgabe: Der König liefert 2 Rationen zum Altar, sein Team besiegt einen Gegner in seiner Nähe oder hält den markierten Ort 10 Sekunden ununterbrochen in Überzahl. Das erste erfolgreiche Team erhält einen Titel für 90 Sekunden und eine Geschwindigkeitsaura von 10 % um seinen König."},
+      {"title":"Haltet das Heiligtum","text":"Gib am Tisch des Heiligtums 1 Barren aus und bleibe 12 Sekunden ohne Gegner in der Zone. Solange ein Teammitglied dort Wache hält, erhält euer Team 10 % der erzeugten Punkte des führenden gegnerischen Königs. Ein Gegner unterbricht diesen Ertrag; eine leere Zone wird neutral. Entscheidet, wer sie verteidigt."}
+    ],
+    "deathTitle":"Ein Rückschlag, nicht das Ende","death":"Beim Tod geht alles getragene Gold verloren: Die Hälfte fällt als Beute zu Boden, der Rest verschwindet. Für Abschüsse gibt es keine Extrapunkte. Nach 8 Sekunden kehrst du mit Grundausrüstung und kurzem Schutz zurück, der bei einer Aktion endet. Eine Trennung verliert ebenfalls das Gold und gibt die Krone weiter. Mit /fatking kannst du innerhalb von 90 Sekunden ohne das verlorene Gold zu deinem Team zurückkehren.",
+    "ending":"Eine volle Partie dauert 15 Minuten; 600 Punkte führen zu keinem vorzeitigen Sieg. Erst entscheidet die Punktzahl, dann das Gold des Königs. Gleichstand bei beidem bedeutet ein Unentschieden zwischen diesen Teams. Dies sind die Anfangseinstellungen der Beta.",
+    "mapsTitle":"Crown of the Depths","mapsIntro":"Eine Welt mit 289 × 289 Blöcken, getrennten Basen und Wegen durch Wald und Hügel. Vier Essensstände, vier Eroberungsorte, ein Altar und ein Heiligtum laden zum Viertelwechsel ein. Erkunde die Bauten in 3D oder von oben.",
+    "districtsTitle":"Orte kennenlernen. Wege wählen.",
+    "districts":[
+      {"slug":"village","title":"Das Walddorf","text":"Fachwerkhäuser, Marktstände und Baumgruppen schaffen enge Wege für Eskorte und Flucht."},
+      {"slug":"ruins","title":"Das verfallene Heiligtum","text":"Offene Bögen und zerbrochene Mauern prägen die Zugänge. Prüfe deine Winkel vor dem Überqueren."},
+      {"slug":"quarry","title":"Der große Steinbruch","text":"Steinterrassen, Kran und Bergbauanlagen bilden eine weithin erkennbare Landmarke."},
+      {"slug":"gardens","title":"Gärten und Orangerie","text":"Gewächshaus, Stege und Pflanzen bieten einen anderen Weg um die zentrale Krone."}
+    ],
+    "atlas":"Alle Karten","mapLink":"Kartenseite öffnen","tiny":"Die Karte von oben","editionTitle":"Für Java und Bedrock gedacht","edition":"Das Spiel nutzt normale Minecraft-Blöcke, Kompasse, Nachrichten und Interaktionen. Spielt die Beta gemeinsam auf Java und Bedrock und meldet Probleme mit Lesbarkeit oder Steuerung.",
+    "feedbackTitle":"Besprecht eure nächste Partie","questions":["Eskortierst du lieber einen reichen König oder hältst du dein Team beweglich?","Den führenden König jagen, den eigenen versorgen oder das Heiligtum halten?","Reichen 30 Sekunden bis zur Erzrückkehr für genügend Bewegung?","Macht der Verlust der halben Beute einen Gegenangriff reizvoll?"],
+    "share":"Link für Freunde kopieren","copied":"Link kopiert.","article":"Ankündigung lesen","back":"Zurück zu Neuigkeiten","articleTitle":"Fat King: eine Krone mit Gewicht","articleIntro":"Jetzt als Beta auf Cookie Build: ein Teamspiel, in dem Gold zugleich stärker und verletzlicher macht."
+  }
+}

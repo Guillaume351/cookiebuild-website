@@ -4,10 +4,10 @@ import {
   SITE_LOCALES,
   localizedAbsoluteUrl,
   localizedSeoLinks,
-  localizedSitePath,
   siteLocaleFromPath,
   stripSiteLocale,
   supportsLocalizedSitePath,
+  switchSiteLocalePath,
 } from "@/utils/site-locales";
 
 export function useSiteLocale() {
@@ -17,10 +17,9 @@ export function useSiteLocale() {
   const basePath = computed(() => stripSiteLocale(route.path));
   const supportsLocalizedRoute = computed(() => supportsLocalizedSitePath(basePath.value));
 
-  const localizePath = (path: string) => localizedSitePath(path, locale.value);
+  const localizePath = (path: string) => switchSiteLocalePath(path, locale.value.code);
   const switchLocalePath = (code: (typeof SITE_LOCALES)[number]["code"]) => {
-    const targetBase = supportsLocalizedRoute.value ? basePath.value : "/";
-    return localizedSitePath(targetBase, code);
+    return switchSiteLocalePath(route.fullPath, code);
   };
 
   return {
@@ -34,13 +33,13 @@ export function useSiteLocale() {
 }
 
 export function useLocalizedSeo(
-  path: string,
+  path: MaybeRefOrGetter<string>,
   title: MaybeRefOrGetter<string>,
   description: MaybeRefOrGetter<string>,
 ) {
   const route = useRoute();
   const locale = computed(() => siteLocaleFromPath(route.path));
-  const canonicalUrl = computed(() => localizedAbsoluteUrl(path, locale.value));
+  const canonicalUrl = computed(() => localizedAbsoluteUrl(toValue(path), locale.value));
 
   useSeoMeta({
     title: computed(() => toValue(title)),
@@ -64,7 +63,7 @@ export function useLocalizedSeo(
     htmlAttrs: { lang: locale.value.htmlLang },
     link: [
       { rel: "canonical", href: canonicalUrl.value },
-      ...localizedSeoLinks(path),
+      ...localizedSeoLinks(toValue(path)),
     ],
   }));
 

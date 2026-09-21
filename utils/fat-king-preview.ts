@@ -1,4 +1,11 @@
-export const fatKingPreviewCopy = {
+import type { SiteLocaleCode } from "./site-locales";
+import de from "./locales/minigames-de.json";
+import it from "./locales/minigames-it.json";
+import bg from "./locales/minigames-bg.json";
+import es from "./locales/minigames-es.json";
+import hi from "./locales/minigames-hi.json";
+import ptBR from "./locales/minigames-pt-BR.json";
+const existingCopy = {
   fr: {
     badge: "Bêta publique · Jouable maintenant", headline: "Plus d’or. Plus de points. Plus de risques.",
     intro: "Mine de l’or, confie-le à ton roi et protège sa couronne. Face à vous : des équipes qui veulent la même richesse… et une boussole qui désigne le roi le plus chargé.",
@@ -78,3 +85,13 @@ export const fatKingPreviewCopy = {
     share: "Copy link for a friend", copied: "Link copied.", article: "Read the announcement", back: "Back to updates", articleTitle: "Fat King: a crown worth its weight", articleIntro: "Now in beta on Cookie Build: a team game where collecting gold makes you stronger and more vulnerable at the same time.",
   },
 };
+
+export const fatKingPreviewCopy = {
+  ...existingCopy,
+  "de": de.fatKing,
+  "it": it.fatKing,
+  "bg": bg.fatKing,
+  "es": es.fatKing,
+  "hi": hi.fatKing,
+  "pt-BR": ptBR.fatKing,
+} satisfies Record<SiteLocaleCode, typeof existingCopy.en>;

@@ -11,7 +11,7 @@
     <img
       v-if="post.coverImageUrl"
       :src="post.coverImageUrl"
-      :alt="`${post.title} illustration`"
+      :alt="post.title"
       class="aspect-[16/9] w-full bg-zinc-950 object-cover"
       loading="lazy"
       decoding="async"
@@ -22,17 +22,17 @@
           variant="outline"
           :class="post.contentType === 'news' ? 'border-orange-500/40 bg-orange-500/10 text-orange-200' : 'border-sky-500/40 bg-sky-500/10 text-sky-200'"
         >
-          {{ updateTypeLabel(post.contentType) }}
+          {{ post.contentType === 'news' ? copy.news : copy.note }}
         </Badge>
         <time
           class="text-xs font-bold uppercase tracking-[0.16em] text-zinc-500"
           :datetime="publishedDateTime"
         >
-          {{ newsDate(post.publishedAt) }}
+          {{ publishedLabel }}
         </time>
       </div>
       <h2 :class="compact ? 'mt-3 text-xl' : 'mt-4 text-2xl sm:text-3xl'" class="break-words font-black text-white">
-        <NuxtLink :to="`/updates/${post.slug}`" class="outline-none hover:text-orange-100 focus-visible:ring-2 focus-visible:ring-orange-400">
+        <NuxtLink :to="localizePath(`/updates/${post.slug}`)" class="outline-none hover:text-orange-100 focus-visible:ring-2 focus-visible:ring-orange-400">
           {{ post.title }}
         </NuxtLink>
       </h2>
@@ -44,18 +44,18 @@
         v-if="post.supersededBySlug"
         class="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100"
       >
-        This update has been replaced by
-        <NuxtLink :to="`/updates/${post.supersededBySlug}`" class="font-bold underline underline-offset-2">
-          a newer clarification
+        {{ copy.replaced }}
+        <NuxtLink :to="localizePath(`/updates/${post.supersededBySlug}`)" class="font-bold underline underline-offset-2">
+          {{ copy.newer }}
         </NuxtLink>.
       </p>
       <p
         v-if="post.supersedesSlug"
         class="mt-4 text-sm text-zinc-500"
       >
-        This update replaces
-        <NuxtLink :to="`/updates/${post.supersedesSlug}`" class="font-semibold text-zinc-300 underline underline-offset-2">
-          an earlier note
+        {{ copy.replaces }}
+        <NuxtLink :to="localizePath(`/updates/${post.supersedesSlug}`)" class="font-semibold text-zinc-300 underline underline-offset-2">
+          {{ copy.earlier }}
         </NuxtLink>.
       </p>
 
@@ -86,10 +86,10 @@
 
       <NuxtLink
         v-else
-        :to="`/updates/${post.slug}`"
+        :to="localizePath(`/updates/${post.slug}`)"
         class="mt-5 inline-flex min-h-11 items-center gap-2 rounded-lg text-sm font-bold text-orange-300 outline-none transition hover:text-orange-200 focus-visible:ring-2 focus-visible:ring-orange-400 focus-visible:ring-offset-4 focus-visible:ring-offset-zinc-900"
       >
-        Read the full update
+        {{ copy.read }}
         <ArrowRight class="h-4 w-4" aria-hidden="true" />
       </NuxtLink>
     </div>
@@ -101,7 +101,8 @@ import { ArrowRight } from "@lucide/vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { changelogBodyLines } from "@/utils/changelog";
 import { newsBodyText, newsBulletLines, newsDate } from "@/utils/news";
-import { updateTypeLabel, type UpdatePost } from "@/utils/updates";
+import { updatesCopy } from "@/utils/updates-copy";
+import { type UpdatePost } from "@/utils/updates";
 
 const props = withDefaults(defineProps<{
   post: UpdatePost;
@@ -110,6 +111,9 @@ const props = withDefaults(defineProps<{
   compact: false,
 });
 
+const { locale, localizePath } = useSiteLocale();
+const copy = computed(() => updatesCopy[locale.value.code]);
+const publishedLabel = computed(() => publishedDateTime.value ? newsDate(props.post.publishedAt, locale.value.htmlLang) : copy.value.recent);
 const publishedDateTime = computed(() => {
   if (!props.post.publishedAt) return undefined;
   const date = props.post.publishedAt instanceof Date
