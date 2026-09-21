@@ -82,7 +82,7 @@ it("tracks the already-open shop once when permission is granted without navigat
   const { useAnalytics, target, append } = await browserFixture();
   const source = await readFile(new URL("../pages/shop/index.vue", import.meta.url), "utf8");
   const start = source.indexOf("const shopAnalytics = useShopAnalytics();");
-  const end = source.indexOf("const french =", start);
+  const end = source.indexOf("const freeItem =", start);
   expect(start).toBeGreaterThan(0);
   const setup = new Function("useShopAnalytics", "onMounted", "watch", source.slice(start, end));
   const mounted: Array<() => void> = [];

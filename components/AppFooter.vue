@@ -21,45 +21,45 @@
                 >{{ copy.navigation.games }}</NuxtLink
               >
             </li>
-            <li><NuxtLink to="/maps" class="text-gray-400 hover:text-white transition-colors">Map catalogue</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/maps')" class="text-gray-400 hover:text-white transition-colors">{{ copy.navigation.maps }}</NuxtLink></li>
             <li>
-              <NuxtLink to="/player-stats" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/player-stats')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.navigation.playerStats }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/updates" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/updates')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.navigation.updates }}</NuxtLink
               >
             </li>
-            <li><NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-gray-400 hover:text-white transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-gray-400 hover:text-white transition-colors">{{ copy.navigation.shop }}</NuxtLink></li>
             <li>
-              <NuxtLink to="/status" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/status')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.serverStatus }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/rules" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/rules')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.rules }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/support" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/support')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.support }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/account/delete" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/account/delete')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.deleteAccount }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/privacy" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/privacy')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.privacy }}</NuxtLink
               >
             </li>
             <li>
-              <NuxtLink to="/terms" class="text-gray-400 hover:text-white transition-colors"
+              <NuxtLink :to="localizePath('/terms')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.footer.terms }}</NuxtLink
               >
             </li>
@@ -85,7 +85,7 @@
       </div>
     </div>
     <div v-if="analytics.enabled" class="container mx-auto px-4 pb-6 text-center">
-      <button class="min-h-11 px-3 text-sm text-zinc-400 underline hover:text-white" @click="analytics.preferencesOpen.value = true">{{ locale.code === "fr" ? "Préférences de mesure d’audience" : "Analytics preferences" }}</button>
+      <button class="min-h-11 px-3 text-sm text-zinc-400 underline hover:text-white" @click="analytics.preferencesOpen.value = true">{{ copy.footer.analyticsPreferences }}</button>
     </div>
   </footer>
 </template>
@@ -93,5 +93,5 @@
 <script setup lang="ts">
 const siteAnalytics = useSiteAnalytics();
 const analytics = useShopAnalytics();
-const { copy, locale, localizePath } = useSiteLocale();
+const { copy, localizePath } = useSiteLocale();
 </script>

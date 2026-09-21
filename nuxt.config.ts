@@ -1,4 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { addLocalizedPreviewAliases } from "./utils/localized-preview-routes";
+
 const publicSecurityHeaders = process.env.NODE_ENV === "production"
   ? {
       "Content-Security-Policy": "default-src 'self'; base-uri 'self'; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; font-src 'self' data:; form-action 'self'; frame-ancestors 'none'; img-src 'self' data: https:; object-src 'none'; script-src 'self' 'unsafe-inline' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; upgrade-insecure-requests",
@@ -15,6 +17,9 @@ export default defineNuxtConfig({
   devtools: { enabled: process.env.NODE_ENV !== "production" },
   modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
   nitro: { compressPublicAssets: true },
+  hooks: {
+    "pages:resolved": addLocalizedPreviewAliases,
+  },
   runtimeConfig: { public: { gaMeasurementId: "" } },
   routeRules: {
     "/**": { headers: publicSecurityHeaders },
@@ -49,7 +54,6 @@ export default defineNuxtConfig({
         { property: "og:title", content: "Cookie Build | Classic Minecraft Mini-Games Server" },
         { property: "og:description", content: "Play free Minecraft mini-games across Java and Bedrock, with live status, clear rules, and player safety tools." },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: "https://www.cookie-build.com/" },
         { property: "og:image", content: "https://www.cookie-build.com/cookie-build-social.webp" },
         { property: "og:image:width", content: "1200" },
         { property: "og:image:height", content: "630" },

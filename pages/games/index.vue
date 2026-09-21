@@ -8,17 +8,17 @@
       </p>
     </header>
 
-    <NuxtLink :to="locale.code === 'fr' ? '/fr/fat-king' : '/fat-king'" class="block overflow-hidden rounded-3xl border border-amber-500/30 bg-zinc-900 p-7 transition hover:border-amber-400 sm:p-10">
-      <p class="font-bold uppercase tracking-wider text-amber-400">{{ locale.code === 'fr' ? 'Bêta publique · Jouable maintenant' : 'Public beta · Play now' }}</p>
-      <h2 class="mt-3 text-4xl font-black text-white">{{ locale.code === 'fr' ? 'Fat King' : 'Fat King' }}</h2>
-      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ locale.code === 'fr' ? 'Récoltez l’or, protégez votre roi et prenez des risques pour marquer. Découvrez les règles et la vraie map en 3D.' : 'Mine gold, defend your king and take risks to score. Explore the rules and the real map in 3D.' }}</p>
-      <span class="mt-5 inline-flex min-h-11 items-center font-bold text-amber-300">{{ locale.code === 'fr' ? 'Découvrir Fat King' : 'Discover Fat King' }} →</span>
+    <NuxtLink :to="localizePath('/fat-king')" class="block overflow-hidden rounded-3xl border border-amber-500/30 bg-zinc-900 p-7 transition hover:border-amber-400 sm:p-10">
+      <p class="font-bold uppercase tracking-wider text-amber-400">{{ fatCopy.badge }}</p>
+      <h2 class="mt-3 text-4xl font-black text-white">Fat King</h2>
+      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ fatCopy.intro }}</p>
+      <span class="mt-5 inline-flex min-h-11 items-center font-bold text-amber-300">{{ miniUi.discover }} →</span>
     </NuxtLink>
-    <NuxtLink :to="locale.code === 'fr' ? '/fr/nomad-wars' : '/nomad-wars'" class="block overflow-hidden rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400 sm:p-10">
-      <p class="font-bold uppercase tracking-wider text-orange-400">{{ locale.code === 'fr' ? 'Bêta publique · Jouable maintenant' : 'Public beta · Play now' }}</p>
+    <NuxtLink :to="localizePath('/nomad-wars')" class="block overflow-hidden rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400 sm:p-10">
+      <p class="font-bold uppercase tracking-wider text-orange-400">{{ fatCopy.badge }}</p>
       <h2 class="mt-3 text-4xl font-black text-white">Nomad Wars</h2>
-      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ locale.code === 'fr' ? 'Suis les zones sûres mobiles, explore quatre quartiers et survis au combat final. Découvre les règles et les trois vraies maps.' : 'Follow moving safe zones, explore four districts and survive the final showdown. Discover the rules and three real map previews.' }}</p>
-      <span class="mt-5 inline-flex min-h-11 items-center font-bold text-orange-300">{{ locale.code === 'fr' ? 'Découvrir la bêta' : 'Explore the beta' }} →</span>
+      <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ nomadCopy.intro }}</p>
+      <span class="mt-5 inline-flex min-h-11 items-center font-bold text-orange-300">{{ miniUi.discover }} →</span>
     </NuxtLink>
     <section aria-labelledby="all-games-title">
       <h2 id="all-games-title" class="sr-only">{{ copy.catalog.allModes }}</h2>
@@ -46,13 +46,19 @@
 </template>
 
 <script setup lang="ts">
+import { nomadPreviewCopy } from "@/utils/nomad-preview";
+import { fatKingPreviewCopy } from "@/utils/fat-king-preview";
+import { gameUiCopy } from "@/utils/game-ui-copy";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
 import { localizedGameLandings } from "@/utils/game-landings-localized";
 
 definePageMeta({ alias: ["/fr/games", "/de/games", "/it/games", "/bg/games", "/es/games", "/hi/games", "/pt-br/games"] });
 
-const { locale, copy } = useSiteLocale();
+const { locale, copy, localizePath } = useSiteLocale();
+const nomadCopy = computed(() => nomadPreviewCopy[locale.value.code]);
+const fatCopy = computed(() => fatKingPreviewCopy[locale.value.code]);
+const miniUi = computed(() => gameUiCopy[locale.value.code]);
 const localizedGames = computed(() => localizedGameLandings(locale.value.code));
 
 useLocalizedSeo(

@@ -126,9 +126,10 @@ describe("cosmetic schema and web rendering", () => {
       readFile(new URL("../components/cosmetics/CosmeticPreview.vue", import.meta.url), "utf8"),
     ]);
     expect(page).toContain('useFetch("/api/cosmetics/catalog"');
-    expect(page).toContain("1 € TTC / mois");
+    expect(page).toContain("euros(subscriptionProduct.priceTtcCents)");
+    expect(page).toContain("shop.monthlyTax");
     expect(page).toContain('aria-disabled="true"');
-    expect(page).toContain("Aucun avantage compétitif");
+    expect(page).toContain("shop.fairTitle");
     expect(page).not.toContain("/api/mobile/v1");
     expect(preview).toContain('role="img"');
     expect(preview).toContain("prefers-reduced-motion: reduce");

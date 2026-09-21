@@ -19,6 +19,8 @@ export interface SiteCopy {
   navigation: {
     home: string;
     games: string;
+    maps: string;
+    shop: string;
     playerStats: string;
     updates: string;
     status: string;
@@ -38,6 +40,7 @@ export interface SiteCopy {
     helpText: string;
     contact: string;
     legal: string;
+    analyticsPreferences: string;
   };
   common: {
     copy: string;
@@ -133,8 +136,8 @@ export interface SiteCopy {
 
 export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
   en: {
-    navigation: { home: "Home", games: "Games", playerStats: "Player Stats", updates: "Updates", status: "Status", language: "Language", toggle: "Toggle navigation" },
-    footer: { description: "The classic Minecraft mini-games server, bringing players together since 2014.", quickLinks: "Quick Links", serverStatus: "Server Status", rules: "Server Rules", support: "Support", deleteAccount: "Delete App Account", privacy: "Privacy", terms: "Terms", help: "Support", helpText: "Need help? Contact our support team.", contact: "Contact Support", legal: "Not affiliated with Mojang or Microsoft." },
+    navigation: { maps: "Map catalogue", shop: "Shop", home: "Home", games: "Games", playerStats: "Player Stats", updates: "Updates", status: "Status", language: "Language", toggle: "Toggle navigation" },
+    footer: { analyticsPreferences: "Analytics preferences", description: "The classic Minecraft mini-games server, bringing players together since 2014.", quickLinks: "Quick Links", serverStatus: "Server Status", rules: "Server Rules", support: "Support", deleteAccount: "Delete App Account", privacy: "Privacy", terms: "Terms", help: "Support", helpText: "Need help? Contact our support team.", contact: "Contact Support", legal: "Not affiliated with Mojang or Microsoft." },
     common: { copy: "Copy", copied: "copied", available: "Available Now", comingSoon: "Coming Soon", beta: "BETA", serverAddress: "Server address", bedrockPort: "Bedrock port", viewStats: "View player stats", socialImageAlt: "Cookie Build Minecraft server lobby" },
     home: {
       title: "Cookie Build | Minecraft Mini-Games for Java & Bedrock",
@@ -177,8 +180,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "Checking server…", onePlayer: "player", players: "players", onlineZero: "Online · 0 players right now", offline: "Server offline", partial: "Status check partially unavailable", unavailable: "Status check unavailable", availability: "Edition availability", checkUnavailable: "check unavailable", online: "online" },
   },
   fr: {
-    navigation: { home: "Accueil", games: "Jeux", playerStats: "Statistiques", updates: "Actualités", status: "Statut", language: "Langue", toggle: "Ouvrir la navigation" },
-    footer: { description: "Le serveur classique de mini-jeux Minecraft qui rassemble les joueurs depuis 2014.", quickLinks: "Liens rapides", serverStatus: "Statut du serveur", rules: "Règles", support: "Assistance", deleteAccount: "Supprimer le compte de l’app", privacy: "Confidentialité", terms: "Conditions", help: "Assistance", helpText: "Besoin d’aide ? Contactez notre équipe.", contact: "Contacter l’assistance", legal: "Sans affiliation avec Mojang ou Microsoft." },
+    navigation: { maps: "Catalogue des maps", shop: "Boutique", home: "Accueil", games: "Jeux", playerStats: "Statistiques", updates: "Actualités", status: "Statut", language: "Langue", toggle: "Ouvrir la navigation" },
+    footer: { analyticsPreferences: "Préférences de mesure d’audience", description: "Le serveur classique de mini-jeux Minecraft qui rassemble les joueurs depuis 2014.", quickLinks: "Liens rapides", serverStatus: "Statut du serveur", rules: "Règles", support: "Assistance", deleteAccount: "Supprimer le compte de l’app", privacy: "Confidentialité", terms: "Conditions", help: "Assistance", helpText: "Besoin d’aide ? Contactez notre équipe.", contact: "Contacter l’assistance", legal: "Sans affiliation avec Mojang ou Microsoft." },
     common: { copy: "Copier", copied: "copié", available: "Disponible maintenant", comingSoon: "Bientôt disponible", beta: "BÊTA", serverAddress: "Adresse du serveur", bedrockPort: "Port Bedrock", viewStats: "Voir les statistiques", socialImageAlt: "Lobby du serveur Minecraft Cookie Build" },
     home: {
       title: "Cookie Build | Mini-jeux Minecraft pour Java et Bedrock",
@@ -221,8 +224,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "Vérification du serveur…", onePlayer: "joueur", players: "joueurs", onlineZero: "En ligne · aucun joueur actuellement", offline: "Serveur hors ligne", partial: "Une partie des vérifications est indisponible", unavailable: "Vérification indisponible", availability: "Disponibilité par édition", checkUnavailable: "vérification indisponible", online: "en ligne" },
   },
   de: {
-    navigation: { home: "Startseite", games: "Spiele", playerStats: "Spielerstatistik", updates: "Neuigkeiten", status: "Status", language: "Sprache", toggle: "Navigation öffnen" },
-    footer: { description: "Der klassische Minecraft-Minispiele-Server, der seit 2014 Spieler zusammenbringt.", quickLinks: "Schnellzugriff", serverStatus: "Serverstatus", rules: "Regeln", support: "Support", deleteAccount: "App-Konto löschen", privacy: "Datenschutz", terms: "Bedingungen", help: "Support", helpText: "Brauchst du Hilfe? Kontaktiere unser Support-Team.", contact: "Support kontaktieren", legal: "Keine Verbindung zu Mojang oder Microsoft." },
+    navigation: { maps: "Kartenkatalog", shop: "Shop", home: "Startseite", games: "Spiele", playerStats: "Spielerstatistik", updates: "Neuigkeiten", status: "Status", language: "Sprache", toggle: "Navigation öffnen" },
+    footer: { analyticsPreferences: "Analyse-Einstellungen", description: "Der klassische Minecraft-Minispiele-Server, der seit 2014 Spieler zusammenbringt.", quickLinks: "Schnellzugriff", serverStatus: "Serverstatus", rules: "Regeln", support: "Support", deleteAccount: "App-Konto löschen", privacy: "Datenschutz", terms: "Bedingungen", help: "Support", helpText: "Brauchst du Hilfe? Kontaktiere unser Support-Team.", contact: "Support kontaktieren", legal: "Keine Verbindung zu Mojang oder Microsoft." },
     common: { copy: "Kopieren", copied: "kopiert", available: "Jetzt verfügbar", comingSoon: "Demnächst", beta: "BETA", serverAddress: "Serveradresse", bedrockPort: "Bedrock-Port", viewStats: "Spielerstatistik ansehen", socialImageAlt: "Minecraft-Serverlobby von Cookie Build" },
     home: {
       title: "Cookie Build | Minecraft-Minispiele für Java und Bedrock",
@@ -265,8 +268,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "Server wird geprüft…", onePlayer: "Spieler", players: "Spieler", onlineZero: "Online · derzeit 0 Spieler", offline: "Server offline", partial: "Statusprüfung teilweise nicht verfügbar", unavailable: "Statusprüfung nicht verfügbar", availability: "Verfügbarkeit der Editionen", checkUnavailable: "Prüfung nicht verfügbar", online: "online" },
   },
   it: {
-    navigation: { home: "Home", games: "Giochi", playerStats: "Statistiche", updates: "Novità", status: "Stato", language: "Lingua", toggle: "Apri navigazione" },
-    footer: { description: "Il classico server di minigiochi Minecraft che unisce i giocatori dal 2014.", quickLinks: "Link rapidi", serverStatus: "Stato del server", rules: "Regole", support: "Assistenza", deleteAccount: "Elimina account dell’app", privacy: "Privacy", terms: "Termini", help: "Assistenza", helpText: "Hai bisogno di aiuto? Contatta il nostro team.", contact: "Contatta l’assistenza", legal: "Nessuna affiliazione con Mojang o Microsoft." },
+    navigation: { maps: "Catalogo mappe", shop: "Negozio", home: "Home", games: "Giochi", playerStats: "Statistiche", updates: "Novità", status: "Stato", language: "Lingua", toggle: "Apri navigazione" },
+    footer: { analyticsPreferences: "Preferenze di analisi", description: "Il classico server di minigiochi Minecraft che unisce i giocatori dal 2014.", quickLinks: "Link rapidi", serverStatus: "Stato del server", rules: "Regole", support: "Assistenza", deleteAccount: "Elimina account dell’app", privacy: "Privacy", terms: "Termini", help: "Assistenza", helpText: "Hai bisogno di aiuto? Contatta il nostro team.", contact: "Contatta l’assistenza", legal: "Nessuna affiliazione con Mojang o Microsoft." },
     common: { copy: "Copia", copied: "copiato", available: "Disponibile ora", comingSoon: "Prossimamente", beta: "BETA", serverAddress: "Indirizzo del server", bedrockPort: "Porta Bedrock", viewStats: "Vedi statistiche", socialImageAlt: "Lobby del server Minecraft Cookie Build" },
     home: {
       title: "Cookie Build | Minigiochi Minecraft per Java e Bedrock",
@@ -309,8 +312,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "Controllo del server…", onePlayer: "giocatore", players: "giocatori", onlineZero: "Online · 0 giocatori al momento", offline: "Server offline", partial: "Parte del controllo non è disponibile", unavailable: "Controllo non disponibile", availability: "Disponibilità per edizione", checkUnavailable: "controllo non disponibile", online: "online" },
   },
   bg: {
-    navigation: { home: "Начало", games: "Игри", playerStats: "Статистика", updates: "Новини", status: "Статус", language: "Език", toggle: "Отвори навигацията" },
-    footer: { description: "Класически Minecraft сървър с миниигри, който събира играчи от 2014 г.", quickLinks: "Бързи връзки", serverStatus: "Статус на сървъра", rules: "Правила", support: "Поддръжка", deleteAccount: "Изтриване на профил", privacy: "Поверителност", terms: "Условия", help: "Поддръжка", helpText: "Имате нужда от помощ? Свържете се с екипа ни.", contact: "Свържете се с нас", legal: "Няма връзка с Mojang или Microsoft." },
+    navigation: { maps: "Каталог с карти", shop: "Магазин", home: "Начало", games: "Игри", playerStats: "Статистика", updates: "Новини", status: "Статус", language: "Език", toggle: "Отвори навигацията" },
+    footer: { analyticsPreferences: "Настройки за анализ", description: "Класически Minecraft сървър с миниигри, който събира играчи от 2014 г.", quickLinks: "Бързи връзки", serverStatus: "Статус на сървъра", rules: "Правила", support: "Поддръжка", deleteAccount: "Изтриване на профил", privacy: "Поверителност", terms: "Условия", help: "Поддръжка", helpText: "Имате нужда от помощ? Свържете се с екипа ни.", contact: "Свържете се с нас", legal: "Няма връзка с Mojang или Microsoft." },
     common: { copy: "Копирай", copied: "е копирано", available: "Достъпно сега", comingSoon: "Очаквайте скоро", beta: "БЕТА", serverAddress: "Адрес на сървъра", bedrockPort: "Bedrock порт", viewStats: "Статистика на играчите", socialImageAlt: "Minecraft лобито на сървъра Cookie Build" },
     home: {
       title: "Cookie Build | Minecraft миниигри за Java и Bedrock",
@@ -353,8 +356,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "Проверка на сървъра…", onePlayer: "играч", players: "играчи", onlineZero: "Онлайн · в момента няма играчи", offline: "Сървърът е офлайн", partial: "Част от проверките не са достъпни", unavailable: "Проверката не е достъпна", availability: "Достъпност на версиите", checkUnavailable: "проверката не е достъпна", online: "онлайн" },
   },
   es: {
-    navigation: { home: "Inicio", games: "Juegos", playerStats: "Estadísticas", updates: "Novedades", status: "Estado", language: "Idioma", toggle: "Abrir navegación" },
-    footer: { description: "El servidor clásico de minijuegos de Minecraft que reúne jugadores desde 2014.", quickLinks: "Enlaces rápidos", serverStatus: "Estado del servidor", rules: "Reglas", support: "Soporte", deleteAccount: "Eliminar cuenta", privacy: "Privacidad", terms: "Términos", help: "Soporte", helpText: "¿Necesitas ayuda? Contacta con nuestro equipo.", contact: "Contactar con soporte", legal: "Sin afiliación con Mojang ni Microsoft." },
+    navigation: { maps: "Catálogo de mapas", shop: "Tienda", home: "Inicio", games: "Juegos", playerStats: "Estadísticas", updates: "Novedades", status: "Estado", language: "Idioma", toggle: "Abrir navegación" },
+    footer: { analyticsPreferences: "Preferencias de analítica", description: "El servidor clásico de minijuegos de Minecraft que reúne jugadores desde 2014.", quickLinks: "Enlaces rápidos", serverStatus: "Estado del servidor", rules: "Reglas", support: "Soporte", deleteAccount: "Eliminar cuenta", privacy: "Privacidad", terms: "Términos", help: "Soporte", helpText: "¿Necesitas ayuda? Contacta con nuestro equipo.", contact: "Contactar con soporte", legal: "Sin afiliación con Mojang ni Microsoft." },
     common: { copy: "Copiar", copied: "copiado", available: "Disponible ahora", comingSoon: "Próximamente", beta: "BETA", serverAddress: "Dirección del servidor", bedrockPort: "Puerto de Bedrock", viewStats: "Ver estadísticas", socialImageAlt: "Lobby del servidor de Minecraft Cookie Build" },
     home: {
       title: "Cookie Build | Minijuegos de Minecraft para Java y Bedrock",
@@ -397,8 +400,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "Comprobando servidor…", onePlayer: "jugador", players: "jugadores", onlineZero: "En línea · 0 jugadores ahora", offline: "Servidor fuera de línea", partial: "Comprobación parcialmente no disponible", unavailable: "Comprobación no disponible", availability: "Disponibilidad por edición", checkUnavailable: "comprobación no disponible", online: "en línea" },
   },
   hi: {
-    navigation: { home: "होम", games: "गेम", playerStats: "खिलाड़ी आँकड़े", updates: "अपडेट", status: "स्थिति", language: "भाषा", toggle: "नेविगेशन खोलें" },
-    footer: { description: "2014 से खिलाड़ियों को जोड़ने वाला क्लासिक Minecraft मिनी-गेम सर्वर।", quickLinks: "ज़रूरी लिंक", serverStatus: "सर्वर स्थिति", rules: "सर्वर नियम", support: "सहायता", deleteAccount: "ऐप खाता हटाएँ", privacy: "गोपनीयता", terms: "शर्तें", help: "सहायता", helpText: "मदद चाहिए? हमारी सहायता टीम से संपर्क करें।", contact: "सहायता से संपर्क", legal: "Mojang या Microsoft से संबद्ध नहीं है।" },
+    navigation: { maps: "मैप सूची", shop: "दुकान", home: "होम", games: "गेम", playerStats: "खिलाड़ी आँकड़े", updates: "अपडेट", status: "स्थिति", language: "भाषा", toggle: "नेविगेशन खोलें" },
+    footer: { analyticsPreferences: "विश्लेषण प्राथमिकताएँ", description: "2014 से खिलाड़ियों को जोड़ने वाला क्लासिक Minecraft मिनी-गेम सर्वर।", quickLinks: "ज़रूरी लिंक", serverStatus: "सर्वर स्थिति", rules: "सर्वर नियम", support: "सहायता", deleteAccount: "ऐप खाता हटाएँ", privacy: "गोपनीयता", terms: "शर्तें", help: "सहायता", helpText: "मदद चाहिए? हमारी सहायता टीम से संपर्क करें।", contact: "सहायता से संपर्क", legal: "Mojang या Microsoft से संबद्ध नहीं है।" },
     common: { copy: "कॉपी करें", copied: "कॉपी हो गया", available: "अभी उपलब्ध", comingSoon: "जल्द आ रहा है", beta: "बीटा", serverAddress: "सर्वर पता", bedrockPort: "Bedrock पोर्ट", viewStats: "खिलाड़ी आँकड़े देखें", socialImageAlt: "Cookie Build Minecraft सर्वर की लॉबी" },
     home: {
       title: "Cookie Build | Java और Bedrock के लिए Minecraft मिनी-गेम",
@@ -441,8 +444,8 @@ export const SITE_COPY: Record<SiteLocaleCode, SiteCopy> = {
     status: { checking: "सर्वर जाँचा जा रहा है…", onePlayer: "खिलाड़ी", players: "खिलाड़ी", onlineZero: "ऑनलाइन · अभी 0 खिलाड़ी", offline: "सर्वर ऑफलाइन है", partial: "स्थिति की कुछ जाँच उपलब्ध नहीं", unavailable: "स्थिति जाँच उपलब्ध नहीं", availability: "संस्करण की उपलब्धता", checkUnavailable: "जाँच उपलब्ध नहीं", online: "ऑनलाइन" },
   },
   "pt-BR": {
-    navigation: { home: "Início", games: "Jogos", playerStats: "Estatísticas", updates: "Novidades", status: "Status", language: "Idioma", toggle: "Abrir navegação" },
-    footer: { description: "O servidor clássico de minijogos do Minecraft que reúne jogadores desde 2014.", quickLinks: "Links rápidos", serverStatus: "Status do servidor", rules: "Regras", support: "Suporte", deleteAccount: "Excluir conta do app", privacy: "Privacidade", terms: "Termos", help: "Suporte", helpText: "Precisa de ajuda? Fale com nossa equipe.", contact: "Falar com o suporte", legal: "Sem vínculo com a Mojang ou a Microsoft." },
+    navigation: { maps: "Catálogo de mapas", shop: "Loja", home: "Início", games: "Jogos", playerStats: "Estatísticas", updates: "Novidades", status: "Status", language: "Idioma", toggle: "Abrir navegação" },
+    footer: { analyticsPreferences: "Preferências de análise", description: "O servidor clássico de minijogos do Minecraft que reúne jogadores desde 2014.", quickLinks: "Links rápidos", serverStatus: "Status do servidor", rules: "Regras", support: "Suporte", deleteAccount: "Excluir conta do app", privacy: "Privacidade", terms: "Termos", help: "Suporte", helpText: "Precisa de ajuda? Fale com nossa equipe.", contact: "Falar com o suporte", legal: "Sem vínculo com a Mojang ou a Microsoft." },
     common: { copy: "Copiar", copied: "copiado", available: "Disponível agora", comingSoon: "Em breve", beta: "BETA", serverAddress: "Endereço do servidor", bedrockPort: "Porta Bedrock", viewStats: "Ver estatísticas", socialImageAlt: "Lobby do servidor de Minecraft Cookie Build" },
     home: {
       title: "Cookie Build | Minijogos de Minecraft para Java e Bedrock",

@@ -4,9 +4,18 @@ import {
   LOCALIZED_MARKETING_PATHS,
   SITE_LOCALES,
   localizedAbsoluteUrl,
+  localizedSitePath,
 } from "./site-locales";
 
-export const MAP_PREVIEW_PATHS = ["/fat-king", "/fr/fat-king", "/updates/fat-king-preview", "/fr/updates/fat-king-preview", "/nomad-wars", "/fr/nomad-wars", "/maps", "/updates/nomad-wars-preview", "/fr/updates/nomad-wars-preview", ...mapCatalog.map((map) => `/maps/${map.slug}`)];
+const mapAndArticlePaths = [
+  "/updates/fat-king-preview",
+  "/updates/nomad-wars-preview",
+  ...mapCatalog.map((map) => `/maps/${map.slug}`),
+];
+
+export const MAP_PREVIEW_PATHS = mapAndArticlePaths.flatMap((path) =>
+  SITE_LOCALES.map((locale) => localizedSitePath(path, locale)),
+);
 
 const escapeXml = (value: string) => value
   .replaceAll("&", "&amp;")
@@ -32,14 +41,13 @@ function localizedUrlEntry(path: string, localeCode: (typeof SITE_LOCALES)[numbe
 }
 
 export function buildMarketingSitemap() {
-  const localizedEntries = LOCALIZED_MARKETING_PATHS.flatMap((path) =>
+  const localizedEntries = [...new Set([...LOCALIZED_MARKETING_PATHS, ...mapAndArticlePaths])].flatMap((path) =>
     SITE_LOCALES.map((locale) => localizedUrlEntry(path, locale.code)),
   );
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
     '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
     ...localizedEntries,
-    ...MAP_PREVIEW_PATHS.map((path) => `  <url><loc>https://www.cookie-build.com${escapeXml(path)}</loc></url>`),
     "</urlset>",
     "",
   ].join("\n");

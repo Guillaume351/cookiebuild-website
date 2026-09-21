@@ -1,6 +1,13 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { buildMarketingSitemap } from "../utils/marketing-sitemap";
+import { SITE_LOCALES } from "../utils/site-locales";
+import { SHOP_COPY } from "../utils/shop-copy";
+import { SITE_COPY } from "../utils/site-copy";
+import { RULES_COPY } from "../utils/rules-copy";
+import { STATUS_COPY } from "../utils/status-copy";
+import { SUPPORT_COPY } from "../utils/support-copy";
+import { ANALYTICS_CONSENT_COPY } from "../utils/analytics-consent-copy";
 
 async function source(path: string) {
   return readFile(new URL(path, import.meta.url), "utf8");
@@ -17,32 +24,45 @@ describe("public experience", () => {
     expect(counter).not.toContain("Quick Play ready");
   });
 
-  it("publishes safety rules in English, French, Spanish, and Brazilian Portuguese", async () => {
+  it("publishes complete safety rules in every header language", async () => {
     const rules = await source("../pages/rules.vue");
 
-    expect(rules).toContain('id: "en", label: "English"');
-    expect(rules).toContain('id: "fr", label: "Français"');
-    expect(rules).toContain('id: "es", label: "Español"');
-    expect(rules).toContain('id: "pt-BR", label: "Português (Brasil)"');
+    for (const locale of SITE_LOCALES) {
+      const text = RULES_COPY[locale.code];
+      expect(text.lang).toBe(locale.code);
+      expect(text.rules).toHaveLength(5);
+      expect(text.rules.every((rule) => rule.title.length > 4 && rule.description.length > 20)).toBe(true);
+      for (const key of ["summary", "safetyIntro", "mute", "block", "report", "moderation"] as const) {
+        expect(text[key].length).toBeGreaterThan(20);
+      }
+    }
+    expect(rules).toContain("RULES_COPY[locale.value.code]");
+    expect(rules).not.toContain("selectedLanguage");
     expect(rules).toContain("/mute &lt;player&gt;");
     expect(rules).toContain("/block &lt;player&gt;");
     expect(rules).toContain("/report &lt;player&gt; &lt;reason&gt;");
     expect(rules).toContain("support@cookie-build.com");
   });
 
-  it("keeps the status controls and language switch accessible", async () => {
+  it("keeps status controls accessible and uses only the shared language selector", async () => {
     const status = await source("../pages/status.vue");
     const rules = await source("../pages/rules.vue");
     const missing = await source("../pages/[...slug].vue");
 
     expect(status).toContain('aria-live="polite"');
     expect(status).toContain('aria-labelledby="current-status"');
-    expect(status).toContain('id: "es", label: "Español"');
-    expect(status).toContain('id: "pt-BR", label: "Português (Brasil)"');
-    expect(status).toContain('aria-label="Status language"');
-    expect(status).toContain(':aria-pressed="selectedLanguage === language.id"');
-    expect(rules).toContain(':aria-label="selectedCopy.languageLabel"');
-    expect(rules).toContain(':aria-pressed="selectedLanguage === language.id"');
+    for (const locale of SITE_LOCALES) {
+      const text = STATUS_COPY[locale.code];
+      expect(text.title.length).toBeGreaterThan(5);
+      expect(text.checkUnavailable).not.toBe(text.offline);
+      expect(text.bothOnlineZero).toContain("0");
+      expect(text.playersOnline(3)).toContain("3");
+      expect(text.outageUnconfirmed.length).toBeGreaterThan(15);
+    }
+    expect(status).toContain("STATUS_COPY[locale.value.code]");
+    expect(status).not.toContain("selectedLanguage");
+    expect(rules).not.toContain("selectedLanguage");
+    expect(missing).toContain("errorCopies[locale.value.code]");
     expect(missing).toContain('robots: "noindex, nofollow"');
     expect(missing).toContain("setResponseStatus(event, 404)");
   });
@@ -53,10 +73,25 @@ describe("public experience", () => {
     const sitemap = buildMarketingSitemap();
 
     expect(header).toContain(':to="localizePath(\'/status\')"');
-    expect(footer).toContain('to="/rules"');
-    expect(footer).toContain('to="/support"');
+    expect(footer).toContain(':to="localizePath(\'/rules\')"');
+    expect(footer).toContain(':to="localizePath(\'/support\')"');
     expect(sitemap).toContain("https://www.cookie-build.com/status");
     expect(sitemap).toContain("https://www.cookie-build.com/rules");
+  });
+
+  it("localizes shared navigation, consent and support in all eight languages", async () => {
+    for (const locale of SITE_LOCALES) {
+      for (const value of Object.values(SITE_COPY[locale.code].navigation)) expect(value.trim()).not.toBe("");
+      for (const value of Object.values(SUPPORT_COPY[locale.code])) expect(value.trim()).not.toBe("");
+      for (const value of Object.values(ANALYTICS_CONSENT_COPY[locale.code])) expect(value.trim()).not.toBe("");
+      expect(SUPPORT_COPY[locale.code].appInstructions).toContain("/app link");
+      expect(SUPPORT_COPY[locale.code].webInstructions).toContain("/support link");
+      expect(SITE_COPY[locale.code].footer.analyticsPreferences.trim()).not.toBe("");
+    }
+    const consent = await source("../components/AnalyticsConsent.vue");
+    expect(consent).toContain("ANALYTICS_CONSENT_COPY[locale.value.code]");
+    expect(consent).toContain("analytics.setConsent('denied')");
+    expect(consent).toContain("analytics.setConsent('granted')");
   });
 
   it("exposes the cosmetics inventory without technical preview claims", async () => {
@@ -65,7 +100,8 @@ describe("public experience", () => {
     ]);
     expect(header).toContain("localizePath('/shop')");
     expect(catalog).not.toContain("platformSupport.java.implementation");
-    expect(catalog).toContain("Visible sur le site · aucun effet en jeu");
+    expect(catalog).toContain("shop.webOnly");
+    expect(SHOP_COPY.fr.webOnly).toBe("Visible sur le site · aucun effet en jeu");
     expect(history).toContain("/api/commerce/selections");
     expect(history).toContain("Télécharger mon historique");
   });

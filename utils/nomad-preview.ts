@@ -1,4 +1,11 @@
-export const nomadPreviewCopy = {
+import type { SiteLocaleCode } from "./site-locales";
+import de from "./locales/minigames-de.json";
+import it from "./locales/minigames-it.json";
+import bg from "./locales/minigames-bg.json";
+import es from "./locales/minigames-es.json";
+import hi from "./locales/minigames-hi.json";
+import ptBR from "./locales/minigames-pt-BR.json";
+const existingCopy = {
   en: {
     badge: "Public beta · Play now", headline: "Keep moving. Choose your moment.",
     intro: "A moving safe zone, four districts to explore and one final showdown. Nomad Wars is a survival mini-game now playable in beta on Cookie Build.",
@@ -33,4 +40,14 @@ export const nomadPreviewCopy = {
     feedbackTitle: "Améliore la bêta avec nous", feedback: "Quelle map choisirais-tu ? Les zones mouvantes sont-elles faciles à comprendre ? Prendrais-tu le risque de laisser une amélioration derrière toi ? Joue avec un ami pour comparer vos expériences.",
     share: "Copier le lien du jeu", copied: "Lien du jeu copié.", article: "Lire les règles du jeu", atlas: "Ouvrir le catalogue de maps", discord: "En discuter sur Discord",
   },
-} as const;
+};
+
+export const nomadPreviewCopy = {
+  ...existingCopy,
+  "de": de.nomad,
+  "it": it.nomad,
+  "bg": bg.nomad,
+  "es": es.nomad,
+  "hi": hi.nomad,
+  "pt-BR": ptBR.nomad,
+} satisfies Record<SiteLocaleCode, typeof existingCopy.en>;

@@ -1,7 +1,7 @@
 <template>
   <div
     class="preview-stage relative isolate flex h-52 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-zinc-950"
-    :aria-label="`Aperçu animé : ${item.name}`"
+    :aria-label="`${shop.previewAnimated}: ${shopItemCopy(locale.code, item).name}`"
     role="img"
   >
     <div class="absolute inset-x-0 bottom-0 h-16 border-t border-orange-200/10 bg-[linear-gradient(135deg,rgba(120,53,15,.2)_25%,transparent_25%,transparent_50%,rgba(120,53,15,.2)_50%,rgba(120,53,15,.2)_75%,transparent_75%)] bg-[length:28px_28px]" />
@@ -32,13 +32,13 @@
       🍪
       <span class="absolute -left-9 top-7 text-3xl text-sky-200" aria-hidden="true">≋</span>
       <span class="absolute -right-9 top-7 text-3xl text-sky-200" aria-hidden="true">≋</span>
-      <span class="absolute -bottom-9 whitespace-nowrap rounded bg-sky-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-200">Lobby uniquement</span>
+      <span class="absolute -bottom-9 whitespace-nowrap rounded bg-sky-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-sky-200">{{ shop.lobbyOnly }}</span>
     </div>
 
     <div v-else-if="item.preview.kind === 'join-flair'" class="relative z-10 grid h-32 w-32 place-items-center">
       <span v-for="index in 6" :key="index" class="join-particle absolute h-2 w-8 rounded-full bg-yellow-100 shadow-[0_0_14px_rgba(254,249,195,.9)]" :style="joinParticleStyle(index)" />
       <span class="join-cookie text-6xl">🍪</span>
-      <span class="absolute -bottom-1 rounded bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-yellow-100">Carillon local</span>
+      <span class="absolute -bottom-1 rounded bg-black/70 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-yellow-100">{{ shop.localChime }}</span>
     </div>
 
     <div v-else class="profile-card relative z-10 w-56 rounded-2xl border-2 border-amber-400 bg-zinc-900 p-4 shadow-[0_0_36px_rgba(245,158,11,.18)]">
@@ -52,11 +52,15 @@
       <div class="mt-4 h-2 overflow-hidden rounded-full bg-zinc-800"><span class="block h-full w-2/3 bg-orange-500" /></div>
     </div>
 
-    <span class="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">Aperçu web</span>
+    <span class="absolute bottom-3 right-3 rounded bg-black/70 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-zinc-400">{{ shop.webPreview }}</span>
   </div>
 </template>
 
 <script setup lang="ts">
+import { SHOP_COPY, shopItemCopy } from "@/utils/shop-copy";
+const { locale } = useSiteLocale();
+const shop = computed(() => SHOP_COPY[locale.value.code]);
+
 import type { COSMETIC_CATALOG } from "#shared/cosmetics-catalog";
 
 defineProps<{ item: (typeof COSMETIC_CATALOG)[number] }>();

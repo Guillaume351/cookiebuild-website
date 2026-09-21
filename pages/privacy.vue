@@ -1,12 +1,7 @@
 <template>
   <article class="mx-auto max-w-3xl space-y-10 py-12 text-gray-300">
-    <LanguageFallbackNotice :available-locales="['en', 'fr']" />
-    <nav class="flex gap-3 text-sm" aria-label="Language">
-      <a class="rounded-md bg-orange-600 px-3 py-2 font-semibold text-white" href="#english">English</a>
-      <a class="rounded-md border border-gray-700 px-3 py-2 font-semibold text-white" href="#francais">Français</a>
-    </nav>
 
-    <section id="english" lang="en" class="space-y-8 scroll-mt-8">
+    <section v-if="locale.code === 'en'" id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Privacy Policy</h1>
         <p>Effective and last updated: September 5, 2026</p>
@@ -130,14 +125,14 @@
       </section>
     </section>
 
-    <hr class="border-gray-800" />
+    <hr v-if="locale.code === 'en' || locale.code === 'fr'" class="border-gray-800" />
 
-    <section class="space-y-3 rounded-xl border border-gray-700 p-5" lang="en">
+    <section v-if="locale.code === 'en'" class="space-y-3 rounded-xl border border-gray-700 p-5" lang="en">
       <h2 class="text-2xl font-bold">Optional website analytics</h2>
       <p>With your permission, Google Analytics uses cookies to measure public page visits, broad visitor-source categories, clicks towards the game or Discord, and shop steps such as selecting a recipient or starting checkout. Our events contain only predefined page categories and actions, site language, broad visitor-source categories, product identifiers and edition (Java or Bedrock), without Minecraft names, player identifiers, login codes, payment URLs, email addresses, URL queries or raw referrers. No Google Analytics tag loads before permission. You can decline or withdraw permission from “Analytics preferences” in the footer. We remember your choice for up to 180 days. These consent-based measurements do not represent every visit or purchase. Google receives technical connection data to provide this service; our reporting does not use advertising signals or cross-site user identifiers. The analytics cookie lifetime is limited to 180 days. Google may process data outside the EEA under its applicable transfer safeguards.</p>
     </section>
 
-    <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
+    <section v-if="locale.code === 'fr'" id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Politique de confidentialité</h1>
         <p>Applicable et mise à jour le 5 septembre 2026</p>
@@ -261,19 +256,37 @@
         </p>
       </section>
     </section>
-    <section class="space-y-3 rounded-xl border border-gray-700 p-5" lang="fr">
+    <section v-if="locale.code === 'fr'" class="space-y-3 rounded-xl border border-gray-700 p-5" lang="fr">
       <h2 class="text-2xl font-bold">Mesure d’audience web facultative</h2>
       <p>Avec votre accord, Google Analytics utilise des cookies pour mesurer les visites des pages publiques, de grandes catégories de provenance, les clics vers le jeu ou Discord et des étapes de la boutique comme le choix d’un destinataire ou l’ouverture du paiement. Nos événements contiennent uniquement des catégories de pages et actions prédéfinies, la langue du site, de grandes catégories de provenance, des identifiants de produit et l’édition (Java ou Bedrock), sans pseudo Minecraft, identifiant joueur, code de connexion, URL de paiement, adresse e-mail, paramètres d’URL ou URL de provenance complète. Aucune balise Google Analytics ne se charge avant votre accord. Vous pouvez refuser ou retirer cet accord depuis « Préférences de mesure d’audience » dans le pied de page. Nous mémorisons ce choix jusqu’à 180 jours. Ces mesures soumises au consentement ne couvrent pas toutes les visites ni tous les achats. Google reçoit les données techniques de connexion nécessaires au service ; notre suivi n’utilise ni signaux publicitaires ni identifiants utilisateur entre sites. La durée des cookies de mesure est limitée à 180 jours. Google peut traiter des données hors EEE selon ses garanties de transfert applicables.</p>
+    </section>
+
+    <section v-if="legal" :lang="locale.htmlLang" class="space-y-8 scroll-mt-8">
+      <header>
+        <h1 class="mb-3 text-4xl font-bold text-white">{{ legal.privacy.title }}</h1>
+        <p>{{ legal.privacy.updated }}</p>
+      </header>
+      <section v-for="(section, index) in legal.privacy.sections" :key="section.title">
+        <h2 class="mb-3 text-2xl font-semibold text-white">{{ section.title }}</h2>
+        <p v-for="paragraph in section.paragraphs" :key="paragraph" class="mt-3">{{ paragraph }}</p>
+        <ul v-if="section.items?.length" class="mt-3 list-disc space-y-2 pl-6">
+          <li v-for="item in section.items" :key="item">{{ item }}</li>
+        </ul>
+        <p v-for="paragraph in section.after" :key="paragraph" class="mt-3">{{ paragraph }}</p>
+        <NuxtLink v-if="section.link" class="mt-3 inline-flex min-h-11 items-center text-orange-400" :to="localizePath(section.link.path)">{{ section.link.label }}</NuxtLink>
+      </section>
     </section>
   </article>
 </template>
 
 <script setup lang="ts">
+import { legalTranslation } from "@/utils/legal-copy";
 import { publicPageSeo } from "@/utils/public-page-seo";
 
 definePageMeta({ alias: ["/fr/privacy", "/de/privacy", "/it/privacy", "/bg/privacy", "/es/privacy", "/hi/privacy", "/pt-br/privacy"] });
 
-const { locale } = useSiteLocale();
+const { locale, localizePath } = useSiteLocale();
+const legal = computed(() => legalTranslation(locale.value.code));
 const seo = computed(() => publicPageSeo(locale.value.code, "privacy"));
 useLocalizedSeo("/privacy", () => seo.value.title, () => seo.value.description);
 </script>

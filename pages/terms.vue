@@ -1,12 +1,7 @@
 <template>
   <article class="mx-auto max-w-3xl space-y-10 py-12 text-gray-300">
-    <LanguageFallbackNotice :available-locales="['en', 'fr']" />
-    <nav class="flex gap-3 text-sm" aria-label="Language">
-      <a class="rounded-md bg-orange-600 px-3 py-2 font-semibold text-white" href="#english">English</a>
-      <a class="rounded-md border border-gray-700 px-3 py-2 font-semibold text-white" href="#francais">Français</a>
-    </nav>
 
-    <section id="english" lang="en" class="space-y-8 scroll-mt-8">
+    <section v-if="locale.code === 'en'" id="english" lang="en" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Terms of Service</h1>
         <p>Effective and last updated: September 5, 2026</p>
@@ -125,9 +120,9 @@
       </section>
     </section>
 
-    <hr class="border-gray-800" />
+    <hr v-if="locale.code === 'en' || locale.code === 'fr'" class="border-gray-800" />
 
-    <section id="francais" lang="fr" class="space-y-8 scroll-mt-8">
+    <section v-if="locale.code === 'fr'" id="francais" lang="fr" class="space-y-8 scroll-mt-8">
       <header>
         <h1 class="mb-3 text-4xl font-bold text-white">Conditions d’utilisation</h1>
         <p>Applicables et mises à jour le 5 septembre 2026</p>
@@ -236,6 +231,30 @@
         </p>
       </section>
     </section>
+
+    <section v-if="legal" :lang="locale.htmlLang" class="space-y-8 scroll-mt-8">
+      <header>
+        <h1 class="mb-3 text-4xl font-bold text-white">{{ legal.terms.title }}</h1>
+        <p>{{ legal.terms.updated }}</p>
+      </header>
+      <section v-for="(section, index) in legal.terms.sections" :key="section.title">
+        <h2 class="mb-3 text-2xl font-semibold text-white">{{ section.title }}</h2>
+        <p v-for="paragraph in section.paragraphs" :key="paragraph" class="mt-3">{{ legalText(paragraph) }}</p>
+        <ul v-if="section.items?.length" class="mt-3 list-disc space-y-2 pl-6">
+          <li v-for="item in section.items" :key="item">{{ legalText(item) }}</li>
+        </ul>
+        <p v-for="paragraph in section.after" :key="paragraph" class="mt-3">{{ legalText(paragraph) }}</p>
+        <p v-if="index === 0 && (seller?.businessId || seller?.vatId)" class="mt-3">
+          <template v-if="seller?.businessId">{{ legal.businessId }}: {{ seller.businessId }}</template>
+          <template v-if="seller?.vatId"> · {{ legal.vat }}: {{ seller.vatId }}</template>
+        </p>
+        <p v-if="index === 7 && seller?.mediatorName && seller?.mediatorUrl" class="mt-3">
+          {{ legal.mediator }}: {{ seller.mediatorName }} —
+          <a class="text-orange-400" :href="seller.mediatorUrl">{{ seller.mediatorUrl }}</a>.
+        </p>
+        <NuxtLink v-if="section.link" class="mt-3 inline-flex min-h-11 items-center text-orange-400" :to="localizePath(section.link.path)">{{ section.link.label }}</NuxtLink>
+      </section>
+    </section>
   </article>
 </template>
 
@@ -243,11 +262,19 @@
 const { data: commerceCatalog } = await useFetch("/api/cosmetics/catalog");
 const seller = computed(() => commerceCatalog.value?.data.commerce.seller);
 
+import { legalTranslation } from "@/utils/legal-copy";
 import { publicPageSeo } from "@/utils/public-page-seo";
 
 definePageMeta({ alias: ["/fr/terms", "/de/terms", "/it/terms", "/bg/terms", "/es/terms", "/hi/terms", "/pt-br/terms"] });
 
-const { locale } = useSiteLocale();
+const { locale, localizePath } = useSiteLocale();
+const legal = computed(() => legalTranslation(locale.value.code));
+const legalText = (text: string) => {
+  const name = seller.value?.legalName || legal.value?.sellerUnavailable || "Cookie Build";
+  const operator = seller.value?.legalAddress ? `${name}, ${seller.value.legalAddress}` : name;
+  return text.replaceAll("{seller}", operator)
+    .replaceAll("{support}", seller.value?.supportEmail || "support@cookie-build.com");
+};
 const seo = computed(() => publicPageSeo(locale.value.code, "terms"));
 useLocalizedSeo("/terms", () => seo.value.title, () => seo.value.description);
 </script>

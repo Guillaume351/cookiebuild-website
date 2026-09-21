@@ -13,15 +13,15 @@
           <span class="text-xl font-bold text-white">Cookie Build</span>
         </NuxtLink>
       </div>
-      <div class="hidden items-center space-x-4 text-sm lg:flex">
+      <div class="hidden items-center space-x-4 text-sm xl:flex">
         <NuxtLink :to="localizePath('/')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.home }}</NuxtLink>
         <NuxtLink :to="localizePath('/games')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.games }}</NuxtLink>
-        <NuxtLink to="/maps" class="text-white hover:text-gray-300 transition-colors">Maps</NuxtLink>
+        <NuxtLink :to="localizePath('/maps')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.maps }}</NuxtLink>
         <NuxtLink :to="localizePath('/player-stats')" class="text-white hover:text-gray-300 transition-colors"
           >{{ copy.navigation.playerStats }}</NuxtLink
         >
         <NuxtLink :to="localizePath('/updates')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
-        <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-white hover:text-gray-300 transition-colors">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
+        <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.shop }}</NuxtLink>
         <NuxtLink :to="localizePath('/status')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.status }}</NuxtLink>
         <label class="relative">
           <span class="sr-only">{{ copy.navigation.language }}</span>
@@ -39,7 +39,7 @@
       </div>
       <button
         type="button"
-        class="rounded-lg border border-white/15 p-2 text-white transition-colors hover:bg-white/10 lg:hidden"
+        class="rounded-lg border border-white/15 p-2 text-white transition-colors hover:bg-white/10 xl:hidden"
         :aria-expanded="mobileMenuOpen"
         aria-controls="mobile-navigation"
         :aria-label="copy.navigation.toggle"
@@ -52,7 +52,7 @@
     <div
       v-if="mobileMenuOpen"
       id="mobile-navigation"
-      class="border-t border-white/10 bg-zinc-950/95 px-4 py-3 lg:hidden"
+      class="border-t border-white/10 bg-zinc-950/95 px-4 py-3 xl:hidden"
     >
       <div class="container mx-auto flex flex-col gap-1">
         <NuxtLink
@@ -69,7 +69,7 @@
         >
           {{ copy.navigation.games }}
         </NuxtLink>
-        <NuxtLink to="/maps" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">Maps</NuxtLink>
+        <NuxtLink :to="localizePath('/maps')" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">{{ copy.navigation.maps }}</NuxtLink>
         <NuxtLink
           :to="localizePath('/player-stats')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
@@ -84,7 +84,7 @@
         >
           {{ copy.navigation.updates }}
         </NuxtLink>
-        <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry'); mobileMenuOpen = false" class="rounded-lg px-3 py-3 text-white hover:bg-white/10">{{ locale.code === "fr" ? "Boutique" : "Shop" }}</NuxtLink>
+        <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry'); mobileMenuOpen = false" class="rounded-lg px-3 py-3 text-white hover:bg-white/10">{{ copy.navigation.shop }}</NuxtLink>
         <NuxtLink
           :to="localizePath('/status')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"
@@ -123,7 +123,7 @@ const changeLanguage = async (event: Event) => {
   const code = (event.target as HTMLSelectElement).value as SiteLocaleCode;
   const target = switchLocalePath(code);
   mobileMenuOpen.value = false;
-  if (target === route.path) return;
+  if (target === route.fullPath) return;
   // A full document navigation guarantees that Nuxt resolves the translated
   // route and refreshes every SSR SEO signal, even when two URLs are aliases
   // of the same page record.

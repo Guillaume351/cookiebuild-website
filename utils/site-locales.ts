@@ -25,6 +25,9 @@ export const SITE_LOCALES: readonly SiteLocale[] = localeContract.locales.map((l
 export const LOCALIZED_MARKETING_PATHS = [
   "/",
   "/games",
+  "/nomad-wars",
+  "/fat-king",
+  "/maps",
   "/bedwars",
   "/skyblock",
   "/build-battle",
@@ -69,19 +72,25 @@ export function localizedSitePath(path: string, locale: SiteLocale | SiteLocaleC
     ? SITE_LOCALES.find((candidate) => candidate.code === locale) || SITE_LOCALES[0]!
     : locale;
   const basePath = stripSiteLocale(path);
-  if (!resolved.pathSegment) return basePath;
-  return basePath === "/" ? `/${resolved.pathSegment}` : `/${resolved.pathSegment}${basePath}`;
+  const suffix = path.match(/[?#].*$/)?.[0] || "";
+  if (!resolved.pathSegment) return basePath + suffix;
+  return (basePath === "/" ? `/${resolved.pathSegment}` : `/${resolved.pathSegment}${basePath}`) + suffix;
 }
 
 export function localizedAbsoluteUrl(path: string, locale: SiteLocale | SiteLocaleCode): string {
-  return `${COOKIE_BUILD_SITE_URL}${localizedSitePath(path, locale)}`;
+  return `${COOKIE_BUILD_SITE_URL}${localizedSitePath(stripSiteLocale(path), locale)}`;
 }
 
 export function supportsLocalizedSitePath(path: string) {
-  const basePath = stripSiteLocale(path);
+  const basePath = stripSiteLocale(path).replace(/\/+$/, "") || "/";
   return LOCALIZED_FUNCTIONAL_PATHS.includes(
     basePath as (typeof LOCALIZED_FUNCTIONAL_PATHS)[number],
-  ) || basePath.startsWith("/updates/");
+  ) || basePath.startsWith("/updates/") || basePath.startsWith("/maps/");
+}
+
+export function switchSiteLocalePath(path: string, locale: SiteLocaleCode): string {
+  // An untranslated utility page must never turn into the homepage.
+  return supportsLocalizedSitePath(path) ? localizedSitePath(path, locale) : path;
 }
 
 export function localizedSeoLinks(path: string) {
