@@ -1,0 +1,9 @@
+{
+  "slug": "nomad-wars-fat-king-lobby-npcs",
+  "contentType": "changelog",
+  "title": "Nomad Wars et Fat King vous attendent dans le lobby",
+  "summary": "Deux nouveaux PNJ permettent de rejoindre directement les mini-jeux en bêta.",
+  "body": "Un chameau pour Nomad Wars et un piglin couronné pour Fat King rejoignent le lobby. Approchez-vous et interagissez avec le PNJ du mode de votre choix pour rejoindre sa file.\n\nLes noms indiquent le mode, son statut bêta et la disponibilité de la partie. Les accès existants par le menu des jeux et les commandes /nomadwars play et /fatking play restent disponibles.",
+  "coverImageUrl": "https://www.cookie-build.com/maps/fat-king-crown.webp",
+  "publishedAt": "2026-09-22T10:30:04Z"
+}
