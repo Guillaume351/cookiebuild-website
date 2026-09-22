@@ -1,0 +1,8 @@
+{
+  "slug": "fat-king-languages-and-kit-preview-cleanup",
+  "contentType": "changelog",
+  "title": "Fat King dans votre langue et aperçus de kits corrigés",
+  "summary": "Fat King ajoute l’espagnol et le portugais ; les aperçus MicroBattles nettoient correctement leurs effets.",
+  "body": "Les messages, objectifs et indications de Fat King suivent votre langue de jeu en français, anglais, espagnol ou portugais.\n\nDans MicroBattles, la fin d’un aperçu de kit retire aussi les effets temporaires et l’objet en seconde main avant de rendre le sélecteur de kits.",
+  "publishedAt": "2026-09-22T12:18:45Z"
+}
