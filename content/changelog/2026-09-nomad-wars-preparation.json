@@ -1,0 +1,9 @@
+{
+  "slug": "nomad-wars-preparation-refuges-forges",
+  "contentType": "changelog",
+  "title": "Nomad Wars : prépare ton départ et retrouve les refuges",
+  "summary": "30 secondes de préparation, des repères pour suivre les refuges et des forges publiques pour fabriquer ton équipement.",
+  "body": "La manche commence par 30 secondes de préparation dans un camp approvisionné. Les quatre refuges ont un rayon de 50 blocs, puis se déplacent pendant deux passages de 240 secondes. Le premier est paisible ; les combats entre joueurs commencent au second.\n\nLes limites proches sont marquées par des particules. Une boussole, une direction et une distance aident à retrouver un refuge ; une piste indique le chemin du retour hors zone. Les aperçus des maps montrent le terrain, pas les zones mobiles.\n\nRécolte le bois, la nourriture, la pierre, le charbon et les ressources en fer du camp. Le décor est protégé : utilise les ressources indiquées. Fabrique ton équipement avec les recettes Minecraft habituelles, jusqu’au fer.\n\nDans une forge publique, 4 fers bruts et 1 charbon deviennent 4 lingots après 20 secondes. Le premier joueur qui revient peut les récupérer. Les tonneaux sont des caches réellement partagées : chacun peut y déposer ou prendre des objets. Leur contenu reste jusqu’à sa récupération et ne revient pas avec le réapprovisionnement des stocks courants.\n\nLa bêta reste accessible avec /nomadwars play, pour 2 à 8 joueurs. Les zones protègent tout le monde et convergent vers le centre après les deux passages. Le dernier survivant gagne ; plusieurs survivants à la fin des 90 secondes de finale donnent une égalité.",
+  "coverImageUrl": "https://www.cookie-build.com/maps/nomad-oasis.webp",
+  "publishedAt": "2026-09-22T00:00:00Z"
+}
