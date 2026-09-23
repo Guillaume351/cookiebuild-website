@@ -1,0 +1,8 @@
+{
+  "slug": "pitchout-retour-fiable-au-hub",
+  "contentType": "changelog",
+  "title": "Un retour plus fiable au hub après les mini-jeux",
+  "summary": "Après une partie, revenez au hub pour choisir votre prochain mini-jeu.",
+  "body": "- Quitter Pitchout vous ramène bien au hub dès la première tentative.\n- Les propositions automatiques « Rejouer » disparaissent en fin de partie : choisissez votre prochaine partie depuis le hub.",
+  "publishedAt": "2026-09-23T15:21:44Z"
+}
