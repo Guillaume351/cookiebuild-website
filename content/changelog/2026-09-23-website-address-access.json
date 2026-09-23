@@ -1,0 +1,8 @@
+{
+  "slug": "website-address-access-restored",
+  "contentType": "changelog",
+  "title": "Cookie Build website address works again",
+  "summary": "You can securely open Cookie Build using cookie-build.com or www.cookie-build.com.",
+  "body": "Links to cookie-build.com now take you securely to the Cookie Build website, including saved links to specific pages.",
+  "publishedAt": "2026-09-23T09:48:36Z"
+}
