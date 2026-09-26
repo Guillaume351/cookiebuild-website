@@ -1,0 +1,8 @@
+{
+  "slug": "neuf-modes-menus-spectateurs-et-votes",
+  "contentType": "changelog",
+  "title": "Des parties plus lisibles dans nos neuf modes de jeu",
+  "summary": "Menus plus accessibles, achats plus clairs, votes mieux guidés et retours plus sûrs après une élimination ou un changement de partie.",
+  "body": "- Build Battle : observez les constructions avant d’ouvrir le vote sur Bedrock. Les votes de thème des joueurs qui quittent l’attente sont retirés.\n- BedWars : les boutiques Bedrock affichent le prix avant achat. Les messages d’élimination sont traduits et indiquent comment revenir au lobby.\n- MicroBattles : après une chute, les joueurs éliminés reviennent au point d’observation et ne subissent plus de dégâts en spectateur.\n- Pitchout : les résultats restent lisibles pendant le compte à rebours de retour. Les spectateurs sont informés, et les messages s’arrêtent dès votre départ.\n- SkyWars : le traqueur s’adapte aux changements d’inventaire. Les joueurs éliminés disposent d’indications pour observer la partie ou revenir au lobby.\n- Turf Wars : la laine et l’arc sont automatiquement pris en main au début de leur phase et après une reconnexion.\n- Skyblock : un chargement terminé en retard ne vous ramène plus sur une île après votre sortie ou votre reconnexion.\n- Nomad Wars : les anciennes alertes de zone disparaissent après une élimination, avec des indications pour choisir un autre jeu ou rejoindre le lobby.\n- Fat King : le menu reste accessible depuis l’arène, l’attente indique les joueurs manquants et les caprices annoncent leur prochain départ.",
+  "publishedAt": "2026-09-26T07:46:27.871984Z"
+}
