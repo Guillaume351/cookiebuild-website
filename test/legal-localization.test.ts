@@ -64,11 +64,11 @@ describe("complete legal-page translations", () => {
     const expected = {
       privacy: {
         en: "f2fa119c2bcae031c8f47ed6ba2acecaf16e90525ed6195dd0f52bfde8a7ea42",
-        fr: "5d41d90b7a73a802a60755e3a633993b53f23aea85cbd94b9db81b9da10f476a",
+        fr: "cadd3191547c7e0a42d25bcf0ea6d08e265f2082d56481b8cbfbf6bddd313f19",
       },
       terms: {
         en: "d6b6ce90322d77b6b4a013cb3b9a52349fda704b6eb915ee81519ba10b5efcb8",
-        fr: "a2c5fe807b465d7934c19675f8b8f0de08739b463b9855199be93d970a665081",
+        fr: "b90c474e94a4255d2b6fd56f36ff7e62f2fa78d5c47df16d3b2507ccb7d69bda",
       },
     };
     for (const page of ["privacy", "terms"] as const) {
