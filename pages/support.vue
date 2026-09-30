@@ -16,8 +16,12 @@
       <div class="grid gap-4 sm:grid-cols-2">
         <article class="rounded-xl border border-gray-800 bg-gray-900 p-5">
           <h3 class="font-bold text-white">{{ support.connect }}</h3>
-          <p class="mt-2">Java: <strong>play.cookie-build.com</strong></p>
-          <p>Bedrock: <strong>play.cookie-build.com:19132</strong></p>
+          <dl class="mt-2 space-y-1">
+            <div><dt class="inline">Java · {{ copy.common.serverAddress }}{{ colon }}</dt> <dd class="inline font-bold text-white">play.cookie-build.com</dd></div>
+            <div><dt class="inline">Bedrock · {{ copy.common.serverAddress }}{{ colon }}</dt> <dd class="inline font-bold text-white">play.cookie-build.com</dd></div>
+            <div><dt class="inline">Bedrock · {{ copy.common.bedrockPort }}{{ colon }}</dt> <dd class="inline font-bold text-white">19132</dd></div>
+          </dl>
+          <NuxtLink class="mt-3 inline-flex min-h-11 items-center font-bold text-orange-400" :to="localizePath('/join')">{{ copy.home.joinGuidesLink }} →</NuxtLink>
         </article>
         <article class="rounded-xl border border-gray-800 bg-gray-900 p-5">
           <h3 class="font-bold text-white">{{ support.webPurchases }}</h3>
@@ -69,6 +73,7 @@ const { data: commerceCatalog } = await useFetch("/api/cosmetics/catalog");
 const seller = computed(() => commerceCatalog.value?.data.commerce.seller);
 const { locale, copy, localizePath } = useSiteLocale();
 const support = computed(() => SUPPORT_COPY[locale.value.code]);
+const colon = computed(() => (locale.value.code === "fr" ? " :" : ":"));
 const seo = computed(() => publicPageSeo(locale.value.code, "support"));
 useLocalizedSeo("/support", () => seo.value.title, () => seo.value.description);
 </script>

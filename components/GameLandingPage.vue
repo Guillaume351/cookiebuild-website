@@ -17,7 +17,7 @@
         </NuxtLink>
         <div class="max-w-4xl">
           <div class="mb-5 flex items-center gap-3">
-            <img :src="game.icon" :alt="game.name" class="h-11 w-11" />
+            <img :src="game.icon" alt="" width="44" height="44" class="h-11 w-11" />
             <Badge class="bg-green-600 hover:bg-green-600">{{ game.badgeLabel || copy.gameUi.available }}</Badge>
           </div>
           <h1 class="text-4xl font-black tracking-tight text-white md:text-6xl">{{ game.h1 }}</h1>

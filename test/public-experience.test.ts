@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
-import { buildMarketingSitemap } from "../utils/marketing-sitemap";
+import { renderMarketingSitemap } from "../utils/marketing-sitemap";
 import { SITE_LOCALES } from "../utils/site-locales";
 import { SHOP_COPY } from "../utils/shop-copy";
 import { SITE_COPY } from "../utils/site-copy";
@@ -62,7 +62,8 @@ describe("public experience", () => {
     expect(status).toContain("STATUS_COPY[locale.value.code]");
     expect(status).not.toContain("selectedLanguage");
     expect(rules).not.toContain("selectedLanguage");
-    expect(missing).toContain("errorCopies[locale.value.code]");
+    expect(missing).toContain("NOT_FOUND_COPY[locale.value.code]");
+    expect(missing).toContain("htmlAttrs: { lang: locale.value.htmlLang }");
     expect(missing).toContain('robots: "noindex, nofollow"');
     expect(missing).toContain("setResponseStatus(event, 404)");
   });
@@ -70,7 +71,7 @@ describe("public experience", () => {
   it("links the public trust pages from navigation and the sitemap", async () => {
     const header = await source("../components/AppHeader.vue");
     const footer = await source("../components/AppFooter.vue");
-    const sitemap = buildMarketingSitemap();
+    const sitemap = renderMarketingSitemap();
 
     expect(header).toContain(':to="localizePath(\'/status\')"');
     expect(footer).toContain(':to="localizePath(\'/rules\')"');
