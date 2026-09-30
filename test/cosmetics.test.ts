@@ -4,6 +4,11 @@ import {
   COSMETIC_CATALOG,
   COSMETIC_CATALOG_RESPONSE,
   COSMETIC_PRODUCTS,
+  COIN_COSMETICS,
+  REWARD_COSMETICS,
+  cosmeticById,
+  isFreeCosmetic,
+  isRewardOnlyCosmetic,
 } from "../shared/cosmetics-catalog";
 
 describe("web cosmetic catalog", () => {
@@ -63,10 +68,16 @@ describe("web cosmetic catalog", () => {
       });
     expect(COSMETIC_PRODUCTS.find((product) => product.id === "supporter_permanent"))
       .toMatchObject({
+        productVersion: 2,
         priceTtcCents: 499,
         access: "permanent",
         recurrence: null,
-        grants: ["supporter_badge"],
+        grants: [
+          "supporter_badge",
+          "lobby_flight",
+          "supporter_join_flair",
+          "supporter_profile_frame",
+        ],
       });
     expect(COSMETIC_PRODUCTS.filter((product) => product.kind === "individual_cosmetic"))
       .toHaveLength(4);
@@ -146,5 +157,55 @@ describe("cosmetic schema and web rendering", () => {
     expect(page).toContain("Cadre Biscuit doré actif");
     expect(page).toContain("supporterProfileFrame");
     expect(route).not.toContain('frame_entitlement.source AS');
+  });
+});
+
+describe("reward-only and coin-only cosmetics", () => {
+  it("is ownable and selectable as a badge but never sold or listed by the shop", () => {
+    expect(REWARD_COSMETICS.map(({ id, slot }) => ({ id, slot }))).toEqual([
+      { id: "app_companion_badge", slot: "BADGE" },
+      { id: "streak_star_trail", slot: "HUB_TRAIL" },
+    ]);
+    expect(cosmeticById("app_companion_badge")?.slot).toBe("BADGE");
+    expect(isRewardOnlyCosmetic("app_companion_badge")).toBe(true);
+    expect(isFreeCosmetic("app_companion_badge")).toBe(false);
+    expect(COSMETIC_CATALOG_RESPONSE.items.some((item) => item.id === "app_companion_badge" as string)).toBe(false);
+    expect(COSMETIC_PRODUCTS.some((product) =>
+      (product.grants as readonly string[]).includes("app_companion_badge"))).toBe(false);
+  });
+
+  it("widens every database constraint that lists cosmetic IDs", async () => {
+    const migration = await readFile(
+      new URL("../drizzle/0021_reward_and_coin_cosmetics.sql", import.meta.url),
+      "utf8",
+    );
+    expect(migration).toContain("('BADGE', 'app_companion_badge')");
+    expect(migration).toContain("('HUB_TRAIL', 'note_trail')");
+    expect(migration).toContain("('HUB_TRAIL', 'heart_trail')");
+    expect(migration).toContain("('HUB_TRAIL', 'streak_star_trail')");
+    expect(migration).toContain("cosmetic_first_activations");
+    for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
+      expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("keeps earned-coin trails in game only with server-side prices", () => {
+    expect(COIN_COSMETICS.map(({ id, slot, coinPrice }) => ({ id, slot, coinPrice }))).toEqual([
+      { id: "note_trail", slot: "HUB_TRAIL", coinPrice: 1_000 },
+      { id: "heart_trail", slot: "HUB_TRAIL", coinPrice: 2_500 },
+    ]);
+    for (const item of COIN_COSMETICS) {
+      expect(cosmeticById(item.id)?.slot).toBe("HUB_TRAIL");
+      expect(COSMETIC_PRODUCTS.some((product) => (product.grants as readonly string[]).includes(item.id))).toBe(false);
+      expect(COSMETIC_CATALOG_RESPONSE.items.some((entry) => entry.id === item.id as string)).toBe(false);
+    }
+    expect(COSMETIC_CATALOG_RESPONSE.coinItems).toBe(COIN_COSMETICS);
+  });
+
+  it("gives the permanent Supporter purchase at least the monthly plan's cosmetics", () => {
+    const monthly = COSMETIC_PRODUCTS.find((product) => product.id === "supporter_monthly")!;
+    const permanent = COSMETIC_PRODUCTS.find((product) => product.id === "supporter_permanent")!;
+    for (const grant of monthly.grants) expect(permanent.grants).toContain(grant);
+    expect(permanent.productVersion).toBeGreaterThan(1);
   });
 });

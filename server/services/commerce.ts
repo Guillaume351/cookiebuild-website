@@ -286,7 +286,7 @@ export async function commerceInventory(playerId: string, now = new Date()) {
   return {
     entitlements: [...aggregated.values()].map((entry) => ({
       ...entry,
-      item: COSMETIC_CATALOG.find((item) => item.id === entry.cosmeticId) || null,
+      item: cosmeticById(entry.cosmeticId) || null,
     })),
     selections,
   };

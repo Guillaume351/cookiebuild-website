@@ -176,6 +176,97 @@ export const COSMETIC_CATALOG = [
 
 export type CosmeticId = (typeof COSMETIC_CATALOG)[number]["id"];
 
+type GameplayCosmetic = {
+  id: string;
+  nameEn: string;
+  slot: CosmeticSlot;
+  name: string;
+  description: string;
+  preview: { kind: string; label: string };
+  platformSupport: { java: PlatformSupport; bedrock: PlatformSupport };
+};
+
+const LOBBY_TRAIL_SUPPORT = (particle: string) => ({
+  java: { mode: "native", implementation: `Particule ${particle} par déplacement significatif, lobby uniquement`, fallback: null },
+  bedrock: { mode: "native", implementation: `${particle} transmis par Geyser`, fallback: "Le rendu peut varier selon le client, sans effet sur le gameplay." },
+}) as const;
+
+/**
+ * Coin-shop cosmetics: bought in game with earned coins only (prices are
+ * server-side constants in CookieDough), never sold for money on the website.
+ */
+export const COIN_COSMETICS = [
+  {
+    id: "note_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 1_000,
+    name: "Trace musicale",
+    nameEn: "Music trail",
+    description: "De petites notes de musique suivent tes pas dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Notes" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("NOTE"),
+  },
+  {
+    id: "heart_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 2_500,
+    name: "Trace de cœurs",
+    nameEn: "Heart trail",
+    description: "Des cœurs flottent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Cœurs" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("HEART"),
+  },
+] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "coins"; coinPrice: number }>;
+
+/**
+ * Reward-only cosmetics: never sold and never listed by the shop, but owned
+ * through an entitlement and shown/selectable in the player's inventory.
+ * IDs must match the gameplay plugin catalog and the database constraints.
+ */
+export const REWARD_COSMETICS = [
+  {
+    id: "app_companion_badge",
+    slot: "BADGE",
+    acquisition: "reward",
+    rewardOnly: true,
+    name: "Badge Appli 📱",
+    nameEn: "App badge 📱",
+    description: "Tag [App] dans le chat et la liste des joueurs, offert une seule fois quand tu relies ton compte à l’application Cookie Build.",
+    preview: { kind: "badge", label: "[App]" },
+    platformSupport: {
+      java: {
+        mode: "native",
+        implementation: "Tag [App] dans la tab-list et le chat, comme l’insigne Supporter",
+        fallback: null,
+      },
+      bedrock: {
+        mode: "native",
+        implementation: "Composants texte de tab-list et chat transmis à Bedrock par Geyser",
+        fallback: "Le texte s’affiche avec la police du client.",
+      },
+    },
+  },
+  {
+    id: "streak_star_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "reward",
+    rewardOnly: true,
+    name: "Trace d’étoiles filantes",
+    nameEn: "Shooting star trail",
+    description: "Réservée aux joueurs fidèles : débloquée au 7e jour du calendrier de connexion en jeu.",
+    preview: { kind: "trail", label: "Étoiles" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("FIREWORK"),
+  },
+] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "reward"; rewardOnly: true }>;
+
+export type RewardCosmeticId = (typeof REWARD_COSMETICS)[number]["id"];
+export type CoinCosmeticId = (typeof COIN_COSMETICS)[number]["id"];
+
+/** Every cosmetic a player can own: shop items, in-game coin items and reward-only items. */
+export const OWNABLE_COSMETICS = [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS] as const;
+
 const COLLECTION_COSMETICS = [
   "cookie_crumb_trail",
   "cookie_cheer",
@@ -203,15 +294,17 @@ export const COSMETIC_PRODUCTS = [
     grants: [...SUBSCRIPTION_COSMETICS],
   },
   {
+    // v2: the one-time purchase now includes everything the monthly plan
+    // includes, permanently (v1 granted only the badge, less than 1 €/month).
     id: "supporter_permanent",
-    productVersion: 1,
+    productVersion: 2,
     kind: "supporter_rank",
     name: "Supporter permanent",
-    description: "Achat unique du titre et de l’insigne Supporter. Aucun avantage de jeu.",
+    description: "Achat unique : insigne, vol du lobby, éclat d’arrivée et cadre web, pour toujours. Aucun avantage de jeu.",
     priceTtcCents: 499,
     access: "permanent",
     recurrence: null,
-    grants: ["supporter_badge"],
+    grants: [...SUBSCRIPTION_COSMETICS],
   },
   ...COLLECTION_COSMETICS.map((cosmeticId) => {
     const cosmetic = COSMETIC_CATALOG.find((item) => item.id === cosmeticId)!;
@@ -258,10 +351,16 @@ export const COSMETIC_CATALOG_RESPONSE = {
   currency: "EUR" as const,
   items: COSMETIC_CATALOG,
   products: COSMETIC_PRODUCTS,
+  /** Earned-coin items bought in game only; informational, never purchasable here. */
+  coinItems: COIN_COSMETICS,
 };
 
 export function cosmeticById(value: string) {
-  return COSMETIC_CATALOG.find((item) => item.id === value);
+  return OWNABLE_COSMETICS.find((item) => item.id === value);
+}
+
+export function isRewardOnlyCosmetic(value: string) {
+  return REWARD_COSMETICS.some((item) => item.id === value);
 }
 
 export function isCosmeticSlot(value: string): value is CosmeticSlot {

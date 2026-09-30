@@ -27,7 +27,7 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
       CREATE TABLE player_sessions (id uuid PRIMARY KEY DEFAULT gen_random_uuid(), player_id uuid REFERENCES playerdata(id));
       CREATE TABLE player_link_challenges (id uuid PRIMARY KEY, player_id uuid REFERENCES playerdata(id), edition varchar(16),
         code_hmac varchar(64), expires_at timestamptz, consumed_at timestamptz, created_at timestamptz DEFAULT now());`);
-    for (const file of ["0015_cosmetic_entitlements.sql", "0016_stripe_commerce.sql", "0017_free_cookie_sparkles.sql", "0018_guest_commerce.sql"]) {
+    for (const file of ["0015_cosmetic_entitlements.sql", "0016_stripe_commerce.sql", "0017_free_cookie_sparkles.sql", "0018_guest_commerce.sql", "0021_reward_and_coin_cosmetics.sql"]) {
       await client.unsafe((await readFile(new URL(`../drizzle/${file}`, import.meta.url), "utf8")).replaceAll("--> statement-breakpoint", ""));
     }
     db = drizzle(client, { schema });
@@ -55,8 +55,8 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
     return order!;
   }
   const metadata = (order: typeof schema.commerceOrders.$inferSelect) => ({ cookiebuild_order_id: order.id, cookiebuild_player_id: order.playerId,
-    cookiebuild_product_id: order.productId, cookiebuild_product_version: "1" });
-  const price = (order: typeof schema.commerceOrders.$inferSelect) => ({ lookup_key: `cookiebuild_${order.productId}_eur_v1`, currency: "eur",
+    cookiebuild_product_id: order.productId, cookiebuild_product_version: String(order.productVersion) });
+  const price = (order: typeof schema.commerceOrders.$inferSelect) => ({ lookup_key: `cookiebuild_${order.productId}_eur_v${order.productVersion}`, currency: "eur",
     unit_amount: order.amountTtcCents, type: order.access === "subscription" ? "recurring" : "one_time", tax_behavior: "inclusive" });
   const checkout = (order: typeof schema.commerceOrders.$inferSelect) => ({ id: `cs_${order.id}`, object: "checkout.session", metadata: metadata(order),
     customer: order.stripeCustomerId, amount_total: order.amountTtcCents, currency: "eur", payment_status: "paid", created: Math.floor(Date.now()/1000),
@@ -82,9 +82,9 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
       COMMERCE_LEGAL_ADDRESS: "Fixture", COMMERCE_SUPPORT_EMAIL: "fixture@example.com", COMMERCE_BUSINESS_STATUS: "test", COMMERCE_VAT_STATUS: "not_applicable" });
     let createdOrderId = "";
     const fakeStripe = {
-      prices: { list: async () => ({ data: [{ id: "price_fixture", active: true, livemode: false, lookup_key: "cookiebuild_supporter_permanent_eur_v1",
+      prices: { list: async () => ({ data: [{ id: "price_fixture", active: true, livemode: false, lookup_key: "cookiebuild_supporter_permanent_eur_v2",
         currency: "eur", unit_amount: 499, tax_behavior: "inclusive", type: "one_time", product: { metadata: { cookiebuild_product_id: "supporter_permanent",
-          cookiebuild_product_version: "1", cookiebuild_access: "permanent", cookiebuild_grants: "supporter_badge" } } }] }) },
+          cookiebuild_product_version: "2", cookiebuild_access: "permanent", cookiebuild_grants: "supporter_badge,lobby_flight,supporter_join_flair,supporter_profile_frame" } } }] }) },
       customers: { create: async () => ({ id: `cus_${playerId}` }) },
       checkout: { sessions: { create: async (input: any) => {
         expect(input.expires_at - Math.floor(Date.now() / 1000)).toBeGreaterThan(1800);
@@ -105,7 +105,8 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
       } else await expect(commerce.createCommerceCheckout(auth, input)).resolves.toMatchObject({ url: "https://checkout.stripe.com/fixture" });
       const [order] = await db.select().from(schema.commerceOrders).where(eq(schema.commerceOrders.id, createdOrderId));
       expect(order?.status).toBe(scenario === "lost-response" ? "created" : "paid");
-      expect(await activeGrants(playerId)).toHaveLength(scenario === "lost-response" ? 0 : 1);
+      // Supporter permanent v2 grants the four Supporter cosmetics.
+      expect(await activeGrants(playerId)).toHaveLength(scenario === "lost-response" ? 0 : 4);
       if (scenario === "raced-success") expect(order?.stripeCheckoutSessionId).toBe(`cs_${createdOrderId}`);
     } finally { stripeUtils.setStripeClientForTests(null); process.env = originalEnv; }
   });
@@ -148,7 +149,7 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
     const customerCreate = vi.fn(async () => ({ id: "cus_guest_private" }));
     const portalCreate = vi.fn(async () => ({ url: "https://billing.stripe.com/p/session/private" }));
     const fakeStripe = {
-      prices: { list: async () => ({ data: [{ id: "price_fixture", active: true, livemode: false, lookup_key: "cookiebuild_supporter_permanent_eur_v1", currency: "eur", unit_amount: 499, tax_behavior: "inclusive", type: "one_time", product: { metadata: { cookiebuild_product_id: "supporter_permanent", cookiebuild_product_version: "1", cookiebuild_access: "permanent", cookiebuild_grants: "supporter_badge" } } }] }) },
+      prices: { list: async () => ({ data: [{ id: "price_fixture", active: true, livemode: false, lookup_key: "cookiebuild_supporter_permanent_eur_v2", currency: "eur", unit_amount: 499, tax_behavior: "inclusive", type: "one_time", product: { metadata: { cookiebuild_product_id: "supporter_permanent", cookiebuild_product_version: "2", cookiebuild_access: "permanent", cookiebuild_grants: "supporter_badge,lobby_flight,supporter_join_flair,supporter_profile_frame" } } }] }) },
       customers: { create: customerCreate },
       billingPortal: { configurations: { list: async () => ({ data: [{ id: "bpc_fixture", metadata: { cookiebuild: "commerce-v1" } }] }) }, sessions: { create: portalCreate } },
       checkout: { sessions: { retrieve, create: async (input: any) => { expect(input.customer).toBe("cus_guest_private"); expect(input.metadata.cookiebuild_player_id).toBe(recipient); return { id: "cs_guest", url: "https://checkout.stripe.com/private_guest" }; } } },
@@ -171,7 +172,7 @@ integration("commerce worker lifecycle against PostgreSQL", () => {
       expect((await commerce.commerceHistory(payer)).orders).toHaveLength(1);
       const [row] = await db.select().from(schema.commerceOrders).where(eq(schema.commerceOrders.id, order.orderId));
       await apply("checkout.session.completed", { ...checkout(row!), id: "cs_guest" });
-      expect(await activeGrants(recipient)).toHaveLength(1);
+      expect(await activeGrants(recipient)).toHaveLength(4);
       expect((await commerce.commerceHistory(recipientAuth)).payments).toHaveLength(0);
       const recipients = await import("../server/services/commerce-recipients");
       const results = await recipients.lookupCommerceRecipients("Gift Player");
