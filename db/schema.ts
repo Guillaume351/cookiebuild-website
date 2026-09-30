@@ -281,6 +281,10 @@ export const mobileDevices = pgTable(
       .defaultNow()
       .notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+    lastRallySentAt: timestamp("last_rally_sent_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
   },
   (table) => [
     uniqueIndex("mobile_devices_installation_id_uq").on(table.installationId),

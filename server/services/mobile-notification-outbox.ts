@@ -373,6 +373,28 @@ function multicastMessage(
   };
 }
 
+/** One rally push per device every three hours, however many queues call for players. */
+export const RALLY_DEVICE_COOLDOWN_HOURS = 3;
+
+/**
+ * Atomically reserves the rally slot of each device so concurrent workers or
+ * several queued rallies cannot notify the same phone twice within the cooldown.
+ */
+async function claimRallyRecipients<T extends { deviceId: string }>(candidates: T[]): Promise<T[]> {
+  if (candidates.length === 0) return [];
+  const claimed = await db
+    .update(mobileDevices)
+    .set({ lastRallySentAt: sql`now()` })
+    .where(and(
+      inArray(mobileDevices.id, candidates.map((candidate) => candidate.deviceId)),
+      sql`(${mobileDevices.lastRallySentAt} IS NULL
+        OR ${mobileDevices.lastRallySentAt} < now() - make_interval(hours => ${RALLY_DEVICE_COOLDOWN_HOURS}))`,
+    ))
+    .returning({ id: mobileDevices.id });
+  const ids = new Set(claimed.map((row) => row.id));
+  return candidates.filter((candidate) => ids.has(candidate.deviceId));
+}
+
 async function deliverNotification(
   row: ClaimedOutboxRow,
   config: MobileNotificationWorkerConfig,
@@ -400,7 +422,7 @@ async function deliverNotification(
     return allowed;
   });
   let suppressed = 0;
-  const recipients = privacyEligible.filter((recipient) => {
+  const quietEligible = privacyEligible.filter((recipient) => {
     const allowed = !isInQuietHours(
       now,
       recipient.timezone,
@@ -411,6 +433,9 @@ async function deliverNotification(
     if (!allowed) suppressed += 1;
     return allowed;
   });
+  const recipients =
+    preference === "rally" ? await claimRallyRecipients(quietEligible) : quietEligible;
+  suppressed += quietEligible.length - recipients.length;
   const disabled: string[] = [];
   const retry: string[] = [];
   let sent = 0;

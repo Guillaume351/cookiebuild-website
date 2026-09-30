@@ -155,6 +155,13 @@
       "when": 1790755200002,
       "tag": "0022_player_login_rewards",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1790755200003,
+      "tag": "0023_rally_recipient_cap",
+      "breakpoints": true
     }
   ]
 }
