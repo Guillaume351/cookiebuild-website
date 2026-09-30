@@ -86,3 +86,8 @@ export function requireMobileAuth(event: H3Event) {
   }
   return auth;
 }
+
+/** Verified Firebase identity when the request carried a bearer token, otherwise undefined. */
+export function optionalMobileAuth(event: H3Event) {
+  return (event.context as MobileContext).mobileAuth;
+}

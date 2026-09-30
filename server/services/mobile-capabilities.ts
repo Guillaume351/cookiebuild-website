@@ -3,6 +3,7 @@ import { createError } from "h3";
 import db from "../../db/client";
 
 export type MobileCapability =
+  | "dailyRewards"
   | "kitShop"
   | "playerDashboard"
   | "skyblockCompanion"
@@ -10,6 +11,7 @@ export type MobileCapability =
   | "skyblockMarketWrites";
 
 interface CapabilityRow extends Record<string, unknown> {
+  dailyRewards: boolean;
   kitShop: boolean;
   playerDashboard: boolean;
   skyblockCompanion: boolean;
@@ -18,6 +20,7 @@ interface CapabilityRow extends Record<string, unknown> {
 }
 
 export interface MobileCapabilities {
+  dailyRewards: boolean;
   kitShop: boolean;
   playerDashboard: boolean;
   skyblockCompanion: boolean;
@@ -36,6 +39,7 @@ export function configuredMobileCapabilities(
 ): MobileCapabilities {
   const skyblockCompanion = enabled(environment.MOBILE_SKYBLOCK_ENABLED);
   return {
+    dailyRewards: enabled(environment.MOBILE_DAILY_REWARDS_ENABLED),
     kitShop: enabled(environment.MOBILE_KIT_SHOP_ENABLED),
     playerDashboard: enabled(environment.MOBILE_PLAYER_DASHBOARD_ENABLED),
     skyblockCompanion,
@@ -51,6 +55,18 @@ export function configuredMobileCapabilities(
 async function databaseCapabilities(): Promise<MobileCapabilities> {
   const rows = await db.execute<CapabilityRow>(sql`
     SELECT (
+      to_regclass('public.player_reward_grants') IS NOT NULL
+      AND to_regclass('public.mobile_daily_claims') IS NOT NULL
+      AND to_regclass('public.mobile_engagement_daily') IS NOT NULL
+      AND to_regclass('public.mobile_player_links') IS NOT NULL
+      AND EXISTS (
+        SELECT 1 FROM information_schema.columns
+         WHERE table_schema = 'public' AND table_name = 'player_reward_grants'
+           AND column_name IN ('player_uuid', 'source', 'period_key', 'coins', 'delivered_at')
+         GROUP BY table_name HAVING count(*) = 5
+      )
+    ) AS "dailyRewards",
+    (
       to_regclass('public.coin_transactions') IS NOT NULL
       AND to_regclass('public.uq_coin_transaction_player_source') IS NOT NULL
       AND EXISTS (
@@ -179,6 +195,7 @@ async function databaseCapabilities(): Promise<MobileCapabilities> {
     ) AS "skyblockMarketWrites"
   `);
   return {
+    dailyRewards: rows[0]?.dailyRewards === true,
     kitShop: rows[0]?.kitShop === true,
     playerDashboard: rows[0]?.playerDashboard === true,
     skyblockCompanion: rows[0]?.skyblockCompanion === true,
@@ -193,6 +210,7 @@ export async function mobileCapabilities(
 ): Promise<MobileCapabilities> {
   const configured = configuredMobileCapabilities();
   if (
+    !configured.dailyRewards &&
     !configured.kitShop &&
     !configured.playerDashboard &&
     !configured.skyblockCompanion &&
@@ -214,6 +232,7 @@ export async function mobileCapabilities(
       );
       cachedSchema = {
         value: {
+          dailyRewards: false,
           kitShop: false,
           playerDashboard: false,
           skyblockCompanion: false,
@@ -225,6 +244,7 @@ export async function mobileCapabilities(
     }
   }
   return {
+    dailyRewards: configured.dailyRewards && cachedSchema.value.dailyRewards,
     kitShop: configured.kitShop && cachedSchema.value.kitShop,
     playerDashboard:
       configured.playerDashboard && cachedSchema.value.playerDashboard,

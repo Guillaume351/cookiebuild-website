@@ -12,6 +12,7 @@ import {
   lockMobileAccountForDeletion,
 } from "./mobile-account";
 import { lockActiveMobileUser } from "./mobile-user";
+import { grantAppLinkRewardInTransaction, rewardGrantsReady } from "./mobile-rewards";
 
 function isUniqueViolation(error: unknown) {
   return typeof error === "object" && error !== null && "code" in error && error.code === "23505";
@@ -23,6 +24,7 @@ export async function claimPlayerLink(firebaseUid: string, code: string) {
     throw createError({ statusCode: 503, statusMessage: "Player linking is not configured" });
   }
   const codeHmac = linkCodeHmac(code, pepper);
+  const rewardsReady = await rewardGrantsReady();
 
   try {
     return await db.transaction(async (tx) => {
@@ -127,12 +129,18 @@ export async function claimPlayerLink(firebaseUid: string, code: string) {
         throw createError({ statusCode: 400, statusMessage: "Invalid or expired link code" });
       }
 
+      // One app-link reward per Minecraft player, committed atomically with the link.
+      const reward = rewardsReady
+        ? await grantAppLinkRewardInTransaction(tx, challenge.playerId)
+        : null;
+
       return {
         playerId: challenge.playerId,
         playerName: player.name,
         edition: challenge.edition,
         isPrimary,
         linkedAt: now,
+        reward,
       };
     });
   } catch (error) {

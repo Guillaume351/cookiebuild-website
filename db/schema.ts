@@ -1,5 +1,6 @@
 import {
   bigint,
+  bigserial,
   boolean,
   check,
   date,
@@ -310,18 +311,18 @@ export const mobileNotificationPreferences = pgTable(
       .default(true)
       .notNull(),
     socialEnabled: boolean("social_enabled").default(true).notNull(),
-    rallyEnabled: boolean("rally_enabled").default(false).notNull(),
+    rallyEnabled: boolean("rally_enabled").default(true).notNull(),
     weeklyDigestEnabled: boolean("weekly_digest_enabled")
       .default(true)
       .notNull(),
     dailyReminderEnabled: boolean("daily_reminder_enabled")
-      .default(false)
+      .default(true)
       .notNull(),
     weeklyReminderEnabled: boolean("weekly_reminder_enabled")
       .default(false)
       .notNull(),
     friendOnlineEnabled: boolean("friend_online_enabled")
-      .default(false)
+      .default(true)
       .notNull(),
     skyblockMarketSoldEnabled: boolean("skyblock_market_sold_enabled")
       .default(false)
@@ -341,6 +342,11 @@ export const mobileNotificationPreferences = pgTable(
       .notNull(),
     quietHoursStart: varchar("quiet_hours_start", { length: 5 }),
     quietHoursEnd: varchar("quiet_hours_end", { length: 5 }),
+    /** Null until the app saves preferences; untouched rows follow code defaults. */
+    explicitlySavedAt: timestamp("explicitly_saved_at", {
+      withTimezone: true,
+      mode: "date",
+    }),
     updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
       .defaultNow()
       .notNull(),
@@ -935,6 +941,10 @@ export const mobileEvents = pgTable(
       mode: "date",
     }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true, mode: "date" }),
+    localizations: jsonb()
+      .$type<Record<string, { title?: string; description?: string }>>()
+      .default({})
+      .notNull(),
     status: varchar({ length: 16 }).default("scheduled").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
       .defaultNow()
@@ -2178,5 +2188,105 @@ export const commerceOrderHistory = pgTable(
   (table) => [
     uniqueIndex("commerce_order_history_dedupe_uq").on(table.dedupeKey),
     index("commerce_order_history_order_idx").on(table.orderId, table.occurredAt),
+  ],
+);
+
+export const playerRewardGrants = pgTable(
+  "player_reward_grants",
+  {
+    id: bigserial({ mode: "number" }).primaryKey(),
+    playerUuid: uuid("player_uuid")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    source: text().notNull(),
+    periodKey: text("period_key").notNull(),
+    coins: integer().default(0).notNull(),
+    xp: integer().default(0).notNull(),
+    cosmeticId: text("cosmetic_id"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true, mode: "date" }),
+  },
+  (table) => [
+    unique("player_reward_grants_player_source_period_uq").on(
+      table.playerUuid,
+      table.source,
+      table.periodKey,
+    ),
+    index("player_reward_grants_undelivered_idx")
+      .on(table.deliveredAt)
+      .where(sql`${table.deliveredAt} IS NULL`),
+    index("player_reward_grants_pending_player_idx")
+      .on(table.playerUuid, table.createdAt)
+      .where(sql`${table.deliveredAt} IS NULL`),
+    check(
+      "player_reward_grants_amounts_ck",
+      sql`${table.coins} >= 0 AND ${table.xp} >= 0`,
+    ),
+  ],
+);
+
+export const mobileDailyClaims = pgTable(
+  "mobile_daily_claims",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    claimDate: date("claim_date", { mode: "string" }).notNull(),
+    streak: integer().notNull(),
+    cycleDay: integer("cycle_day").notNull(),
+    coins: integer().notNull(),
+    grantId: bigint("grant_id", { mode: "number" }).references(
+      () => playerRewardGrants.id,
+      { onDelete: "set null" },
+    ),
+    claimedAt: timestamp("claimed_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.claimDate] }),
+    check(
+      "mobile_daily_claims_values_ck",
+      sql`${table.streak} >= 1 AND ${table.cycleDay} BETWEEN 1 AND 7 AND ${table.coins} >= 0`,
+    ),
+  ],
+);
+
+export const mobileEngagementDaily = pgTable(
+  "mobile_engagement_daily",
+  {
+    day: date({ mode: "string" }).notNull(),
+    metric: varchar({ length: 32 }).notNull(),
+    kind: varchar({ length: 64 }).notNull(),
+    count: bigint({ mode: "number" }).default(0).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.day, table.metric, table.kind] })],
+);
+
+/** In-game login calendar (Europe/Paris days); written by CookieDough. */
+export const playerLoginRewards = pgTable(
+  "player_login_rewards",
+  {
+    playerId: uuid("player_id")
+      .primaryKey()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    lastClaimDay: date("last_claim_day", { mode: "string" }).notNull(),
+    streak: integer().notNull(),
+    bestStreak: integer("best_streak").notNull(),
+    totalClaims: integer("total_claims").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "player_login_rewards_values_ck",
+      sql`${table.streak} >= 1 AND ${table.bestStreak} >= ${table.streak} AND ${table.totalClaims} >= 1`,
+    ),
   ],
 );

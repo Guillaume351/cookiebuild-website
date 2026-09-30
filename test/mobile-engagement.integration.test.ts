@@ -13,6 +13,10 @@ describe.skipIf(!enabled)("mobile engagement PostgreSQL integration", () => {
       daily: expect.any(Number),
       weekly: expect.any(Number),
       friendOnline: expect.any(Number),
+      workerFull: expect.any(Number),
+      objectiveReady: expect.any(Number),
+      weeklyDigest: expect.any(Number),
+      soireeReminders: expect.any(Number),
     });
   });
 
@@ -45,7 +49,7 @@ describe.skipIf(!enabled)("mobile engagement PostgreSQL integration", () => {
         playerId,
         edition: "java",
         rank: { period: "season", gamemode: "all" },
-        progression: { resetTimezone: "UTC" },
+        progression: { resetTimezone: "Europe/Paris", achievements: { total: 7 } },
       });
       expect(profile.progression.dailyQuests).toHaveLength(2);
       expect(profile.progression.weeklyQuests).toHaveLength(3);

@@ -1,6 +1,14 @@
 import { sql } from "drizzle-orm";
 import { createError } from "h3";
 import db from "../../db/client";
+import {
+  addDaysToDateKey,
+  isoWeekKeyOfDateKey,
+  isoWeekdayOfDateKey,
+  nextParisMidnight,
+  parisDateKey,
+  parisWallTimeToUtc,
+} from "../utils/paris-time";
 
 interface PrimaryPlayerRow extends Record<string, unknown> {
   playerId: string;
@@ -43,22 +51,21 @@ interface ProfileRow extends Record<string, unknown> {
   weeklyKills: number;
 }
 
-function nextUtcDay(now = new Date()) {
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1));
-}
+/** Goals reset at midnight Europe/Paris, matching CookieDough's ParisCalendar. */
+export const GOAL_RESET_TIMEZONE = "Europe/Paris";
 
-function nextUtcWeek(now = new Date()) {
-  const day = now.getUTCDay() || 7;
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + (8 - day)));
-}
+/** Must match GoalRules.CATALOG in CookieDough. */
+export const ACHIEVEMENT_TOTAL = 7;
 
-function isoWeekKey(now: Date) {
-  const date = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const week = Math.ceil((((date.getTime() - yearStart.getTime()) / 86_400_000) + 1) / 7);
-  return `${date.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+export function goalCalendar(now: Date) {
+  const today = parisDateKey(now);
+  const nextMonday = addDaysToDateKey(today, 8 - isoWeekdayOfDateKey(today));
+  return {
+    day: today,
+    week: isoWeekKeyOfDateKey(today),
+    dailyReset: nextParisMidnight(now),
+    weeklyReset: parisWallTimeToUtc(nextMonday, 0),
+  };
 }
 
 function objective(
@@ -166,15 +173,12 @@ export async function mobileEngagementSnapshot(firebaseUid: string, now = new Da
     const row = rows[0];
     if (!row) throw createError({ statusCode: 428, statusMessage: "Primary player link required" });
 
-    const utcDay = now.toISOString().slice(0, 10);
-    const dailyMatches = row.day === utcDay ? row.dailyMatches : 0;
-    const dailyWins = row.day === utcDay ? row.dailyWins : 0;
-    const currentWeek = isoWeekKey(now);
-    const weeklyMatches = row.week === currentWeek ? row.weeklyMatches : 0;
-    const weeklyWins = row.week === currentWeek ? row.weeklyWins : 0;
-    const weeklyKills = row.week === currentWeek ? row.weeklyKills : 0;
-    const dailyReset = nextUtcDay(now);
-    const weeklyReset = nextUtcWeek(now);
+    const calendar = goalCalendar(now);
+    const dailyMatches = row.day === calendar.day ? row.dailyMatches : 0;
+    const dailyWins = row.day === calendar.day ? row.dailyWins : 0;
+    const weeklyMatches = row.week === calendar.week ? row.weeklyMatches : 0;
+    const weeklyWins = row.week === calendar.week ? row.weeklyWins : 0;
+    const { dailyReset, weeklyReset } = calendar;
     const experience = Math.max(0, Number(row.experience));
     const level = Math.floor(Math.sqrt(experience / 100)) + 1;
     const levelBase = ((level - 1) ** 2) * 100;
@@ -186,7 +190,8 @@ export async function mobileEngagementSnapshot(firebaseUid: string, now = new Da
     const weeklyQuests = [
       objective("weekly-matches", "Play 3 matches", "Complete three matches this week.", weeklyMatches, 3, 25, 50, weeklyReset),
       objective("weekly-win", "Win a match", "Win a match this week.", weeklyWins, 1, 25, 50, weeklyReset),
-      objective("weekly-kills", "Earn 10 eliminations", "Earn ten eliminations this week.", weeklyKills, 10, 40, 75, weeklyReset),
+      // Mode-neutral: reachable by a player who only plays Build Battle.
+      objective("weekly-finish5", "Finish 5 matches", "Complete five matches this week.", weeklyMatches, 5, 40, 75, weeklyReset),
     ];
     const nextBestAction = dailyQuests.find((quest) => !quest.completed)
       ?? weeklyQuests.find((quest) => !quest.completed)
@@ -208,11 +213,11 @@ export async function mobileEngagementSnapshot(firebaseUid: string, now = new Da
         xp: experience,
         xpIntoLevel: experience - levelBase,
         xpForNextLevel: nextLevel - levelBase,
-        resetTimezone: "UTC",
+        resetTimezone: GOAL_RESET_TIMEZONE,
         daily: dailyQuests[0],
         dailyQuests,
         weeklyQuests,
-        achievements: { completed: row.achievements.length, total: 3 },
+        achievements: { completed: Math.min(row.achievements.length, ACHIEVEMENT_TOTAL), total: ACHIEVEMENT_TOTAL },
         nextBestAction,
       },
     };

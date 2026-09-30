@@ -29,6 +29,13 @@ export default defineNuxtConfig({
         "X-Frame-Options": "SAMEORIGIN",
       },
     },
+    // Apple fetches this extensionless file directly; it must be JSON and never redirect.
+    "/.well-known/apple-app-site-association": {
+      headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" },
+    },
+    "/.well-known/assetlinks.json": {
+      headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=3600" },
+    },
     "/news": { redirect: { to: "/updates", statusCode: 301 } },
     "/changelog": { redirect: { to: "/updates", statusCode: 301 } },
     "/lobby.webp": { redirect: { to: "/lobby-hero-clean-1600.webp", statusCode: 301 } },

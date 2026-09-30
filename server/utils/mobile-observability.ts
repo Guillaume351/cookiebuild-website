@@ -4,6 +4,8 @@ const allowedEvents = new Set(eventContract.mobileEvents);
 const allowedResults = new Set(eventContract.results);
 const counters = new Map<string, number>();
 const durationSums = new Map<string, { count: number; sum: number }>();
+const clientErrors = new Map<string, number>();
+const CLIENT_ERROR_VERSION_PATTERN = /^\d{1,3}\.\d{1,3}\.\d{1,3}(?:\+\d{1,6})?$/;
 
 export type MobileMetricResult = "success" | "client_error" | "rate_limited" | "server_error";
 
@@ -50,6 +52,14 @@ export function recordMobileProductEvent(event: string, result: MobileMetricResu
   durationSums.set(key, duration);
 }
 
+/** Counts app-reported errors with bounded labels (platform and release version only). */
+export function recordMobileClientError(platform: "ios" | "android", appVersion: string) {
+  const version = CLIENT_ERROR_VERSION_PATTERN.test(appVersion) ? appVersion : "other";
+  const key = `${platform}\0${version}`;
+  if (!clientErrors.has(key) && clientErrors.size >= 200) return;
+  clientErrors.set(key, (clientErrors.get(key) ?? 0) + 1);
+}
+
 const prometheusEscape = (value: string) => value.replaceAll("\\", "\\\\").replaceAll("\"", "\\\"");
 
 export function renderMobileMetrics() {
@@ -71,10 +81,19 @@ export function renderMobileMetrics() {
     lines.push(`cookiebuild_mobile_request_duration_seconds_count{${labels}} ${duration.count}`);
     lines.push(`cookiebuild_mobile_request_duration_seconds_sum{${labels}} ${duration.sum.toFixed(6)}`);
   }
+  lines.push(
+    "# HELP cookiebuild_mobile_client_errors_total Errors reported by the mobile app.",
+    "# TYPE cookiebuild_mobile_client_errors_total counter",
+  );
+  for (const [key, count] of [...clientErrors.entries()].sort(([a], [b]) => a.localeCompare(b))) {
+    const [platform, version] = key.split("\0");
+    lines.push(`cookiebuild_mobile_client_errors_total{platform="${prometheusEscape(platform!)}",app_version="${prometheusEscape(version!)}"} ${count}`);
+  }
   return `${lines.join("\n")}\n`;
 }
 
 export function resetMobileMetricsForTests() {
   counters.clear();
   durationSums.clear();
+  clientErrors.clear();
 }

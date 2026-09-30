@@ -8,16 +8,28 @@ Admin before touching account data.
 
 - `GET /bootstrap`: addresses, supported games, feature flags, support, privacy, terms, and
   account-deletion URLs.
-- `GET /status`: Java and Bedrock status, player counts, versions, and MOTDs.
+- `GET /status`: Java and Bedrock status, player counts, versions, and MOTDs. When a game-server
+  runtime snapshot (admin bridge) is younger than 90 seconds it also returns
+  `modes: [{ id, playing }]`, players currently in a game instance per normalized mode ID
+  (`microbattles`, `skywars`, …). The field is omitted, never guessed, when no fresh snapshot exists.
 - `GET /leaderboards`: the existing stats query with `gamemode`, `period`, `search`, `page`, and
   `pageSize` filters.
-- `GET /events` and `GET /news`: currently published content from PostgreSQL.
+- `GET /events` and `GET /news`: currently published content from PostgreSQL. `GET /events` accepts
+  `?locale=fr` (or `Accept-Language`) and returns the localized `title`/`description` when the event
+  carries one, otherwise the stored base copy.
+- `POST /client-errors` with `{ message, stack?, appVersion, platform: "ios"|"android", route? }`
+  returns `204`. Bearer auth is optional. Reports are truncated, scrubbed (e-mails, tokens, UUIDs,
+  IPs, query strings) and written only to the structured log plus the
+  `cookiebuild_mobile_client_errors_total{platform,app_version}` metric. Rate-limited per uid and IP.
+- `POST /notifications/opened` with `{ kind, notificationId? }` returns `204` and increments the
+  identity-free Europe/Paris daily counter `mobile_engagement_daily` (`metric =
+  notification_opened`, unknown kinds folded into `other`). Bearer auth is optional; rate-limited.
 
 ## Authenticated routes
 
 - `GET /me`: app identity, active Java/Bedrock player links, and `primaryPlayer` with the linked
   player's personal seasonal rank, aggregate XP, exact PostgreSQL-backed daily/weekly goal state,
-  achievements, UTC resets, and `nextBestAction`.
+  achievements, Europe/Paris resets, and `nextBestAction`.
 - `GET /me/dashboard`: the primary linked player's private live status, coin balance, per-game
   totals, 30-day activity series, progression, selected kits, and up to 15 recent completed matches
   per supported game mode. It is exposed only when `MOBILE_PLAYER_DASHBOARD_ENABLED=true` and the
@@ -30,7 +42,20 @@ Admin before touching account data.
   active mobile identity/link (website only), `playerdata`, then `minigame_progression`. There is no
   real-money checkout. The routes remain unavailable unless `MOBILE_KIT_SHOP_ENABLED=true` and the
   `add-retention-ledger.sql` schema capability check passes.
-- `POST /player-link/claim` with `{ "code": "AB23CD45" }`.
+- `POST /player-link/claim` with `{ "code": "AB23CD45" }`. The `201` response `data` also contains
+  `reward: { coins: 150, cosmeticId: "app_companion_badge" } | null`: the first link of a Minecraft
+  player inserts one `player_reward_grants` row (`source = app_link`, `period_key = once`) in the
+  link transaction; later links of the same player return `null`. CookieDough delivers grants.
+- `GET /rewards/daily` and `POST /rewards/daily/claim`: the app-exclusive daily chest, exposed only
+  when `features.dailyRewards` is true (`MOBILE_DAILY_REWARDS_ENABLED=true` plus the migration 0020
+  schema check); otherwise both return `404`. Days are Europe/Paris calendar days. `GET` returns
+  `{ linked, available, claimedToday, streak, currentDay, nextResetAt, rewards: [{ day, coins }] }`
+  where `streak` is the live consecutive-day count (0 after a missed day) and `currentDay` (1–7) is
+  the reward claimable today or claimed today. Rewards are 25, 30, 40, 50, 60, 75 and 150 coins;
+  the cycle restarts at day 1 after day 7. `POST` returns `200 { granted: { coins, day }, streak,
+  currentDay, claimedToday, nextResetAt }`, `409` if already opened today, `403` when no player is
+  linked. Each claim stores `mobile_daily_claims` and a `player_reward_grants` row
+  (`source = app_daily`, `period_key = YYYY-MM-DD`).
 - `DELETE /player-link`, optionally filtered with `playerId` and/or `edition` query parameters.
 - `POST /devices` and `DELETE /devices/:installationId` for FCM token lifecycle. Registration may
   include an IANA `timezone` plus the paired `timezoneOffsetMinutes` (-840 to 840) and
@@ -281,8 +306,11 @@ existing `HH:00` storage format.
 
 CookieDough stores `player_goal_progress` after every match. The legacy `goals.yml` file is imported
 once for players without a database row, while existing database rows remain authoritative. Daily
-goals reset at 00:00 UTC and weekly goals at Monday 00:00 UTC. Reward claims remain idempotent in the
-coin-transaction ledger; daily/weekly rewards now grant both minigame XP and coins.
+goals reset at 00:00 Europe/Paris and weekly goals at Monday 00:00 Europe/Paris (CookieDough
+`ParisCalendar`). Reward claims remain idempotent in the coin-transaction ledger; daily/weekly rewards
+grant both minigame XP and coins. Weekly goals are mode-neutral: `weekly-matches` (3 matches),
+`weekly-win` (1 win) and `weekly-finish5` (5 matches, 75 coins / 40 XP); the former elimination goal
+was removed. The achievement catalog has 7 entries.
 
 `GET /me` adds:
 
@@ -300,11 +328,11 @@ coin-transaction ledger; daily/weekly rewards now grant both minigame XP and coi
         "xp": 520,
         "xpIntoLevel": 120,
         "xpForNextLevel": 500,
-        "resetTimezone": "UTC",
+        "resetTimezone": "Europe/Paris",
         "daily": {},
         "dailyQuests": [],
         "weeklyQuests": [],
-        "achievements": { "completed": 2, "total": 3 },
+        "achievements": { "completed": 2, "total": 7 },
         "nextBestAction": null
       }
     }
@@ -337,11 +365,24 @@ The worker recognizes these producer kinds and corresponding user preference swi
 - `event`, `event_reminder`, `event_start`
 - `server_status`, `server_offline`, `server_recovered`
 - `social`, `friend_request`, `party_invite`
-- `player_rally` (dedicated `rallyEnabled` preference, disabled by default)
-- `weekly_digest`
-- `daily_goal_reminder` (dedicated opt-in, one row per player/UTC day)
-- `weekly_goal_reminder` (dedicated opt-in, one row per player/ISO week)
+- `player_rally` (dedicated `rallyEnabled` preference)
+- `weekly_digest` (Monday 10:00–10:59 Europe/Paris, one row per linked user and ISO week: last
+  week's completed matches and wins plus the next Soirée Cookie when that series is enabled)
+- `event_reminder` for Soirée Cookie: 15 minutes before each occurrence, one localized row per
+  language chunk of `mobileUserIds`, skipped entirely once the occurrence has reminder rows
+- `daily_goal_reminder` (dedicated preference, one row per player/Europe/Paris day)
+- `weekly_goal_reminder` (dedicated opt-in, one row per player/Europe/Paris ISO week)
 - `friend_online` (global plus accepted-friend opt-ins, one row per session, six-hour pair cooldown)
+
+`rallyEnabled`, `friendOnlineEnabled` and `dailyReminderEnabled` default to `true` since migration
+0020. Rows that were never saved through `PUT /notification-preferences` (tracked by
+`explicitly_saved_at`) were moved to the new defaults; explicit choices were kept. Friend-online
+alerts still require the per-friend opt-in.
+
+Soirée Cookie (`MOBILE_SOIREE_COOKIE_ENABLED=true`) runs every Wednesday and Saturday from 21:00 to
+22:00 Europe/Paris with double coins in game. Every replica keeps the next 14 days of occurrences in
+`mobile_events` (`soiree-cookie-YYYY-MM-DD`, localized in `localizations`), inserting idempotently and
+never overwriting an operator edit or cancellation.
 
 An audience must have exactly one selector: `{ "all": true }`, a `firebaseUid`, a
 `mobileUserIds` array, or a `deviceIds` array. A visible payload accepts `title`, `body`, optional

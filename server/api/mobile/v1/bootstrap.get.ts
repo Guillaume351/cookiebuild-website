@@ -29,6 +29,7 @@ export default defineCachedEventHandler(
           friendOnlineAlerts: friends,
           liveChat: false,
           shop: capabilities.kitShop,
+          dailyRewards: capabilities.dailyRewards,
           playerDashboard: capabilities.playerDashboard,
           skyblockCompanion: capabilities.skyblockCompanion,
           skyblockManagementWrites: capabilities.skyblockManagementWrites,

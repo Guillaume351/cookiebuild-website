@@ -134,6 +134,27 @@
       "when": 1788610000001,
       "tag": "0019_shop_activation_metrics",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1790755200000,
+      "tag": "0020_app_rewards_engagement",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1790755200001,
+      "tag": "0021_reward_and_coin_cosmetics",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1790755200002,
+      "tag": "0022_player_login_rewards",
+      "breakpoints": true
     }
   ]
 }

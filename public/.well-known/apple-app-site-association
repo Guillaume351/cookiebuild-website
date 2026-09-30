@@ -1,0 +1,16 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appIDs": ["K29MSNV5QP.com.cookie-build.Cookie-Build-Network"],
+        "appID": "K29MSNV5QP.com.cookie-build.Cookie-Build-Network",
+        "components": [
+          { "/": "/app", "comment": "Cookie Build companion app home" },
+          { "/": "/app/*", "comment": "Cookie Build companion app screens" }
+        ],
+        "paths": ["/app", "/app/*"]
+      }
+    ]
+  }
+}

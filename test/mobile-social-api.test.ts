@@ -28,7 +28,9 @@ describe("mobile social API gates", () => {
   it("keeps private shop and dashboard capabilities disabled unless explicitly enabled", () => {
     delete process.env.MOBILE_KIT_SHOP_ENABLED;
     delete process.env.MOBILE_PLAYER_DASHBOARD_ENABLED;
+    delete process.env.MOBILE_DAILY_REWARDS_ENABLED;
     expect(capabilityModule.configuredMobileCapabilities()).toEqual({
+      dailyRewards: false,
       kitShop: false,
       playerDashboard: false,
       skyblockCompanion: false,
@@ -39,6 +41,7 @@ describe("mobile social API gates", () => {
     process.env.MOBILE_KIT_SHOP_ENABLED = "TRUE";
     process.env.MOBILE_PLAYER_DASHBOARD_ENABLED = "true";
     expect(capabilityModule.configuredMobileCapabilities()).toEqual({
+      dailyRewards: false,
       kitShop: true,
       playerDashboard: true,
       skyblockCompanion: false,

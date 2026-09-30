@@ -152,6 +152,7 @@ export default defineEventHandler(async (event) => {
       onlineVisibility: visibility,
       quietHoursStart,
       quietHoursEnd,
+      explicitlySavedAt: new Date(),
       updatedAt: new Date(),
     };
     const preferences = await tx

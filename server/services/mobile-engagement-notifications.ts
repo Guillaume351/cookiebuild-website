@@ -2,9 +2,117 @@ import { sql } from "drizzle-orm";
 import db from "../../db/client";
 import { mobileCapabilities } from "./mobile-capabilities";
 import {
+  enqueueSoireeCookieReminders,
+  nextSoireeCookie,
+  soireeCookieEnabled,
+} from "./mobile-community-events";
+import { engagementTextSql } from "./mobile-engagement-copy";
+import {
+  addDaysToDateKey,
+  isoWeekKeyOfDateKey,
+  isoWeekdayOfDateKey,
+  parisDateKey,
+  parisWallTimeToUtc,
+} from "../utils/paris-time";
+import {
   skyblockActionNotificationsEnabled,
   skyblockNotificationTextSql,
 } from "./mobile-skyblock-notification-copy";
+
+const WEEKLY_DIGEST_HOUR = 10;
+const WEEKLY_DIGEST_BATCH = 500;
+
+/** The Paris week summarized by a digest sent during Monday 10:00–10:59, if now is in that slot. */
+export function weeklyDigestWindow(now: Date) {
+  const today = parisDateKey(now);
+  if (isoWeekdayOfDateKey(today) !== 1) return null;
+  const slotStart = parisWallTimeToUtc(today, WEEKLY_DIGEST_HOUR);
+  const slotEnd = parisWallTimeToUtc(today, WEEKLY_DIGEST_HOUR + 1);
+  if (now < slotStart || now >= slotEnd) return null;
+  const previousMonday = addDaysToDateKey(today, -7);
+  return {
+    weekKey: isoWeekKeyOfDateKey(previousMonday),
+    startsAt: parisWallTimeToUtc(previousMonday, 0),
+    endsAt: parisWallTimeToUtc(today, 0),
+  };
+}
+
+/**
+ * Monday-morning recap for linked players with the weekly digest preference:
+ * last week's completed matches and wins, plus the next Soirée Cookie when that
+ * event series is enabled. Match times are stored as UTC wall-clock timestamps.
+ */
+export async function enqueueWeeklyDigestNotifications(now = new Date()) {
+  const window = weeklyDigestWindow(now);
+  if (!window) return 0;
+  const next = soireeCookieEnabled() ? nextSoireeCookie(now) : null;
+  const nextText = next
+    ? engagementTextSql(sql`locale`, next.isoWeekday === 3 ? "digestNextWednesday" : "digestNextSaturday")
+    : sql`NULL`;
+  const start = window.startsAt.toISOString().replace("Z", "");
+  const end = window.endsAt.toISOString().replace("Z", "");
+  const rows = await db.execute(sql`
+    WITH candidate AS (
+      SELECT user_row.id, user_row.firebase_uid, user_row.locale, link.player_id
+        FROM mobile_users user_row
+        JOIN mobile_notification_preferences preference
+          ON preference.mobile_user_id = user_row.id AND preference.weekly_digest_enabled
+        JOIN mobile_player_links link
+          ON link.firebase_uid = user_row.firebase_uid AND link.is_primary AND link.revoked_at IS NULL
+       WHERE user_row.deleted_at IS NULL
+         AND EXISTS (
+           SELECT 1 FROM mobile_devices device
+            WHERE device.mobile_user_id = user_row.id
+              AND device.notifications_authorized AND device.revoked_at IS NULL
+         )
+         AND NOT EXISTS (
+           SELECT 1 FROM mobile_notification_outbox sent_digest
+            WHERE sent_digest.dedupe_key = 'weekly-digest:' || user_row.id || ':' || ${window.weekKey}
+         )
+       ORDER BY user_row.id
+       LIMIT ${WEEKLY_DIGEST_BATCH}
+    ), stats AS (
+      SELECT candidate.*,
+             (SELECT count(*) FROM match_players played
+                JOIN matches played_match ON played_match.id = played.match_id
+               WHERE played.player_id = candidate.player_id
+                 AND played_match.endtime IS NOT NULL
+                 AND played_match.starttime >= ${start}::timestamp
+                 AND played_match.starttime < ${end}::timestamp)::int AS matches,
+             (SELECT count(*) FROM match_winners winner
+                JOIN matches won_match ON won_match.id = winner.match_id
+               WHERE winner.player_id = candidate.player_id
+                 AND won_match.endtime IS NOT NULL
+                 AND won_match.starttime >= ${start}::timestamp
+                 AND won_match.starttime < ${end}::timestamp)::int AS wins
+        FROM candidate
+    )
+    INSERT INTO mobile_notification_outbox (kind, dedupe_key, audience, payload)
+    SELECT 'weekly_digest',
+           'weekly-digest:' || id || ':' || ${window.weekKey},
+           jsonb_build_object('firebaseUid', firebase_uid),
+           jsonb_build_object(
+             'title', ${engagementTextSql(sql`locale`, "digestTitle")},
+             'body', concat_ws(' ',
+               CASE WHEN matches > 0
+                 THEN replace(replace(${engagementTextSql(sql`locale`, "digestPlayed")},
+                   '{matches}', matches::text), '{wins}', wins::text)
+                 ELSE ${engagementTextSql(sql`locale`, "digestIdle")} END,
+               ${nextText}),
+             'deepLink', 'cookiebuild://progress',
+             'data', jsonb_build_object(
+               'type', 'weekly_digest',
+               'week', ${window.weekKey}::text,
+               'matches', matches::text,
+               'wins', wins::text
+             )
+           )
+      FROM stats
+    ON CONFLICT (dedupe_key) WHERE dedupe_key IS NOT NULL DO NOTHING
+    RETURNING id
+  `);
+  return rows.length;
+}
 
 /**
  * Produces only explicitly opted-in reminders. Unique dedupe keys make every
@@ -15,7 +123,7 @@ export async function enqueueMobileEngagementNotifications() {
   const daily = await db.execute(sql`
     INSERT INTO mobile_notification_outbox (kind, dedupe_key, audience, payload)
     SELECT 'daily_goal_reminder',
-           'daily-goal:' || user_row.id || ':' || timezone('UTC', now())::date,
+           'daily-goal:' || user_row.id || ':' || (now() AT TIME ZONE 'Europe/Paris')::date,
            jsonb_build_object('firebaseUid', user_row.firebase_uid),
            jsonb_build_object(
              'title', CASE WHEN lower(COALESCE(user_row.locale, '')) LIKE 'fr%'
@@ -25,7 +133,7 @@ export async function enqueueMobileEngagementNotifications() {
                THEN 'Joue une partie aujourd’hui pour entretenir ta progression.'
                ELSE 'Play one match today to keep your momentum going.' END,
              'deepLink', 'cookiebuild://progress',
-             'data', jsonb_build_object('type', 'daily_goal_reminder', 'resetTimezone', 'UTC')
+             'data', jsonb_build_object('type', 'daily_goal_reminder', 'resetTimezone', 'Europe/Paris')
            )
       FROM mobile_users user_row
       JOIN mobile_notification_preferences preference ON preference.mobile_user_id = user_row.id
@@ -36,7 +144,7 @@ export async function enqueueMobileEngagementNotifications() {
        AND preference.daily_reminder_enabled
        AND (now() + make_interval(mins => preference.timezone_offset_minutes))::time >= time '19:00'
        AND (now() + make_interval(mins => preference.timezone_offset_minutes))::time < time '19:15'
-       AND (goal.day IS DISTINCT FROM timezone('UTC', now())::date OR goal.daily_matches < 1)
+       AND (goal.day IS DISTINCT FROM (now() AT TIME ZONE 'Europe/Paris')::date OR goal.daily_matches < 1)
        AND EXISTS (
          SELECT 1 FROM mobile_devices device
           WHERE device.mobile_user_id = user_row.id
@@ -49,17 +157,17 @@ export async function enqueueMobileEngagementNotifications() {
   const weekly = await db.execute(sql`
     INSERT INTO mobile_notification_outbox (kind, dedupe_key, audience, payload)
     SELECT 'weekly_goal_reminder',
-           'weekly-goal:' || user_row.id || ':' || to_char(timezone('UTC', now()), 'IYYY-"W"IW'),
+           'weekly-goal:' || user_row.id || ':' || to_char(now() AT TIME ZONE 'Europe/Paris', 'IYYY-"W"IW'),
            jsonb_build_object('firebaseUid', user_row.firebase_uid),
            jsonb_build_object(
              'title', CASE WHEN lower(COALESCE(user_row.locale, '')) LIKE 'fr%'
                THEN 'Nouveaux objectifs Cookie Build de la semaine'
                ELSE 'New weekly Cookie Build goals' END,
              'body', CASE WHEN lower(COALESCE(user_row.locale, '')) LIKE 'fr%'
-               THEN 'Joue trois parties, gagne une fois et réalise dix éliminations cette semaine.'
-               ELSE 'Play three matches, win once, and earn ten eliminations this week.' END,
+               THEN 'Termine cinq parties et gagnes-en une cette semaine.'
+               ELSE 'Finish five matches and win one this week.' END,
              'deepLink', 'cookiebuild://progress',
-             'data', jsonb_build_object('type', 'weekly_goal_reminder', 'resetTimezone', 'UTC')
+             'data', jsonb_build_object('type', 'weekly_goal_reminder', 'resetTimezone', 'Europe/Paris')
            )
       FROM mobile_users user_row
       JOIN mobile_notification_preferences preference ON preference.mobile_user_id = user_row.id
@@ -71,8 +179,8 @@ export async function enqueueMobileEngagementNotifications() {
        AND extract(isodow FROM (now() + make_interval(mins => preference.timezone_offset_minutes))) = 1
        AND (now() + make_interval(mins => preference.timezone_offset_minutes))::time >= time '18:00'
        AND (now() + make_interval(mins => preference.timezone_offset_minutes))::time < time '18:15'
-       AND (goal.week IS DISTINCT FROM to_char(timezone('UTC', now()), 'IYYY-"W"IW')
-            OR goal.weekly_matches < 3 OR goal.weekly_wins < 1 OR goal.weekly_kills < 10)
+       AND (goal.week IS DISTINCT FROM to_char(now() AT TIME ZONE 'Europe/Paris', 'IYYY-"W"IW')
+            OR goal.weekly_matches < 5 OR goal.weekly_wins < 1)
        AND EXISTS (
          SELECT 1 FROM mobile_devices device
           WHERE device.mobile_user_id = user_row.id
@@ -256,11 +364,15 @@ export async function enqueueMobileEngagementNotifications() {
     `);
     objectiveReady = objectives.length;
   }
+  const weeklyDigest = await enqueueWeeklyDigestNotifications();
+  const soireeReminders = soireeCookieEnabled() ? await enqueueSoireeCookieReminders() : 0;
   return {
     daily: daily.length,
     weekly: weekly.length,
     friendOnline: friends.length,
     workerFull,
     objectiveReady,
+    weeklyDigest,
+    soireeReminders,
   };
 }

@@ -212,15 +212,15 @@ function preferenceCondition(kind: NotificationPreferenceKind) {
     case "social":
       return sql`coalesce(${mobileNotificationPreferences.socialEnabled}, true)`;
     case "rally":
-      return sql`coalesce(${mobileNotificationPreferences.rallyEnabled}, false)`;
+      return sql`coalesce(${mobileNotificationPreferences.rallyEnabled}, true)`;
     case "weekly_digest":
       return sql`coalesce(${mobileNotificationPreferences.weeklyDigestEnabled}, true)`;
     case "daily_reminder":
-      return sql`coalesce(${mobileNotificationPreferences.dailyReminderEnabled}, false)`;
+      return sql`coalesce(${mobileNotificationPreferences.dailyReminderEnabled}, true)`;
     case "weekly_reminder":
       return sql`coalesce(${mobileNotificationPreferences.weeklyReminderEnabled}, false)`;
     case "friend_online":
-      return sql`coalesce(${mobileNotificationPreferences.friendOnlineEnabled}, false)`;
+      return sql`coalesce(${mobileNotificationPreferences.friendOnlineEnabled}, true)`;
     case "skyblock_market_sold":
       return sql`coalesce(${mobileNotificationPreferences.skyblockMarketSoldEnabled}, false)`;
     case "skyblock_worker_full":

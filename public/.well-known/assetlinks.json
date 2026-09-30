@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "cookiebuild.com.cookiebuildstatus",
+      "sha256_cert_fingerprints": [
+        "6F:3D:4D:AB:A5:16:D7:0E:1C:25:B9:B9:3B:81:30:EA:D8:3B:EB:6F:75:33:BE:3B:A2:46:A6:2B:DD:0D:CD:F6"
+      ]
+    }
+  }
+]
