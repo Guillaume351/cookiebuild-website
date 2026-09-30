@@ -75,6 +75,21 @@
       </div>
     </section>
 
+    <section v-if="coinItems.length" aria-labelledby="coin-items-title" class="rounded-3xl border border-yellow-300/20 bg-yellow-950/10 p-6 md:p-8">
+      <h2 id="coin-items-title" class="text-2xl font-black text-white">{{ shop.coinTitle }}</h2>
+      <p class="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{{ shop.coinIntro }}</p>
+      <ul class="mt-6 grid gap-4 md:grid-cols-2">
+        <li v-for="item in coinItems" :key="item.id" class="flex items-start justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+          <div>
+            <h3 class="text-lg font-black text-white">{{ locale.code === "fr" ? item.name : item.nameEn }}</h3>
+            <p v-if="locale.code === 'fr'" class="mt-1 text-sm text-zinc-400">{{ item.description }}</p>
+            <p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">{{ shop.coinNotice }}</p>
+          </div>
+          <span class="shrink-0 rounded-full border border-yellow-300/40 bg-yellow-300/10 px-3 py-1 text-sm font-black text-yellow-100">{{ shop.coinPrice.replace("{price}", new Intl.NumberFormat(locale.htmlLang).format(item.coinPrice)) }}</span>
+        </li>
+      </ul>
+    </section>
+
     <section aria-labelledby="offers-title">
       <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
@@ -147,6 +162,9 @@ const catalog = computed(() => catalogResponse.value?.data ?? COSMETIC_CATALOG_R
 const purchaseEnabled = computed(() => catalog.value.purchaseEnabled === true);
 const subscriptionProduct = computed(() => catalog.value.products.find((product) => product.kind === "supporter_subscription")!);
 const oneTimeProducts = computed(() => catalog.value.products.filter((product) => product.access === "permanent"));
+interface CoinShopItem { id: string; name: string; nameEn: string; description: string; coinPrice: number }
+// Coin-only cosmetics are informational: bought in game with earned coins, never on the web.
+const coinItems = computed<CoinShopItem[]>(() => (catalog.value as { coinItems?: CoinShopItem[] }).coinItems ?? []);
 const supportProducts = computed(() => catalog.value.products.filter((product) => product.kind === "voluntary_support"));
 
 const subscriptionBenefits = computed(() => catalog.value.items.filter((item) => subscriptionProduct.value.grants.some((id) => id === item.id)));

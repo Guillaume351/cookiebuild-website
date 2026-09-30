@@ -480,8 +480,9 @@ const latestUpdates = computed(() => updatesData.value?.data ?? []);
 const { data: bootstrapData } = await useFetch("/api/mobile/v1/bootstrap");
 const bedWarsAvailable = computed(() => bootstrapData.value?.data?.gamemodes
   ?.some((game) => game.id === "bedwars" && game.available) ?? false);
+// Next community session (e.g. the recurring Soirée Cookie), localized for the page.
 const { data: eventsData } = await useFetch("/api/mobile/v1/events", {
-  query: { limit: 10 },
+  query: computed(() => ({ limit: 10, locale: locale.value.code })),
 });
 const nextEvent = computed(() => featuredEvent(eventsData.value?.data ?? []));
 

@@ -77,7 +77,18 @@ try {
   assert(sitemapResponse.headers.get("content-type")?.includes("application/xml"), "sitemap content type is not XML");
   const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
   assert(sitemapUrls.length === new Set(sitemapUrls).size, "sitemap has duplicate URLs");
-  const paths = sitemapUrls.map((url) => new URL(url).pathname).filter((path) =>
+  // Update articles are single-language: one canonical URL each, no alternates.
+  const isArticle = (url) => /^(?:\/[a-z-]+)?\/updates\/(?!fat-king-preview$|nomad-wars-preview$)[a-z0-9-]+$/.test(new URL(url).pathname);
+  const articleUrls = sitemapUrls.filter(isArticle);
+  for (const url of articleUrls) {
+    const route = new URL(url).pathname;
+    const response = await fetch(`${localOrigin}${route}`);
+    const html = await response.text();
+    assert(response.status === 200, `${route}: expected 200, got ${response.status}`);
+    assert(html.includes(`rel="canonical" href="${origin}${route}"`), `${route}: article canonical is not self`);
+    assert(!html.includes("hreflang="), `${route}: single-language article must not declare hreflang`);
+  }
+  const paths = sitemapUrls.filter((url) => !isArticle(url)).map((url) => new URL(url).pathname).filter((path) =>
     !locales.some((locale) => locale.segment && (path === `/${locale.segment}` || path.startsWith(`/${locale.segment}/`))),
   );
   for (const required of ["/nomad-wars", "/fat-king", "/maps", "/maps/nomad-oasis", "/maps/fat-king-crown", "/updates/nomad-wars-preview", "/updates/fat-king-preview"]) {
@@ -121,7 +132,7 @@ try {
   assert(missing.status === 404, `localized catch-all expected 404, got ${missing.status}`);
 
   const localizedUrlCount = paths.length * locales.length;
-  assert(sitemapUrls.length === localizedUrlCount, `sitemap must contain ${localizedUrlCount} public URLs`);
+  assert(sitemapUrls.length === localizedUrlCount + articleUrls.length, `sitemap must contain ${localizedUrlCount} localized URLs plus ${articleUrls.length} articles`);
   for (const path of paths) for (const locale of locales) {
     assert(sitemapUrls.includes(origin + localize(path, locale)), `sitemap missing ${localize(path, locale)}`);
   }

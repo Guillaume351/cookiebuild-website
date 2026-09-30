@@ -45,7 +45,7 @@
         </div>
         <div class="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col">
           <Button as-child class="bg-emerald-600 font-bold hover:bg-emerald-700">
-            <a href="https://discord.gg/ajmPnwh9g8" target="_blank" rel="noopener noreferrer">
+            <a :href="DISCORD_INVITE_URL" target="_blank" rel="noopener">
               {{ updates.discord }}
               <ExternalLink class="ml-2 h-4 w-4" aria-hidden="true" />
             </a>
@@ -143,6 +143,7 @@ import { gameUiCopy } from "@/utils/game-ui-copy";
 import { updatesCopy } from "@/utils/updates-copy";
 import { publicPageSeo } from "@/utils/public-page-seo";
 import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
+import { DISCORD_INVITE_URL } from "@/utils/site-links";
 
 definePageMeta({ alias: ["/fr/updates", "/de/updates", "/it/updates", "/bg/updates", "/es/updates", "/hi/updates", "/pt-br/updates"] });
 
@@ -201,8 +202,9 @@ const { data, pending, error } = await useFetch("/api/mobile/v1/news", {
   query: { limit: 50, includeSuperseded: "true" },
   transform: (response: UpdatesResponse) => response.data.map(toUpdateListItem),
 });
+// Recurring sessions (e.g. Soirée Cookie) come back localized for the page language.
 const { data: eventsData } = await useFetch<EventsResponse>("/api/mobile/v1/events", {
-  query: { limit: 20 },
+  query: computed(() => ({ limit: 20, locale: locale.value.code })),
 });
 
 const posts = computed(() => data.value ?? []);
