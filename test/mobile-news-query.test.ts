@@ -22,9 +22,17 @@ describe("mobile news query compatibility", () => {
       contentType: "changelog",
       slug: "skywars-release",
       limit: 50,
+      offset: 0,
     });
     expect(() => parseMobileNewsQuery({ includeSuperseded: "yes" })).toThrow(/includeSuperseded/);
     expect(() => parseMobileNewsQuery({ slug: "Bad Slug" })).toThrow(/slug/);
+  });
+
+  it("pages through posts with a bounded offset", () => {
+    expect(parseMobileNewsQuery({ offset: "100" }).offset).toBe(100);
+    expect(() => parseMobileNewsQuery({ offset: "-1" })).toThrow(/offset/);
+    expect(() => parseMobileNewsQuery({ offset: "1.5" })).toThrow(/offset/);
+    expect(() => parseMobileNewsQuery({ offset: "5001" })).toThrow(/offset/);
   });
 
   it("keeps the original DTO readable when additive relation fields are present", () => {

@@ -1,3 +1,4 @@
+import { fetchAllNews } from "./all-news";
 import { mapCatalog } from "./map-catalog";
 import { updateLanguage } from "./updates";
 
@@ -98,10 +99,8 @@ export function renderMarketingSitemap(articles: readonly SitemapArticle[] = [])
 /** Loads every published update permalink through the public news API. */
 export async function loadSitemapArticles(): Promise<SitemapArticle[]> {
   try {
-    const response = await $fetch<{ data: SitemapArticle[] }>("/api/mobile/v1/news", {
-      query: { limit: 50 },
-    });
-    return response.data.map(({ slug, publishedAt, title, summary }) => ({ slug, publishedAt, title, summary }));
+    const articles = await fetchAllNews<SitemapArticle>();
+    return articles.map(({ slug, publishedAt, title, summary }) => ({ slug, publishedAt, title, summary }));
   } catch (error) {
     console.error("[sitemap] update articles unavailable", error);
     return [];

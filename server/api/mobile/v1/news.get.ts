@@ -5,7 +5,7 @@ import { mobileNewsPosts } from "../../../../db/schema";
 import { parseMobileNewsQuery } from "../../../utils/mobile-news";
 
 export default defineEventHandler(async (event) => {
-  const { contentType, includeSuperseded, limit, slug } = parseMobileNewsQuery(getQuery(event));
+  const { contentType, includeSuperseded, limit, offset, slug } = parseMobileNewsQuery(getQuery(event));
   const now = new Date();
   const posts = await db
     .select({
@@ -44,8 +44,9 @@ export default defineEventHandler(async (event) => {
       lte(mobileNewsPosts.publishedAt, now),
       or(isNull(mobileNewsPosts.expiresAt), gt(mobileNewsPosts.expiresAt, now)),
     ))
-    .orderBy(desc(mobileNewsPosts.publishedAt))
-    .limit(limit);
+    .orderBy(desc(mobileNewsPosts.publishedAt), desc(mobileNewsPosts.id))
+    .limit(limit)
+    .offset(offset);
 
   setHeader(event, "Cache-Control", "public, max-age=60, s-maxage=120, stale-while-revalidate=300");
   return { data: posts };

@@ -141,6 +141,7 @@ import { nomadPreviewCopy } from "@/utils/nomad-preview";
 import { fatKingPreviewCopy } from "@/utils/fat-king-preview";
 import { gameUiCopy } from "@/utils/game-ui-copy";
 import { updatesCopy } from "@/utils/updates-copy";
+import { fetchAllNews } from "@/utils/all-news";
 import { publicPageSeo } from "@/utils/public-page-seo";
 import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
 import { DISCORD_INVITE_URL } from "@/utils/site-links";
@@ -197,11 +198,9 @@ const requestedPage = computed(() => {
 });
 
 // Only list fields reach the SSR payload: full bodies live on each article page.
-const { data, pending, error } = await useFetch("/api/mobile/v1/news", {
-  key: "updates-list",
-  query: { limit: 50, includeSuperseded: "true" },
-  transform: (response: UpdatesResponse) => response.data.map(toUpdateListItem),
-});
+const { data, pending, error } = await useAsyncData("updates-list",
+  async () => (await fetchAllNews<UpdatesResponse["data"][number]>({ includeSuperseded: "true" }))
+    .map(toUpdateListItem));
 // Recurring sessions (e.g. Soirée Cookie) come back localized for the page language.
 const { data: eventsData } = await useFetch<EventsResponse>("/api/mobile/v1/events", {
   query: computed(() => ({ limit: 20, locale: locale.value.code })),
