@@ -8,13 +8,13 @@ import ptBR from "./locales/minigames-pt-BR.json";
 const existingCopy = {
   fr: {
     badge: "Bêta publique · Jouable maintenant", headline: "Plus d’or. Plus de points. Plus de risques.",
-    intro: "Mine de l’or, confie-le à ton roi et protège sa couronne. Face à vous : des équipes qui veulent la même richesse… et une boussole qui désigne le roi le plus chargé.",
-    status: "Bêta publique pour 4 à 8 joueurs, répartis en deux équipes de 2 à 4. Rejoins le menu des jeux ou utilise /fatking play. Le Quick Play automatique ne propose pas cette bêta et les parties ne donnent pas de monnaie du serveur. Les réglages pourront évoluer après vos essais.",
+    intro: "Mine de l’or, confie-le à ton roi et protège sa couronne. Face à toi : des équipes qui veulent la même richesse… et une boussole qui désigne le roi le plus chargé.",
+    status: "Bêta publique pour 4 à 8 joueurs, répartis en deux équipes de 2 à 4. Rejoins le menu des jeux ou utilise /fatking play. Le Quick Play automatique ne propose pas cette bêta et les parties ne donnent pas de monnaie du serveur. Les réglages pourront évoluer après tes essais.",
     rulesTitle: "Une couronne. Toute une équipe.",
     steps: [
-      { title: "Récoltez ensemble", text: "La bêta se joue à deux équipes de 2 à 4 joueurs et démarre à partir de 4 joueurs. Chaque équipe reçoit un roi choisi au hasard. Utilise /fatking crown pour retrouver ton équipe et ton roi." },
-      { title: "Chargez votre roi", text: "Seuls les lingots récoltés pendant la partie comptent. Interagis avec ton roi à proximité pour lui donner ton or ; la commande /fatking give fait aussi le transfert. Son or rapporte des points chaque seconde, sans être consommé." },
-      { title: "Défendez la couronne", text: "Plus votre roi porte d’or, plus il marque… et plus il ralentit. La manche dure 15 minutes : le meilleur score gagne. Un héritier vivant est désigné à l’avance. À la mort du roi, il prend la relève : le rôle tourne, les points restent." },
+      { title: "Récolte en équipe", text: "La bêta se joue à deux équipes de 2 à 4 joueurs et démarre à partir de 4 joueurs. Chaque équipe reçoit un roi choisi au hasard. Utilise /fatking crown pour retrouver ton équipe et ton roi." },
+      { title: "Charge ton roi", text: "Seuls les lingots récoltés pendant la partie comptent. Interagis avec ton roi à proximité pour lui donner ton or ; la commande /fatking give fait aussi le transfert. Son or rapporte des points chaque seconde, sans être consommé." },
+      { title: "Défends la couronne", text: "Plus ton roi porte d’or, plus il marque… et plus il ralentit. La manche dure 15 minutes : le meilleur score gagne. Un héritier vivant est désigné à l’avance. À la mort du roi, il prend la relève : le rôle tourne, les points restent." },
     ],
     riskTitle: "À quel moment faut-il arrêter de remplir les poches du roi ?",
     risk: "Avec 1 lingot, le roi marque 1 point par seconde ; avec 16, il en marque 4 ; avec 64, il en marque 8. Le rendement diminue donc progressivement. La charge est limitée à 64 lingots. Tous les porteurs ralentissent, jusqu’à 40 % pour les sujets et 55 % pour le roi. Nourrir le roi allège le poids de son or sans réduire ses points : organise aussi son ravitaillement.",
@@ -24,9 +24,9 @@ const existingCopy = {
     mines: "Un filon récolté devient une roche sombre incassable pendant 30 secondes. Des étincelles annoncent son retour pendant les 5 dernières secondes. Les mines sont communes : tenir un passage, escorter un mineur ou tendre une embuscade compte autant que la pioche. Les bases ne fabriquent pas d’or gratuit.",
     objectivesTitle: "La couronne a de nouvelles exigences",
     objectives: [
-      { title: "Ravitaillez le roi", text: "Chaque quartier possède un stand de rations. Interagis avec le tonneau pour en récupérer une, puis avec ton roi à moins de 4 blocs en tenant la ration. Tu peux en porter 3 et en reprendre une toutes les 20 secondes, quel que soit le stand. Une ration rend 40 de satiété ; elle diminue de 1 par seconde et peut alléger jusqu’à 16 lingots." },
-      { title: "Répondez aux caprices", text: "Toutes les 2 minutes, un défi de 90 secondes s’ouvre : le roi livre 2 rations à l’autel, son équipe abat un adversaire près de lui, ou elle tient le lieu indiqué en supériorité numérique pendant 10 secondes sans interruption. La première équipe à réussir gagne un titre de 90 secondes et une aura de vitesse de 10 % autour du roi." },
-      { title: "Tenez le sanctuaire", text: "Dépense 1 lingot à la table du sanctuaire et reste dans la zone sans adversaire pendant 12 secondes. Tant qu’un membre de l’équipe le garde, vous détournez 10 % des points produits par le roi adverse en tête. Un ennemi interrompt ce revenu ; une zone vide redevient neutre. Il faut choisir qui reste défendre." },
+      { title: "Ravitaille le roi", text: "Chaque quartier possède un stand de rations. Interagis avec le tonneau pour en récupérer une, puis avec ton roi à moins de 4 blocs en tenant la ration. Tu peux en porter 3 et en reprendre une toutes les 20 secondes, quel que soit le stand. Une ration rend 40 de satiété ; elle diminue de 1 par seconde et peut alléger jusqu’à 16 lingots." },
+      { title: "Réponds aux caprices", text: "Toutes les 2 minutes, un défi de 90 secondes s’ouvre : le roi livre 2 rations à l’autel, son équipe abat un adversaire près de lui, ou elle tient le lieu indiqué en supériorité numérique pendant 10 secondes sans interruption. La première équipe à réussir gagne un titre de 90 secondes et une aura de vitesse de 10 % autour du roi." },
+      { title: "Tiens le sanctuaire", text: "Dépense 1 lingot à la table du sanctuaire et reste dans la zone sans adversaire pendant 12 secondes. Tant qu’un membre de l’équipe le garde, ton équipe détourne 10 % des points produits par le roi adverse en tête. Un ennemi interrompt ce revenu ; une zone vide redevient neutre. Il faut choisir qui reste défendre." },
     ],
     deathTitle: "Tomber coûte cher, mais ne termine pas la partie",
     death: "À la mort, l’or porté est perdu : la moitié tombe au sol, le reste disparaît. Aucun point bonus n’est donné pour tuer. Après 8 secondes, tu réapparais avec ton équipement de base et une courte protection qui s’arrête si tu agis. Une déconnexion fait aussi perdre l’or et transmet la couronne ; tu peux retrouver ton équipe sous 90 secondes avec /fatking, sans récupérer la richesse perdue.",
@@ -40,9 +40,9 @@ const existingCopy = {
       { slug: "gardens", title: "Les jardins et l’orangerie", text: "Serre, passerelles et végétation offrent une autre route autour de la couronne centrale." },
     ],
     atlas: "Toutes les maps", mapLink: "Voir la fiche de la map", tiny: "La map vue du dessus", editionTitle: "Pensé pour Java et Bedrock",
-    edition: "Le jeu utilise des blocs, une boussole, des messages et des interactions Minecraft classiques. Testez la bêta ensemble sur Java et Bedrock et signalez les difficultés de lecture ou de contrôle.",
+    edition: "Le jeu utilise des blocs, une boussole, des messages et des interactions Minecraft classiques. Teste la bêta avec tes amis sur Java et Bedrock et signale les difficultés de lecture ou de contrôle.",
     feedbackTitle: "À discuter avec ton prochain coéquipier",
-    questions: ["Tu préfères escorter un roi très riche ou garder une équipe plus mobile ?", "Faut-il attaquer le roi en tête, ravitailler le vôtre ou tenir le sanctuaire ?", "30 secondes avant le retour d’un filon : assez pour encourager les déplacements ?", "La perte de la moitié du butin vous donne-t-elle envie de tenter une revanche ?"],
+    questions: ["Tu préfères escorter un roi très riche ou garder une équipe plus mobile ?", "Faut-il attaquer le roi en tête, ravitailler le tien ou tenir le sanctuaire ?", "30 secondes avant le retour d’un filon : assez pour encourager les déplacements ?", "La perte de la moitié du butin te donne-t-elle envie de tenter une revanche ?"],
     share: "Copier le lien pour un ami", copied: "Lien copié.", article: "Lire l’annonce", back: "Retour aux actualités", articleTitle: "Fat King : la couronne qui pèse lourd", articleIntro: "En bêta sur Cookie Build : un jeu d’équipe où accumuler de l’or rend à la fois plus puissant et plus vulnérable.",
   },
   en: {

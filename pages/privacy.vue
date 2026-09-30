@@ -142,7 +142,7 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Responsable et périmètre</h2>
         <p>
           Cookie Build est exploité par Guillaume Claverie, responsable des données traitées par le
-          serveur Minecraft, le site et l’application. Pour toute demande, écrivez à
+          serveur Minecraft, le site et l’application. Pour toute demande, écris à
           <a class="text-orange-400" href="mailto:support@cookie-build.com">support@cookie-build.com</a>.
         </p>
       </section>
@@ -221,21 +221,21 @@
           <li>Résultats et statistiques agrégées : pendant la durée de vie du serveur pour le classement, l’équité et l’intégrité des matchs.</li>
           <li>Objectifs quotidiens/hebdomadaires, succès, XP, pièces et limiteur de promotion de l’app : données de jeu conservées selon la même durée que les statistiques Minecraft.</li>
           <li>L’accès par une session commerce web est valable 30 jours au maximum et peut être révoqué avant. Son expiration ne supprime pas les transactions associées.</li>
-          <li>Les commandes, paiements, remboursements, litiges, factures et preuves de consentement peuvent devoir être conservés pour les obligations comptables, fiscales, de consommation et la défense des droits. Contactez le support pour demander l’examen ou l’effacement de vos données de commerce. Chaque demande est examinée selon les obligations de conservation applicables.</li>
+          <li>Les commandes, paiements, remboursements, litiges, factures et preuves de consentement peuvent devoir être conservés pour les obligations comptables, fiscales, de consommation et la défense des droits. Contacte le support pour demander l’examen ou l’effacement de tes données de commerce. Chaque demande est examinée selon les obligations de conservation applicables.</li>
           <li>Progression d’île, stockage, transactions du marché et dépôts de reprise Skyblock : données de jeu et d’intégrité conservées selon la même durée que les statistiques Minecraft.</li>
         </ul>
       </section>
 
       <section>
-        <h2 class="mb-3 text-2xl font-semibold text-white">Vos droits</h2>
+        <h2 class="mb-3 text-2xl font-semibold text-white">Tes droits</h2>
         <p>
           Sans association, l’état, les actualités, événements et classements restent accessibles.
-          Dans l’app, vous pouvez désactiver les notifications, dissocier un joueur, copier vos
-          données et supprimer le compte mobile. Vous pouvez aussi demander accès, rectification,
-          effacement, limitation, portabilité ou opposition, et retirer un consentement. Écrivez à
-          l’adresse ci-dessus ou utilisez la
+          Dans l’app, tu peux désactiver les notifications, dissocier un joueur, copier tes
+          données et supprimer le compte mobile. Tu peux aussi demander accès, rectification,
+          effacement, limitation, portabilité ou opposition, et retirer un consentement. Écris à
+          l’adresse ci-dessus ou utilise la
           <NuxtLink class="text-orange-400" to="/account/delete">page de suppression</NuxtLink>.
-          Vous pouvez saisir votre autorité locale ; en France, la CNIL.
+          Tu peux saisir ton autorité locale ; en France, la CNIL.
         </p>
         <p class="mt-3">La suppression du compte mobile n’efface pas l’historique commerce distinct lié au joueur Minecraft. Une demande de droits peut le couvrir, sous réserve des conservations obligatoires de facture, comptabilité, antifraude et défense des droits.</p>
         <p class="mt-3">
@@ -258,7 +258,7 @@
     </section>
     <section v-if="locale.code === 'fr'" class="space-y-3 rounded-xl border border-gray-700 p-5" lang="fr">
       <h2 class="text-2xl font-bold">Mesure d’audience web facultative</h2>
-      <p>Avec votre accord, Google Analytics utilise des cookies pour mesurer les visites des pages publiques, de grandes catégories de provenance, les clics vers le jeu ou Discord et des étapes de la boutique comme le choix d’un destinataire ou l’ouverture du paiement. Nos événements contiennent uniquement des catégories de pages et actions prédéfinies, la langue du site, de grandes catégories de provenance, des identifiants de produit et l’édition (Java ou Bedrock), sans pseudo Minecraft, identifiant joueur, code de connexion, URL de paiement, adresse e-mail, paramètres d’URL ou URL de provenance complète. Aucune balise Google Analytics ne se charge avant votre accord. Vous pouvez refuser ou retirer cet accord depuis « Préférences de mesure d’audience » dans le pied de page. Nous mémorisons ce choix jusqu’à 180 jours. Ces mesures soumises au consentement ne couvrent pas toutes les visites ni tous les achats. Google reçoit les données techniques de connexion nécessaires au service ; notre suivi n’utilise ni signaux publicitaires ni identifiants utilisateur entre sites. La durée des cookies de mesure est limitée à 180 jours. Google peut traiter des données hors EEE selon ses garanties de transfert applicables.</p>
+      <p>Avec ton accord, Google Analytics utilise des cookies pour mesurer les visites des pages publiques, de grandes catégories de provenance, les clics vers le jeu ou Discord et des étapes de la boutique comme le choix d’un destinataire ou l’ouverture du paiement. Nos événements contiennent uniquement des catégories de pages et actions prédéfinies, la langue du site, de grandes catégories de provenance, des identifiants de produit et l’édition (Java ou Bedrock), sans pseudo Minecraft, identifiant joueur, code de connexion, URL de paiement, adresse e-mail, paramètres d’URL ou URL de provenance complète. Aucune balise Google Analytics ne se charge avant ton accord. Tu peux refuser ou retirer cet accord depuis « Préférences de mesure d’audience » dans le pied de page. Nous mémorisons ce choix jusqu’à 180 jours. Ces mesures soumises au consentement ne couvrent pas toutes les visites ni tous les achats. Google reçoit les données techniques de connexion nécessaires au service ; notre suivi n’utilise ni signaux publicitaires ni identifiants utilisateur entre sites. La durée des cookies de mesure est limitée à 180 jours. Google peut traiter des données hors EEE selon ses garanties de transfert applicables.</p>
     </section>
 
     <section v-if="legal" :lang="locale.htmlLang" class="space-y-8 scroll-mt-8">

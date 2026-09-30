@@ -29,28 +29,28 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
   fr: {
     bedwars: {
       cardDescription:
-        "Protégez votre lit, récoltez des cookies, améliorez votre équipe et éliminez tous vos rivaux.",
+        "Protège ton lit, récolte des cookies, améliore ton équipe et élimine tous tes rivaux.",
       heroIntro:
-        "Jouez à BedWars dans le Cookie Colosseum, une arène pâtissière flottante conçue pour les parties communes Java et Bedrock. Protégez votre lit, collectez des ressources, améliorez votre équipe et détruisez les lits adverses.",
+        "Joue à BedWars dans le Cookie Colosseum, une arène pâtissière flottante conçue pour les parties communes Java et Bedrock. Protège ton lit, collecte des ressources, améliore ton équipe et détruis les lits adverses.",
       joinIntro:
         "BedWars est en bêta. Les joueurs Java et Bedrock partagent les mêmes parties à quatre équipes, avec des menus adaptés à chaque édition.",
       gameplayEyebrow: "Lits, ponts et cookies",
       gameplayHeading: "Comment fonctionne BedWars sur Cookie Build",
       steps: [
         {
-          title: "Protégez votre lit",
+          title: "Protège ton lit",
           description:
-            "Rejoignez une équipe et défendez votre île pour permettre à vos équipiers de réapparaître.",
+            "Rejoins une équipe et défends ton île pour permettre à tes équipiers de réapparaître.",
         },
         {
-          title: "Récoltez et améliorez",
+          title: "Récolte et améliore",
           description:
-            "Collectez des cookies, de l’or, des diamants et des émeraudes pour acheter équipement, blocs et améliorations d’équipe.",
+            "Collecte des cookies, de l’or, des diamants et des émeraudes pour acheter équipement, blocs et améliorations d’équipe.",
         },
         {
-          title: "Éliminez vos rivaux",
+          title: "Élimine tes rivaux",
           description:
-            "Construisez des ponts, brisez les lits adverses et éliminez les joueurs qui ne peuvent plus réapparaître.",
+            "Construis des ponts, brise les lits adverses et élimine les joueurs qui ne peuvent plus réapparaître.",
         },
       ],
       highlightHeading: "Une boutique BedWars pour Java et Bedrock",
@@ -70,37 +70,37 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
         {
           question: "Comment gagner à BedWars ?",
           answer:
-            "Protégez votre lit, détruisez ceux des autres équipes puis éliminez tous les joueurs restants.",
+            "Protège ton lit, détruis ceux des autres équipes puis élimine tous les joueurs restants.",
         },
       ],
     },
     skyblock: {
       cardDescription:
-        "Développez une île persistante, améliorez son générateur, accomplissez des quêtes, échangez et bâtissez avec vos amis.",
+        "Développe une île persistante, améliore son générateur, accomplis des quêtes, échange et bâtis avec tes amis.",
       heroIntro:
-        "Commencez sur une île Cookie Orchard persistante. Agrandissez-la au-dessus du vide, améliorez le générateur, accomplissez des quêtes, collectez la production des ouvriers, échangez et invitez des amis de confiance depuis Java ou Bedrock.",
+        "Commence sur une île Cookie Orchard persistante. Agrandis-la au-dessus du vide, améliore le générateur, accomplis des quêtes, collecte la production des ouvriers, échange et invite des amis de confiance depuis Java ou Bedrock.",
       joinIntro:
         "Skyblock est un mode bêta persistant partagé entre Bedrock et Java. Ses menus guidés rendent accessibles l’île, les améliorations, le stockage, les quêtes, la coopération et le marché sur les deux éditions.",
       gameplayEyebrow: "Une île, une progression durable",
       gameplayHeading: "Comment fonctionne Skyblock sur Cookie Build",
       steps: [
         {
-          title: "Développez votre île",
+          title: "Développe ton île",
           description:
-            "Commencez sur une Cookie Orchard protégée, récoltez ses ressources et construisez prudemment au-dessus du vide.",
+            "Commence sur une Cookie Orchard protégée, récolte ses ressources et construis prudemment au-dessus du vide.",
         },
         {
-          title: "Améliorez et automatisez",
+          title: "Améliore et automatise",
           description:
-            "Améliorez le générateur, accomplissez des quêtes et récupérez la production des ouvriers.",
+            "Améliore le générateur, accomplis des quêtes et récupère la production des ouvriers.",
         },
         {
-          title: "Échangez et coopérez",
+          title: "Échange et coopère",
           description:
-            "Vendez les objets compatibles sur le marché, achetez des ressources utiles et gérez vos partenaires de confiance.",
+            "Vends les objets compatibles sur le marché, achète des ressources utiles et gère tes partenaires de confiance.",
         },
       ],
-      highlightHeading: "Gérez Skyblock en jeu et depuis l’application",
+      highlightHeading: "Gère Skyblock en jeu et depuis l’application",
       highlightBody:
         "L’application permet de consulter l’île et le stockage. Les améliorations, ouvriers, quêtes, invitations et échanges avec le Marchand Skyblock exigent l’activation de la gestion de l’île ; les écritures du Marché entre joueurs ont une activation distincte. Les espaces désactivés restent clairement en lecture seule. La Boutique de kits des mini-jeux est un service séparé.",
       faqs: [
@@ -112,7 +112,7 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
         {
           question: "Que puis-je gérer depuis l’application ?",
           answer:
-            "Une fois votre joueur associé, l’application affiche l’île et uniquement les actions activées par le serveur. La gestion et les écritures du marché possèdent des activations distinctes et peuvent rester en lecture seule.",
+            "Une fois ton joueur associé, l’application affiche l’île et uniquement les actions activées par le serveur. La gestion et les écritures du marché possèdent des activations distinctes et peuvent rester en lecture seule.",
         },
         {
           question: "Java et Bedrock peuvent-ils partager une île ?",
@@ -123,28 +123,28 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
     },
     "build-battle": {
       cardDescription:
-        "Votez pour un thème, construisez cinq minutes sur votre parcelle puis notez chaque création.",
+        "Vote pour un thème, construis cinq minutes sur ta parcelle puis note chaque création.",
       heroIntro:
-        "Rejoignez Build Battle depuis Bedrock ou Java, votez pour un thème, créez votre construction en cinq minutes puis notez toutes les parcelles. Il s’agit d’un vrai serveur multijoueur, pas d’une carte à télécharger.",
+        "Rejoins Build Battle depuis Bedrock ou Java, vote pour un thème, crée ta construction en cinq minutes puis note toutes les parcelles. Il s’agit d’un vrai serveur multijoueur, pas d’une carte à télécharger.",
       joinIntro:
         "Les joueurs Windows, Android, iOS et Java partagent les mêmes parties de Build Battle.",
       gameplayEyebrow: "Un thème, des idées sans limite",
       gameplayHeading: "Comment fonctionne Build Battle",
       steps: [
         {
-          title: "Votez pour un thème",
+          title: "Vote pour un thème",
           description:
-            "Choisissez l’un des trois thèmes proposés pendant que la partie se remplit.",
+            "Choisis l’un des trois thèmes proposés pendant que la partie se remplit.",
         },
         {
-          title: "Construisez cinq minutes",
+          title: "Construis cinq minutes",
           description:
-            "Créez une construction mémorable sur votre parcelle avec la palette commune à Java et Bedrock.",
+            "Crée une construction mémorable sur ta parcelle avec la palette commune à Java et Bedrock.",
         },
         {
-          title: "Notez les parcelles",
+          title: "Note les parcelles",
           description:
-            "Visitez les créations, attribuez une note de 1 à 5 et découvrez le classement final.",
+            "Visite les créations, attribue une note de 1 à 5 et découvre le classement final.",
         },
       ],
       highlightHeading: "Build Battle sur toutes les plateformes",
@@ -170,28 +170,28 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
     },
     microbattles: {
       cardDescription:
-        "Combattez au sein de quatre petites équipes, utilisez judicieusement votre kit et vos blocs et survivez.",
+        "Combats au sein de quatre petites équipes, utilise judicieusement ton kit et tes blocs et survis.",
       heroIntro:
-        "Jouez des combats rapides entre quatre équipes. Choisissez un kit, préparez-vous derrière les murs puis aidez les Bleus, Rouges, Jaunes ou Verts à rester en vie.",
+        "Joue des combats rapides entre quatre équipes. Choisis un kit, prépare-toi derrière les murs puis aide les Bleus, Rouges, Jaunes ou Verts à rester en vie.",
       joinIntro:
         "Bedrock et Java partagent la même file. Les arènes compactes accueillent jusqu’à quatre équipes de trois joueurs.",
       gameplayEyebrow: "Petites cartes, décisions rapides",
       gameplayHeading: "Comment fonctionne MicroBattles",
       steps: [
         {
-          title: "Choisissez votre équipe",
+          title: "Choisis ton équipe",
           description:
             "Les équipes bleue, rouge, jaune et verte accueillent chacune jusqu’à trois joueurs.",
         },
         {
-          title: "Préparez votre kit",
+          title: "Prépare ton kit",
           description:
-            "Commencez avec le kit choisi et de la laine colorée pendant que les murs séparent les équipes.",
+            "Commence avec le kit choisi et de la laine colorée pendant que les murs séparent les équipes.",
         },
         {
-          title: "Survivez au combat",
+          title: "Survis au combat",
           description:
-            "Après 15 secondes, les murs tombent. Éliminez les autres équipes et gardez un équipier en vie.",
+            "Après 15 secondes, les murs tombent. Élimine les autres équipes et garde un équipier en vie.",
         },
       ],
       highlightHeading: "Quatre équipes et huit arènes classiques",
@@ -206,39 +206,39 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
         {
           question: "Comment gagner ?",
           answer:
-            "Éliminez les autres équipes. La dernière équipe ayant encore un joueur en vie l’emporte.",
+            "Élimine les autres équipes. La dernière équipe ayant encore un joueur en vie l’emporte.",
         },
         {
           question: "Peut-on choisir un kit ?",
           answer:
-            "Oui. Choisissez votre kit avant la chute des murs ; son nom et sa description sont aussi traduits dans le menu Bedrock.",
+            "Oui. Choisis ton kit avant la chute des murs ; son nom et sa description sont aussi traduits dans le menu Bedrock.",
         },
       ],
     },
     pitchout: {
       cardDescription:
-        "Utilisez un puissant recul pour éjecter vos adversaires et protégez vos cinq vies.",
+        "Utilise un puissant recul pour éjecter tes adversaires et protège tes cinq vies.",
       heroIntro:
-        "Pitchout est un mini-jeu original de Cookie Build. Éjectez vos adversaires de l’arène avec votre pelle et votre arc, protégez vos cinq vies et soyez le dernier survivant.",
+        "Pitchout est un mini-jeu original de Cookie Build. Éjecte tes adversaires de l’arène avec ta pelle et ton arc, protège tes cinq vies et sois le dernier survivant.",
       joinIntro:
         "Bedrock et Java partagent les arènes, le vote des cartes, le tableau des scores, les récompenses et la progression.",
       gameplayEyebrow: "Cinq vies, un gagnant",
       gameplayHeading: "Comment fonctionne Pitchout",
       steps: [
         {
-          title: "Votez pour une arène",
+          title: "Vote pour une arène",
           description:
-            "Choisissez parmi les cartes disponibles pendant que les joueurs se rassemblent.",
+            "Choisis parmi les cartes disponibles pendant que les joueurs se rassemblent.",
         },
         {
-          title: "Maîtrisez le recul",
+          title: "Maîtrise le recul",
           description:
-            "Utilisez la pelle au corps à corps ou l’arc pour frapper à distance.",
+            "Utilise la pelle au corps à corps ou l’arc pour frapper à distance.",
         },
         {
-          title: "Protégez vos cinq vies",
+          title: "Protège tes cinq vies",
           description:
-            "Chaque chute coûte une vie. Continuez jusqu’à ce qu’il ne reste qu’un joueur.",
+            "Chaque chute coûte une vie. Continue jusqu’à ce qu’il ne reste qu’un joueur.",
         },
       ],
       highlightHeading: "Un jeu original et classique de Cookie Build",
@@ -253,7 +253,7 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
         {
           question: "Comment gagner à Pitchout ?",
           answer:
-            "Chaque joueur commence avec cinq vies. Éjectez vos adversaires jusqu’à être le dernier.",
+            "Chaque joueur commence avec cinq vies. Éjecte tes adversaires jusqu’à être le dernier.",
         },
         {
           question: "Les noms des cartes sont-ils traduits ?",
@@ -264,38 +264,38 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
     },
     skywars: {
       cardDescription:
-        "Fouillez votre île, construisez jusqu’aux coffres centraux plus riches et soyez le dernier survivant.",
+        "Fouille ton île, construis jusqu’aux coffres centraux plus riches et sois le dernier survivant.",
       heroIntro:
-        "Jouez au SkyWars solo classique depuis Bedrock ou Java. Commencez sur une île flottante, ouvrez les coffres, construisez vers le centre et survivez au-dessus du vide.",
+        "Joue au SkyWars solo classique depuis Bedrock ou Java. Commence sur une île flottante, ouvre les coffres, construis vers le centre et survis au-dessus du vide.",
       joinIntro:
         "Bedrock et Java partagent les files, les kits, le butin, les cartes et la progression persistante.",
       gameplayEyebrow: "Butin, ponts, survie",
       gameplayHeading: "Comment fonctionne SkyWars sur Cookie Build",
       steps: [
         {
-          title: "Choisissez votre kit",
+          title: "Choisis ton kit",
           description:
-            "Préparez votre style de jeu avant d’apparaître sur une île flottante séparée.",
+            "Prépare ton style de jeu avant d’apparaître sur une île flottante séparée.",
         },
         {
-          title: "Fouillez et construisez",
+          title: "Fouille et construis",
           description:
-            "Ouvrez les coffres, récupérez des blocs et atteignez le centre pour obtenir un meilleur butin.",
+            "Ouvre les coffres, récupère des blocs et atteins le centre pour obtenir un meilleur butin.",
         },
         {
-          title: "Soyez le dernier",
+          title: "Sois le dernier",
           description:
-            "Combattez, évitez le vide et survivez à tous vos adversaires.",
+            "Combats, évite le vide et survis à tous tes adversaires.",
         },
       ],
       highlightHeading: "Quatre arènes SkyWars restaurées",
       highlightBody:
-        "Quatre cartes classiques disposent de points d’apparition vérifiés et de coffres centraux plus riches. Participation, éliminations et victoires font progresser votre profil.",
+        "Quatre cartes classiques disposent de points d’apparition vérifiés et de coffres centraux plus riches. Participation, éliminations et victoires font progresser ton profil.",
       faqs: [
         {
           question: "SkyWars propose-t-il des kits ?",
           answer:
-            "Oui. Choisissez un kit avant la partie ; ses noms et messages sont traduits sur Bedrock et Java.",
+            "Oui. Choisis un kit avant la partie ; ses noms et messages sont traduits sur Bedrock et Java.",
         },
         {
           question: "Combien y a-t-il de cartes ?",
@@ -311,26 +311,26 @@ const LOCALIZED_SEEDS: LocalizedSeeds = {
     },
     turfwars: {
       cardDescription:
-        "Construisez des défenses, touchez à l’arc et repoussez le territoire de votre équipe dans l’arène.",
+        "Construis des défenses, touche à l’arc et repousse le territoire de ton équipe dans l’arène.",
       heroIntro:
-        "Rejoignez l’équipe bleue ou rouge dans Turf Wars. Alternez de courtes phases de construction et de combat, défendez votre camp et gagnez du terrain à chaque flèche réussie.",
+        "Rejoins l’équipe bleue ou rouge dans Turf Wars. Alterne de courtes phases de construction et de combat, défends ton camp et gagne du terrain à chaque flèche réussie.",
       joinIntro:
         "Turf Wars accueille de 2 à 10 joueurs Bedrock et Java répartis équitablement entre Bleus et Rouges.",
-      gameplayEyebrow: "Construisez, combattez, conquérez",
+      gameplayEyebrow: "Construis, combats, conquiers",
       gameplayHeading: "Comment fonctionne Turf Wars",
       steps: [
         {
-          title: "Construisez pendant 25 secondes",
+          title: "Construis pendant 25 secondes",
           description:
-            "Utilisez la laine de votre équipe dans votre territoire pour créer des abris et des positions de tir.",
+            "Utilise la laine de ton équipe dans ton territoire pour créer des abris et des positions de tir.",
         },
         {
-          title: "Combattez pendant 90 secondes",
+          title: "Combats pendant 90 secondes",
           description:
-            "Touchez vos adversaires avec un arc incassable et une flèche qui réapparaît.",
+            "Touche tes adversaires avec un arc incassable et une flèche qui réapparaît.",
         },
         {
-          title: "Atteignez 72 points",
+          title: "Atteins 72 points",
           description:
             "Chaque coup déplace deux colonnes. La première équipe à atteindre 72 gagne.",
         },
@@ -2327,13 +2327,13 @@ const localeTemplates = {
     seoTitle: (name: string) =>
       `Serveur Minecraft Bedrock ${name} | Cookie Build`,
     meta: (name: string) =>
-      `Jouez gratuitement à ${name} sur Minecraft Bedrock et Java. Rejoignez ${COOKIE_BUILD_SERVER_IP}, port Bedrock ${COOKIE_BUILD_BEDROCK_PORT}.`,
+      `Joue gratuitement à ${name} sur Minecraft Bedrock et Java. Rejoins ${COOKIE_BUILD_SERVER_IP}, port Bedrock ${COOKIE_BUILD_BEDROCK_PORT}.`,
     h1: (name: string) => `Serveur Minecraft ${name} pour Bedrock et Java`,
     joinHeading: (name: string) => `Jouer à ${name} sur Minecraft Bedrock`,
     joinQuestion: (name: string) =>
       `Comment rejoindre ${name} depuis Minecraft Bedrock ?`,
     joinAnswer: (name: string) =>
-      `Ajoutez ${COOKIE_BUILD_SERVER_IP} avec le port ${COOKIE_BUILD_BEDROCK_PORT}, rejoignez Cookie Build puis choisissez ${name} dans le lobby.`,
+      `Ajoute ${COOKIE_BUILD_SERVER_IP} avec le port ${COOKIE_BUILD_BEDROCK_PORT}, rejoins Cookie Build puis choisis ${name} dans le lobby.`,
     badge: "Disponible · Gratuit",
     imageAlt: (name: string) => `Carte Minecraft ${name} sur Cookie Build`,
   },

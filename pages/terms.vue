@@ -132,7 +132,7 @@
         <h2 class="mb-3 text-2xl font-semibold text-white">Exploitant et acceptation</h2>
         <p>
           Cookie Build est un serveur Minecraft, un site et une app compagnon indépendants exploités
-          par {{ seller?.legalName || "Cookie Build ; les achats sont actuellement indisponibles" }}<template v-if="seller?.legalAddress">, {{ seller?.legalAddress }}</template>. En utilisant le service, vous acceptez ces conditions et les règles
+          par {{ seller?.legalName || "Cookie Build ; les achats sont actuellement indisponibles" }}<template v-if="seller?.legalAddress">, {{ seller?.legalAddress }}</template>. En utilisant le service, tu acceptes ces conditions et les règles
           publiées du serveur. Contact :
           <a class="text-orange-400" href="mailto:support@cookie-build.com">support@cookie-build.com</a>.
           Cookie Build n’est ni affilié ni approuvé par Mojang, Microsoft, Apple ou Google.
@@ -145,8 +145,8 @@
         <p>
           L’app est destinée aux personnes de 13 ans ou plus. Lorsque la loi locale exige un accord
           parental, un parent ou responsable légal doit autoriser l’utilisation. L’app crée un compte
-          pseudonyme et l’associe au joueur grâce à un code temporaire généré en jeu. Protégez votre
-          appareil et votre compte Minecraft et ne partagez jamais ce code.
+          pseudonyme et l’associe au joueur grâce à un code temporaire généré en jeu. Protège ton
+          appareil et ton compte Minecraft et ne partage jamais ce code.
         </p>
       </section>
 
@@ -168,7 +168,7 @@
         <p>
           Cookie Build peut retirer un contenu, limiter une fonction, suspendre ou fermer un accès
           pour la sécurité, l’équité, l’intégrité, une obligation légale ou une violation importante.
-          Un abus grave ou répété peut entraîner une mesure immédiate. Pour contester, écrivez au
+          Un abus grave ou répété peut entraîner une mesure immédiate. Pour contester, écris au
           support avec le pseudo, l’édition, la date approximative et le contexte. Un humain examine le recours.
         </p>
       </section>
@@ -206,7 +206,7 @@
           <li>Le « soutien libre » est un pourboire répétable au service Cookie Build, sans finalité caritative ; il ne donne aucun rang, cosmétique, objet ni avantage exclusif.</li>
           <li>L’app mobile actuelle n’expose aucun achat en argent réel, checkout ni lien de paiement. Sa boutique de kits utilise uniquement des pièces gagnées en jeu.</li>
         </ul>
-        <p class="mt-3">L’espace web conserve l’historique de commande, le texte/version des consentements et leurs dates sur un support durable. Pour un paiement, une résiliation, une rétractation ou un remboursement, écrivez à <a class="text-orange-400" :href="`mailto:${seller?.supportEmail || 'support@cookie-build.com'}`">{{ seller?.supportEmail || "support@cookie-build.com" }}</a> avec la référence de commande, jamais les données de carte.</p>
+        <p class="mt-3">L’espace web conserve l’historique de commande, le texte/version des consentements et leurs dates sur un support durable. Pour un paiement, une résiliation, une rétractation ou un remboursement, écris à <a class="text-orange-400" :href="`mailto:${seller?.supportEmail || 'support@cookie-build.com'}`">{{ seller?.supportEmail || "support@cookie-build.com" }}</a> avec la référence de commande, jamais les données de carte.</p>
       </section>
 
       <section>
@@ -225,8 +225,8 @@
       <section>
         <h2 class="mb-3 text-2xl font-semibold text-white">Arrêt du service</h2>
         <p>
-          Vous pouvez arrêter à tout moment, dissocier les joueurs, quitter les amis ou groupes,
-          désactiver les notifications et supprimer le compte mobile dans les réglages. Consultez la
+          Tu peux arrêter à tout moment, dissocier les joueurs, quitter les amis ou groupes,
+          désactiver les notifications et supprimer le compte mobile dans les réglages. Consulte la
           <NuxtLink class="text-orange-400" to="/privacy">Politique de confidentialité</NuxtLink>.
         </p>
       </section>
