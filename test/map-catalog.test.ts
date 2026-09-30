@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { findMapPreview, mapCatalog, mapViewerUrl, nomadMaps } from "../utils/map-catalog";
-import { buildMarketingSitemap } from "../utils/marketing-sitemap";
+import { renderMarketingSitemap } from "../utils/marketing-sitemap";
 
 describe("public world previews", () => {
   it("labels the four beta maps distinctly while retaining all existing game maps", () => {
@@ -20,7 +20,7 @@ describe("public world previews", () => {
     for (const map of mapCatalog) {
       expect(map.image).toMatch(/^\/maps\/[a-z0-9-]+\.webp$/);
       expect(mapViewerUrl(map)).toMatch(/^\/map-viewer\/index\.html#/);
-      expect(buildMarketingSitemap()).toContain(`/maps/${map.slug}</loc>`);
+      expect(renderMarketingSitemap()).toContain(`/maps/${map.slug}</loc>`);
     }
   });
 });

@@ -8,13 +8,25 @@ const localeContract = JSON.parse(await readFile(new URL("../contracts/locales-v
 const locales = localeContract.locales.map((locale) => ({
   code: locale.code,
   segment: locale.pathSegment,
-  lang: locale.languageTag,
+  // SEO tags are language-only (the contract's regional languageTag is kept for the app).
+  lang: locale.code,
 }));
 
-
-const localize = (path, locale) => locale.segment
-  ? path === "/" ? `/${locale.segment}` : `/${locale.segment}${path}`
-  : path;
+// Mirrors LOCALIZED_SLUGS in utils/site-locales.ts.
+const localizedSlugs = { "/join": { fr: "/rejoindre" }, "/history": { fr: "/notre-histoire" } };
+const translateSlug = (path, locale) => {
+  for (const [canonical, slugs] of Object.entries(localizedSlugs)) {
+    const translated = slugs[locale.code];
+    if (translated && (path === canonical || path.startsWith(`${canonical}/`))) return translated + path.slice(canonical.length);
+  }
+  return path;
+};
+const localize = (path, locale) => {
+  const translated = translateSlug(path, locale);
+  return locale.segment
+    ? translated === "/" ? `/${locale.segment}` : `/${locale.segment}${translated}`
+    : translated;
+};
 
 const getFreePort = () => new Promise((resolve, reject) => {
   const server = net.createServer();

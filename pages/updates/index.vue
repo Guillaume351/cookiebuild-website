@@ -8,20 +8,20 @@
       </p>
     </section>
 
-    <NuxtLink :to="localizePath('/updates/fat-king-preview')" class="block overflow-hidden rounded-3xl border border-amber-500/30 bg-zinc-900 p-7 transition hover:border-amber-400 sm:p-10">
+    <NuxtLink v-if="currentPage === 1" :to="localizePath('/updates/fat-king-preview')" class="block overflow-hidden rounded-3xl border border-amber-500/30 bg-zinc-900 p-7 transition hover:border-amber-400 sm:p-10">
       <p class="font-bold uppercase tracking-wider text-amber-400">{{ fatCopy.badge }}</p>
       <h2 class="mt-3 text-4xl font-black text-white">{{ fatCopy.articleTitle }}</h2>
       <p class="mt-4 max-w-2xl text-lg text-zinc-300">{{ fatCopy.intro }}</p>
       <span class="mt-5 inline-flex min-h-11 items-center font-bold text-amber-300">{{ miniUi.discover }} →</span>
     </NuxtLink>
-    <NuxtLink :to="localizePath('/updates/nomad-wars-preview')" class="block rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400">
+    <NuxtLink v-if="currentPage === 1" :to="localizePath('/updates/nomad-wars-preview')" class="block rounded-3xl border border-orange-500/30 bg-zinc-900 p-7 transition hover:border-orange-400">
       <p class="text-sm font-bold uppercase tracking-wider text-orange-400">{{ fatCopy.badge }}</p>
       <h2 class="mt-3 text-3xl font-black text-white">{{ `Nomad Wars — ${miniUi.beta}` }}</h2>
       <p class="mt-4 text-zinc-300">{{ nomadCopy.intro }}</p>
       <span class="mt-4 inline-flex min-h-11 items-center font-bold text-orange-300">{{ miniUi.rules }} →</span>
     </NuxtLink>
     <section
-      v-if="nextEvent"
+      v-if="nextEvent && currentPage === 1"
       aria-labelledby="next-event-title"
       class="overflow-hidden rounded-3xl border border-emerald-500/25 bg-emerald-950/20 p-6 shadow-xl sm:p-8"
     >
@@ -63,19 +63,18 @@
           <h2 id="updates-feed-title" class="text-3xl font-black tracking-tight text-white">{{ updates.latest }}</h2>
           <p class="mt-2 text-zinc-400">{{ updates.latestIntro }}</p>
         </div>
-        <div class="flex flex-wrap gap-2" :aria-label="updates.filter">
-          <button
+        <nav class="flex flex-wrap gap-2" :aria-label="updates.filter">
+          <NuxtLink
             v-for="option in filters"
             :key="option.value"
-            type="button"
-            class="min-h-11 rounded-full border px-4 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+            :to="listLink(1, option.value)"
+            class="inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
             :class="activeFilter === option.value ? 'border-orange-500 bg-orange-600 text-white' : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500 hover:text-white'"
-            :aria-pressed="activeFilter === option.value"
-            @click="activeFilter = option.value"
+            :aria-current="activeFilter === option.value ? 'page' : undefined"
           >
             {{ option.label }}
-          </button>
-        </div>
+          </NuxtLink>
+        </nav>
       </div>
 
       <div aria-live="polite">
@@ -88,10 +87,43 @@
         <div v-else-if="!filteredPosts.length" class="rounded-2xl border border-zinc-800 bg-zinc-900 p-8 text-zinc-400">
           {{ updates.empty }}
         </div>
-        <div v-else class="space-y-8">
-          <UpdatePostCard v-for="post in filteredPosts" :key="post.id" :post="post" />
+        <div v-else class="grid gap-6 md:grid-cols-2">
+          <UpdatePostCard v-for="post in pagePosts" :key="post.id" :post="post" compact />
         </div>
       </div>
+
+      <nav v-if="pageCount > 1" class="mt-10 flex flex-wrap items-center justify-between gap-4" :aria-label="updates.pagination">
+        <NuxtLink
+          v-if="currentPage > 1"
+          :to="listLink(currentPage - 1, activeFilter)"
+          rel="prev"
+          class="inline-flex min-h-11 items-center rounded-xl border border-zinc-700 bg-zinc-900 px-4 font-bold text-zinc-200 hover:border-orange-400 hover:text-white"
+        >
+          ← {{ updates.previous }}
+        </NuxtLink>
+        <span v-else></span>
+        <ol class="flex flex-wrap gap-2">
+          <li v-for="number in pageCount" :key="number">
+            <NuxtLink
+              :to="listLink(number, activeFilter)"
+              class="inline-flex h-11 min-w-11 items-center justify-center rounded-xl border px-3 font-bold"
+              :class="number === currentPage ? 'border-orange-500 bg-orange-600 text-white' : 'border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-zinc-500 hover:text-white'"
+              :aria-current="number === currentPage ? 'page' : undefined"
+              :aria-label="updates.pageLabel.replace('{page}', String(number))"
+            >
+              {{ number }}
+            </NuxtLink>
+          </li>
+        </ol>
+        <NuxtLink
+          v-if="currentPage < pageCount"
+          :to="listLink(currentPage + 1, activeFilter)"
+          rel="next"
+          class="inline-flex min-h-11 items-center rounded-xl border border-zinc-700 bg-zinc-900 px-4 font-bold text-zinc-200 hover:border-orange-400 hover:text-white"
+        >
+          {{ updates.nextPage }} →
+        </NuxtLink>
+      </nav>
     </section>
 
     <section class="rounded-3xl border border-zinc-800 bg-zinc-900 p-7 sm:p-9">
@@ -110,6 +142,7 @@ import { fatKingPreviewCopy } from "@/utils/fat-king-preview";
 import { gameUiCopy } from "@/utils/game-ui-copy";
 import { updatesCopy } from "@/utils/updates-copy";
 import { publicPageSeo } from "@/utils/public-page-seo";
+import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
 
 definePageMeta({ alias: ["/fr/updates", "/de/updates", "/it/updates", "/bg/updates", "/es/updates", "/hi/updates", "/pt-br/updates"] });
 
@@ -118,10 +151,13 @@ import UpdatePostCard from "@/components/UpdatePostCard.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import {
+  UPDATES_PAGE_SIZE,
   eventDate,
   eventDateTime,
   featuredEvent,
   isEventLive,
+  paginateUpdates,
+  toUpdateListItem,
   updateSlugFromHash,
   type NetworkEvent,
   type UpdateContentType,
@@ -138,6 +174,7 @@ interface EventsResponse {
 
 type UpdateFilter = "all" | UpdateContentType;
 
+const route = useRoute();
 const { locale, localizePath } = useSiteLocale();
 const nomadCopy = computed(() => nomadPreviewCopy[locale.value.code]);
 const fatCopy = computed(() => fatKingPreviewCopy[locale.value.code]);
@@ -149,21 +186,45 @@ const filters = computed<Array<{ value: UpdateFilter; label: string }>>(() => [
   { value: "news", label: updates.value.news },
   { value: "changelog", label: updates.value.notes },
 ]);
-const activeFilter = ref<UpdateFilter>("all");
+const activeFilter = computed<UpdateFilter>(() => {
+  const type = route.query.type;
+  return type === "news" || type === "changelog" ? type : "all";
+});
+const requestedPage = computed(() => {
+  const value = Number.parseInt(String(route.query.page ?? "1"), 10);
+  return Number.isFinite(value) && value > 0 ? value : 1;
+});
 
-const { data, pending, error } = await useFetch<UpdatesResponse>("/api/mobile/v1/news", {
+// Only list fields reach the SSR payload: full bodies live on each article page.
+const { data, pending, error } = await useFetch("/api/mobile/v1/news", {
+  key: "updates-list",
   query: { limit: 50, includeSuperseded: "true" },
+  transform: (response: UpdatesResponse) => response.data.map(toUpdateListItem),
 });
 const { data: eventsData } = await useFetch<EventsResponse>("/api/mobile/v1/events", {
   query: { limit: 20 },
 });
 
-const posts = computed(() => data.value?.data ?? []);
+const posts = computed(() => data.value ?? []);
 const filteredPosts = computed(() => activeFilter.value === "all"
   ? posts.value
   : posts.value.filter((post) => post.contentType === activeFilter.value));
+const pagination = computed(() => paginateUpdates(filteredPosts.value, requestedPage.value, UPDATES_PAGE_SIZE));
+const pagePosts = computed(() => pagination.value.items);
+const currentPage = computed(() => pagination.value.page);
+const pageCount = computed(() => pagination.value.pageCount);
+if (!error.value && requestedPage.value > pageCount.value) {
+  throw createError({ statusCode: 404, statusMessage: "Updates page not found" });
+}
 const nextEvent = computed(() => featuredEvent(eventsData.value?.data ?? []));
 const nextEventIsLive = computed(() => nextEvent.value ? isEventLive(nextEvent.value) : false);
+
+function listLink(page: number, filter: UpdateFilter) {
+  const query: Record<string, string> = {};
+  if (filter !== "all") query.type = filter;
+  if (page > 1) query.page = String(page);
+  return { path: localizePath("/updates"), query };
+}
 
 onMounted(async () => {
   const slug = updateSlugFromHash(window.location.hash);
@@ -175,5 +236,26 @@ onMounted(async () => {
 });
 
 const seo = computed(() => publicPageSeo(locale.value.code, "updates"));
-useLocalizedSeo("/updates", () => seo.value.title, () => seo.value.description);
+const canonicalQuery = computed(() => {
+  const params = new URLSearchParams();
+  if (activeFilter.value !== "all") params.set("type", activeFilter.value);
+  if (currentPage.value > 1) params.set("page", String(currentPage.value));
+  return params.toString() || undefined;
+});
+useLocalizedSeo(
+  "/updates",
+  () => currentPage.value > 1
+    ? seo.value.title.replace(" | ", ` – ${updates.value.pageLabel.replace("{page}", String(currentPage.value))} | `)
+    : seo.value.title,
+  () => seo.value.description,
+  { canonicalQuery },
+);
+const router = useRouter();
+const absoluteListUrl = (page: number) => `${COOKIE_BUILD_SITE_URL}${router.resolve(listLink(page, activeFilter.value)).fullPath}`;
+useHead(() => ({
+  link: [
+    ...(currentPage.value > 1 ? [{ rel: "prev" as const, href: absoluteListUrl(currentPage.value - 1) }] : []),
+    ...(currentPage.value < pageCount.value ? [{ rel: "next" as const, href: absoluteListUrl(currentPage.value + 1) }] : []),
+  ],
+}));
 </script>

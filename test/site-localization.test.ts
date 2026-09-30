@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { gameLandings } from "../utils/game-landings";
 import { localizedGameLandings } from "../utils/game-landings-localized";
-import { buildMarketingSitemap, MAP_PREVIEW_PATHS } from "../utils/marketing-sitemap";
+import { renderMarketingSitemap, MAP_PREVIEW_PATHS } from "../utils/marketing-sitemap";
 import {
   LOCALIZED_MARKETING_PATHS,
   SITE_LOCALES,
@@ -16,16 +16,16 @@ import { SITE_COPY } from "../utils/site-copy";
 
 const readSource = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
 
-describe("country-targeted public-site localization", () => {
-  it("maps every requested country to a complete regional language target", () => {
+describe("language-targeted public-site localization", () => {
+  it("keeps the regional contract but emits language-only SEO tags", () => {
     expect(SITE_LOCALES.map(({ code, country, htmlLang, pathSegment }) => ({ code, country, htmlLang, pathSegment }))).toEqual([
-      { code: "en", country: "Australia", htmlLang: "en-AU", pathSegment: "" },
-      { code: "fr", country: "France", htmlLang: "fr-FR", pathSegment: "fr" },
-      { code: "de", country: "Germany", htmlLang: "de-DE", pathSegment: "de" },
-      { code: "it", country: "Italy", htmlLang: "it-IT", pathSegment: "it" },
-      { code: "bg", country: "Bulgaria", htmlLang: "bg-BG", pathSegment: "bg" },
-      { code: "es", country: "Peru", htmlLang: "es-PE", pathSegment: "es" },
-      { code: "hi", country: "India", htmlLang: "hi-IN", pathSegment: "hi" },
+      { code: "en", country: "Australia", htmlLang: "en", pathSegment: "" },
+      { code: "fr", country: "France", htmlLang: "fr", pathSegment: "fr" },
+      { code: "de", country: "Germany", htmlLang: "de", pathSegment: "de" },
+      { code: "it", country: "Italy", htmlLang: "it", pathSegment: "it" },
+      { code: "bg", country: "Bulgaria", htmlLang: "bg", pathSegment: "bg" },
+      { code: "es", country: "Peru", htmlLang: "es", pathSegment: "es" },
+      { code: "hi", country: "India", htmlLang: "hi", pathSegment: "hi" },
       { code: "pt-BR", country: "Brazil", htmlLang: "pt-BR", pathSegment: "pt-br" },
     ]);
 
@@ -43,7 +43,7 @@ describe("country-targeted public-site localization", () => {
     expect(SITE_LOCALES.map((locale) => ({
       code: locale.code,
       pathSegment: locale.pathSegment,
-      languageTag: locale.htmlLang,
+      languageTag: locale.languageTag,
     }))).toEqual(contract.locales.map((locale: { code: string; pathSegment: string; languageTag: string }) => ({
       code: locale.code,
       pathSegment: locale.pathSegment,
@@ -53,10 +53,15 @@ describe("country-targeted public-site localization", () => {
 
   it("resolves and switches prefixed routes without changing the stable page slug", () => {
     expect(siteLocaleFromPath("/bg/skywars").code).toBe("bg");
-    expect(siteLocaleFromPath("/es/games").htmlLang).toBe("es-PE");
+    expect(siteLocaleFromPath("/es/games").htmlLang).toBe("es");
     expect(siteLocaleFromPath("/hi").country).toBe("India");
     expect(siteLocaleFromPath("/pt-br/bedwars").code).toBe("pt-BR");
-    expect(siteLocaleFromPath("/fr/skyblock").htmlLang).toBe("fr-FR");
+    expect(siteLocaleFromPath("/fr/skyblock").htmlLang).toBe("fr");
+    expect(siteLocaleFromPath("/fr/skyblock").languageTag).toBe("fr-FR");
+    expect(localizedSitePath("/join/xbox", "fr")).toBe("/fr/rejoindre/xbox");
+    expect(localizedSitePath("/fr/rejoindre/xbox", "de")).toBe("/de/join/xbox");
+    expect(localizedSitePath("/fr/notre-histoire", "en")).toBe("/history");
+    expect(stripSiteLocale("/fr/rejoindre")).toBe("/join");
     expect(siteLocaleFromPath("/de/games").code).toBe("de");
     expect(siteLocaleFromPath("/it/bedwars").country).toBe("Italy");
     expect(stripSiteLocale("/pt-br/build-battle?from=menu")).toBe("/build-battle");
@@ -107,7 +112,7 @@ describe("country-targeted public-site localization", () => {
   });
 
   it("generates one indexable URL per locale and page with complete alternates", () => {
-    const sitemap = buildMarketingSitemap();
+    const sitemap = renderMarketingSitemap();
     const localizedUrlCount = LOCALIZED_MARKETING_PATHS.length * SITE_LOCALES.length;
     expect((sitemap.match(/<loc>/g) || []).length).toBe(localizedUrlCount + MAP_PREVIEW_PATHS.length);
     expect(sitemap).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
