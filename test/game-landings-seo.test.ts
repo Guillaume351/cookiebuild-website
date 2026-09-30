@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { COOKIE_BUILD_BEDROCK_PORT, COOKIE_BUILD_SERVER_IP, gameLandings } from "../utils/game-landings";
-import { buildMarketingSitemap } from "../utils/marketing-sitemap";
+import { renderMarketingSitemap } from "../utils/marketing-sitemap";
 
 const readSource = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
 
@@ -38,7 +38,7 @@ describe("game mode SEO landing pages", () => {
       readFile(new URL("../public/bedwars-cookie-colosseum-beta.webp", import.meta.url)),
       readSource("../composables/useGameLandingSeo.ts"),
     ]);
-    const sitemap = buildMarketingSitemap();
+    const sitemap = renderMarketingSitemap();
 
     expect(bedWars).toMatchObject({
       path: "/bedwars",
@@ -82,7 +82,7 @@ describe("game mode SEO landing pages", () => {
       readSource("../components/AppHeader.vue"),
       readSource("../components/AppFooter.vue"),
     ]);
-    const sitemap = buildMarketingSitemap();
+    const sitemap = renderMarketingSitemap();
 
     expect(header).toContain(":to=\"localizePath('/games')\"");
     expect(footer).toContain(":to=\"localizePath('/games')\"");

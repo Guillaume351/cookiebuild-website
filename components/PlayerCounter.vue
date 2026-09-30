@@ -1,12 +1,14 @@
 <template>
   <div class="player-counter" role="status" aria-live="polite">
-    <Users class="mr-2 h-5 w-5" />
+    <Users class="mr-2 h-5 w-5" aria-hidden="true" />
     <span v-if="pending">{{ copy.status.checking }}</span>
     <template v-else-if="status">
       <span v-if="status.online && status.players > 0">
         {{ status.players }} {{ status.players === 1 ? copy.status.onePlayer : copy.status.players }} {{ copy.status.online }}
       </span>
-      <span v-else-if="status.online">{{ copy.status.onlineZero }}</span>
+      <span v-else-if="status.online">
+        {{ copy.status.onlineZero }}<template v-if="nextEvent"> · {{ copy.status.nextSession }}{{ locale.code === 'fr' ? ' :' : ':' }} <time :datetime="eventDateTime(nextEvent.startsAt)">{{ nextEvent.title }} — {{ shortEventDate }}</time></template>
+      </span>
       <span v-else-if="status.java.reachable && status.bedrock.reachable">{{ copy.status.offline }}</span>
       <span v-else-if="status.java.reachable || status.bedrock.reachable">{{ copy.status.partial }}</span>
       <span v-else>{{ copy.status.unavailable }}</span>
@@ -21,6 +23,7 @@
 
 <script setup lang="ts">
 import { Users } from "@lucide/vue";
+import { eventDateTime, type NetworkEvent } from "@/utils/updates";
 
 interface EditionStatus {
   online: boolean;
@@ -35,8 +38,22 @@ interface ServerStatus {
   bedrock: EditionStatus;
 }
 
+const props = defineProps<{ nextEvent?: NetworkEvent | null }>();
 const { data: status, pending } = useFetch<ServerStatus>("/api/server-status");
-const { copy } = useSiteLocale();
+const { copy, locale } = useSiteLocale();
+const shortEventDate = computed(() => {
+  if (!props.nextEvent) return "";
+  const date = new Date(props.nextEvent.startsAt);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat(locale.value.htmlLang, {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/Paris",
+  }).format(date);
+});
 
 function editionLabel(edition: EditionStatus) {
   if (!edition.reachable) return copy.value.status.checkUnavailable;

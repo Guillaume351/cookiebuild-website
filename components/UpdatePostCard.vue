@@ -1,6 +1,7 @@
 <template>
   <article
     :id="`update-${post.slug}`"
+    :lang="articleLang"
     class="relative scroll-mt-24 overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/80 shadow-xl"
   >
     <span
@@ -31,11 +32,11 @@
           {{ publishedLabel }}
         </time>
       </div>
-      <h2 :class="compact ? 'mt-3 text-xl' : 'mt-4 text-2xl sm:text-3xl'" class="break-words font-black text-white">
+      <component :is="headingLevel" :class="compact ? 'mt-3 text-xl' : 'mt-4 text-2xl sm:text-3xl'" class="break-words font-black text-white">
         <NuxtLink :to="localizePath(`/updates/${post.slug}`)" class="outline-none hover:text-orange-100 focus-visible:ring-2 focus-visible:ring-orange-400">
           {{ post.title }}
         </NuxtLink>
-      </h2>
+      </component>
       <p class="mt-3 break-words leading-relaxed text-zinc-300">
         {{ post.summary }}
       </p>
@@ -102,13 +103,15 @@ import Badge from "@/components/ui/badge/Badge.vue";
 import { changelogBodyLines } from "@/utils/changelog";
 import { newsBodyText, newsBulletLines, newsDate } from "@/utils/news";
 import { updatesCopy } from "@/utils/updates-copy";
-import { type UpdatePost } from "@/utils/updates";
+import { updateLanguage, type UpdatePost } from "@/utils/updates";
 
 const props = withDefaults(defineProps<{
   post: UpdatePost;
   compact?: boolean;
+  headingLevel?: "h1" | "h2" | "h3";
 }>(), {
   compact: false,
+  headingLevel: "h2",
 });
 
 const { locale, localizePath } = useSiteLocale();
@@ -121,5 +124,6 @@ const publishedDateTime = computed(() => {
     : new Date(props.post.publishedAt);
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 });
+const articleLang = computed(() => updateLanguage(props.post));
 const bodyBulletLines = computed(() => newsBulletLines(props.post.body));
 </script>

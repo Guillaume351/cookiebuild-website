@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 import { addLocalizedPreviewAliases } from "../utils/localized-preview-routes";
 import { SITE_LOCALES, localizedAbsoluteUrl } from "../utils/site-locales";
-import { buildMarketingSitemap } from "../utils/marketing-sitemap";
+import { renderMarketingSitemap } from "../utils/marketing-sitemap";
 import { mapCatalog } from "../utils/map-catalog";
 
 describe("shared game and map routes", () => {
@@ -31,7 +31,7 @@ describe("shared game and map routes", () => {
   });
 
   it("publishes unique canonical URLs and reciprocal alternates for all translated previews", () => {
-    const sitemap = buildMarketingSitemap();
+    const sitemap = renderMarketingSitemap();
     const urls = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1]);
     expect(new Set(urls).size).toBe(urls.length);
     for (const path of ["/nomad-wars", "/fat-king", "/maps",

@@ -2,7 +2,7 @@
   <main class="container mx-auto max-w-3xl px-4 py-16 text-gray-100">
     <LanguageFallbackNotice :available-locales="['en', 'fr']" />
     <h1 class="mb-3 text-4xl font-bold">Delete your Cookie Build app account</h1>
-    <p class="mb-8 text-gray-400" lang="fr">Supprimer votre compte de l’application Cookie Build</p>
+    <p class="mb-8 text-gray-400" lang="fr">Supprimer ton compte de l’application Cookie Build</p>
 
     <div class="space-y-6 rounded-xl border border-gray-700 bg-gray-900 p-6 text-gray-300">
       <section>
@@ -27,7 +27,7 @@
           <li>Enter the eight-character code below within 10 minutes.</li>
         </ol>
         <p class="mt-3" lang="fr">
-          Rejoignez le serveur avec le joueur associé, exécutez <code>/app link</code>, puis saisissez
+          Rejoins le serveur avec le joueur associé, exécute <code>/app link</code>, puis saisis
           le code de huit caractères ci-dessous dans les 10 minutes.
         </p>
 

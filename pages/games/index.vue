@@ -30,7 +30,7 @@
           class="group rounded-2xl border border-zinc-800 bg-zinc-900 p-7 transition hover:-translate-y-1 hover:border-orange-500/60 hover:shadow-xl"
         >
           <div class="flex items-start gap-4">
-            <img :src="game.icon" :alt="game.name" class="h-12 w-12 transition-transform group-hover:scale-110" />
+            <img :src="game.icon" alt="" width="48" height="48" class="h-12 w-12 transition-transform group-hover:scale-110" />
             <div>
               <h3 class="text-2xl font-black text-white">{{ game.name }}</h3>
               <p class="mt-3 leading-relaxed text-zinc-400">{{ game.cardDescription }}</p>
@@ -76,11 +76,15 @@ useHead(() => ({
         "@type": "ItemList",
         name: copy.value.catalog.title,
         inLanguage: locale.value.htmlLang,
-        itemListElement: localizedGames.value.map((game, index) => ({
+        itemListElement: [
+          { name: "Fat King", url: `${COOKIE_BUILD_SITE_URL}${localizePath("/fat-king")}` },
+          { name: "Nomad Wars", url: `${COOKIE_BUILD_SITE_URL}${localizePath("/nomad-wars")}` },
+          ...localizedGames.value.map((game) => ({ name: game.name, url: `${COOKIE_BUILD_SITE_URL}${game.path}` })),
+        ].map((game, index) => ({
           "@type": "ListItem",
           position: index + 1,
           name: game.name,
-          url: `${COOKIE_BUILD_SITE_URL}${game.path}`,
+          url: game.url,
         })),
       }),
     },

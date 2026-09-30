@@ -1,12 +1,30 @@
 <template>
   <footer class="bg-gray-900 text-white py-12 mt-20">
     <div class="container mx-auto px-4">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         <div>
           <h3 class="text-xl font-bold mb-4">Cookie Build</h3>
           <p class="text-gray-400">
             {{ copy.footer.description }}
           </p>
+          <p class="mt-4">
+            <NuxtLink :to="localizePath('/history')" class="font-bold text-orange-300 hover:text-orange-200">{{ copy.footer.history }}</NuxtLink>
+          </p>
+          <ul class="mt-4 flex flex-wrap gap-3 text-sm">
+            <li><a :href="DISCORD_INVITE_URL" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center rounded-lg bg-indigo-600 px-4 font-bold text-white hover:bg-indigo-500" @click="siteAnalytics.track('discord_open')">Discord</a></li>
+            <li><a :href="X_PROFILE_URL" target="_blank" rel="noopener" class="inline-flex min-h-11 items-center rounded-lg border border-gray-700 px-4 font-bold text-gray-300 hover:text-white">X</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="text-xl font-bold mb-4">{{ copy.footer.play }}</h3>
+          <ul class="space-y-2">
+            <li><NuxtLink :to="localizePath('/join')" class="text-gray-400 hover:text-white transition-colors">{{ copy.footer.joinGuide }}</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/join/java')" class="text-gray-400 hover:text-white transition-colors">Java (PC, Mac, Linux)</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/join/mobile')" class="text-gray-400 hover:text-white transition-colors">{{ copy.footer.joinMobile }}</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/join/playstation')" class="text-gray-400 hover:text-white transition-colors">PlayStation</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/join/xbox')" class="text-gray-400 hover:text-white transition-colors">Xbox</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/join/switch')" class="text-gray-400 hover:text-white transition-colors">Nintendo Switch</NuxtLink></li>
+          </ul>
         </div>
         <div>
           <h3 class="text-xl font-bold mb-4">{{ copy.footer.quickLinks }}</h3>
@@ -91,6 +109,8 @@
 </template>
 
 <script setup lang="ts">
+import { DISCORD_INVITE_URL, X_PROFILE_URL } from "@/utils/site-links";
+
 const siteAnalytics = useSiteAnalytics();
 const analytics = useShopAnalytics();
 const { copy, localizePath } = useSiteLocale();

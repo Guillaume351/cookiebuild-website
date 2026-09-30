@@ -66,7 +66,7 @@ describe("changelog supersession contract", () => {
 
   it("keeps web history explicit and provides reliable per-slug pages", async () => {
     const [updatesPage, permalinkPage] = await Promise.all([
-      read("../pages/updates.vue"),
+      read("../pages/updates/index.vue"),
       read("../pages/updates/[slug].vue"),
     ]);
     expect(updatesPage).toContain('includeSuperseded: "true"');

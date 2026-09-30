@@ -7,7 +7,9 @@
         <NuxtLink :to="localizePath('/')" class="flex items-center">
           <img
             src="/android-chrome-192x192.png"
-            alt="Cookie Build"
+            alt=""
+            width="40"
+            height="40"
             class="h-10 w-10 mr-3"
           />
           <span class="text-xl font-bold text-white">Cookie Build</span>
@@ -23,6 +25,10 @@
         <NuxtLink :to="localizePath('/updates')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.updates }}</NuxtLink>
         <NuxtLink :to="localizePath('/shop')" @click="siteAnalytics.track('shop_entry')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.shop }}</NuxtLink>
         <NuxtLink :to="localizePath('/status')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.status }}</NuxtLink>
+        <a :href="DISCORD_INVITE_URL" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600/90 px-3 py-2 font-bold text-white transition-colors hover:bg-indigo-500" @click="siteAnalytics.track('discord_open')">
+          <MessageCircle class="h-4 w-4" aria-hidden="true" />
+          {{ copy.navigation.discord }}
+        </a>
         <label class="relative">
           <span class="sr-only">{{ copy.navigation.language }}</span>
           <select
@@ -32,7 +38,7 @@
             @change="changeLanguage"
           >
             <option v-for="language in SITE_LOCALES" :key="language.code" :value="language.code" :selected="language.code === locale.code">
-              {{ language.flag }} {{ language.nativeLabel }}
+              {{ language.nativeLabel }}
             </option>
           </select>
         </label>
@@ -45,8 +51,8 @@
         :aria-label="copy.navigation.toggle"
         @click="mobileMenuOpen = !mobileMenuOpen"
       >
-        <X v-if="mobileMenuOpen" class="h-5 w-5" />
-        <Menu v-else class="h-5 w-5" />
+        <X v-if="mobileMenuOpen" class="h-5 w-5" aria-hidden="true" />
+        <Menu v-else class="h-5 w-5" aria-hidden="true" />
       </button>
     </div>
     <div
@@ -92,6 +98,9 @@
         >
           {{ copy.navigation.status }}
         </NuxtLink>
+        <a :href="DISCORD_INVITE_URL" target="_blank" rel="noopener" class="rounded-lg px-3 py-3 font-bold text-indigo-200 hover:bg-white/10" @click="siteAnalytics.track('discord_open'); mobileMenuOpen = false">
+          {{ copy.navigation.discord }}
+        </a>
         <label class="mt-2 border-t border-white/10 pt-3">
           <span class="mb-2 block px-3 text-xs font-bold uppercase tracking-wider text-zinc-400">{{ copy.navigation.language }}</span>
           <select
@@ -101,7 +110,7 @@
             @change="changeLanguage"
           >
             <option v-for="language in SITE_LOCALES" :key="language.code" :value="language.code" :selected="language.code === locale.code">
-              {{ language.flag }} {{ language.nativeLabel }}
+              {{ language.nativeLabel }}
             </option>
           </select>
         </label>
@@ -111,7 +120,8 @@
 </template>
 
 <script setup lang="ts">
-import { Menu, X } from "@lucide/vue";
+import { Menu, MessageCircle, X } from "@lucide/vue";
+import { DISCORD_INVITE_URL } from "@/utils/site-links";
 import { SITE_LOCALES, type SiteLocaleCode } from "@/utils/site-locales";
 
 const siteAnalytics = useSiteAnalytics();

@@ -3,13 +3,13 @@
     <LanguageFallbackNotice :available-locales="['en']" />
     <!-- Stats Hero -->
     <section class="relative overflow-hidden rounded-3xl bg-zinc-900 text-center text-white shadow-xl py-10">
-      <div class="absolute inset-0 z-0 bg-[url('/lobby-hero-960.webp')] bg-cover bg-center opacity-20 blur-sm"></div>
+      <div class="absolute inset-0 z-0 bg-[url('/lobby-hero-960.webp')] bg-cover bg-center opacity-20 blur-sm" aria-hidden="true"></div>
       <div class="relative z-10 px-6">
         <h1 class="text-3xl md:text-5xl font-bold tracking-tight mb-2 text-white">
-          Leaderboard
+          {{ seo.title.replace(" | Cookie Build", "") }}
         </h1>
         <p class="text-sm md:text-base text-zinc-400 max-w-xl mx-auto">
-          Completed-match rankings with calendar-period filters and personal progression.
+          {{ seo.description }}
         </p>
       </div>
     </section>
@@ -189,7 +189,7 @@
                         <img
                           v-if="!isBedrockPlayer(stat.name) && stat.name"
                           :src="`/api/player-avatar/${encodeURIComponent(stat.id)}?size=32`"
-                          :alt="`${formatPlayerName(stat.name)} avatar`"
+                          alt=""
                           class="w-10 h-10 rounded-lg shadow-lg group-hover:scale-110 transition-transform"
                         />
                         <div v-else class="w-10 h-10 bg-zinc-800 rounded-lg flex items-center justify-center text-zinc-600">
