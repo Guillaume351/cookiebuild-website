@@ -68,6 +68,7 @@ export const SITE_LOCALES: readonly SiteLocale[] = localeContract.locales.map((l
 export const LOCALIZED_SLUGS: Record<string, Partial<Record<SiteLocaleCode, string>>> = {
   "/join": { fr: "/rejoindre" },
   "/history": { fr: "/notre-histoire" },
+  "/builds": { fr: "/galerie" },
 };
 
 function canonicalSlugPath(path: string, locale: SiteLocale | undefined): string {
@@ -100,6 +101,7 @@ export const LOCALIZED_MARKETING_PATHS = [
   "/bedwars",
   "/skyblock",
   "/build-battle",
+  "/builds",
   "/microbattles",
   "/pitchout",
   "/skywars",
@@ -162,7 +164,7 @@ export function supportsLocalizedSitePath(path: string) {
   const basePath = stripSiteLocale(path).replace(/\/+$/, "") || "/";
   return LOCALIZED_FUNCTIONAL_PATHS.includes(
     basePath as (typeof LOCALIZED_FUNCTIONAL_PATHS)[number],
-  ) || basePath.startsWith("/updates/") || basePath.startsWith("/maps/");
+  ) || basePath.startsWith("/updates/") || basePath.startsWith("/maps/") || basePath.startsWith("/builds/");
 }
 
 export function switchSiteLocalePath(path: string, locale: SiteLocaleCode): string {

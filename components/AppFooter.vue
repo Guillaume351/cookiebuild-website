@@ -40,6 +40,7 @@
               >
             </li>
             <li><NuxtLink :to="localizePath('/maps')" class="text-gray-400 hover:text-white transition-colors">{{ copy.navigation.maps }}</NuxtLink></li>
+            <li><NuxtLink :to="localizePath('/builds')" class="text-gray-400 hover:text-white transition-colors">{{ copy.navigation.builds }}</NuxtLink></li>
             <li>
               <NuxtLink :to="localizePath('/player-stats')" class="text-gray-400 hover:text-white transition-colors"
                 >{{ copy.navigation.playerStats }}</NuxtLink

@@ -13,7 +13,7 @@ const locales = localeContract.locales.map((locale) => ({
 }));
 
 // Mirrors LOCALIZED_SLUGS in utils/site-locales.ts.
-const localizedSlugs = { "/join": { fr: "/rejoindre" }, "/history": { fr: "/notre-histoire" } };
+const localizedSlugs = { "/join": { fr: "/rejoindre" }, "/history": { fr: "/notre-histoire" }, "/builds": { fr: "/galerie" } };
 const translateSlug = (path, locale) => {
   for (const [canonical, slugs] of Object.entries(localizedSlugs)) {
     const translated = slugs[locale.code];

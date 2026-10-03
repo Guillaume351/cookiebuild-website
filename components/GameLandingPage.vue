@@ -98,6 +98,9 @@
       </div>
     </section>
 
+    <!-- Game-specific extras (e.g. the Build Battle gallery strip). -->
+    <slot />
+
     <section class="rounded-3xl border border-orange-500/20 bg-gradient-to-br from-orange-950/40 via-zinc-950 to-zinc-950 p-8 md:p-12">
       <div class="grid items-center gap-8 lg:grid-cols-[1fr_auto]">
         <div>

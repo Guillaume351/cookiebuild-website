@@ -238,6 +238,9 @@
       </div>
     </section>
 
+    <!-- Build Battle best of the week (client-only, hidden when empty) -->
+    <BuildBestOfStrip variant="home" />
+
     <!-- Screenshot gallery -->
     <section aria-labelledby="gallery-title">
       <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -410,6 +413,7 @@
 import PlayerCounter from "@/components/PlayerCounter.vue";
 import JoinAddress from "@/components/JoinAddress.vue";
 import UpdatePostCard from "@/components/UpdatePostCard.vue";
+import BuildBestOfStrip from "@/components/BuildBestOfStrip.vue";
 import Badge from "@/components/ui/badge/Badge.vue";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
