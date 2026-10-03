@@ -19,6 +19,7 @@
         <NuxtLink :to="localizePath('/')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.home }}</NuxtLink>
         <NuxtLink :to="localizePath('/games')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.games }}</NuxtLink>
         <NuxtLink :to="localizePath('/maps')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.maps }}</NuxtLink>
+        <NuxtLink :to="localizePath('/builds')" class="text-white hover:text-gray-300 transition-colors">{{ copy.navigation.builds }}</NuxtLink>
         <NuxtLink :to="localizePath('/player-stats')" class="text-white hover:text-gray-300 transition-colors"
           >{{ copy.navigation.playerStats }}</NuxtLink
         >
@@ -76,6 +77,7 @@
           {{ copy.navigation.games }}
         </NuxtLink>
         <NuxtLink :to="localizePath('/maps')" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">{{ copy.navigation.maps }}</NuxtLink>
+        <NuxtLink :to="localizePath('/builds')" class="rounded-lg px-3 py-3 text-white hover:bg-white/10" @click="mobileMenuOpen = false">{{ copy.navigation.builds }}</NuxtLink>
         <NuxtLink
           :to="localizePath('/player-stats')"
           class="rounded-lg px-3 py-3 text-white hover:bg-white/10"

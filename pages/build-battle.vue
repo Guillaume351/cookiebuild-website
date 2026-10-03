@@ -1,9 +1,12 @@
 <template>
-  <GameLandingPage :game="game" />
+  <GameLandingPage :game="game">
+    <BuildBestOfStrip variant="landing" />
+  </GameLandingPage>
 </template>
 
 <script setup lang="ts">
 import GameLandingPage from "@/components/GameLandingPage.vue";
+import BuildBestOfStrip from "@/components/BuildBestOfStrip.vue";
 import { localizedGameLandingBySlug } from "@/utils/game-landings-localized";
 
 definePageMeta({ alias: ["/fr/build-battle", "/de/build-battle", "/it/build-battle", "/bg/build-battle", "/es/build-battle", "/hi/build-battle", "/pt-br/build-battle"] });

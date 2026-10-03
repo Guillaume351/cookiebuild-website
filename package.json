@@ -34,6 +34,7 @@
     "postgres": "^3.4.9",
     "radix-vue": "^1.9.17",
     "tailwind-merge": "^2.6.0",
+    "three": "^0.186.1",
     "vue": "^3.5.39",
     "stripe": "^22.5.0"
   },
@@ -41,6 +42,7 @@
     "@nuxtjs/tailwindcss": "^6.14.0",
     "@types/node": "^24.13.3",
     "@types/amqplib": "^0.10.8",
+    "@types/three": "^0.186.0",
     "drizzle-kit": "^0.31.10",
     "nuxt": "^4.5.2",
     "shadcn-nuxt": "^2.7.4",
