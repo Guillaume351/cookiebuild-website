@@ -2,6 +2,8 @@
 .github
 .env
 .env.*
+# Committed template without secrets; tests read it to check documented flags.
+!.env.example
 .git
 .nuxt
 .output
