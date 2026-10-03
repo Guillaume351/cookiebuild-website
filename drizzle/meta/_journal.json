@@ -162,6 +162,20 @@
       "when": 1790755200003,
       "tag": "0023_rally_recipient_cap",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1790755200004,
+      "tag": "0024_buildbattle_gallery",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1790755200005,
+      "tag": "0025_starter_coin_cosmetic",
+      "breakpoints": true
     }
   ]
 }

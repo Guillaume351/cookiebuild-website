@@ -75,8 +75,14 @@ function articleUrlEntry(article: SitemapArticle) {
   ].join("\n");
 }
 
+/**
+ * Build Battle gallery listing (/builds, /fr/galerie, /xx/builds). Individual
+ * builds are user-generated, noindex pages and are deliberately not listed.
+ */
+export const GALLERY_SITEMAP_PATHS = ["/builds"] as const;
+
 export function renderMarketingSitemap(articles: readonly SitemapArticle[] = []) {
-  const localizedEntries = [...new Set([...LOCALIZED_MARKETING_PATHS, ...mapAndArticlePaths])].flatMap((path) =>
+  const localizedEntries = [...new Set([...LOCALIZED_MARKETING_PATHS, ...GALLERY_SITEMAP_PATHS, ...mapAndArticlePaths])].flatMap((path) =>
     SITE_LOCALES.map((locale) => localizedUrlEntry(path, locale.code)),
   );
   const staticArticles = new Set(mapAndArticlePaths);

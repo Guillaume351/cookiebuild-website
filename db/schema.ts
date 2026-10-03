@@ -3,6 +3,7 @@ import {
   bigserial,
   boolean,
   check,
+  customType,
   date,
   foreignKey,
   index,
@@ -11,6 +12,7 @@ import {
   pgSequence,
   pgTable,
   primaryKey,
+  smallint,
   text,
   timestamp,
   unique,
@@ -1930,7 +1932,7 @@ export const cosmeticEntitlements = pgTable(
       .where(sql`${table.revokedAt} IS NULL`),
     check(
       "cosmetic_entitlements_id_ck",
-      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail')`,
+      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail')`,
     ),
     check("cosmetic_entitlements_source_ck", sql`length(btrim(${table.source})) > 0`),
     check(
@@ -1960,8 +1962,13 @@ export const cosmeticSelections = pgTable(
       "cosmetic_selections_slot_cosmetic_ck",
       sql`(${table.slot}, ${table.cosmeticId}) IN (
         ('BADGE', 'supporter_badge'),
+        ('BADGE', 'app_companion_badge'),
         ('HUB_TRAIL', 'cookie_crumb_trail'),
         ('HUB_TRAIL', 'cookie_sparkle_trail'),
+        ('HUB_TRAIL', 'note_trail'),
+        ('HUB_TRAIL', 'heart_trail'),
+        ('HUB_TRAIL', 'streak_star_trail'),
+        ('HUB_TRAIL', 'starter_spark_trail'),
         ('EMOTE', 'cookie_cheer'),
         ('VICTORY_EFFECT', 'golden_cookie_burst'),
         ('PROFILE_FRAME', 'supporter_profile_frame'),
@@ -2294,3 +2301,96 @@ export const playerLoginRewards = pgTable(
     ),
   ],
 );
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType() {
+    return "bytea";
+  },
+});
+
+/** Build Battle gallery: captured by the BuildBattles plugin, read by the site and app. */
+export const buildbattleBuilds = pgTable(
+  "buildbattle_builds",
+  {
+    id: uuid().primaryKey(),
+    shortCode: varchar("short_code", { length: 10 }).notNull().unique(),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    matchId: uuid("match_id"),
+    themeKey: varchar("theme_key", { length: 64 }).notNull(),
+    themeName: varchar("theme_name", { length: 80 }).notNull(),
+    outcome: varchar({ length: 24 }).notNull(),
+    placement: smallint(),
+    builders: smallint().notNull(),
+    blockCount: integer("block_count").notNull(),
+    sizeX: smallint("size_x").notNull(),
+    sizeY: smallint("size_y").notNull(),
+    sizeZ: smallint("size_z").notNull(),
+    data: bytea().notNull(),
+    likeCount: integer("like_count").default(0).notNull(),
+    reportCount: integer("report_count").default(0).notNull(),
+    status: varchar({ length: 16 }).default("published").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("buildbattle_builds_status_created_idx").on(table.status, table.createdAt.desc()),
+    index("buildbattle_builds_status_likes_idx").on(
+      table.status,
+      table.likeCount.desc(),
+      table.createdAt.desc(),
+    ),
+    index("buildbattle_builds_player_created_idx").on(table.playerId, table.createdAt.desc()),
+  ],
+);
+
+export const buildbattleBuildLikes = pgTable(
+  "buildbattle_build_likes",
+  {
+    buildId: uuid("build_id")
+      .notNull()
+      .references(() => buildbattleBuilds.id, { onDelete: "cascade" }),
+    likerKey: varchar("liker_key", { length: 80 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.buildId, table.likerKey] })],
+);
+
+export const buildbattleBuildReports = pgTable(
+  "buildbattle_build_reports",
+  {
+    buildId: uuid("build_id")
+      .notNull()
+      .references(() => buildbattleBuilds.id, { onDelete: "cascade" }),
+    reporterKey: varchar("reporter_key", { length: 80 }).notNull(),
+    reason: varchar({ length: 32 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.buildId, table.reporterKey] })],
+);
+
+export const buildbattleGallerySettings = pgTable("buildbattle_gallery_settings", {
+  playerId: uuid("player_id")
+    .primaryKey()
+    .references(() => playerdata.id, { onDelete: "cascade" }),
+  galleryOptOut: boolean("gallery_opt_out").default(false).notNull(),
+  /** Total likes already announced to the player on join (written by the plugin). */
+  lastSeenLikeTotal: integer("last_seen_like_total").default(0).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" })
+    .defaultNow()
+    .notNull(),
+});
+
+/** Website-only idempotency markers for Discord community announcements. */
+export const discordEventAnnouncements = pgTable("discord_event_announcements", {
+  dedupeKey: varchar("dedupe_key", { length: 120 }).primaryKey(),
+  createdAt: timestamp("created_at", { withTimezone: true, mode: "date" })
+    .defaultNow()
+    .notNull(),
+});

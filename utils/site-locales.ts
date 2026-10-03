@@ -68,6 +68,7 @@ export const SITE_LOCALES: readonly SiteLocale[] = localeContract.locales.map((l
 export const LOCALIZED_SLUGS: Record<string, Partial<Record<SiteLocaleCode, string>>> = {
   "/join": { fr: "/rejoindre" },
   "/history": { fr: "/notre-histoire" },
+  "/builds": { fr: "/galerie" },
 };
 
 function canonicalSlugPath(path: string, locale: SiteLocale | undefined): string {

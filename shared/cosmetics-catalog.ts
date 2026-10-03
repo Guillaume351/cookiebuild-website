@@ -197,6 +197,19 @@ const LOBBY_TRAIL_SUPPORT = (particle: string) => ({
  */
 export const COIN_COSMETICS = [
   {
+    // First cheap coin item (release bb-gallery-20261003): affordable after a
+    // few matches so new players reach their first purchase quickly.
+    id: "starter_spark_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 250,
+    name: "Trace d’étincelles",
+    nameEn: "Starter sparks trail",
+    description: "De petites étincelles suivent tes pas dans le lobby. Ton premier objet à 250 pièces, à acheter en jeu.",
+    preview: { kind: "trail", label: "Étincelles" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("CRIT"),
+  },
+  {
     id: "note_trail",
     slot: "HUB_TRAIL",
     acquisition: "coins",
