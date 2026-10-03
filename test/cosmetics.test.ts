@@ -185,12 +185,34 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(migration).toContain("('HUB_TRAIL', 'streak_star_trail')");
     expect(migration).toContain("cosmetic_first_activations");
     for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
+      if (item.id === "starter_spark_trail") continue; // added by 0025
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
     }
   });
 
+  it("widens every cosmetic constraint again for the 250-coin starter trail", async () => {
+    const migration = await readFile(
+      new URL("../drizzle/0025_starter_coin_cosmetic.sql", import.meta.url),
+      "utf8",
+    );
+    expect(migration).toContain("('HUB_TRAIL', 'starter_spark_trail')");
+    expect(migration).toContain("DROP CONSTRAINT IF EXISTS \"cosmetic_entitlements_id_ck\"");
+    expect(migration).toContain("DROP CONSTRAINT IF EXISTS \"cosmetic_selections_slot_cosmetic_ck\"");
+    expect(migration).toContain("cosmetic_first_activations");
+    for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
+      expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
+    }
+    const starter = cosmeticById("starter_spark_trail");
+    expect(starter?.slot).toBe("HUB_TRAIL");
+    expect(isRewardOnlyCosmetic("starter_spark_trail")).toBe(false);
+    expect(isFreeCosmetic("starter_spark_trail")).toBe(false);
+    expect(COSMETIC_PRODUCTS.some((product) =>
+      (product.grants as readonly string[]).includes("starter_spark_trail"))).toBe(false);
+  });
+
   it("keeps earned-coin trails in game only with server-side prices", () => {
     expect(COIN_COSMETICS.map(({ id, slot, coinPrice }) => ({ id, slot, coinPrice }))).toEqual([
+      { id: "starter_spark_trail", slot: "HUB_TRAIL", coinPrice: 250 },
       { id: "note_trail", slot: "HUB_TRAIL", coinPrice: 1_000 },
       { id: "heart_trail", slot: "HUB_TRAIL", coinPrice: 2_500 },
     ]);
