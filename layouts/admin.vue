@@ -57,6 +57,7 @@ const navigation = [
   { to: "/admin/observability", label: "Observabilité", permission: "dashboard:read" },
   { to: "/admin/skyblock-economy", label: "Économie Skyblock", permission: "dashboard:read" },
   { to: "/admin/reports", label: "Signalements", permission: "reports:read" },
+  { to: "/admin/builds", label: "Galerie Build Battle", permission: "moderation:read" },
   { to: "/admin/content", label: "Contenus", permission: "content:read" },
   { to: "/admin/notifications", label: "Notifications", permission: "notifications:read" },
   { to: "/admin/audit", label: "Audit", permission: "audit:read" },
