@@ -118,6 +118,13 @@ The migration can be replayed without duplicating or reclassifying observations.
 Do not replay the historical observability bootstrap just to install shop views:
 it also handles credentials and unrelated views.
 
+Migration `drizzle/0026_shop_activation_cosmetics.sql` adds two views:
+`metrics.shop_welcome_gifts_daily` (free-trail welcome gifts per Paris day,
+edition and equipped flag) and `metrics.shop_coin_purchases_daily` (in-game coin
+purchases and coins spent per cosmetic, from the game `coin_transactions` ledger,
+skipped where that table does not exist yet). New first activations may also be
+labeled `gift`, `purchase` or `grant` when the game server sets that provenance.
+
 An account/cosmetic pair is recorded once, regardless of selection changes,
 retries, deselection/reselection, or whether the write came from Java, Bedrock
 or the website. Existing selections are labeled `baseline` and timestamped at
