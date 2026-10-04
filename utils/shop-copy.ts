@@ -1,3 +1,4 @@
+import type { CoinCosmeticId } from "../shared/cosmetics-catalog";
 import type { SiteLocaleCode } from "./site-locales";
 
 export const SHOP_COPY = {
@@ -7,8 +8,8 @@ export const SHOP_COPY = {
     "unavailable": "Purchases are currently unavailable. Link your player to view existing access in your inventory.",
     "testMode": "Test mode: no real payments. Test access is not a permanent purchase.",
     "freeBadge": "Free for everyone · €0",
-    "freeDescription": "A little sparkle trail in the lobby. No purchase, subscription or payment card: every player already has access.",
-    "freeInstructions": "Equip it with /shop in game, or link your player to use your web inventory. Java and Bedrock, without competitive advantage.",
+    "freeDescription": "A little sparkle trail in the lobby, free for every player. It is equipped automatically the first time you arrive in the lobby: no purchase, subscription or payment card.",
+    "freeInstructions": "Change or remove it with the “Cosmetics” emerald in your hotbar, or type /shop in game. Java and Bedrock, without competitive advantage.",
     "equipFree": "Equip my free effect",
     "linkPlayer": "Link my player",
     "inventory": "Inventory and history",
@@ -38,7 +39,7 @@ export const SHOP_COPY = {
     "rankTitle": "Permanent Supporter",
     "rankDescription": "One-time purchase: the same four Supporter benefits as the monthly plan (badge, lobby flight, join flair and web profile frame), kept forever. No gameplay advantage.",
     "coinTitle": "Earned in game with coins",
-    "coinIntro": "These lobby trails are never sold on the website: buy them in game with the coins you earn by playing.",
+    "coinIntro": "These lobby trails and victory effects are never sold on the website: buy them in game with the coins you earn by playing.",
     "coinPrice": "{price} coins",
     "coinNotice": "In game only · not for sale here",
     "packTitle": "First Collection Pack",
@@ -51,8 +52,8 @@ export const SHOP_COPY = {
     "unavailable": "Les achats sont actuellement indisponibles. Lie ton joueur pour consulter tes accès existants dans ton inventaire.",
     "testMode": "Mode test : aucun paiement réel. Les accès de test ne sont pas des achats définitifs.",
     "freeBadge": "Offert à tous · 0 €",
-    "freeDescription": "Une petite trace lumineuse dans le lobby. Aucun achat, abonnement ni carte bancaire : cet effet est déjà disponible pour chaque joueur.",
-    "freeInstructions": "Active-la avec /shop en jeu ou lie ton joueur pour utiliser ton inventaire web. Java et Bedrock, sans avantage compétitif.",
+    "freeDescription": "Une petite trace lumineuse dans le lobby, offerte à tous les joueurs. Elle s’équipe toute seule à ta première arrivée dans le lobby : aucun achat, abonnement ni carte bancaire.",
+    "freeInstructions": "Pour la changer ou l’enlever, utilise l’émeraude « Cosmétiques » de ta barre d’objets ou tape /shop en jeu. Java et Bedrock, sans avantage compétitif.",
     "equipFree": "Activer mon effet gratuit",
     "linkPlayer": "Lier mon joueur",
     "inventory": "Inventaire et historique",
@@ -82,7 +83,7 @@ export const SHOP_COPY = {
     "rankTitle": "Supporter permanent",
     "rankDescription": "Achat unique : les quatre avantages Supporter de l’abonnement mensuel (insigne, vol dans le lobby, arrivée remarquée et cadre de profil web), pour toujours. Aucun avantage de jeu.",
     "coinTitle": "À gagner en jeu avec tes pièces",
-    "coinIntro": "Ces traces de lobby ne sont jamais vendues sur le site : achète-les en jeu avec les pièces que tu gagnes en jouant.",
+    "coinIntro": "Ces traces de lobby et effets de victoire ne sont jamais vendus sur le site : achète-les en jeu avec les pièces que tu gagnes en jouant.",
     "coinPrice": "{price} pièces",
     "coinNotice": "En jeu uniquement · pas en vente ici",
     "packTitle": "Pack Première collection",
@@ -95,8 +96,8 @@ export const SHOP_COPY = {
     "unavailable": "Käufe sind derzeit nicht verfügbar. Verknüpfe deinen Spieler, um vorhandene Zugänge im Inventar zu sehen.",
     "testMode": "Testmodus: keine echten Zahlungen. Testzugänge sind keine dauerhaften Käufe.",
     "freeBadge": "Für alle kostenlos · 0 €",
-    "freeDescription": "Eine kleine Funkenspur in der Lobby. Kein Kauf, Abo oder Zahlungsmittel nötig: Jeder Spieler hat bereits Zugriff.",
-    "freeInstructions": "Aktiviere sie mit /shop im Spiel oder verknüpfe deinen Spieler für das Webinventar. Java und Bedrock, ohne Wettbewerbsvorteil.",
+    "freeDescription": "Eine kleine Funkenspur in der Lobby, gratis für alle Spieler. Sie wird bei deiner ersten Ankunft in der Lobby automatisch ausgerüstet: kein Kauf, kein Abo, keine Karte.",
+    "freeInstructions": "Ändern oder entfernen kannst du sie mit dem Smaragd „Kosmetik“ in deiner Schnellleiste oder mit /shop im Spiel. Java und Bedrock, ohne Wettbewerbsvorteil.",
     "equipFree": "Kostenlosen Effekt aktivieren",
     "linkPlayer": "Spieler verknüpfen",
     "inventory": "Inventar und Verlauf",
@@ -126,7 +127,7 @@ export const SHOP_COPY = {
     "rankTitle": "Dauerhafter Supporter",
     "rankDescription": "Einmalkauf: dieselben vier Supporter-Vorteile wie im Monatsabo (Abzeichen, Lobby-Flug, Beitritts-Effekt und Web-Profilrahmen), dauerhaft. Kein Spielvorteil.",
     "coinTitle": "Im Spiel mit Münzen verdienen",
-    "coinIntro": "Diese Lobby-Spuren werden nie auf der Website verkauft: Kaufe sie im Spiel mit den Münzen, die du beim Spielen verdienst.",
+    "coinIntro": "Diese Lobby-Spuren und Siegeseffekte werden nie auf der Website verkauft: Kaufe sie im Spiel mit den Münzen, die du beim Spielen verdienst.",
     "coinPrice": "{price} Münzen",
     "coinNotice": "Nur im Spiel · hier nicht käuflich",
     "packTitle": "Erste Sammlung",
@@ -139,8 +140,8 @@ export const SHOP_COPY = {
     "unavailable": "Gli acquisti non sono disponibili al momento. Collega il giocatore per vedere gli accessi esistenti nell’inventario.",
     "testMode": "Modalità test: nessun pagamento reale. Gli accessi di prova non sono acquisti permanenti.",
     "freeBadge": "Gratis per tutti · 0 €",
-    "freeDescription": "Una piccola scia luminosa nella lobby. Nessun acquisto, abbonamento o carta: ogni giocatore ha già accesso.",
-    "freeInstructions": "Attivala con /shop nel gioco oppure collega il giocatore per usare l’inventario web. Java e Bedrock, senza vantaggi competitivi.",
+    "freeDescription": "Una piccola scia luminosa nella lobby, gratis per tutti i giocatori. Si equipaggia da sola al tuo primo arrivo nella lobby: nessun acquisto, abbonamento o carta.",
+    "freeInstructions": "Per cambiarla o toglierla usa lo smeraldo «Cosmetici» nella barra rapida oppure /shop nel gioco. Java e Bedrock, senza vantaggi competitivi.",
     "equipFree": "Attiva il mio effetto gratuito",
     "linkPlayer": "Collega il mio giocatore",
     "inventory": "Inventario e cronologia",
@@ -170,7 +171,7 @@ export const SHOP_COPY = {
     "rankTitle": "Supporter permanente",
     "rankDescription": "Acquisto singolo: gli stessi quattro vantaggi Supporter dell’abbonamento mensile (distintivo, volo nella lobby, ingresso speciale e cornice del profilo web), per sempre. Nessun vantaggio di gioco.",
     "coinTitle": "Da ottenere in gioco con le monete",
-    "coinIntro": "Queste scie per la lobby non sono mai in vendita sul sito: comprale in gioco con le monete che guadagni giocando.",
+    "coinIntro": "Queste scie per la lobby e questi effetti di vittoria non sono mai in vendita sul sito: comprali in gioco con le monete che guadagni giocando.",
     "coinPrice": "{price} monete",
     "coinNotice": "Solo in gioco · non in vendita qui",
     "packTitle": "Prima collezione",
@@ -183,8 +184,8 @@ export const SHOP_COPY = {
     "unavailable": "Покупките временно не са достъпни. Свържи играча си, за да видиш наличните достъпи в инвентара.",
     "testMode": "Тестов режим: без реални плащания. Тестовите достъпи не са постоянни покупки.",
     "freeBadge": "Безплатно за всички · 0 €",
-    "freeDescription": "Малка светеща следа в лобито. Без покупка, абонамент или карта: всеки играч вече има достъп.",
-    "freeInstructions": "Активирай с /shop в играта или свържи играча за уеб инвентара. Java и Bedrock, без състезателно предимство.",
+    "freeDescription": "Малка светеща следа в лобито, безплатна за всеки играч. Слага се автоматично при първото ти влизане в лобито: без покупка, абонамент или карта.",
+    "freeInstructions": "Смени я или я махни с изумруда „Козметика“ в лентата с предмети или с /shop в играта. Java и Bedrock, без състезателно предимство.",
     "equipFree": "Активирай безплатния ефект",
     "linkPlayer": "Свържи моя играч",
     "inventory": "Инвентар и история",
@@ -214,7 +215,7 @@ export const SHOP_COPY = {
     "rankTitle": "Постоянен Supporter",
     "rankDescription": "Еднократна покупка: същите четири предимства Supporter като при месечния план (значка, полет в лобито, ефект при влизане и рамка на уеб профила), завинаги. Без игрово предимство.",
     "coinTitle": "Спечели ги в играта с монети",
-    "coinIntro": "Тези следи за лобито никога не се продават на сайта: купи ги в играта с монетите, които печелиш, докато играеш.",
+    "coinIntro": "Тези следи за лобито и победни ефекти никога не се продават на сайта: купи ги в играта с монетите, които печелиш, докато играеш.",
     "coinPrice": "{price} монети",
     "coinNotice": "Само в играта · не се продава тук",
     "packTitle": "Първа колекция",
@@ -227,8 +228,8 @@ export const SHOP_COPY = {
     "unavailable": "Las compras no están disponibles actualmente. Vincula tu jugador para ver tus accesos existentes en el inventario.",
     "testMode": "Modo de prueba: sin pagos reales. Los accesos de prueba no son compras permanentes.",
     "freeBadge": "Gratis para todos · 0 €",
-    "freeDescription": "Una pequeña estela brillante en el lobby. Sin compra, suscripción ni tarjeta: todos los jugadores ya tienen acceso.",
-    "freeInstructions": "Actívala con /shop en el juego o vincula tu jugador para usar el inventario web. Java y Bedrock, sin ventaja competitiva.",
+    "freeDescription": "Una pequeña estela brillante en el lobby, gratis para todos los jugadores. Se equipa sola la primera vez que llegas al lobby: sin compra, suscripción ni tarjeta.",
+    "freeInstructions": "Para cambiarla o quitarla, usa la esmeralda «Cosméticos» de tu barra rápida o escribe /shop en el juego. Java y Bedrock, sin ventaja competitiva.",
     "equipFree": "Activar mi efecto gratuito",
     "linkPlayer": "Vincular mi jugador",
     "inventory": "Inventario e historial",
@@ -258,7 +259,7 @@ export const SHOP_COPY = {
     "rankTitle": "Supporter permanente",
     "rankDescription": "Compra única: las mismas cuatro ventajas Supporter del plan mensual (insignia, vuelo en el lobby, entrada destacada y marco de perfil web), para siempre. Sin ventaja de juego.",
     "coinTitle": "Se consiguen en el juego con monedas",
-    "coinIntro": "Estos rastros para el lobby nunca se venden en la web: cómpralos en el juego con las monedas que ganas jugando.",
+    "coinIntro": "Estos rastros para el lobby y efectos de victoria nunca se venden en la web: cómpralos en el juego con las monedas que ganas jugando.",
     "coinPrice": "{price} monedas",
     "coinNotice": "Solo en el juego · no se vende aquí",
     "packTitle": "Primera colección",
@@ -271,8 +272,8 @@ export const SHOP_COPY = {
     "unavailable": "खरीद अभी उपलब्ध नहीं है। इन्वेंटरी में अपने मौजूदा एक्सेस देखने के लिए खिलाड़ी लिंक करें।",
     "testMode": "टेस्ट मोड: कोई असली भुगतान नहीं। टेस्ट एक्सेस स्थायी खरीद नहीं है।",
     "freeBadge": "सभी के लिए मुफ्त · €0",
-    "freeDescription": "लॉबी में छोटी चमकदार लकीर। खरीद, सदस्यता या कार्ड जरूरी नहीं: हर खिलाड़ी को पहले से एक्सेस है।",
-    "freeInstructions": "गेम में /shop से चालू करें या वेब इन्वेंटरी के लिए खिलाड़ी लिंक करें। Java और Bedrock, बिना प्रतिस्पर्धी लाभ के।",
+    "freeDescription": "लॉबी में छोटी चमकदार ट्रेल, हर खिलाड़ी के लिए मुफ़्त। लॉबी में आपके पहली बार आने पर यह अपने-आप लग जाती है: कोई खरीद, सदस्यता या कार्ड नहीं।",
+    "freeInstructions": "इसे बदलने या हटाने के लिए हॉटबार में “कॉस्मेटिक्स” पन्ना इस्तेमाल करें या गेम में /shop लिखें। Java और Bedrock, बिना प्रतिस्पर्धी लाभ के।",
     "equipFree": "मेरा मुफ्त प्रभाव चालू करें",
     "linkPlayer": "मेरा खिलाड़ी लिंक करें",
     "inventory": "इन्वेंटरी और इतिहास",
@@ -302,7 +303,7 @@ export const SHOP_COPY = {
     "rankTitle": "स्थायी Supporter",
     "rankDescription": "एकमुश्त खरीद: मासिक प्लान वाले वही चार Supporter लाभ (बैज, लॉबी में उड़ान, जॉइन इफ़ेक्ट और वेब प्रोफ़ाइल फ़्रेम), हमेशा के लिए। कोई गेम लाभ नहीं।",
     "coinTitle": "गेम में सिक्कों से पाएँ",
-    "coinIntro": "ये लॉबी ट्रेल वेबसाइट पर कभी नहीं बिकते: खेलकर कमाए गए सिक्कों से इन्हें गेम में खरीदें।",
+    "coinIntro": "ये लॉबी ट्रेल और जीत के इफ़ेक्ट वेबसाइट पर कभी नहीं बिकते: खेलकर कमाए गए सिक्कों से इन्हें गेम में खरीदें।",
     "coinPrice": "{price} सिक्के",
     "coinNotice": "सिर्फ़ गेम में · यहाँ बिक्री के लिए नहीं",
     "packTitle": "पहला संग्रह",
@@ -315,8 +316,8 @@ export const SHOP_COPY = {
     "unavailable": "As compras estão indisponíveis no momento. Vincule seu jogador para ver os acessos existentes no inventário.",
     "testMode": "Modo de teste: sem pagamentos reais. Acessos de teste não são compras permanentes.",
     "freeBadge": "Grátis para todos · €0",
-    "freeDescription": "Uma pequena trilha brilhante no lobby. Sem compra, assinatura ou cartão: todos os jogadores já têm acesso.",
-    "freeInstructions": "Ative com /shop no jogo ou vincule seu jogador para usar o inventário web. Java e Bedrock, sem vantagem competitiva.",
+    "freeDescription": "Uma pequena trilha brilhante no lobby, grátis para todos os jogadores. Ela é equipada sozinha na sua primeira chegada ao lobby: sem compra, assinatura ou cartão.",
+    "freeInstructions": "Para trocar ou remover, use a esmeralda “Cosméticos” da sua barra de atalhos ou digite /shop no jogo. Java e Bedrock, sem vantagem competitiva.",
     "equipFree": "Ativar meu efeito grátis",
     "linkPlayer": "Vincular meu jogador",
     "inventory": "Inventário e histórico",
@@ -346,7 +347,7 @@ export const SHOP_COPY = {
     "rankTitle": "Supporter permanente",
     "rankDescription": "Compra única: os mesmos quatro benefícios Supporter do plano mensal (distintivo, voo no lobby, entrada especial e moldura de perfil web), para sempre. Sem vantagem de jogo.",
     "coinTitle": "Ganhe no jogo com moedas",
-    "coinIntro": "Esses rastros de lobby nunca são vendidos no site: compre no jogo com as moedas que você ganha jogando.",
+    "coinIntro": "Esses rastros de lobby e efeitos de vitória nunca são vendidos no site: compre no jogo com as moedas que você ganha jogando.",
     "coinPrice": "{price} moedas",
     "coinNotice": "Só no jogo · não está à venda aqui",
     "packTitle": "Primeira coleção",
@@ -633,6 +634,365 @@ export const SHOP_ITEMS = {
 
 export function shopItemCopy(locale: SiteLocaleCode, item: { id: string; name: string; description: string }) {
   return (SHOP_ITEMS[locale] as Record<string, {name: string; description: string}>)[item.id] ?? item;
+}
+
+type CoinItemText = { name: string; description: string };
+
+/**
+ * Localized names and descriptions of the earned-coin cosmetics (bought in
+ * game only). Same wording as the game message bundles.
+ */
+export const COIN_ITEM_COPY = {
+  "en": {
+    "chocolate_chip_trail": {
+      "name": "Chocolate Chips",
+      "description": "Little chocolate chips drop behind you in the lobby"
+    },
+    "starter_spark_trail": {
+      "name": "Critical Sparks",
+      "description": "Critical-hit sparks burst from your steps in the lobby"
+    },
+    "cherry_petal_trail": {
+      "name": "Cherry Petals",
+      "description": "Pink cherry blossom petals swirl behind you in the lobby"
+    },
+    "cookie_rain_victory": {
+      "name": "Cookie Rain",
+      "description": "Cookies rain down around you when you win a match"
+    },
+    "soul_flame_trail": {
+      "name": "Blue Flames",
+      "description": "Little blue soul flames dance at your feet in the lobby"
+    },
+    "note_trail": {
+      "name": "Music trail",
+      "description": "Little music notes follow your steps in the lobby"
+    },
+    "totem_victory": {
+      "name": "Victory Confetti",
+      "description": "A colourful confetti burst when you win a match"
+    },
+    "heart_trail": {
+      "name": "Heart trail",
+      "description": "Hearts float behind you in the lobby"
+    },
+    "firework_victory": {
+      "name": "Grand Fireworks",
+      "description": "A spiral of sparklers and fireworks rises when you win a match"
+    },
+    "rainbow_trail": {
+      "name": "Rainbow",
+      "description": "A trail that cycles through every colour of the rainbow in the lobby"
+    }
+  },
+  "fr": {
+    "chocolate_chip_trail": {
+      "name": "Pépites de chocolat",
+      "description": "De petites pépites de chocolat tombent derrière toi dans le lobby"
+    },
+    "starter_spark_trail": {
+      "name": "Éclats critiques",
+      "description": "Des éclats de coup critique jaillissent à chacun de tes pas dans le lobby"
+    },
+    "cherry_petal_trail": {
+      "name": "Pétales de cerisier",
+      "description": "Des pétales roses de cerisier virevoltent derrière toi dans le lobby"
+    },
+    "cookie_rain_victory": {
+      "name": "Pluie de cookies",
+      "description": "Des cookies pleuvent autour de toi quand tu gagnes une partie"
+    },
+    "soul_flame_trail": {
+      "name": "Flammes bleues",
+      "description": "De petites flammes bleues dansent à tes pieds dans le lobby"
+    },
+    "note_trail": {
+      "name": "Trace musicale",
+      "description": "De petites notes de musique suivent tes pas dans le lobby"
+    },
+    "totem_victory": {
+      "name": "Confettis de victoire",
+      "description": "Une explosion de confettis colorés quand tu gagnes une partie"
+    },
+    "heart_trail": {
+      "name": "Trace de cœurs",
+      "description": "Des cœurs flottent derrière toi dans le lobby"
+    },
+    "firework_victory": {
+      "name": "Grand feu d’artifice",
+      "description": "Une spirale d’étincelles et de feux d’artifice s’élève quand tu gagnes une partie"
+    },
+    "rainbow_trail": {
+      "name": "Arc-en-ciel",
+      "description": "Une traînée qui passe par toutes les couleurs de l’arc-en-ciel dans le lobby"
+    }
+  },
+  "de": {
+    "chocolate_chip_trail": {
+      "name": "Schokostückchen",
+      "description": "Kleine Schokostückchen fallen hinter dir in der Lobby"
+    },
+    "starter_spark_trail": {
+      "name": "Kritische Funken",
+      "description": "Funken kritischer Treffer sprühen bei jedem Schritt in der Lobby"
+    },
+    "cherry_petal_trail": {
+      "name": "Kirschblüten",
+      "description": "Rosa Kirschblütenblätter wirbeln in der Lobby hinter dir"
+    },
+    "cookie_rain_victory": {
+      "name": "Keksregen",
+      "description": "Kekse regnen um dich herum, wenn du eine Partie gewinnst"
+    },
+    "soul_flame_trail": {
+      "name": "Blaue Flammen",
+      "description": "Kleine blaue Seelenflammen tanzen in der Lobby zu deinen Füßen"
+    },
+    "note_trail": {
+      "name": "Musikspur",
+      "description": "Kleine Musiknoten folgen deinen Schritten in der Lobby"
+    },
+    "totem_victory": {
+      "name": "Siegeskonfetti",
+      "description": "Bunte Konfetti explodieren, wenn du eine Partie gewinnst"
+    },
+    "heart_trail": {
+      "name": "Herzspur",
+      "description": "Herzen schweben in der Lobby hinter dir her"
+    },
+    "firework_victory": {
+      "name": "Großes Feuerwerk",
+      "description": "Eine Spirale aus Funken und Feuerwerk steigt auf, wenn du gewinnst"
+    },
+    "rainbow_trail": {
+      "name": "Regenbogen",
+      "description": "Eine Spur in allen Farben des Regenbogens in der Lobby"
+    }
+  },
+  "it": {
+    "chocolate_chip_trail": {
+      "name": "Gocce di cioccolato",
+      "description": "Piccole gocce di cioccolato cadono dietro di te nella lobby"
+    },
+    "starter_spark_trail": {
+      "name": "Scintille critiche",
+      "description": "Scintille di colpo critico a ogni tuo passo nella lobby"
+    },
+    "cherry_petal_trail": {
+      "name": "Petali di ciliegio",
+      "description": "Petali rosa di ciliegio volteggiano dietro di te nella lobby"
+    },
+    "cookie_rain_victory": {
+      "name": "Pioggia di biscotti",
+      "description": "Biscotti piovono intorno a te quando vinci una partita"
+    },
+    "soul_flame_trail": {
+      "name": "Fiamme blu",
+      "description": "Piccole fiamme blu danzano ai tuoi piedi nella lobby"
+    },
+    "note_trail": {
+      "name": "Scia musicale",
+      "description": "Piccole note musicali seguono i tuoi passi nella lobby"
+    },
+    "totem_victory": {
+      "name": "Coriandoli della vittoria",
+      "description": "Un’esplosione di coriandoli colorati quando vinci una partita"
+    },
+    "heart_trail": {
+      "name": "Scia di cuori",
+      "description": "Dei cuori fluttuano dietro di te nella lobby"
+    },
+    "firework_victory": {
+      "name": "Fuochi d’artificio",
+      "description": "Una spirale di scintille e fuochi d’artificio sale quando vinci una partita"
+    },
+    "rainbow_trail": {
+      "name": "Arcobaleno",
+      "description": "Una scia che passa per tutti i colori dell’arcobaleno nella lobby"
+    }
+  },
+  "bg": {
+    "chocolate_chip_trail": {
+      "name": "Шоколадови парченца",
+      "description": "Малки шоколадови парченца падат след теб в лобито"
+    },
+    "starter_spark_trail": {
+      "name": "Критични искри",
+      "description": "Искри от критичен удар изскачат при всяка твоя стъпка в лобито"
+    },
+    "cherry_petal_trail": {
+      "name": "Черешови цветчета",
+      "description": "Розови черешови цветчета се вихрят след теб в лобито"
+    },
+    "cookie_rain_victory": {
+      "name": "Дъжд от бисквитки",
+      "description": "Бисквитки валят около теб, когато спечелиш игра"
+    },
+    "soul_flame_trail": {
+      "name": "Сини пламъци",
+      "description": "Малки сини пламъчета танцуват в краката ти в лобито"
+    },
+    "note_trail": {
+      "name": "Музикална следа",
+      "description": "Малки музикални ноти следват стъпките ти в лобито"
+    },
+    "totem_victory": {
+      "name": "Победно конфети",
+      "description": "Цветно конфети избухва, когато спечелиш игра"
+    },
+    "heart_trail": {
+      "name": "Следа от сърца",
+      "description": "Сърца летят след теб в лобито"
+    },
+    "firework_victory": {
+      "name": "Голяма заря",
+      "description": "Спирала от искри и фойерверки се издига, когато спечелиш игра"
+    },
+    "rainbow_trail": {
+      "name": "Дъга",
+      "description": "Следа във всички цветове на дъгата в лобито"
+    }
+  },
+  "es": {
+    "chocolate_chip_trail": {
+      "name": "Pepitas de chocolate",
+      "description": "Pequeñas pepitas de chocolate caen detrás de ti en el lobby"
+    },
+    "starter_spark_trail": {
+      "name": "Chispas críticas",
+      "description": "Chispas de golpe crítico saltan a cada paso en el lobby"
+    },
+    "cherry_petal_trail": {
+      "name": "Pétalos de cerezo",
+      "description": "Pétalos rosas de cerezo revolotean detrás de ti en el lobby"
+    },
+    "cookie_rain_victory": {
+      "name": "Lluvia de galletas",
+      "description": "Llueven galletas a tu alrededor cuando ganas una partida"
+    },
+    "soul_flame_trail": {
+      "name": "Llamas azules",
+      "description": "Pequeñas llamas azules bailan a tus pies en el lobby"
+    },
+    "note_trail": {
+      "name": "Rastro musical",
+      "description": "Pequeñas notas musicales siguen tus pasos en el lobby"
+    },
+    "totem_victory": {
+      "name": "Confeti de victoria",
+      "description": "Una explosión de confeti de colores cuando ganas una partida"
+    },
+    "heart_trail": {
+      "name": "Rastro de corazones",
+      "description": "Corazones flotan detrás de ti en el lobby"
+    },
+    "firework_victory": {
+      "name": "Fuegos artificiales",
+      "description": "Una espiral de chispas y fuegos artificiales se eleva cuando ganas una partida"
+    },
+    "rainbow_trail": {
+      "name": "Arcoíris",
+      "description": "Una estela que recorre todos los colores del arcoíris en el lobby"
+    }
+  },
+  "hi": {
+    "chocolate_chip_trail": {
+      "name": "चॉकलेट चिप्स",
+      "description": "लॉबी में छोटी चॉकलेट चिप्स आपके पीछे गिरती हैं"
+    },
+    "starter_spark_trail": {
+      "name": "क्रिटिकल चिंगारी",
+      "description": "लॉबी में हर कदम पर क्रिटिकल हिट की चिंगारियाँ"
+    },
+    "cherry_petal_trail": {
+      "name": "चेरी की पंखुड़ियाँ",
+      "description": "लॉबी में गुलाबी चेरी की पंखुड़ियाँ आपके पीछे उड़ती हैं"
+    },
+    "cookie_rain_victory": {
+      "name": "कुकी की बारिश",
+      "description": "मैच जीतने पर आपके चारों ओर कुकीज़ बरसती हैं"
+    },
+    "soul_flame_trail": {
+      "name": "नीली लपटें",
+      "description": "लॉबी में छोटी नीली लपटें आपके कदमों के पास नाचती हैं"
+    },
+    "note_trail": {
+      "name": "संगीत ट्रेल",
+      "description": "लॉबी में छोटे संगीत नोट आपके कदमों के पीछे चलते हैं"
+    },
+    "totem_victory": {
+      "name": "जीत की कंफ़ेटी",
+      "description": "मैच जीतने पर रंग-बिरंगी कंफ़ेटी का धमाका"
+    },
+    "heart_trail": {
+      "name": "दिल ट्रेल",
+      "description": "लॉबी में दिल आपके पीछे तैरते हैं"
+    },
+    "firework_victory": {
+      "name": "भव्य आतिशबाज़ी",
+      "description": "मैच जीतने पर चिंगारियों और आतिशबाज़ी का घेरा ऊपर उठता है"
+    },
+    "rainbow_trail": {
+      "name": "इंद्रधनुष",
+      "description": "लॉबी में इंद्रधनुष के सभी रंगों से गुज़रती ट्रेल"
+    }
+  },
+  "pt-BR": {
+    "chocolate_chip_trail": {
+      "name": "Gotas de chocolate",
+      "description": "Pequenas gotas de chocolate caem atrás de você no lobby"
+    },
+    "starter_spark_trail": {
+      "name": "Faíscas críticas",
+      "description": "Faíscas de golpe crítico saltam a cada passo seu no lobby"
+    },
+    "cherry_petal_trail": {
+      "name": "Pétalas de cerejeira",
+      "description": "Pétalas cor-de-rosa de cerejeira rodopiam atrás de você no lobby"
+    },
+    "cookie_rain_victory": {
+      "name": "Chuva de cookies",
+      "description": "Cookies caem ao seu redor quando você vence uma partida"
+    },
+    "soul_flame_trail": {
+      "name": "Chamas azuis",
+      "description": "Pequenas chamas azuis dançam aos seus pés no lobby"
+    },
+    "note_trail": {
+      "name": "Rastro musical",
+      "description": "Pequenas notas musicais seguem seus passos no lobby"
+    },
+    "totem_victory": {
+      "name": "Confete da vitória",
+      "description": "Uma explosão de confete colorido quando você vence uma partida"
+    },
+    "heart_trail": {
+      "name": "Rastro de corações",
+      "description": "Corações flutuam atrás de você no lobby"
+    },
+    "firework_victory": {
+      "name": "Grande queima de fogos",
+      "description": "Uma espiral de faíscas e fogos de artifício sobe quando você vence uma partida"
+    },
+    "rainbow_trail": {
+      "name": "Arco-íris",
+      "description": "Um rastro que passa por todas as cores do arco-íris no lobby"
+    }
+  }
+} satisfies Record<SiteLocaleCode, Record<CoinCosmeticId, CoinItemText>>;
+
+/**
+ * Localized coin item text. A coin item without a translation yet keeps its
+ * French catalog text in French and its English name elsewhere (no description).
+ */
+export function coinItemCopy(
+  locale: SiteLocaleCode,
+  item: { id: string; name: string; nameEn?: string; description: string },
+): CoinItemText {
+  const localized = (COIN_ITEM_COPY[locale] as Record<string, CoinItemText | undefined> | undefined)?.[item.id];
+  if (localized) return localized;
+  if (locale === "fr") return { name: item.name, description: item.description };
+  return { name: item.nameEn ?? item.name, description: "" };
 }
 
 export const SHOP_FAIRNESS = {

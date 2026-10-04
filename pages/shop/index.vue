@@ -79,10 +79,10 @@
       <h2 id="coin-items-title" class="text-2xl font-black text-white">{{ shop.coinTitle }}</h2>
       <p class="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{{ shop.coinIntro }}</p>
       <ul class="mt-6 grid gap-4 md:grid-cols-2">
-        <li v-for="item in coinItems" :key="item.id" class="flex items-start justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
+        <li v-for="item in localizedCoinItems" :key="item.id" class="flex items-start justify-between gap-4 rounded-2xl border border-zinc-800 bg-zinc-900/70 p-5">
           <div>
-            <h3 class="text-lg font-black text-white">{{ locale.code === "fr" ? item.name : item.nameEn }}</h3>
-            <p v-if="locale.code === 'fr'" class="mt-1 text-sm text-zinc-400">{{ item.description }}</p>
+            <h3 class="text-lg font-black text-white">{{ item.text.name }}</h3>
+            <p v-if="item.text.description" class="mt-1 text-sm text-zinc-400">{{ item.text.description }}</p>
             <p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">{{ shop.coinNotice }}</p>
           </div>
           <span class="shrink-0 rounded-full border border-yellow-300/40 bg-yellow-300/10 px-3 py-1 text-sm font-black text-yellow-100">{{ shop.coinPrice.replace("{price}", new Intl.NumberFormat(locale.htmlLang).format(item.coinPrice)) }}</span>
@@ -140,7 +140,7 @@
 
 <script setup lang="ts">
 definePageMeta({ alias: ["/fr/shop", "/de/shop", "/it/shop", "/bg/shop", "/es/shop", "/hi/shop", "/pt-br/shop"] });
-import { SHOP_COPY, SHOP_FAIRNESS, shopItemCopy } from "@/utils/shop-copy";
+import { SHOP_COPY, SHOP_FAIRNESS, coinItemCopy, shopItemCopy } from "@/utils/shop-copy";
 import { COSMETIC_CATALOG_RESPONSE } from "#shared/cosmetics-catalog";
 import CosmeticPreview from "../../components/cosmetics/CosmeticPreview.vue";
 
@@ -165,6 +165,7 @@ const oneTimeProducts = computed(() => catalog.value.products.filter((product) =
 interface CoinShopItem { id: string; name: string; nameEn: string; description: string; coinPrice: number }
 // Coin-only cosmetics are informational: bought in game with earned coins, never on the web.
 const coinItems = computed<CoinShopItem[]>(() => (catalog.value as { coinItems?: CoinShopItem[] }).coinItems ?? []);
+const localizedCoinItems = computed(() => coinItems.value.map((item) => ({ ...item, text: coinItemCopy(locale.value.code, item) })));
 const supportProducts = computed(() => catalog.value.products.filter((product) => product.kind === "voluntary_support"));
 
 const subscriptionBenefits = computed(() => catalog.value.items.filter((item) => subscriptionProduct.value.grants.some((id) => id === item.id)));
