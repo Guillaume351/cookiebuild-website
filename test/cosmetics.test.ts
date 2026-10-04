@@ -1,10 +1,13 @@
 import { readFile } from "node:fs/promises";
+import { getTableConfig } from "drizzle-orm/pg-core";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { cosmeticEntitlements, cosmeticSelections, cosmeticWelcomeGifts } from "../db/schema";
 import {
   COSMETIC_CATALOG,
   COSMETIC_CATALOG_RESPONSE,
   COSMETIC_PRODUCTS,
   COIN_COSMETICS,
+  OWNABLE_COSMETICS,
   REWARD_COSMETICS,
   cosmeticById,
   isFreeCosmetic,
@@ -229,5 +232,88 @@ describe("reward-only and coin-only cosmetics", () => {
     const permanent = COSMETIC_PRODUCTS.find((product) => product.id === "supporter_permanent")!;
     for (const grant of monthly.grants) expect(permanent.grants).toContain(grant);
     expect(permanent.productVersion).toBeGreaterThan(1);
+  });
+});
+
+describe("shop activation migration 0026", () => {
+  const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
+
+  it("widens every constraint that lists cosmetic IDs for the eight new cosmetics", async () => {
+    const migration = await read("../drizzle/0026_shop_activation_cosmetics.sql");
+    expect(migration).toContain('DROP CONSTRAINT IF EXISTS "cosmetic_entitlements_id_ck"');
+    expect(migration).toContain('DROP CONSTRAINT IF EXISTS "cosmetic_selections_slot_cosmetic_ck"');
+    expect(migration).toContain("cosmetic_first_activations_cosmetic_id_check");
+    for (const item of OWNABLE_COSMETICS) {
+      expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
+      expect(migration).toContain(`('${item.slot}', '${item.id}')`);
+    }
+    expect(migration).not.toMatch(/CREATE TABLE (?!IF NOT EXISTS)/);
+    expect(migration).not.toMatch(/CREATE INDEX (?!IF NOT EXISTS)/);
+  });
+
+  it("creates the once-per-account welcome gift marker for the free trail only", async () => {
+    const migration = await read("../drizzle/0026_shop_activation_cosmetics.sql");
+    expect(migration).toContain('CREATE TABLE IF NOT EXISTS "cosmetic_welcome_gifts"');
+    expect(migration).toContain('"player_id" uuid PRIMARY KEY NOT NULL REFERENCES "playerdata"("id") ON DELETE CASCADE');
+    expect(migration).toContain(`CHECK ("cosmetic_id" IN ('cookie_sparkle_trail'))`);
+    expect(migration).toContain(`CHECK ("edition" IN ('java', 'bedrock', 'unknown'))`);
+    expect(migration).toContain("REVOKE ALL ON public.cosmetic_welcome_gifts FROM PUBLIC");
+    expect(migration).toContain("REVOKE ALL ON public.cosmetic_welcome_gifts FROM cookiebuild_metrics");
+    expect(isFreeCosmetic("cookie_sparkle_trail")).toBe(true);
+  });
+
+  it("records gift, purchase and grant provenance from a transaction-local setting", async () => {
+    const migration = await read("../drizzle/0026_shop_activation_cosmetics.sql");
+    expect(migration).toContain("current_setting('cookiebuild.cosmetic_source', true)");
+    expect(migration).toContain("IF provenance NOT IN ('selection', 'gift', 'purchase', 'grant')");
+    expect(migration).toContain("provenance := 'selection'");
+    expect(migration).toMatch(/observed_source IN \(\s*'baseline', 'selection', 'gift', 'purchase', 'grant'\)/);
+    expect(migration).toContain("SET search_path = pg_catalog");
+    expect(migration).toContain("ON CONFLICT (player_id, cosmetic_id) DO NOTHING");
+  });
+
+  it("exposes only security-barriered aggregate views to the metrics role", async () => {
+    const migration = await read("../drizzle/0026_shop_activation_cosmetics.sql");
+    expect(migration.match(/CREATE OR REPLACE VIEW metrics\.shop_/g)).toHaveLength(2);
+    expect(migration.match(/WITH \(security_barrier = true\)/g)).toHaveLength(2);
+    expect(migration).toContain("metrics.shop_welcome_gifts_daily");
+    expect(migration).toContain("metrics.shop_coin_purchases_daily");
+    expect(migration).toContain("to_regclass('public.coin_transactions') IS NOT NULL");
+    expect(migration).not.toMatch(/GRANT\s+SELECT\s+ON\s+public\./i);
+    expect(migration).not.toMatch(/player_id\s*(,|AS)[^;]*FROM public\.cosmetic_welcome_gifts/);
+  });
+
+  it("is registered in the drizzle journal right after 0025", async () => {
+    const journal = JSON.parse(await read("../drizzle/meta/_journal.json")) as {
+      entries: Array<{ idx: number; tag: string; when: number; breakpoints: boolean }>;
+    };
+    const start = journal.entries.findIndex((entry) => entry.tag === "0025_starter_coin_cosmetic");
+    const [previous, current] = journal.entries.slice(start, start + 2);
+    expect(previous).toMatchObject({ idx: 25, tag: "0025_starter_coin_cosmetic" });
+    expect(current).toMatchObject({ idx: 26, version: "7", tag: "0026_shop_activation_cosmetics", breakpoints: true });
+    expect(current!.when).toBeGreaterThan(previous!.when);
+  });
+
+  it("declares the same constraints and welcome gift table in the drizzle schema", () => {
+    const entitlementCheck = getTableConfig(cosmeticEntitlements).checks
+      .find((check) => check.name === "cosmetic_entitlements_id_ck")!;
+    const selectionCheck = getTableConfig(cosmeticSelections).checks
+      .find((check) => check.name === "cosmetic_selections_slot_cosmetic_ck")!;
+    const sqlText = (check: { value: { queryChunks: unknown[] } }) =>
+      check.value.queryChunks.map((chunk) => (chunk as { value?: string[] }).value?.join("") ?? "").join("");
+    for (const item of OWNABLE_COSMETICS) {
+      expect(sqlText(entitlementCheck)).toContain(`'${item.id}'`);
+      expect(sqlText(selectionCheck)).toContain(`('${item.slot}', '${item.id}')`);
+    }
+    const gifts = getTableConfig(cosmeticWelcomeGifts);
+    expect(gifts.name).toBe("cosmetic_welcome_gifts");
+    expect(gifts.columns.map((column) => column.name)).toEqual(["player_id", "cosmetic_id", "equipped", "edition", "granted_at"]);
+    expect(gifts.columns.find((column) => column.name === "player_id")?.primary).toBe(true);
+    expect(gifts.foreignKeys).toHaveLength(1);
+    expect(gifts.checks.map((check) => check.name).sort()).toEqual([
+      "cosmetic_welcome_gifts_cosmetic_ck",
+      "cosmetic_welcome_gifts_edition_ck",
+    ]);
+    expect(gifts.indexes.map((index) => index.config.name)).toEqual(["cosmetic_welcome_gifts_time_idx"]);
   });
 });

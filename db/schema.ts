@@ -1932,7 +1932,7 @@ export const cosmeticEntitlements = pgTable(
       .where(sql`${table.revokedAt} IS NULL`),
     check(
       "cosmetic_entitlements_id_ck",
-      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail')`,
+      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail', 'chocolate_chip_trail', 'cherry_petal_trail', 'soul_flame_trail', 'rainbow_trail', 'lucky_clover_trail', 'cookie_rain_victory', 'totem_victory', 'firework_victory')`,
     ),
     check("cosmetic_entitlements_source_ck", sql`length(btrim(${table.source})) > 0`),
     check(
@@ -1969,13 +1969,45 @@ export const cosmeticSelections = pgTable(
         ('HUB_TRAIL', 'heart_trail'),
         ('HUB_TRAIL', 'streak_star_trail'),
         ('HUB_TRAIL', 'starter_spark_trail'),
+        ('HUB_TRAIL', 'chocolate_chip_trail'),
+        ('HUB_TRAIL', 'cherry_petal_trail'),
+        ('HUB_TRAIL', 'soul_flame_trail'),
+        ('HUB_TRAIL', 'rainbow_trail'),
+        ('HUB_TRAIL', 'lucky_clover_trail'),
         ('EMOTE', 'cookie_cheer'),
         ('VICTORY_EFFECT', 'golden_cookie_burst'),
+        ('VICTORY_EFFECT', 'cookie_rain_victory'),
+        ('VICTORY_EFFECT', 'totem_victory'),
+        ('VICTORY_EFFECT', 'firework_victory'),
         ('PROFILE_FRAME', 'supporter_profile_frame'),
         ('LOBBY_FLIGHT', 'lobby_flight'),
         ('JOIN_FLAIR', 'supporter_join_flair')
       )`,
     ),
+  ],
+);
+
+/**
+ * Welcome gift (migration 0026): the free Cookie Sparkles trail is equipped
+ * once per account on the first lobby arrival. The row is the idempotency
+ * marker written by the game server and the aggregate gift counter.
+ */
+export const cosmeticWelcomeGifts = pgTable(
+  "cosmetic_welcome_gifts",
+  {
+    playerId: uuid("player_id")
+      .primaryKey()
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    cosmeticId: varchar("cosmetic_id", { length: 64 }).notNull(),
+    equipped: boolean().default(false).notNull(),
+    edition: varchar({ length: 16 }).default("unknown").notNull(),
+    grantedAt: timestamp("granted_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("cosmetic_welcome_gifts_time_idx").on(table.grantedAt, table.edition, table.equipped),
+    check("cosmetic_welcome_gifts_cosmetic_ck", sql`${table.cosmeticId} IN ('cookie_sparkle_trail')`),
+    check("cosmetic_welcome_gifts_edition_ck", sql`${table.edition} IN ('java', 'bedrock', 'unknown')`),
   ],
 );
 

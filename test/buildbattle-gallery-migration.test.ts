@@ -57,8 +57,9 @@ describe("Build Battle gallery migration 0024", () => {
 
   it("is registered after 0023 in the drizzle journal, followed by 0025", () => {
     const tags = journal.entries.map((entry) => entry.tag);
-    expect(tags.slice(-3)).toEqual(["0023_rally_recipient_cap", "0024_buildbattle_gallery", "0025_starter_coin_cosmetic"]);
-    const [previous, gallery, cosmetic] = journal.entries.slice(-3);
+    const start = tags.indexOf("0023_rally_recipient_cap");
+    expect(tags.slice(start, start + 3)).toEqual(["0023_rally_recipient_cap", "0024_buildbattle_gallery", "0025_starter_coin_cosmetic"]);
+    const [previous, gallery, cosmetic] = journal.entries.slice(start, start + 3);
     expect([gallery!.idx, cosmetic!.idx]).toEqual([24, 25]);
     expect(gallery!.when).toBeGreaterThan(previous!.when);
     expect(cosmetic!.when).toBeGreaterThan(gallery!.when);

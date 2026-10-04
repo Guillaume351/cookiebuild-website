@@ -176,6 +176,13 @@
       "when": 1790755200005,
       "tag": "0025_starter_coin_cosmetic",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1790755200006,
+      "tag": "0026_shop_activation_cosmetics",
+      "breakpoints": true
     }
   ]
 }
