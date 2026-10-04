@@ -35,6 +35,27 @@ test("uses bounded fallback labels for context-free server events", () => {
   assert.equal(result.counters[funnelCounterKey("kit_purchased", "unknown", "none")], 1);
 });
 
+test("counts lobby cosmetics events without player, cosmetic or source labels", () => {
+  const result = recordFunnelTelemetry([
+    "[CookieDough] [funnel] event=cosmetics_opened player=3f2a9c edition=bedrock source=hotbar",
+    "[CookieDough] [funnel] event=cosmetics_opened player=7b1d04 edition=java source=command",
+    "[CookieDough] [funnel] event=cosmetic_selected player=3f2a9c edition=bedrock cosmetic=rainbow_trail slot=HUB_TRAIL",
+    "[CookieDough] [funnel] event=cosmetic_purchased player=3f2a9c edition=bedrock cosmetic=rainbow_trail price=2000",
+    "[CookieDough] [funnel] event=cosmetic_gifted player=7b1d04 edition=java cosmetic=cookie_sparkle_trail equipped=true",
+    "[CookieDough] [funnel] event=cosmetic_gifted player=a1b2c3 edition=user-input game=user-input",
+    "[CookieDough] [funnel] event=cosmetic_refunded player=3f2a9c edition=java",
+  ].join("\n"));
+
+  assert.equal(result.counters[funnelCounterKey("cosmetics_opened", "bedrock", "none")], 1);
+  assert.equal(result.counters[funnelCounterKey("cosmetics_opened", "java", "none")], 1);
+  assert.equal(result.counters[funnelCounterKey("cosmetic_selected", "bedrock", "none")], 1);
+  assert.equal(result.counters[funnelCounterKey("cosmetic_purchased", "bedrock", "none")], 1);
+  assert.equal(result.counters[funnelCounterKey("cosmetic_gifted", "java", "none")], 1);
+  assert.equal(result.counters[funnelCounterKey("cosmetic_gifted", "unknown", "none")], 1);
+  assert.equal(Object.keys(result.counters).length, 6);
+  assert.doesNotMatch(JSON.stringify(result.counters), /3f2a9c|7b1d04|a1b2c3|rainbow|sparkle|hotbar|user-input|refunded/);
+});
+
 test("maps allowlisted Skyblock lifecycle events to the bounded persistent mode", () => {
   const result = recordFunnelTelemetry([
     "[Skyblock] [funnel] event=skyblock_entry player=private edition=java island_level=1",

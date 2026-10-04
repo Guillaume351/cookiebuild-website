@@ -8,7 +8,8 @@
     "tutorial_completed", "reward_claimed", "kit_selected", "kit_purchased", "npc_selected",
     "feedback", "skyblock_entry", "skyblock_rejoin", "skyblock_quest_completed",
     "skyblock_quest_claimed", "skyblock_worker_collected", "skyblock_generator_upgraded",
-    "skyblock_coop_joined", "skyblock_deposit_completed"
+    "skyblock_coop_joined", "skyblock_deposit_completed", "cosmetics_opened",
+    "cosmetic_selected", "cosmetic_purchased", "cosmetic_gifted"
   ],
   "mobileEvents": [
     "mobile_bootstrap_viewed", "mobile_dashboard_viewed", "mobile_kit_shop_viewed",

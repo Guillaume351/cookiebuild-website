@@ -5,6 +5,8 @@ const FUNNEL_EVENTS = new Set([
   "npc_selected", "feedback", "skyblock_entry", "skyblock_rejoin", "skyblock_quest_completed",
   "skyblock_quest_claimed", "skyblock_worker_collected", "skyblock_generator_upgraded",
   "skyblock_coop_joined", "skyblock_deposit_completed",
+  // Lobby cosmetics (polish-20261004): menu opened, selection, coin purchase, welcome gift.
+  "cosmetics_opened", "cosmetic_selected", "cosmetic_purchased", "cosmetic_gifted",
 ]);
 
 const EDITIONS = new Set(["java", "bedrock"]);
