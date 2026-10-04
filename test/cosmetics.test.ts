@@ -14,6 +14,20 @@ import {
   isRewardOnlyCosmetic,
 } from "../shared/cosmetics-catalog";
 
+/** Cosmetics introduced by migration 0026 (release polish-20261004). */
+const ADDED_BY_0026 = new Set([
+  "chocolate_chip_trail",
+  "cherry_petal_trail",
+  "soul_flame_trail",
+  "rainbow_trail",
+  "lucky_clover_trail",
+  "cookie_rain_victory",
+  "totem_victory",
+  "firework_victory",
+]);
+const grantedByAnyProduct = (id: string) =>
+  COSMETIC_PRODUCTS.some((product) => (product.grants as readonly string[]).includes(id));
+
 describe("web cosmetic catalog", () => {
   it("uses the canonical gameplay IDs and slots", () => {
     expect(COSMETIC_CATALOG.map(({ id, slot }) => ({ id, slot }))).toEqual([
@@ -168,6 +182,7 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(REWARD_COSMETICS.map(({ id, slot }) => ({ id, slot }))).toEqual([
       { id: "app_companion_badge", slot: "BADGE" },
       { id: "streak_star_trail", slot: "HUB_TRAIL" },
+      { id: "lucky_clover_trail", slot: "HUB_TRAIL" },
     ]);
     expect(cosmeticById("app_companion_badge")?.slot).toBe("BADGE");
     expect(isRewardOnlyCosmetic("app_companion_badge")).toBe(true);
@@ -188,7 +203,7 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(migration).toContain("('HUB_TRAIL', 'streak_star_trail')");
     expect(migration).toContain("cosmetic_first_activations");
     for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
-      if (item.id === "starter_spark_trail") continue; // added by 0025
+      if (item.id === "starter_spark_trail" || ADDED_BY_0026.has(item.id)) continue; // added by 0025/0026
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
     }
   });
@@ -203,6 +218,7 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(migration).toContain("DROP CONSTRAINT IF EXISTS \"cosmetic_selections_slot_cosmetic_ck\"");
     expect(migration).toContain("cosmetic_first_activations");
     for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
+      if (ADDED_BY_0026.has(item.id)) continue;
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
     }
     const starter = cosmeticById("starter_spark_trail");
@@ -213,18 +229,67 @@ describe("reward-only and coin-only cosmetics", () => {
       (product.grants as readonly string[]).includes("starter_spark_trail"))).toBe(false);
   });
 
-  it("keeps earned-coin trails in game only with server-side prices", () => {
+  it("keeps earned-coin trails and victory effects in game only with server-side prices", () => {
     expect(COIN_COSMETICS.map(({ id, slot, coinPrice }) => ({ id, slot, coinPrice }))).toEqual([
+      { id: "chocolate_chip_trail", slot: "HUB_TRAIL", coinPrice: 150 },
       { id: "starter_spark_trail", slot: "HUB_TRAIL", coinPrice: 250 },
-      { id: "note_trail", slot: "HUB_TRAIL", coinPrice: 1_000 },
-      { id: "heart_trail", slot: "HUB_TRAIL", coinPrice: 2_500 },
+      { id: "cherry_petal_trail", slot: "HUB_TRAIL", coinPrice: 400 },
+      { id: "cookie_rain_victory", slot: "VICTORY_EFFECT", coinPrice: 500 },
+      { id: "soul_flame_trail", slot: "HUB_TRAIL", coinPrice: 600 },
+      { id: "note_trail", slot: "HUB_TRAIL", coinPrice: 750 },
+      { id: "totem_victory", slot: "VICTORY_EFFECT", coinPrice: 900 },
+      { id: "heart_trail", slot: "HUB_TRAIL", coinPrice: 1_200 },
+      { id: "firework_victory", slot: "VICTORY_EFFECT", coinPrice: 1_500 },
+      { id: "rainbow_trail", slot: "HUB_TRAIL", coinPrice: 2_000 },
     ]);
+    const prices = COIN_COSMETICS.map((item) => item.coinPrice);
+    expect(prices.every((price) => Number.isInteger(price) && price > 0)).toBe(true);
+    expect(prices).toEqual([...prices].sort((a, b) => a - b));
+    expect(new Set(prices).size).toBe(prices.length);
     for (const item of COIN_COSMETICS) {
-      expect(cosmeticById(item.id)?.slot).toBe("HUB_TRAIL");
-      expect(COSMETIC_PRODUCTS.some((product) => (product.grants as readonly string[]).includes(item.id))).toBe(false);
+      expect(item.acquisition).toBe("coins");
+      expect(cosmeticById(item.id)?.slot).toBe(item.slot);
+      expect(isFreeCosmetic(item.id)).toBe(false);
+      expect(isRewardOnlyCosmetic(item.id)).toBe(false);
+      expect(grantedByAnyProduct(item.id)).toBe(false);
       expect(COSMETIC_CATALOG_RESPONSE.items.some((entry) => entry.id === item.id as string)).toBe(false);
+      expect(item.preview.kind).toBe(item.slot === "VICTORY_EFFECT" ? "burst" : "trail");
+      expect(item.platformSupport.java.implementation).toContain(
+        item.slot === "VICTORY_EFFECT" ? "victoire confirmée, sans entité ni dégâts" : "lobby uniquement",
+      );
+      expect(item.platformSupport.bedrock.implementation).toContain("Geyser");
     }
     expect(COSMETIC_CATALOG_RESPONSE.coinItems).toBe(COIN_COSMETICS);
+  });
+
+  it("makes the 150-coin chocolate trail the first purchase and renames the 250-coin trail", () => {
+    expect(COIN_COSMETICS[0]).toMatchObject({ id: "chocolate_chip_trail", coinPrice: 150 });
+    expect(Math.min(...COIN_COSMETICS.map((item) => item.coinPrice))).toBe(150);
+    const starter = COIN_COSMETICS.find((item) => item.id === "starter_spark_trail")!;
+    expect(starter).toMatchObject({ coinPrice: 250, name: "Éclats critiques", nameEn: "Critical Sparks" });
+    expect(starter.description).not.toContain("premier objet");
+    // The paid name must not be confused with the free "Étincelles de cookie".
+    const free: { name: string; nameEn: string } = COSMETIC_CATALOG.find((item) => item.id === "cookie_sparkle_trail")!;
+    const coinNames: ReadonlyArray<{ name: string; nameEn: string }> = COIN_COSMETICS;
+    expect(coinNames.some((item) => item.name === free.name || item.nameEn === free.nameEn)).toBe(false);
+  });
+
+  it("unlocks the lucky clover trail only through the ten-match achievement", () => {
+    const clover = REWARD_COSMETICS.find((item) => item.id === "lucky_clover_trail")!;
+    expect(clover).toMatchObject({ slot: "HUB_TRAIL", acquisition: "reward", rewardOnly: true, nameEn: "Lucky Trail" });
+    expect(clover.description).toContain("10 parties");
+    expect(clover.platformSupport.java.implementation).toContain("HAPPY_VILLAGER");
+    expect(isRewardOnlyCosmetic("lucky_clover_trail")).toBe(true);
+    expect(isFreeCosmetic("lucky_clover_trail")).toBe(false);
+    expect(grantedByAnyProduct("lucky_clover_trail")).toBe(false);
+    expect(COIN_COSMETICS.some((item) => item.id === "lucky_clover_trail" as string)).toBe(false);
+    expect(COSMETIC_CATALOG_RESPONSE.items.some((item) => item.id === "lucky_clover_trail" as string)).toBe(false);
+  });
+
+  it("keeps every ownable cosmetic ID unique across shop, coin and reward lists", () => {
+    const ids = OWNABLE_COSMETICS.map((item) => item.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ADDED_BY_0026) expect(ids).toContain(id);
   });
 
   it("gives the permanent Supporter purchase at least the monthly plan's cosmetics", () => {

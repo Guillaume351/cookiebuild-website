@@ -191,29 +191,81 @@ const LOBBY_TRAIL_SUPPORT = (particle: string) => ({
   bedrock: { mode: "native", implementation: `${particle} transmis par Geyser`, fallback: "Le rendu peut varier selon le client, sans effet sur le gameplay." },
 }) as const;
 
+const VICTORY_EFFECT_SUPPORT = (particles: string) => ({
+  java: { mode: "native", implementation: `Effet ${particles} joué après une victoire confirmée, sans entité ni dégâts`, fallback: null },
+  bedrock: { mode: "native", implementation: `${particles} transmis par Geyser après une victoire confirmée`, fallback: "Les paquets visuels non pris en charge sont omis sans entité ni impact de jeu." },
+}) as const;
+
 /**
  * Coin-shop cosmetics: bought in game with earned coins only (prices are
  * server-side constants in CookieDough), never sold for money on the website.
+ * Ordered by ascending price.
  */
 export const COIN_COSMETICS = [
   {
-    // First cheap coin item (release bb-gallery-20261003): affordable after a
-    // few matches so new players reach their first purchase quickly.
+    // Cheapest coin item (release polish-20261004): affordable after a couple
+    // of matches so new players reach their first purchase quickly.
+    id: "chocolate_chip_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 150,
+    name: "Pépites de chocolat",
+    nameEn: "Chocolate Chips",
+    description: "De petites pépites de chocolat tombent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Pépites" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("DUST (brun chocolat et crème)"),
+  },
+  {
+    // Renamed in polish-20261004: its old name was too close to the free
+    // "Étincelles de cookie" trail.
     id: "starter_spark_trail",
     slot: "HUB_TRAIL",
     acquisition: "coins",
     coinPrice: 250,
-    name: "Trace d’étincelles",
-    nameEn: "Starter sparks trail",
-    description: "De petites étincelles suivent tes pas dans le lobby. Ton premier objet à 250 pièces, à acheter en jeu.",
-    preview: { kind: "trail", label: "Étincelles" },
+    name: "Éclats critiques",
+    nameEn: "Critical Sparks",
+    description: "Des éclats de coup critique jaillissent à chacun de tes pas dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Éclats" },
     platformSupport: LOBBY_TRAIL_SUPPORT("CRIT"),
+  },
+  {
+    id: "cherry_petal_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 400,
+    name: "Pétales de cerisier",
+    nameEn: "Cherry Petals",
+    description: "Des pétales roses de cerisier virevoltent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Pétales" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("CHERRY_LEAVES"),
+  },
+  {
+    id: "cookie_rain_victory",
+    slot: "VICTORY_EFFECT",
+    acquisition: "coins",
+    coinPrice: 500,
+    name: "Pluie de cookies",
+    nameEn: "Cookie Rain",
+    description: "Des cookies pleuvent autour de toi quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
+    preview: { kind: "burst", label: "Cookies" },
+    platformSupport: VICTORY_EFFECT_SUPPORT("ITEM (cookie) et HAPPY_VILLAGER"),
+  },
+  {
+    id: "soul_flame_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 600,
+    name: "Flammes bleues",
+    nameEn: "Blue Flames",
+    description: "De petites flammes bleues dansent à tes pieds dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Flammes" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("SOUL_FIRE_FLAME"),
   },
   {
     id: "note_trail",
     slot: "HUB_TRAIL",
     acquisition: "coins",
-    coinPrice: 1_000,
+    coinPrice: 750,
     name: "Trace musicale",
     nameEn: "Music trail",
     description: "De petites notes de musique suivent tes pas dans le lobby. À acheter en jeu avec tes pièces.",
@@ -221,15 +273,48 @@ export const COIN_COSMETICS = [
     platformSupport: LOBBY_TRAIL_SUPPORT("NOTE"),
   },
   {
+    id: "totem_victory",
+    slot: "VICTORY_EFFECT",
+    acquisition: "coins",
+    coinPrice: 900,
+    name: "Confettis de victoire",
+    nameEn: "Victory Confetti",
+    description: "Une explosion de confettis colorés quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
+    preview: { kind: "burst", label: "Confettis" },
+    platformSupport: VICTORY_EFFECT_SUPPORT("TOTEM_OF_UNDYING"),
+  },
+  {
     id: "heart_trail",
     slot: "HUB_TRAIL",
     acquisition: "coins",
-    coinPrice: 2_500,
+    coinPrice: 1_200,
     name: "Trace de cœurs",
     nameEn: "Heart trail",
     description: "Des cœurs flottent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
     preview: { kind: "trail", label: "Cœurs" },
     platformSupport: LOBBY_TRAIL_SUPPORT("HEART"),
+  },
+  {
+    id: "firework_victory",
+    slot: "VICTORY_EFFECT",
+    acquisition: "coins",
+    coinPrice: 1_500,
+    name: "Grand feu d’artifice",
+    nameEn: "Grand Fireworks",
+    description: "Une spirale d’étincelles et de feux d’artifice s’élève quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
+    preview: { kind: "burst", label: "Feu d’artifice" },
+    platformSupport: VICTORY_EFFECT_SUPPORT("FIREWORK et END_ROD en spirale"),
+  },
+  {
+    id: "rainbow_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 2_000,
+    name: "Arc-en-ciel",
+    nameEn: "Rainbow",
+    description: "Une traînée qui passe par toutes les couleurs de l’arc-en-ciel dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Arc-en-ciel" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("DUST (couleurs de l’arc-en-ciel)"),
   },
 ] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "coins"; coinPrice: number }>;
 
@@ -271,6 +356,18 @@ export const REWARD_COSMETICS = [
     description: "Réservée aux joueurs fidèles : débloquée au 7e jour du calendrier de connexion en jeu.",
     preview: { kind: "trail", label: "Étoiles" },
     platformSupport: LOBBY_TRAIL_SUPPORT("FIREWORK"),
+  },
+  {
+    // Unlocked in game by the ten_matches achievement (10 matches played).
+    id: "lucky_clover_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "reward",
+    rewardOnly: true,
+    name: "Porte-bonheur",
+    nameEn: "Lucky Trail",
+    description: "Des étincelles vertes porte-bonheur pour les joueurs qui ont joué 10 parties. Jamais vendue : elle se débloque toute seule en jeu.",
+    preview: { kind: "trail", label: "Porte-bonheur" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("HAPPY_VILLAGER"),
   },
 ] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "reward"; rewardOnly: true }>;
 
