@@ -1,0 +1,8 @@
+{
+  "slug": "build-battle-vote-de-la-duree",
+  "contentType": "changelog",
+  "title": "Build Battle : vote pour 5, 10 ou 15 minutes",
+  "summary": "Avant chaque partie de Build Battle, vote pour le temps de construction en plus du thème : 5, 10 ou 15 minutes. Merci à .LIttleFlower172 pour l'idée !",
+  "body": "- En salle d'attente, trois horloges apparaissent au milieu de ta barre d'objets, à côté des thèmes : 5, 10 et 15 minutes. Utilise celle que tu veux, clique sur la durée dans le chat ou tape /bbduration 10.\n- Sur Bedrock, le choix de la durée s'affiche juste après celui du thème.\n- La durée la plus votée l'emporte. En cas d'égalité, c'est la plus courte qui gagne, pour que personne ne se retrouve coincé dans une partie trop longue.\n- Si personne ne vote, rien ne change : 5 minutes à plusieurs, 3 minutes en solo.\n- La durée choisie s'affiche dans le chat au début de la partie, et le chrono habituel reste à l'écran.\n- Un joueur qui arrive en cours de route peut toujours rejoindre pendant la première moitié de la construction, quelle que soit la durée.\n- Merci à .LIttleFlower172 qui nous a demandé des parties de 10 et 15 minutes. Continuez à nous envoyer vos idées !",
+  "publishedAt": "2026-10-05T19:16:46Z"
+}
