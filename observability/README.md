@@ -125,6 +125,17 @@ purchases and coins spent per cosmetic, from the game `coin_transactions` ledger
 skipped where that table does not exist yet). New first activations may also be
 labeled `gift`, `purchase` or `grant` when the game server sets that provenance.
 
+Migration `drizzle/0027_halloween_theme.sql` adds the seasonal hunt view
+`metrics.seasonal_collectibles_daily`: per Europe/Paris day and hunt edition
+(`theme_id`, e.g. `halloween-2026` for the 13 lobby pumpkins, so each year
+starts fresh), `players` who found at least one collectible that day,
+`collectibles_found`, and `players_completed`, the players whose last missing
+collectible was found that day. Each edition's collectible count is listed in
+the view's `goals` rows; a new edition (e.g. Christmas) adds one.
+The source table `seasonal_collectibles` is written by the game server and is
+not readable by the metrics role. Query it with
+`SELECT * FROM metrics.seasonal_collectibles_daily WHERE theme_id = 'halloween-2026' ORDER BY time;`.
+
 An account/cosmetic pair is recorded once, regardless of selection changes,
 retries, deselection/reselection, or whether the write came from Java, Bedrock
 or the website. Existing selections are labeled `baseline` and timestamped at

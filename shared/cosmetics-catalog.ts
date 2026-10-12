@@ -1,3 +1,5 @@
+import { seasonWindow, isWithinSeason, type SeasonWindow } from "./seasonal-themes";
+
 export const COSMETIC_SLOTS = [
   "BADGE",
   "HUB_TRAIL",
@@ -196,10 +198,17 @@ const VICTORY_EFFECT_SUPPORT = (particles: string) => ({
   bedrock: { mode: "native", implementation: `${particles} transmis par Geyser après une victoire confirmée`, fallback: "Les paquets visuels non pris en charge sont omis sans entité ni impact de jeu." },
 }) as const;
 
+/** Halloween 2026 sale window, shared with the website theme (Europe/Paris). */
+const HALLOWEEN_SEASON = seasonWindow("halloween");
+
 /**
  * Coin-shop cosmetics: bought in game with earned coins only (prices are
  * server-side constants in CookieDough), never sold for money on the website.
- * Ordered by ascending price.
+ * Ordered by ascending price; at an equal price, permanent items come first.
+ *
+ * An item with a `season` is a limited edition: it is on sale (and listed) only
+ * inside its window, then hidden from players who don't own it. Owners keep and
+ * equip it forever.
  */
 export const COIN_COSMETICS = [
   {
@@ -238,6 +247,18 @@ export const COIN_COSMETICS = [
     description: "Des pétales roses de cerisier virevoltent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
     preview: { kind: "trail", label: "Pétales" },
     platformSupport: LOBBY_TRAIL_SUPPORT("CHERRY_LEAVES"),
+  },
+  {
+    id: "pumpkin_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 450,
+    season: HALLOWEEN_SEASON,
+    name: "Traînée Citrouille",
+    nameEn: "Pumpkin Trail",
+    description: "De petites citrouilles-lanternes et des étincelles orange et noires virevoltent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Citrouilles" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("ITEM (lanterne-citrouille) et DUST (orange et noir)"),
   },
   {
     id: "cookie_rain_victory",
@@ -284,6 +305,18 @@ export const COIN_COSMETICS = [
     platformSupport: VICTORY_EFFECT_SUPPORT("TOTEM_OF_UNDYING"),
   },
   {
+    id: "witch_spell_victory",
+    slot: "VICTORY_EFFECT",
+    acquisition: "coins",
+    coinPrice: 900,
+    season: HALLOWEEN_SEASON,
+    name: "Victoire Sortilège",
+    nameEn: "Witch Spell Victory",
+    description: "Un tourbillon de sortilège violet et vert, avec un rire de sorcière, quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
+    preview: { kind: "burst", label: "Sortilège" },
+    platformSupport: VICTORY_EFFECT_SUPPORT("WITCH et DUST (violet et vert)"),
+  },
+  {
     id: "heart_trail",
     slot: "HUB_TRAIL",
     acquisition: "coins",
@@ -316,7 +349,7 @@ export const COIN_COSMETICS = [
     preview: { kind: "trail", label: "Arc-en-ciel" },
     platformSupport: LOBBY_TRAIL_SUPPORT("DUST (couleurs de l’arc-en-ciel)"),
   },
-] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "coins"; coinPrice: number }>;
+] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "coins"; coinPrice: number; season?: SeasonWindow }>;
 
 /**
  * Reward-only cosmetics: never sold and never listed by the shop, but owned
@@ -368,6 +401,19 @@ export const REWARD_COSMETICS = [
     description: "Des étincelles vertes porte-bonheur pour les joueurs qui ont joué 10 parties. Jamais vendue : elle se débloque toute seule en jeu.",
     preview: { kind: "trail", label: "Porte-bonheur" },
     platformSupport: LOBBY_TRAIL_SUPPORT("HAPPY_VILLAGER"),
+  },
+  {
+    // Halloween pumpkin hunt: unlocked in game once the 13 pumpkins hidden in
+    // the lobby are found (seasonal_collectibles, edition "halloween-2026").
+    id: "will_o_wisp_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "reward",
+    rewardOnly: true,
+    name: "Feux follets",
+    nameEn: "Will-o'-the-Wisps",
+    description: "De pâles âmes flottantes te suivent dans le lobby. Récompense pour avoir trouvé les 13 citrouilles cachées du lobby pendant Halloween. Jamais vendue.",
+    preview: { kind: "trail", label: "Feux follets" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("SOUL"),
   },
 ] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "reward"; rewardOnly: true }>;
 
@@ -454,6 +500,21 @@ export const COSMETIC_PRODUCTS = [
   })),
 ] as const;
 
+type CoinCosmetic = (typeof COIN_COSMETICS)[number];
+
+/** A seasonal coin item is on sale only inside its window; other coin items always are. */
+export function isCoinCosmeticOnSale(
+  item: { id: string; season?: Pick<SeasonWindow, "availableFrom" | "availableUntil"> },
+  now: Date = new Date(),
+): boolean {
+  return !item.season || isWithinSeason(item.season, now);
+}
+
+/** Coin items listed by the shop at `now`: seasonal items outside their window are hidden. */
+export function coinCosmeticsOnSale(now: Date = new Date()): CoinCosmetic[] {
+  return COIN_COSMETICS.filter((item) => isCoinCosmeticOnSale(item, now));
+}
+
 export const COSMETIC_CATALOG_RESPONSE = {
   availability: "coming_soon" as const,
   purchaseEnabled: false,
@@ -461,8 +522,11 @@ export const COSMETIC_CATALOG_RESPONSE = {
   currency: "EUR" as const,
   items: COSMETIC_CATALOG,
   products: COSMETIC_PRODUCTS,
-  /** Earned-coin items bought in game only; informational, never purchasable here. */
-  coinItems: COIN_COSMETICS,
+  /**
+   * Earned-coin items bought in game only; informational, never purchasable
+   * here. Static list of every item; the public API filters it by season.
+   */
+  coinItems: COIN_COSMETICS as readonly CoinCosmetic[],
 };
 
 export function cosmeticById(value: string) {

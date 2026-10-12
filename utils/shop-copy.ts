@@ -656,6 +656,10 @@ export const COIN_ITEM_COPY = {
       "name": "Cherry Petals",
       "description": "Pink cherry blossom petals swirl behind you in the lobby"
     },
+    "pumpkin_trail": {
+      "name": "Pumpkin Trail",
+      "description": "Little jack-o’-lanterns and orange and black sparks trail behind you in the lobby"
+    },
     "cookie_rain_victory": {
       "name": "Cookie Rain",
       "description": "Cookies rain down around you when you win a match"
@@ -671,6 +675,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Victory Confetti",
       "description": "A colourful confetti burst when you win a match"
+    },
+    "witch_spell_victory": {
+      "name": "Witch Spell Victory",
+      "description": "A purple and green witch spell swirls around you, with a cackle, when you win a match"
     },
     "heart_trail": {
       "name": "Heart trail",
@@ -698,6 +706,10 @@ export const COIN_ITEM_COPY = {
       "name": "Pétales de cerisier",
       "description": "Des pétales roses de cerisier virevoltent derrière toi dans le lobby"
     },
+    "pumpkin_trail": {
+      "name": "Traînée Citrouille",
+      "description": "De petites citrouilles-lanternes et des étincelles orange et noires virevoltent derrière toi dans le lobby"
+    },
     "cookie_rain_victory": {
       "name": "Pluie de cookies",
       "description": "Des cookies pleuvent autour de toi quand tu gagnes une partie"
@@ -713,6 +725,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Confettis de victoire",
       "description": "Une explosion de confettis colorés quand tu gagnes une partie"
+    },
+    "witch_spell_victory": {
+      "name": "Victoire Sortilège",
+      "description": "Un tourbillon de sortilège violet et vert, avec un rire de sorcière, quand tu gagnes une partie"
     },
     "heart_trail": {
       "name": "Trace de cœurs",
@@ -740,6 +756,10 @@ export const COIN_ITEM_COPY = {
       "name": "Kirschblüten",
       "description": "Rosa Kirschblütenblätter wirbeln in der Lobby hinter dir"
     },
+    "pumpkin_trail": {
+      "name": "Kürbisspur",
+      "description": "Kleine Kürbislaternen und orange-schwarze Funken wirbeln in der Lobby hinter dir"
+    },
     "cookie_rain_victory": {
       "name": "Keksregen",
       "description": "Kekse regnen um dich herum, wenn du eine Partie gewinnst"
@@ -755,6 +775,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Siegeskonfetti",
       "description": "Bunte Konfetti explodieren, wenn du eine Partie gewinnst"
+    },
+    "witch_spell_victory": {
+      "name": "Hexenzauber-Sieg",
+      "description": "Ein lila-grüner Hexenzauber wirbelt mit Hexenlachen um dich herum, wenn du eine Partie gewinnst"
     },
     "heart_trail": {
       "name": "Herzspur",
@@ -782,6 +806,10 @@ export const COIN_ITEM_COPY = {
       "name": "Petali di ciliegio",
       "description": "Petali rosa di ciliegio volteggiano dietro di te nella lobby"
     },
+    "pumpkin_trail": {
+      "name": "Scia di zucche",
+      "description": "Piccole zucche di Halloween e scintille arancioni e nere volteggiano dietro di te nella lobby"
+    },
     "cookie_rain_victory": {
       "name": "Pioggia di biscotti",
       "description": "Biscotti piovono intorno a te quando vinci una partita"
@@ -797,6 +825,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Coriandoli della vittoria",
       "description": "Un’esplosione di coriandoli colorati quando vinci una partita"
+    },
+    "witch_spell_victory": {
+      "name": "Vittoria Sortilegio",
+      "description": "Un vortice di incantesimo viola e verde, con la risata di una strega, quando vinci una partita"
     },
     "heart_trail": {
       "name": "Scia di cuori",
@@ -824,6 +856,10 @@ export const COIN_ITEM_COPY = {
       "name": "Черешови цветчета",
       "description": "Розови черешови цветчета се вихрят след теб в лобито"
     },
+    "pumpkin_trail": {
+      "name": "Тиквена следа",
+      "description": "Малки тиквени фенери и оранжево-черни искри се вихрят след теб в лобито"
+    },
     "cookie_rain_victory": {
       "name": "Дъжд от бисквитки",
       "description": "Бисквитки валят около теб, когато спечелиш игра"
@@ -839,6 +875,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Победно конфети",
       "description": "Цветно конфети избухва, когато спечелиш игра"
+    },
+    "witch_spell_victory": {
+      "name": "Магическа победа",
+      "description": "Лилаво-зелено заклинание се завихря около теб със смях на вещица, когато спечелиш игра"
     },
     "heart_trail": {
       "name": "Следа от сърца",
@@ -866,6 +906,10 @@ export const COIN_ITEM_COPY = {
       "name": "Pétalos de cerezo",
       "description": "Pétalos rosas de cerezo revolotean detrás de ti en el lobby"
     },
+    "pumpkin_trail": {
+      "name": "Estela de calabazas",
+      "description": "Pequeñas calabazas de Halloween y chispas naranjas y negras revolotean detrás de ti en el lobby"
+    },
     "cookie_rain_victory": {
       "name": "Lluvia de galletas",
       "description": "Llueven galletas a tu alrededor cuando ganas una partida"
@@ -881,6 +925,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Confeti de victoria",
       "description": "Una explosión de confeti de colores cuando ganas una partida"
+    },
+    "witch_spell_victory": {
+      "name": "Victoria Hechizo",
+      "description": "Un remolino de hechizo morado y verde, con la risa de una bruja, cuando ganas una partida"
     },
     "heart_trail": {
       "name": "Rastro de corazones",
@@ -908,6 +956,10 @@ export const COIN_ITEM_COPY = {
       "name": "चेरी की पंखुड़ियाँ",
       "description": "लॉबी में गुलाबी चेरी की पंखुड़ियाँ आपके पीछे उड़ती हैं"
     },
+    "pumpkin_trail": {
+      "name": "कद्दू ट्रेल",
+      "description": "लॉबी में छोटे कद्दू-लालटेन और नारंगी-काली चिंगारियाँ आपके पीछे उड़ती हैं"
+    },
     "cookie_rain_victory": {
       "name": "कुकी की बारिश",
       "description": "मैच जीतने पर आपके चारों ओर कुकीज़ बरसती हैं"
@@ -923,6 +975,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "जीत की कंफ़ेटी",
       "description": "मैच जीतने पर रंग-बिरंगी कंफ़ेटी का धमाका"
+    },
+    "witch_spell_victory": {
+      "name": "जादुई जीत",
+      "description": "मैच जीतने पर बैंगनी और हरे जादू का भँवर, चुड़ैल की हँसी के साथ, आपके चारों ओर घूमता है"
     },
     "heart_trail": {
       "name": "दिल ट्रेल",
@@ -950,6 +1006,10 @@ export const COIN_ITEM_COPY = {
       "name": "Pétalas de cerejeira",
       "description": "Pétalas cor-de-rosa de cerejeira rodopiam atrás de você no lobby"
     },
+    "pumpkin_trail": {
+      "name": "Rastro de abóboras",
+      "description": "Pequenas abóboras de Halloween e faíscas laranja e pretas rodopiam atrás de você no lobby"
+    },
     "cookie_rain_victory": {
       "name": "Chuva de cookies",
       "description": "Cookies caem ao seu redor quando você vence uma partida"
@@ -965,6 +1025,10 @@ export const COIN_ITEM_COPY = {
     "totem_victory": {
       "name": "Confete da vitória",
       "description": "Uma explosão de confete colorido quando você vence uma partida"
+    },
+    "witch_spell_victory": {
+      "name": "Vitória Feitiço",
+      "description": "Um redemoinho de feitiço roxo e verde, com a risada de uma bruxa, quando você vence uma partida"
     },
     "heart_trail": {
       "name": "Rastro de corações",

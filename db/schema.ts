@@ -1932,7 +1932,7 @@ export const cosmeticEntitlements = pgTable(
       .where(sql`${table.revokedAt} IS NULL`),
     check(
       "cosmetic_entitlements_id_ck",
-      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail', 'chocolate_chip_trail', 'cherry_petal_trail', 'soul_flame_trail', 'rainbow_trail', 'lucky_clover_trail', 'cookie_rain_victory', 'totem_victory', 'firework_victory')`,
+      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail', 'chocolate_chip_trail', 'cherry_petal_trail', 'soul_flame_trail', 'rainbow_trail', 'lucky_clover_trail', 'cookie_rain_victory', 'totem_victory', 'firework_victory', 'pumpkin_trail', 'witch_spell_victory', 'will_o_wisp_trail')`,
     ),
     check("cosmetic_entitlements_source_ck", sql`length(btrim(${table.source})) > 0`),
     check(
@@ -1974,11 +1974,14 @@ export const cosmeticSelections = pgTable(
         ('HUB_TRAIL', 'soul_flame_trail'),
         ('HUB_TRAIL', 'rainbow_trail'),
         ('HUB_TRAIL', 'lucky_clover_trail'),
+        ('HUB_TRAIL', 'pumpkin_trail'),
+        ('HUB_TRAIL', 'will_o_wisp_trail'),
         ('EMOTE', 'cookie_cheer'),
         ('VICTORY_EFFECT', 'golden_cookie_burst'),
         ('VICTORY_EFFECT', 'cookie_rain_victory'),
         ('VICTORY_EFFECT', 'totem_victory'),
         ('VICTORY_EFFECT', 'firework_victory'),
+        ('VICTORY_EFFECT', 'witch_spell_victory'),
         ('PROFILE_FRAME', 'supporter_profile_frame'),
         ('LOBBY_FLIGHT', 'lobby_flight'),
         ('JOIN_FLAIR', 'supporter_join_flair')
@@ -2008,6 +2011,30 @@ export const cosmeticWelcomeGifts = pgTable(
     index("cosmetic_welcome_gifts_time_idx").on(table.grantedAt, table.edition, table.equipped),
     check("cosmetic_welcome_gifts_cosmetic_ck", sql`${table.cosmeticId} IN ('cookie_sparkle_trail')`),
     check("cosmetic_welcome_gifts_edition_ck", sql`${table.edition} IN ('java', 'bedrock', 'unknown')`),
+  ],
+);
+
+/**
+ * Seasonal hidden collectibles (migration 0027): one row per player, hunt
+ * edition (theme_id, e.g. "halloween-2026") and collectible found (the 13
+ * Halloween lobby pumpkins, later Christmas gifts). Written by the game server
+ * with INSERT ... ON CONFLICT DO NOTHING; rows are kept after the season.
+ */
+export const seasonalCollectibles = pgTable(
+  "seasonal_collectibles",
+  {
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => playerdata.id, { onDelete: "cascade" }),
+    themeId: varchar("theme_id", { length: 32 }).notNull(),
+    collectibleId: varchar("collectible_id", { length: 64 }).notNull(),
+    foundAt: timestamp("found_at", { withTimezone: true, mode: "date" }).defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.playerId, table.themeId, table.collectibleId] }),
+    index("seasonal_collectibles_theme_found_idx").on(table.themeId, table.foundAt),
+    check("seasonal_collectibles_theme_id_ck", sql`length(btrim(${table.themeId})) > 0`),
+    check("seasonal_collectibles_collectible_id_ck", sql`length(btrim(${table.collectibleId})) > 0`),
   ],
 );
 
