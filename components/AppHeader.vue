@@ -13,6 +13,7 @@
             class="h-10 w-10 mr-3"
           />
           <span class="text-xl font-bold text-white">Cookie Build</span>
+          <span v-if="seasonalTheme === 'halloween'" aria-hidden="true" class="ml-2 text-lg leading-none">🎃</span>
         </NuxtLink>
       </div>
       <div class="hidden items-center space-x-4 text-sm xl:flex">
@@ -118,6 +119,11 @@
         </label>
       </div>
     </div>
+    <div
+      v-if="seasonalTheme === 'halloween'"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-purple-600/80 via-orange-500 to-purple-600/80"
+    />
   </nav>
 </template>
 
@@ -130,6 +136,7 @@ const siteAnalytics = useSiteAnalytics();
 const mobileMenuOpen = ref(false);
 const route = useRoute();
 const { locale, copy, localizePath, switchLocalePath } = useSiteLocale();
+const { theme: seasonalTheme } = useSeasonalTheme();
 
 const changeLanguage = async (event: Event) => {
   const code = (event.target as HTMLSelectElement).value as SiteLocaleCode;

@@ -4,6 +4,7 @@
     <section
       aria-labelledby="home-title"
       class="relative overflow-hidden rounded-3xl bg-gray-900 text-center text-white shadow-2xl"
+      :class="halloween ? 'halloween-hero ring-1 ring-orange-500/40' : ''"
     >
       <img
         src="/lobby-hero-clean-960.webp"
@@ -20,8 +21,51 @@
         class="absolute inset-0 z-10 bg-gradient-to-t from-gray-900 via-transparent to-black/30"
         aria-hidden="true"
       ></div>
+      <!-- Seasonal skin: decorative only, absolutely positioned (no layout shift). -->
+      <div v-if="halloween" class="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-gradient-to-b from-purple-950/60 via-purple-900/10 to-orange-950/50"></div>
+        <div class="halloween-moon absolute right-[7%] top-6 h-14 w-14 rounded-full md:right-[9%] md:top-10 md:h-24 md:w-24"></div>
+        <svg
+          v-for="bat in HALLOWEEN_BATS"
+          :key="bat.id"
+          class="halloween-bat absolute"
+          :class="bat.class"
+          :style="bat.style"
+          viewBox="0 0 64 28"
+          fill="currentColor"
+        >
+          <path d="M32 11 L30 5 L28.5 10.5 Q22 8 12 7 Q6 8 2 12 Q7 12 11 17 Q14 14 19 19 Q22 17 27 22 L32 26 L37 22 Q42 17 45 19 Q50 14 53 17 Q57 12 62 12 Q58 8 52 7 Q42 8 35.5 10.5 L34 5 Z" />
+        </svg>
+        <svg
+          v-for="pumpkin in HALLOWEEN_PUMPKINS"
+          :key="pumpkin.id"
+          class="halloween-pumpkin absolute bottom-3"
+          :class="pumpkin.class"
+          :style="pumpkin.style"
+          viewBox="0 0 48 40"
+        >
+          <path d="M23 9 Q22 4 26 1 L28 3 Q25 5 26 9 Z" fill="#4d7c0f" />
+          <ellipse cx="15" cy="24" rx="12" ry="14" fill="#c2410c" />
+          <ellipse cx="33" cy="24" rx="12" ry="14" fill="#c2410c" />
+          <ellipse cx="24" cy="24" rx="11" ry="15" fill="#f97316" />
+          <path class="halloween-pumpkin-face" d="M14 21 L17 15 L20 21 Z M28 21 L31 15 L34 21 Z M13 27 Q24 37 35 27 L31 28 L29 26 L27 29 L24 27 L21 29 L19 26 L17 28 Z" fill="#fde047" />
+        </svg>
+      </div>
 
       <div class="relative z-20 px-6 py-20 md:py-28">
+        <NuxtLink
+          v-if="seasonal"
+          :to="seasonal.href"
+          class="group mx-auto mb-8 flex max-w-2xl items-start gap-4 rounded-2xl border border-orange-400/50 bg-gradient-to-r from-purple-950/85 via-zinc-950/85 to-orange-950/85 p-4 text-left shadow-[0_0_40px_rgba(147,51,234,.25)] backdrop-blur hover:border-orange-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 md:p-5"
+        >
+          <span aria-hidden="true" class="shrink-0 text-3xl leading-none md:text-4xl">🎃</span>
+          <span class="min-w-0">
+            <span class="block text-[11px] font-black uppercase tracking-widest text-orange-300">{{ seasonal.bannerEyebrow }}</span>
+            <span class="mt-1 block text-lg font-black text-white md:text-xl">{{ seasonal.bannerTitle }}</span>
+            <span class="mt-1 block text-sm leading-relaxed text-zinc-200">{{ seasonal.bannerText }}</span>
+            <span class="mt-2 inline-flex items-center text-sm font-black text-orange-300 group-hover:text-orange-200">{{ seasonal.bannerCta }} →</span>
+          </span>
+        </NuxtLink>
         <p class="mb-4 text-lg font-black uppercase tracking-[0.25em] text-orange-400 drop-shadow">
           Cookie Build <span aria-hidden="true">🍪</span>
         </p>
@@ -425,6 +469,8 @@ import { mapCatalog } from "@/utils/map-catalog";
 import { featuredEvent } from "@/utils/updates";
 import { COOKIE_BUILD_SITE_URL } from "@/utils/game-landings";
 import { localizedAbsoluteUrl } from "@/utils/site-locales";
+import { seasonalUpdatePath } from "@/utils/seasonal-theme";
+import { seasonalCopy } from "@/utils/seasonal-copy";
 import {
   BEDROCK_ADD_SERVER_URL,
   BEDROCK_PORT,
@@ -443,6 +489,22 @@ const shopAnalytics = useShopAnalytics();
 const siteAnalytics = useSiteAnalytics();
 const { copyToClipboard } = useCopyToast();
 const { locale, copy, localizePath } = useSiteLocale();
+// Seasonal skin (e.g. Halloween): decided once at SSR, nothing changes outside the window.
+const { theme: seasonalTheme } = useSeasonalTheme();
+const halloween = computed(() => seasonalTheme.value === "halloween");
+const seasonal = computed(() => seasonalTheme.value
+  ? { ...seasonalCopy(seasonalTheme.value, locale.value.code), href: localizePath(seasonalUpdatePath(seasonalTheme.value)) }
+  : null);
+const HALLOWEEN_BATS = [
+  { id: "moon", class: "w-10 md:w-14 right-[9%] top-12 md:right-[12%] md:top-20", style: { animationDelay: "-0.4s" } },
+  { id: "left", class: "w-9 md:w-12 left-[6%] top-[18%]", style: { animationDelay: "-1.3s" } },
+  { id: "far", class: "hidden w-7 md:block left-[20%] top-[7%]", style: { animationDelay: "-2.1s" } },
+];
+const HALLOWEEN_PUMPKINS = [
+  { id: "left", class: "left-[3%] w-12 md:w-16", style: { animationDelay: "-0.6s" } },
+  { id: "left-small", class: "left-[13%] hidden w-9 sm:block md:w-11", style: { animationDelay: "-1.7s" } },
+  { id: "right", class: "right-[4%] w-11 md:w-14", style: { animationDelay: "-1.1s" } },
+];
 const editions = computed(() => [
   { id: "java", label: "Java" },
   { id: "bedrock", label: "Bedrock" },
@@ -665,3 +727,26 @@ useHead(() => ({
   ],
 }));
 </script>
+
+<style scoped>
+.halloween-hero { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .25), 0 0 60px rgba(147, 51, 234, .22); }
+.halloween-moon {
+  background: radial-gradient(circle at 38% 35%, #fffbeb 0%, #fde68a 48%, #f59e0b 100%);
+  box-shadow: 0 0 40px 8px rgba(253, 230, 138, .3), 0 0 90px 20px rgba(249, 115, 22, .18);
+  opacity: .9;
+}
+.halloween-bat {
+  color: #0c0a09;
+  filter: drop-shadow(0 0 5px rgba(249, 115, 22, .55));
+  transform-origin: 50% 40%;
+  animation: halloween-bat-flap .5s ease-in-out infinite alternate, halloween-bat-drift 7s ease-in-out infinite;
+}
+.halloween-pumpkin { filter: drop-shadow(0 0 12px rgba(249, 115, 22, .55)); }
+.halloween-pumpkin-face { animation: halloween-flicker 2.6s ease-in-out infinite; animation-delay: inherit; }
+@keyframes halloween-bat-flap { from { transform: scaleY(1); } to { transform: scaleY(.55); } }
+@keyframes halloween-bat-drift { 0%, 100% { translate: 0 0; } 50% { translate: 14px -10px; } }
+@keyframes halloween-flicker { 0%, 100% { opacity: 1; } 40% { opacity: .75; } 45% { opacity: .95; } 70% { opacity: .65; } }
+@media (prefers-reduced-motion: reduce) {
+  .halloween-bat, .halloween-pumpkin-face { animation: none; }
+}
+</style>

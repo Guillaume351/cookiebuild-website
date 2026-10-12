@@ -12,7 +12,7 @@
     </div>
 
     <div v-else-if="item.preview.kind === 'trail' || item.preview.kind === 'sparkle-trail'" class="relative z-10 h-28 w-52">
-      <span v-for="index in 7" :key="index" class="crumb absolute h-2.5 w-2.5" :class="item.preview.kind === 'sparkle-trail' ? 'rounded-full bg-yellow-100 shadow-[0_0_10px_rgba(254,249,195,.9)]' : 'rounded-sm bg-amber-500'" :style="crumbStyle(index)" />
+      <span v-for="index in 7" :key="index" class="crumb absolute h-2.5 w-2.5" :class="crumbClass(index)" :style="crumbStyle(index)" />
       <div class="walker absolute right-7 top-5 grid h-16 w-12 place-items-center rounded-md border-2 border-orange-300 bg-orange-900 text-2xl">🍪</div>
     </div>
 
@@ -24,7 +24,7 @@
     </div>
 
     <div v-else-if="item.preview.kind === 'burst'" class="relative z-10 grid h-32 w-32 place-items-center">
-      <span v-for="index in 12" :key="index" class="burst-particle absolute h-3 w-3 rounded-sm bg-amber-300" :style="particleStyle(index)" />
+      <span v-for="index in 12" :key="index" class="burst-particle absolute h-3 w-3" :class="burstClass(index)" :style="particleStyle(index)" />
       <span class="victory-cookie text-6xl drop-shadow-[0_0_18px_rgba(251,191,36,.8)]">🍪</span>
     </div>
 
@@ -63,7 +63,24 @@ const shop = computed(() => SHOP_COPY[locale.value.code]);
 
 import type { COSMETIC_CATALOG } from "#shared/cosmetics-catalog";
 
-defineProps<{ item: (typeof COSMETIC_CATALOG)[number] }>();
+const props = defineProps<{ item: (typeof COSMETIC_CATALOG)[number] }>();
+
+// Seasonal looks reuse the trail and burst stages with their own colours.
+const itemId = computed<string>(() => props.item.id);
+
+function crumbClass(index: number) {
+  if (itemId.value === "pumpkin_trail") {
+    return index % 2 ? "rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,.85)]" : "rounded-sm bg-zinc-950 ring-1 ring-orange-400/70";
+  }
+  if (itemId.value === "will_o_wisp_trail") return "rounded-full bg-cyan-100/90 shadow-[0_0_14px_rgba(165,243,252,.9)]";
+  if (props.item.preview.kind === "sparkle-trail") return "rounded-full bg-yellow-100 shadow-[0_0_10px_rgba(254,249,195,.9)]";
+  return "rounded-sm bg-amber-500";
+}
+
+function burstClass(index: number) {
+  if (itemId.value === "witch_spell_victory") return index % 2 ? "rounded-full bg-purple-400" : "rounded-full bg-lime-400";
+  return "rounded-sm bg-amber-300";
+}
 
 function crumbStyle(index: number) {
   return {
