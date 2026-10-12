@@ -8,6 +8,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Avión",
     "fr": "Avion",
     "hi": "हवाई जहाज़",
+    "it": "Aereo",
     "pa": "ਹਵਾਈ ਜਹਾਜ਼",
     "pt-BR": "Avião"
   },
@@ -18,6 +19,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Extraterrestre",
     "fr": "Extraterrestre",
     "hi": "एलियन",
+    "it": "Alieno",
     "pa": "ਏਲੀਅਨ",
     "pt-BR": "Alienígena"
   },
@@ -28,6 +30,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Animales",
     "fr": "Animaux",
     "hi": "जानवर",
+    "it": "Animali",
     "pa": "ਜਾਨਵਰ",
     "pt-BR": "Animais"
   },
@@ -38,6 +41,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Baloncesto",
     "fr": "Basket-ball",
     "hi": "बास्केटबॉल",
+    "it": "Pallacanestro",
     "pa": "ਬਾਸਕਟਬਾਲ",
     "pt-BR": "Basquete"
   },
@@ -48,6 +52,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Pájaros",
     "fr": "Oiseaux",
     "hi": "पक्षी",
+    "it": "Uccelli",
     "pa": "ਪੰਛੀ",
     "pt-BR": "Pássaros"
   },
@@ -58,6 +63,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Acampada",
     "fr": "Camping",
     "hi": "कैंपिंग",
+    "it": "Campeggio",
     "pa": "ਕੈਂਪਿੰਗ",
     "pt-BR": "Acampamento"
   },
@@ -68,6 +74,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Vela",
     "fr": "Bougie",
     "hi": "मोमबत्ती",
+    "it": "Candela",
     "pa": "ਮੋਮਬੱਤੀ",
     "pt-BR": "Vela"
   },
@@ -78,6 +85,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Dulces",
     "fr": "Bonbons",
     "hi": "कैंडी",
+    "it": "Caramelle",
     "pa": "ਮਿਠਾਈ",
     "pt-BR": "Doces"
   },
@@ -88,6 +96,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Coche",
     "fr": "Voiture",
     "hi": "कार",
+    "it": "Auto",
     "pa": "ਕਾਰ",
     "pt-BR": "Carro"
   },
@@ -98,6 +107,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Reloj",
     "fr": "Horloge",
     "hi": "घड़ी",
+    "it": "Orologio",
     "pa": "ਘੜੀ",
     "pt-BR": "Relógio"
   },
@@ -108,6 +118,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Consola",
     "fr": "Console",
     "hi": "कंसोल",
+    "it": "Console",
     "pa": "ਕੰਸੋਲ",
     "pt-BR": "Console"
   },
@@ -118,6 +129,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Escritorio",
     "fr": "Bureau",
     "hi": "मेज़",
+    "it": "Scrivania",
     "pa": "ਮੇਜ਼",
     "pt-BR": "Escrivaninha"
   },
@@ -128,6 +140,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Dragón",
     "fr": "Dragon",
     "hi": "ड्रैगन",
+    "it": "Drago",
     "pa": "ਡ੍ਰੈਗਨ",
     "pt-BR": "Dragão"
   },
@@ -138,6 +151,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Emoji",
     "fr": "Emoji",
     "hi": "इमोजी",
+    "it": "Emoji",
     "pa": "ਇਮੋਜੀ",
     "pt-BR": "Emoji"
   },
@@ -148,6 +162,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Granja",
     "fr": "Ferme",
     "hi": "खेत",
+    "it": "Fattoria",
     "pa": "ਖੇਤ",
     "pt-BR": "Fazenda"
   },
@@ -158,6 +173,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Comida rápida",
     "fr": "Restauration rapide",
     "hi": "फ़ास्ट फ़ूड",
+    "it": "Fast food",
     "pa": "ਫ਼ਾਸਟ ਫ਼ੂਡ",
     "pt-BR": "Fast-food"
   },
@@ -168,8 +184,42 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Estilo libre",
     "fr": "Style libre",
     "hi": "मुक्त शैली",
+    "it": "Stile libero",
     "pa": "ਫ਼੍ਰੀ ਸਟਾਈਲ",
     "pt-BR": "Estilo livre"
+  },
+  "ghost": {
+    "bg": "Призрак",
+    "de": "Gespenst",
+    "en": "Ghost",
+    "es": "Fantasma",
+    "fr": "Fantôme",
+    "hi": "भूत",
+    "it": "Fantasma",
+    "pa": "ਭੂਤ",
+    "pt-BR": "Fantasma"
+  },
+  "giant_spider": {
+    "bg": "Гигантски паяк",
+    "de": "Riesenspinne",
+    "en": "Giant Spider",
+    "es": "Araña gigante",
+    "fr": "Araignée géante",
+    "hi": "विशाल मकड़ी",
+    "it": "Ragno gigante",
+    "pa": "ਵਿਸ਼ਾਲ ਮੱਕੜੀ",
+    "pt-BR": "Aranha gigante"
+  },
+  "graveyard": {
+    "bg": "Гробище",
+    "de": "Friedhof",
+    "en": "Graveyard",
+    "es": "Cementerio",
+    "fr": "Cimetière",
+    "hi": "कब्रिस्तान",
+    "it": "Cimitero",
+    "pa": "ਕਬਰਿਸਤਾਨ",
+    "pt-BR": "Cemitério"
   },
   "halloween": {
     "bg": "Хелоуин",
@@ -178,8 +228,20 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Halloween",
     "fr": "Halloween",
     "hi": "हैलोवीन",
+    "it": "Halloween",
     "pa": "ਹੈਲੋਵੀਨ",
     "pt-BR": "Halloween"
+  },
+  "haunted_house": {
+    "bg": "Къща с духове",
+    "de": "Spukhaus",
+    "en": "Haunted House",
+    "es": "Casa embrujada",
+    "fr": "Maison hantée",
+    "hi": "भूतिया घर",
+    "it": "Casa stregata",
+    "pa": "ਭੂਤੀਆ ਘਰ",
+    "pt-BR": "Casa assombrada"
   },
   "house": {
     "bg": "Къща",
@@ -188,6 +250,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Casa",
     "fr": "Maison",
     "hi": "घर",
+    "it": "Casa",
     "pa": "ਘਰ",
     "pt-BR": "Casa"
   },
@@ -198,6 +261,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Helado",
     "fr": "Glace",
     "hi": "आइसक्रीम",
+    "it": "Gelato",
     "pa": "ਆਈਸਕ੍ਰੀਮ",
     "pt-BR": "Sorvete"
   },
@@ -208,6 +272,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Faro",
     "fr": "Phare",
     "hi": "प्रकाशस्तंभ",
+    "it": "Faro",
     "pa": "ਲਾਈਟਹਾਊਸ",
     "pt-BR": "Farol"
   },
@@ -218,6 +283,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Magia",
     "fr": "Magie",
     "hi": "जादू",
+    "it": "Magia",
     "pa": "ਜਾਦੂ",
     "pt-BR": "Magia"
   },
@@ -228,6 +294,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Mario",
     "fr": "Mario",
     "hi": "Mario",
+    "it": "Mario",
     "pa": "ਮਾਰੀਓ",
     "pt-BR": "Mario"
   },
@@ -238,6 +305,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Laberinto",
     "fr": "Labyrinthe",
     "hi": "भूलभुलैया",
+    "it": "Labirinto",
     "pa": "ਭੁੱਲ-ਭੁਲੱਈਆ",
     "pt-BR": "Labirinto"
   },
@@ -248,6 +316,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Minions",
     "fr": "Minions",
     "hi": "मिनियन्स",
+    "it": "Minions",
     "pa": "ਮਿਨੀਅਨਜ਼",
     "pt-BR": "Minions"
   },
@@ -258,6 +327,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Nintendo",
     "fr": "Nintendo",
     "hi": "Nintendo",
+    "it": "Nintendo",
     "pa": "ਨਿਨਟੈਂਡੋ",
     "pt-BR": "Nintendo"
   },
@@ -268,6 +338,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Pixel art",
     "fr": "Pixel art",
     "hi": "पिक्सेल कला",
+    "it": "Pixel art",
     "pa": "ਪਿਕਸਲ ਆਰਟ",
     "pt-BR": "Pixel art"
   },
@@ -278,6 +349,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Pizza",
     "fr": "Pizza",
     "hi": "पिज़्ज़ा",
+    "it": "Pizza",
     "pa": "ਪੀਜ਼ਾ",
     "pt-BR": "Pizza"
   },
@@ -288,8 +360,20 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Pokémon",
     "fr": "Pokémon",
     "hi": "Pokémon",
+    "it": "Pokémon",
     "pa": "ਪੋਕੇਮੋਨ",
     "pt-BR": "Pokémon"
+  },
+  "pumpkin": {
+    "bg": "Тиква",
+    "de": "Kürbis",
+    "en": "Pumpkin",
+    "es": "Calabaza",
+    "fr": "Citrouille",
+    "hi": "कद्दू",
+    "it": "Zucca",
+    "pa": "ਕੱਦੂ",
+    "pt-BR": "Abóbora"
   },
   "pyramid": {
     "bg": "Пирамида",
@@ -298,6 +382,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Pirámide",
     "fr": "Pyramide",
     "hi": "पिरामिड",
+    "it": "Piramide",
     "pa": "ਪਿਰਾਮਿਡ",
     "pt-BR": "Pirâmide"
   },
@@ -308,6 +393,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Conejo",
     "fr": "Lapin",
     "hi": "खरगोश",
+    "it": "Coniglio",
     "pa": "ਖ਼ਰਗੋਸ਼",
     "pt-BR": "Coelho"
   },
@@ -318,6 +404,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Restaurante",
     "fr": "Restaurant",
     "hi": "रेस्तरां",
+    "it": "Ristorante",
     "pa": "ਰੈਸਟੋਰੈਂਟ",
     "pt-BR": "Restaurante"
   },
@@ -328,6 +415,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Cohete",
     "fr": "Fusée",
     "hi": "रॉकेट",
+    "it": "Razzo",
     "pa": "ਰਾਕੇਟ",
     "pt-BR": "Foguete"
   },
@@ -338,6 +426,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Ruinas",
     "fr": "Ruines",
     "hi": "खंडहर",
+    "it": "Rovine",
     "pa": "ਖੰਡਰ",
     "pt-BR": "Ruínas"
   },
@@ -348,6 +437,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Ciencia",
     "fr": "Science",
     "hi": "विज्ञान",
+    "it": "Scienza",
     "pa": "ਵਿਗਿਆਨ",
     "pt-BR": "Ciência"
   },
@@ -358,6 +448,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Zapatos",
     "fr": "Chaussures",
     "hi": "जूते",
+    "it": "Scarpe",
     "pa": "ਜੁੱਤੀਆਂ",
     "pt-BR": "Sapatos"
   },
@@ -368,6 +459,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Tienda",
     "fr": "Boutique",
     "hi": "दुकान",
+    "it": "Negozio",
     "pa": "ਦੁਕਾਨ",
     "pt-BR": "Loja"
   },
@@ -378,6 +470,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Esqueleto",
     "fr": "Squelette",
     "hi": "कंकाल",
+    "it": "Scheletro",
     "pa": "ਪਿੰਜਰ",
     "pt-BR": "Esqueleto"
   },
@@ -388,6 +481,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Rascacielos",
     "fr": "Gratte-ciel",
     "hi": "गगनचुंबी इमारत",
+    "it": "Grattacielo",
     "pa": "ਗਗਨਚੁੰਬੀ ਇਮਾਰਤ",
     "pt-BR": "Arranha-céu"
   },
@@ -398,6 +492,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Teléfono inteligente",
     "fr": "Smartphone",
     "hi": "स्मार्टफ़ोन",
+    "it": "Smartphone",
     "pa": "ਸਮਾਰਟਫ਼ੋਨ",
     "pt-BR": "Smartphone"
   },
@@ -408,6 +503,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Muñeco de nieve",
     "fr": "Bonhomme de neige",
     "hi": "हिममानव",
+    "it": "Pupazzo di neve",
     "pa": "ਬਰਫ਼ ਦਾ ਆਦਮੀ",
     "pt-BR": "Boneco de neve"
   },
@@ -418,6 +514,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Fútbol",
     "fr": "Football",
     "hi": "फ़ुटबॉल",
+    "it": "Calcio",
     "pa": "ਫ਼ੁੱਟਬਾਲ",
     "pt-BR": "Futebol"
   },
@@ -428,6 +525,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Verano",
     "fr": "Été",
     "hi": "गर्मी",
+    "it": "Estate",
     "pa": "ਗਰਮੀਆਂ",
     "pt-BR": "Verão"
   },
@@ -438,6 +536,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Tanque",
     "fr": "Char d’assaut",
     "hi": "टैंक",
+    "it": "Carro armato",
     "pa": "ਟੈਂਕ",
     "pt-BR": "Tanque"
   },
@@ -448,6 +547,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Tren",
     "fr": "Train",
     "hi": "ट्रेन",
+    "it": "Treno",
     "pa": "ਰੇਲਗੱਡੀ",
     "pt-BR": "Trem"
   },
@@ -458,8 +558,20 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Boca abajo",
     "fr": "À l’envers",
     "hi": "उल्टा",
+    "it": "Sottosopra",
     "pa": "ਉਲਟਾ-ਪੁਲਟਾ",
     "pt-BR": "De cabeça para baixo"
+  },
+  "vampire": {
+    "bg": "Вампир",
+    "de": "Vampir",
+    "en": "Vampire",
+    "es": "Vampiro",
+    "fr": "Vampire",
+    "hi": "वैम्पायर",
+    "it": "Vampiro",
+    "pa": "ਵੈਂਪਾਇਰ",
+    "pt-BR": "Vampiro"
   },
   "volcano": {
     "bg": "Вулкан",
@@ -468,6 +580,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Volcán",
     "fr": "Volcan",
     "hi": "ज्वालामुखी",
+    "it": "Vulcano",
     "pa": "ਜਵਾਲਾਮੁਖੀ",
     "pt-BR": "Vulcão"
   },
@@ -478,8 +591,20 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Invierno",
     "fr": "Hiver",
     "hi": "सर्दी",
+    "it": "Inverno",
     "pa": "ਸਰਦੀਆਂ",
     "pt-BR": "Inverno"
+  },
+  "witch_cauldron": {
+    "bg": "Котел на вещица",
+    "de": "Hexenkessel",
+    "en": "Witch's Cauldron",
+    "es": "Caldero de bruja",
+    "fr": "Chaudron de sorcière",
+    "hi": "चुड़ैल की कड़ाही",
+    "it": "Calderone della strega",
+    "pa": "ਡੈਣ ਦੀ ਕੜਾਹੀ",
+    "pt-BR": "Caldeirão de bruxa"
   },
   "wizard": {
     "bg": "Магьосник",
@@ -488,6 +613,7 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "es": "Mago",
     "fr": "Sorcier",
     "hi": "जादूगर",
+    "it": "Mago",
     "pa": "ਜਾਦੂਗਰ",
     "pt-BR": "Mago"
   }

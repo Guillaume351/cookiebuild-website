@@ -123,10 +123,16 @@ describe("gallery periods (Europe/Paris)", () => {
 
 describe("gallery localization and links", () => {
   it("localizes theme names from the BuildBattles bundles with an English fallback", () => {
-    expect(Object.keys(BUILDBATTLE_THEME_NAMES).length).toBeGreaterThanOrEqual(49);
+    expect(Object.keys(BUILDBATTLE_THEME_NAMES).length).toBeGreaterThanOrEqual(56);
     expect(localizedThemeName("summer", "Summer", "fr")).toBe("Été");
     expect(localizedThemeName("summer", "Summer", "pt-BR")).toBe(BUILDBATTLE_THEME_NAMES.summer!["pt-BR"]);
-    expect(localizedThemeName("summer", "Summer", "it")).toBe("Summer");
+    // Italian bundles shipped with the Build Battle build-time vote release.
+    expect(localizedThemeName("summer", "Summer", "it")).toBe("Estate");
+    // Halloween seasonal themes (release halloween-20261012) in every gallery language.
+    for (const theme of ["haunted_house", "witch_cauldron", "graveyard", "pumpkin", "ghost", "vampire", "giant_spider"]) {
+      expect(Object.keys(BUILDBATTLE_THEME_NAMES[theme] ?? {}).sort()).toEqual(["bg", "de", "en", "es", "fr", "hi", "it", "pa", "pt-BR"]);
+    }
+    expect(localizedThemeName("haunted_house", "Haunted House", "fr")).toBe("Maison hantée");
     expect(localizedThemeName("unknown_theme", "Custom", "fr")).toBe("Custom");
     expect(localizedThemeName("summer", "Summer", null)).toBe("Summer");
     expect(normalizeGalleryLocale("fr-FR")).toBe("fr");
