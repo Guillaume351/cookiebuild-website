@@ -1,0 +1,8 @@
+{
+  "slug": "october-java-bedrock-compatibility-refresh",
+  "contentType": "changelog",
+  "title": "Java and Bedrock compatibility maintenance",
+  "summary": "Updated server and connection components for Java and Bedrock players.",
+  "body": "- Updated the Java server engine to Paper 26.2 build 134, including the latest fixes for this Minecraft version.\n- Updated Bedrock connectivity to Geyser 2.12.0 build 1265 and Floodgate build 141.\n- Updated support for different Java client versions with ViaVersion and ViaBackwards 5.12.1.",
+  "publishedAt": "2026-10-19T14:15:00Z"
+}
