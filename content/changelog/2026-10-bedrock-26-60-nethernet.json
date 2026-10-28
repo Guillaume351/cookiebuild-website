@@ -1,0 +1,8 @@
+{
+  "slug": "bedrock-26-60-nethernet",
+  "contentType": "changelog",
+  "title": "Minecraft Bedrock 26.60 support",
+  "summary": "Join Cookie Build with Minecraft Bedrock 26.60 using the same server address and port.",
+  "body": "- Updated Bedrock connectivity to Geyser 2.12.1 build 1276 for Minecraft Bedrock 26.60.\n- Enabled NetherNet, the connection method required by Bedrock 26.60, while keeping RakNet available for supported older clients.\n- Keep using play.cookie-build.com with port 19132. Bedrock may ask you to trust the server on your first connection with the new transport.\n- Java access, worlds, player progress and gameplay rules remain unchanged.",
+  "publishedAt": "2026-10-28T13:00:00Z"
+}
