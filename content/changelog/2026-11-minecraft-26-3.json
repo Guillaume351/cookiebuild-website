@@ -1,0 +1,8 @@
+{
+  "slug": "minecraft-26-3-java-bedrock-update",
+  "contentType": "changelog",
+  "title": "Minecraft 26.3 on Cookie Build",
+  "summary": "Cookie Build now runs Minecraft Java 26.3, with updated connection support for Java and Bedrock players.",
+  "body": "- Updated the server to Paper 26.3 build 238.\n- Updated Bedrock connectivity to Geyser 2.12.1 build 1284.\n- Updated support for different Java client versions with ViaVersion and ViaBackwards 5.12.2, including fixes for block-breaking effects and blocks displayed by older clients.",
+  "publishedAt": "2026-11-03T19:45:00Z"
+}
