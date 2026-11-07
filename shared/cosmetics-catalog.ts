@@ -200,11 +200,14 @@ const VICTORY_EFFECT_SUPPORT = (particles: string) => ({
 
 /** Halloween 2026 sale window, shared with the website theme (Europe/Paris). */
 const HALLOWEEN_SEASON = seasonWindow("halloween");
+/** Christmas 2026 sale window, shared with the website theme (Europe/Paris). */
+const CHRISTMAS_SEASON = seasonWindow("christmas");
 
 /**
  * Coin-shop cosmetics: bought in game with earned coins only (prices are
  * server-side constants in CookieDough), never sold for money on the website.
- * Ordered by ascending price; at an equal price, permanent items come first.
+ * Ordered by ascending price; at an equal price, permanent items come first
+ * (seasonal items sharing a price belong to different, non-overlapping seasons).
  *
  * An item with a `season` is a limited edition: it is on sale (and listed) only
  * inside its window, then hidden from players who don't own it. Owners keep and
@@ -261,6 +264,18 @@ export const COIN_COSMETICS = [
     platformSupport: LOBBY_TRAIL_SUPPORT("ITEM (lanterne-citrouille) et DUST (orange et noir)"),
   },
   {
+    id: "snowflake_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "coins",
+    coinPrice: 450,
+    season: CHRISTMAS_SEASON,
+    name: "Traînée Flocons",
+    nameEn: "Snowflake Trail",
+    description: "Des flocons de neige et des étincelles blanches et bleu glacier tourbillonnent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
+    preview: { kind: "trail", label: "Flocons" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("SNOWFLAKE et DUST (blanc et bleu glacier)"),
+  },
+  {
     id: "cookie_rain_victory",
     slot: "VICTORY_EFFECT",
     acquisition: "coins",
@@ -315,6 +330,18 @@ export const COIN_COSMETICS = [
     description: "Un tourbillon de sortilège violet et vert, avec un rire de sorcière, quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
     preview: { kind: "burst", label: "Sortilège" },
     platformSupport: VICTORY_EFFECT_SUPPORT("WITCH et DUST (violet et vert)"),
+  },
+  {
+    id: "snowstorm_victory",
+    slot: "VICTORY_EFFECT",
+    acquisition: "coins",
+    coinPrice: 900,
+    season: CHRISTMAS_SEASON,
+    name: "Victoire Tempête de neige",
+    nameEn: "Snowstorm Victory",
+    description: "Une tempête de flocons et de boules de neige tourbillonne autour de toi quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
+    preview: { kind: "burst", label: "Tempête de neige" },
+    platformSupport: VICTORY_EFFECT_SUPPORT("SNOWFLAKE, ITEM_SNOWBALL et END_ROD"),
   },
   {
     id: "heart_trail",
@@ -414,6 +441,19 @@ export const REWARD_COSMETICS = [
     description: "De pâles âmes flottantes te suivent dans le lobby. Récompense pour avoir trouvé les 13 citrouilles cachées du lobby pendant Halloween. Jamais vendue.",
     preview: { kind: "trail", label: "Feux follets" },
     platformSupport: LOBBY_TRAIL_SUPPORT("SOUL"),
+  },
+  {
+    // Christmas present hunt: unlocked in game once the 13 presents hidden in
+    // the lobby are found (seasonal_collectibles, edition "christmas-2026").
+    id: "candy_cane_trail",
+    slot: "HUB_TRAIL",
+    acquisition: "reward",
+    rewardOnly: true,
+    name: "Sucre d'orge",
+    nameEn: "Candy Cane Trail",
+    description: "Une traînée rouge et blanche comme un sucre d’orge te suit dans le lobby. Récompense pour avoir trouvé les 13 cadeaux cachés du lobby pendant Noël. Jamais vendue.",
+    preview: { kind: "trail", label: "Sucre d'orge" },
+    platformSupport: LOBBY_TRAIL_SUPPORT("DUST (rouge et blanc)"),
   },
 ] as const satisfies ReadonlyArray<GameplayCosmetic & { acquisition: "reward"; rewardOnly: true }>;
 

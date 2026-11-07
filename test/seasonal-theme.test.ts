@@ -16,11 +16,22 @@ describe("seasonal theme windows", () => {
     const halloween = seasonWindow("halloween");
     expect(parisTime(new Date(halloween.availableFrom))).toBe("12/10/2026, 00:00");
     expect(parisTime(new Date(halloween.availableUntil))).toBe("03/11/2026, 00:00");
-    expect(SEASONAL_THEMES.map((theme) => theme.id)).toEqual(["halloween"]);
+    expect(SEASONAL_THEMES.map((theme) => theme.id)).toEqual(["halloween", "christmas"]);
     expect(new Set(SEASONAL_THEMES.map((theme) => theme.id)).size).toBe(SEASONAL_THEMES.length);
     for (const theme of SEASONAL_THEMES) {
       expect(Date.parse(theme.availableUntil)).toBeGreaterThan(Date.parse(theme.availableFrom));
     }
+    // Windows never overlap, so at most one skin (and one set of limited items) is active.
+    for (let index = 1; index < SEASONAL_THEMES.length; index += 1) {
+      expect(Date.parse(SEASONAL_THEMES[index]!.availableFrom))
+        .toBeGreaterThanOrEqual(Date.parse(SEASONAL_THEMES[index - 1]!.availableUntil));
+    }
+  });
+
+  it("runs Christmas from 1 December 00:00 to 5 January 00:00, Paris time", () => {
+    const christmas = seasonWindow("christmas");
+    expect(parisTime(new Date(christmas.availableFrom))).toBe("01/12/2026, 00:00");
+    expect(parisTime(new Date(christmas.availableUntil))).toBe("05/01/2027, 00:00");
   });
 
   it("activates the skin inside the half-open window only", () => {
@@ -31,13 +42,20 @@ describe("seasonal theme windows", () => {
     expect(activeSeasonalTheme(new Date("2026-10-31T21:00:00+01:00"))).toBe("halloween");
     expect(activeSeasonalTheme(new Date("2026-11-02T22:59:59.999Z"))).toBe("halloween");
     expect(activeSeasonalTheme(new Date("2026-11-02T23:00:00Z"))).toBeNull();
-    expect(activeSeasonalTheme(new Date("2026-12-24T12:00:00Z"))).toBeNull();
-    expect([null, "halloween"]).toContain(activeSeasonalTheme());
+    // Halloween is over: the release day (7 November) shows no skin.
+    expect(activeSeasonalTheme(new Date("2026-11-07T12:00:00Z"))).toBeNull();
+    expect(activeSeasonalTheme(new Date("2026-11-30T22:59:59.999Z"))).toBeNull();
+    expect(activeSeasonalTheme(new Date("2026-11-30T23:00:00Z"))).toBe("christmas");
+    expect(activeSeasonalTheme(new Date("2026-12-24T12:00:00Z"))).toBe("christmas");
+    expect(activeSeasonalTheme(new Date("2027-01-04T22:59:59.999Z"))).toBe("christmas");
+    expect(activeSeasonalTheme(new Date("2027-01-04T23:00:00Z"))).toBeNull();
+    expect([null, "halloween", "christmas"]).toContain(activeSeasonalTheme());
   });
 
   it("recognises theme ids and windows without depending on the caller's clock", () => {
     expect(isSeasonalThemeId("halloween")).toBe(true);
-    expect(isSeasonalThemeId("christmas")).toBe(false);
+    expect(isSeasonalThemeId("christmas")).toBe(true);
+    expect(isSeasonalThemeId("easter")).toBe(false);
     const window = { availableFrom: "2026-12-01T00:00:00+01:00", availableUntil: "2027-01-04T00:00:00+01:00" };
     expect(isWithinSeason(window, new Date("2026-12-25T00:00:00+01:00"))).toBe(true);
     expect(isWithinSeason(window, new Date("2027-01-04T00:00:00+01:00"))).toBe(false);
@@ -65,19 +83,30 @@ describe("seasonal copy and links", () => {
     }
     expect(SEASONAL_COPY.halloween.fr.limitedEdition).toBe("Édition limitée Halloween · jusqu’au 2 novembre");
     expect(SEASONAL_COPY.halloween.en.limitedEdition).toBe("Limited Halloween edition · until November 2");
+    expect(SEASONAL_COPY.christmas.fr.limitedEdition).toBe("Édition limitée Noël · jusqu’au 4 janvier");
+    expect(SEASONAL_COPY.christmas.en.limitedEdition).toBe("Limited Christmas edition · until January 4");
     // French speaks to the player with "tu".
-    for (const text of Object.values(SEASONAL_COPY.halloween.fr)) {
-      expect(text).not.toMatch(/\bvous\b|\bvotre\b|\bvos\b/i);
+    for (const theme of SEASONAL_THEMES) {
+      for (const text of Object.values(SEASONAL_COPY[theme.id].fr)) {
+        expect(text).not.toMatch(/\bvous\b|\bvotre\b|\bvos\b/i);
+      }
     }
+    // The advent calendar ends on 24 December, before the theme does.
+    for (const { code } of SITE_LOCALES) expect(SEASONAL_COPY.christmas[code].bannerText).toContain("24");
   });
 
   it("names the last day of the window in the labels", () => {
-    const lastDay = new Date(Date.parse(seasonWindow("halloween").availableUntil) - 1);
-    const day = (locale: string) => new Intl.DateTimeFormat(locale, { timeZone: "Europe/Paris", day: "numeric", month: "long" }).format(lastDay);
-    expect(SEASONAL_COPY.halloween.fr.limitedEdition).toContain(day("fr"));
-    expect(SEASONAL_COPY.halloween.en.limitedEdition).toContain(day("en-US"));
-    expect(SEASONAL_COPY.halloween.it.limitedEdition).toContain(day("it"));
-    expect(SEASONAL_COPY.halloween.fr.bannerEyebrow).toContain(day("fr"));
+    for (const theme of SEASONAL_THEMES) {
+      const lastDay = new Date(Date.parse(theme.availableUntil) - 1);
+      const day = (locale: string) => new Intl.DateTimeFormat(locale, { timeZone: "Europe/Paris", day: "numeric", month: "long" }).format(lastDay);
+      const copy = SEASONAL_COPY[theme.id];
+      expect(copy.fr.limitedEdition).toContain(day("fr"));
+      expect(copy.en.limitedEdition).toContain(day("en-US"));
+      expect(copy.it.limitedEdition).toContain(day("it"));
+      expect(copy.es.limitedEdition).toContain(day("es"));
+      expect(copy.fr.bannerEyebrow).toContain(day("fr"));
+    }
+    expect(SEASONAL_COPY.christmas.fr.bannerEyebrow).toContain("4 janvier");
   });
 
   it("links the banner to the localized release-note route", () => {
@@ -88,6 +117,9 @@ describe("seasonal copy and links", () => {
     expect(localizedSitePath(path, "fr")).toBe("/fr/updates/halloween-sur-cookie-build");
     expect(localizedSitePath(path, "en")).toBe("/updates/halloween-sur-cookie-build");
     expect(localizedSitePath(path, "pt-BR")).toBe("/pt-br/updates/halloween-sur-cookie-build");
+    expect(SEASONAL_UPDATE_SLUGS.christmas).toBe("noel-sur-cookie-build");
+    expect(localizedSitePath(seasonalUpdatePath("christmas"), "fr")).toBe("/fr/updates/noel-sur-cookie-build");
+    expect(localizedSitePath(seasonalUpdatePath("christmas"), "de")).toBe("/de/updates/noel-sur-cookie-build");
   });
 });
 
@@ -115,5 +147,8 @@ describe("seasonal rendering", () => {
     expect(page).toContain("isCoinCosmeticOnSale(item, seasonalNow.value)");
     expect(page).toContain("seasonalCopy(item.season.id, locale.value.code).limitedEdition");
     expect(page).toContain('v-if="item.limitedEdition"');
+    // Each season has its own badge look (no pumpkin on a Christmas item).
+    expect(page).toMatch(/christmas: \{\s*icon: "❄️"/);
+    expect(page).toContain("LIMITED_EDITION_STYLE[item.season.id]");
   });
 });

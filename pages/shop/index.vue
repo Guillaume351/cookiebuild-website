@@ -79,9 +79,9 @@
       <h2 id="coin-items-title" class="text-2xl font-black text-white">{{ shop.coinTitle }}</h2>
       <p class="mt-2 max-w-2xl text-sm leading-relaxed text-zinc-400">{{ shop.coinIntro }}</p>
       <ul class="mt-6 grid gap-4 md:grid-cols-2">
-        <li v-for="item in localizedCoinItems" :key="item.id" class="flex items-start justify-between gap-4 rounded-2xl border p-5" :class="item.limitedEdition ? 'border-orange-400/40 bg-gradient-to-br from-purple-950/50 via-zinc-900/80 to-orange-950/40' : 'border-zinc-800 bg-zinc-900/70'">
+        <li v-for="item in localizedCoinItems" :key="item.id" class="flex items-start justify-between gap-4 rounded-2xl border p-5" :class="item.limitedStyle ? item.limitedStyle.card : 'border-zinc-800 bg-zinc-900/70'">
           <div>
-            <p v-if="item.limitedEdition" class="mb-2 inline-flex rounded-full border border-orange-400/50 bg-orange-500/10 px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider text-orange-200"><span aria-hidden="true" class="mr-1">🎃</span>{{ item.limitedEdition }}</p>
+            <p v-if="item.limitedEdition" class="mb-2 inline-flex rounded-full border px-2.5 py-0.5 text-[11px] font-black uppercase tracking-wider" :class="item.limitedStyle?.badge"><span aria-hidden="true" class="mr-1">{{ item.limitedStyle?.icon }}</span>{{ item.limitedEdition }}</p>
             <h3 class="text-lg font-black text-white">{{ item.text.name }}</h3>
             <p v-if="item.text.description" class="mt-1 text-sm text-zinc-400">{{ item.text.description }}</p>
             <p class="mt-2 text-xs font-bold uppercase tracking-wider text-zinc-500">{{ shop.coinNotice }}</p>
@@ -143,7 +143,7 @@
 definePageMeta({ alias: ["/fr/shop", "/de/shop", "/it/shop", "/bg/shop", "/es/shop", "/hi/shop", "/pt-br/shop"] });
 import { SHOP_COPY, SHOP_FAIRNESS, coinItemCopy, shopItemCopy } from "@/utils/shop-copy";
 import { COSMETIC_CATALOG_RESPONSE, isCoinCosmeticOnSale } from "#shared/cosmetics-catalog";
-import { isSeasonalThemeId } from "#shared/seasonal-themes";
+import { isSeasonalThemeId, type SeasonalThemeId } from "#shared/seasonal-themes";
 import { seasonalCopy } from "@/utils/seasonal-copy";
 import CosmeticPreview from "../../components/cosmetics/CosmeticPreview.vue";
 
@@ -169,6 +169,19 @@ interface CoinShopItem {
   id: string; name: string; nameEn: string; description: string; coinPrice: number;
   season?: { id: string; availableFrom: string; availableUntil: string };
 }
+// Card and badge look of a limited coin item, per season (the label text comes from seasonal-copy).
+const LIMITED_EDITION_STYLE: Record<SeasonalThemeId, { icon: string; card: string; badge: string }> = {
+  halloween: {
+    icon: "🎃",
+    card: "border-orange-400/40 bg-gradient-to-br from-purple-950/50 via-zinc-900/80 to-orange-950/40",
+    badge: "border-orange-400/50 bg-orange-500/10 text-orange-200",
+  },
+  christmas: {
+    icon: "❄️",
+    card: "border-sky-300/40 bg-gradient-to-br from-sky-950/60 via-zinc-900/80 to-red-950/40",
+    badge: "border-sky-300/50 bg-sky-400/10 text-sky-100",
+  },
+};
 // Coin-only cosmetics are informational: bought in game with earned coins, never on the web.
 // Seasonal items are listed only during their season, even from a cached catalog response.
 const { now: seasonalNow } = useSeasonalTheme();
@@ -180,6 +193,7 @@ const localizedCoinItems = computed(() => coinItems.value.map((item) => ({
   limitedEdition: item.season && isSeasonalThemeId(item.season.id)
     ? seasonalCopy(item.season.id, locale.value.code).limitedEdition
     : null,
+  limitedStyle: item.season && isSeasonalThemeId(item.season.id) ? LIMITED_EDITION_STYLE[item.season.id] : null,
 })));
 const supportProducts = computed(() => catalog.value.products.filter((product) => product.kind === "voluntary_support"));
 

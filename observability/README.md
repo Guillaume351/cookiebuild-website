@@ -136,6 +136,12 @@ The source table `seasonal_collectibles` is written by the game server and is
 not readable by the metrics role. Query it with
 `SELECT * FROM metrics.seasonal_collectibles_daily WHERE theme_id = 'halloween-2026' ORDER BY time;`.
 
+Migration `drizzle/0028_christmas_theme.sql` recreates the same view (same
+columns) with two Christmas editions in `goals`: `christmas-2026`, the 13
+presents hidden in the lobby, and `christmas-2026-advent`, the advent calendar
+(one gift a day from 1 to 24 December, so `players_completed` counts the players
+who claimed all 24 days).
+
 An account/cosmetic pair is recorded once, regardless of selection changes,
 retries, deselection/reselection, or whether the write came from Java, Bedrock
 or the website. Existing selections are labeled `baseline` and timestamped at

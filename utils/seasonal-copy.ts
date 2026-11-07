@@ -74,6 +74,64 @@ export const SEASONAL_COPY = {
       bannerCta: "Tudo sobre o Halloween",
     },
   },
+  christmas: {
+    en: {
+      limitedEdition: "Limited Christmas edition · until January 4",
+      bannerEyebrow: "Christmas · until January 4",
+      bannerTitle: "Christmas has come to Cookie Build",
+      bannerText: "The lobby is covered in snow: find the 13 hidden presents to win an exclusive trail, listen to the snowman play carols, open your advent calendar until December 24 and pick up limited-edition cosmetics.",
+      bannerCta: "Read the Christmas update",
+    },
+    fr: {
+      limitedEdition: "Édition limitée Noël · jusqu’au 4 janvier",
+      bannerEyebrow: "Noël · jusqu’au 4 janvier",
+      bannerTitle: "Noël s’installe sur Cookie Build",
+      bannerText: "Le lobby se couvre de neige : trouve les 13 cadeaux cachés pour gagner une traînée exclusive, écoute le bonhomme de neige jouer des chants de Noël, ouvre ton calendrier de l’Avent jusqu’au 24 décembre et récupère des cosmétiques en édition limitée.",
+      bannerCta: "Tout savoir sur Noël",
+    },
+    de: {
+      limitedEdition: "Limitierte Weihnachts-Edition · bis 4. Januar",
+      bannerEyebrow: "Weihnachten · bis 4. Januar",
+      bannerTitle: "Weihnachten ist bei Cookie Build eingezogen",
+      bannerText: "Die Lobby ist verschneit: Finde die 13 versteckten Geschenke und gewinne eine exklusive Spur, hör dem Schneemann bei seinen Weihnachtsliedern zu, öffne bis zum 24. Dezember deinen Adventskalender und hol dir Kosmetik in limitierter Edition.",
+      bannerCta: "Alles über Weihnachten",
+    },
+    it: {
+      limitedEdition: "Edizione limitata Natale · fino al 4 gennaio",
+      bannerEyebrow: "Natale · fino al 4 gennaio",
+      bannerTitle: "Il Natale è arrivato su Cookie Build",
+      bannerText: "La lobby si copre di neve: trova i 13 regali nascosti per vincere una scia esclusiva, ascolta il pupazzo di neve suonare i canti di Natale, apri il tuo calendario dell’Avvento fino al 24 dicembre e prendi i cosmetici in edizione limitata.",
+      bannerCta: "Scopri le novità di Natale",
+    },
+    bg: {
+      limitedEdition: "Ограничено коледно издание · до 4 януари",
+      bannerEyebrow: "Коледа · до 4 януари",
+      bannerTitle: "Коледа дойде в Cookie Build",
+      bannerText: "Лобито е покрито със сняг: намери 13-те скрити подаръка, за да спечелиш ексклузивна следа, послушай снежния човек, който свири коледни песни, отваряй адвентния си календар до 24 декември и вземи козметика с ограничено издание.",
+      bannerCta: "Всичко за Коледа",
+    },
+    es: {
+      limitedEdition: "Edición limitada de Navidad · hasta el 4 de enero",
+      bannerEyebrow: "Navidad · hasta el 4 de enero",
+      bannerTitle: "La Navidad llega a Cookie Build",
+      bannerText: "El lobby se cubre de nieve: encuentra los 13 regalos escondidos para ganar una estela exclusiva, escucha al muñeco de nieve tocar villancicos, abre tu calendario de Adviento hasta el 24 de diciembre y consigue cosméticos de edición limitada.",
+      bannerCta: "Todo sobre la Navidad",
+    },
+    hi: {
+      limitedEdition: "सीमित क्रिसमस संस्करण · 4 जनवरी तक",
+      bannerEyebrow: "क्रिसमस · 4 जनवरी तक",
+      bannerTitle: "Cookie Build पर क्रिसमस आ गया है",
+      bannerText: "लॉबी बर्फ़ से ढक गई है: एक खास ट्रेल जीतने के लिए छिपे हुए 13 उपहार ढूँढें, स्नोमैन को क्रिसमस कैरल बजाते सुनें, 24 दिसंबर तक अपना एडवेंट कैलेंडर खोलें और सीमित संस्करण वाले कॉस्मेटिक्स पाएँ।",
+      bannerCta: "क्रिसमस के बारे में सब कुछ",
+    },
+    "pt-BR": {
+      limitedEdition: "Edição limitada de Natal · até 4 de janeiro",
+      bannerEyebrow: "Natal · até 4 de janeiro",
+      bannerTitle: "O Natal chegou ao Cookie Build",
+      bannerText: "O lobby está coberto de neve: encontre os 13 presentes escondidos para ganhar um rastro exclusivo, ouça o boneco de neve tocar canções de Natal, abra seu calendário do Advento até 24 de dezembro e pegue cosméticos de edição limitada.",
+      bannerCta: "Tudo sobre o Natal",
+    },
+  },
 } satisfies Record<SeasonalThemeId, Record<SiteLocaleCode, SeasonalCopy>>;
 
 export function seasonalCopy(theme: SeasonalThemeId, locale: SiteLocaleCode): SeasonalCopy {

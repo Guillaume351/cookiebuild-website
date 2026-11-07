@@ -73,12 +73,17 @@ function crumbClass(index: number) {
     return index % 2 ? "rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,.85)]" : "rounded-sm bg-zinc-950 ring-1 ring-orange-400/70";
   }
   if (itemId.value === "will_o_wisp_trail") return "rounded-full bg-cyan-100/90 shadow-[0_0_14px_rgba(165,243,252,.9)]";
+  if (itemId.value === "snowflake_trail") {
+    return index % 2 ? "rotate-45 rounded-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,.9)]" : "rounded-full bg-sky-200 shadow-[0_0_10px_rgba(186,230,253,.85)]";
+  }
+  if (itemId.value === "candy_cane_trail") return index % 2 ? "rounded-full bg-red-500" : "rounded-full bg-white ring-1 ring-red-400/70";
   if (props.item.preview.kind === "sparkle-trail") return "rounded-full bg-yellow-100 shadow-[0_0_10px_rgba(254,249,195,.9)]";
   return "rounded-sm bg-amber-500";
 }
 
 function burstClass(index: number) {
   if (itemId.value === "witch_spell_victory") return index % 2 ? "rounded-full bg-purple-400" : "rounded-full bg-lime-400";
+  if (itemId.value === "snowstorm_victory") return index % 2 ? "rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,.9)]" : "rotate-45 rounded-[2px] bg-sky-200";
   return "rounded-sm bg-amber-300";
 }
 

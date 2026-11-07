@@ -17,6 +17,7 @@ export function activeSeasonalTheme(now: Date = new Date()): SeasonalThemeId | n
  */
 export const SEASONAL_UPDATE_SLUGS = {
   halloween: "halloween-sur-cookie-build",
+  christmas: "noel-sur-cookie-build",
 } as const satisfies Record<SeasonalThemeId, string>;
 
 export function seasonalUpdatePath(theme: SeasonalThemeId): string {

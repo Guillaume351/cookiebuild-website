@@ -1932,7 +1932,7 @@ export const cosmeticEntitlements = pgTable(
       .where(sql`${table.revokedAt} IS NULL`),
     check(
       "cosmetic_entitlements_id_ck",
-      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail', 'chocolate_chip_trail', 'cherry_petal_trail', 'soul_flame_trail', 'rainbow_trail', 'lucky_clover_trail', 'cookie_rain_victory', 'totem_victory', 'firework_victory', 'pumpkin_trail', 'witch_spell_victory', 'will_o_wisp_trail')`,
+      sql`${table.cosmeticId} IN ('supporter_badge', 'cookie_crumb_trail', 'cookie_cheer', 'golden_cookie_burst', 'supporter_profile_frame', 'lobby_flight', 'supporter_join_flair', 'cookie_sparkle_trail', 'app_companion_badge', 'note_trail', 'heart_trail', 'streak_star_trail', 'starter_spark_trail', 'chocolate_chip_trail', 'cherry_petal_trail', 'soul_flame_trail', 'rainbow_trail', 'lucky_clover_trail', 'cookie_rain_victory', 'totem_victory', 'firework_victory', 'pumpkin_trail', 'witch_spell_victory', 'will_o_wisp_trail', 'snowflake_trail', 'snowstorm_victory', 'candy_cane_trail')`,
     ),
     check("cosmetic_entitlements_source_ck", sql`length(btrim(${table.source})) > 0`),
     check(
@@ -1976,12 +1976,15 @@ export const cosmeticSelections = pgTable(
         ('HUB_TRAIL', 'lucky_clover_trail'),
         ('HUB_TRAIL', 'pumpkin_trail'),
         ('HUB_TRAIL', 'will_o_wisp_trail'),
+        ('HUB_TRAIL', 'snowflake_trail'),
+        ('HUB_TRAIL', 'candy_cane_trail'),
         ('EMOTE', 'cookie_cheer'),
         ('VICTORY_EFFECT', 'golden_cookie_burst'),
         ('VICTORY_EFFECT', 'cookie_rain_victory'),
         ('VICTORY_EFFECT', 'totem_victory'),
         ('VICTORY_EFFECT', 'firework_victory'),
         ('VICTORY_EFFECT', 'witch_spell_victory'),
+        ('VICTORY_EFFECT', 'snowstorm_victory'),
         ('PROFILE_FRAME', 'supporter_profile_frame'),
         ('LOBBY_FLIGHT', 'lobby_flight'),
         ('JOIN_FLAIR', 'supporter_join_flair')
@@ -2017,7 +2020,8 @@ export const cosmeticWelcomeGifts = pgTable(
 /**
  * Seasonal hidden collectibles (migration 0027): one row per player, hunt
  * edition (theme_id, e.g. "halloween-2026") and collectible found (the 13
- * Halloween lobby pumpkins, later Christmas gifts). Written by the game server
+ * Halloween lobby pumpkins; for Christmas, "christmas-2026" g01-g13 for the 13
+ * lobby presents and "christmas-2026-advent" d01-d24 for the advent calendar). Written by the game server
  * with INSERT ... ON CONFLICT DO NOTHING; rows are kept after the season.
  */
 export const seasonalCollectibles = pgTable(

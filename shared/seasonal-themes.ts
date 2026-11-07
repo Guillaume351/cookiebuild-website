@@ -2,7 +2,7 @@
  * Seasonal windows shared by the website, the shop API and the coin catalog.
  * Each window is half-open, [availableFrom, availableUntil), written with the
  * Europe/Paris offset of that date. It matches the game's `themes/<id>/theme.yml`
- * window and theme id. Christmas is one more row.
+ * window and theme id.
  */
 export interface SeasonWindow {
   id: string;
@@ -15,6 +15,12 @@ export const SEASONAL_THEMES = [
     id: "halloween",
     availableFrom: "2026-10-12T00:00:00+02:00",
     availableUntil: "2026-11-03T00:00:00+01:00",
+  },
+  {
+    // 1 December 00:00 to 5 January 00:00 (last day: Sunday 4 January), Paris time.
+    id: "christmas",
+    availableFrom: "2026-12-01T00:00:00+01:00",
+    availableUntil: "2027-01-05T00:00:00+01:00",
   },
 ] as const satisfies ReadonlyArray<SeasonWindow>;
 

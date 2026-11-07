@@ -31,6 +31,8 @@ const ADDED_BY_0026 = new Set([
 ]);
 /** Cosmetics introduced by migration 0027 (release halloween-20261012). */
 const ADDED_BY_0027 = new Set(["pumpkin_trail", "witch_spell_victory", "will_o_wisp_trail"]);
+/** Cosmetics introduced by migration 0028 (release christmas-20261107). */
+const ADDED_BY_0028 = new Set(["snowflake_trail", "snowstorm_victory", "candy_cane_trail"]);
 const grantedByAnyProduct = (id: string) =>
   COSMETIC_PRODUCTS.some((product) => (product.grants as readonly string[]).includes(id));
 
@@ -190,6 +192,7 @@ describe("reward-only and coin-only cosmetics", () => {
       { id: "streak_star_trail", slot: "HUB_TRAIL" },
       { id: "lucky_clover_trail", slot: "HUB_TRAIL" },
       { id: "will_o_wisp_trail", slot: "HUB_TRAIL" },
+      { id: "candy_cane_trail", slot: "HUB_TRAIL" },
     ]);
     expect(cosmeticById("app_companion_badge")?.slot).toBe("BADGE");
     expect(isRewardOnlyCosmetic("app_companion_badge")).toBe(true);
@@ -210,7 +213,7 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(migration).toContain("('HUB_TRAIL', 'streak_star_trail')");
     expect(migration).toContain("cosmetic_first_activations");
     for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
-      if (item.id === "starter_spark_trail" || ADDED_BY_0026.has(item.id) || ADDED_BY_0027.has(item.id)) continue; // added by 0025/0026/0027
+      if (item.id === "starter_spark_trail" || ADDED_BY_0026.has(item.id) || ADDED_BY_0027.has(item.id) || ADDED_BY_0028.has(item.id)) continue; // added by 0025-0028
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
     }
   });
@@ -225,7 +228,7 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(migration).toContain("DROP CONSTRAINT IF EXISTS \"cosmetic_selections_slot_cosmetic_ck\"");
     expect(migration).toContain("cosmetic_first_activations");
     for (const item of [...COSMETIC_CATALOG, ...COIN_COSMETICS, ...REWARD_COSMETICS]) {
-      if (ADDED_BY_0026.has(item.id) || ADDED_BY_0027.has(item.id)) continue;
+      if (ADDED_BY_0026.has(item.id) || ADDED_BY_0027.has(item.id) || ADDED_BY_0028.has(item.id)) continue;
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
     }
     const starter = cosmeticById("starter_spark_trail");
@@ -242,11 +245,13 @@ describe("reward-only and coin-only cosmetics", () => {
       { id: "starter_spark_trail", slot: "HUB_TRAIL", coinPrice: 250 },
       { id: "cherry_petal_trail", slot: "HUB_TRAIL", coinPrice: 400 },
       { id: "pumpkin_trail", slot: "HUB_TRAIL", coinPrice: 450 },
+      { id: "snowflake_trail", slot: "HUB_TRAIL", coinPrice: 450 },
       { id: "cookie_rain_victory", slot: "VICTORY_EFFECT", coinPrice: 500 },
       { id: "soul_flame_trail", slot: "HUB_TRAIL", coinPrice: 600 },
       { id: "note_trail", slot: "HUB_TRAIL", coinPrice: 750 },
       { id: "totem_victory", slot: "VICTORY_EFFECT", coinPrice: 900 },
       { id: "witch_spell_victory", slot: "VICTORY_EFFECT", coinPrice: 900 },
+      { id: "snowstorm_victory", slot: "VICTORY_EFFECT", coinPrice: 900 },
       { id: "heart_trail", slot: "HUB_TRAIL", coinPrice: 1_200 },
       { id: "firework_victory", slot: "VICTORY_EFFECT", coinPrice: 1_500 },
       { id: "rainbow_trail", slot: "HUB_TRAIL", coinPrice: 2_000 },
@@ -255,11 +260,14 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(prices.every((price) => Number.isInteger(price) && price > 0)).toBe(true);
     expect(prices).toEqual([...prices].sort((a, b) => a - b));
     // Permanent items keep distinct prices; a seasonal item may share one and comes after it.
+    // Seasonal items sharing a price belong to different seasons (never on sale together).
     const permanentPrices = COIN_COSMETICS.filter((item) => !("season" in item)).map((item) => item.coinPrice);
     expect(new Set(permanentPrices).size).toBe(permanentPrices.length);
     COIN_COSMETICS.forEach((item, index) => {
       const previous = COIN_COSMETICS[index - 1];
-      if (previous?.coinPrice === item.coinPrice) expect("season" in item && !("season" in previous)).toBe(true);
+      if (previous?.coinPrice !== item.coinPrice) return;
+      expect("season" in item).toBe(true);
+      if ("season" in previous && "season" in item) expect(previous.season.id).not.toBe(item.season.id);
     });
     for (const item of COIN_COSMETICS) {
       expect(item.acquisition).toBe("coins");
@@ -306,6 +314,7 @@ describe("reward-only and coin-only cosmetics", () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ADDED_BY_0026) expect(ids).toContain(id);
     for (const id of ADDED_BY_0027) expect(ids).toContain(id);
+    for (const id of ADDED_BY_0028) expect(ids).toContain(id);
   });
 
   it("gives the permanent Supporter purchase at least the monthly plan's cosmetics", () => {
@@ -325,7 +334,7 @@ describe("shop activation migration 0026", () => {
     expect(migration).toContain('DROP CONSTRAINT IF EXISTS "cosmetic_selections_slot_cosmetic_ck"');
     expect(migration).toContain("cosmetic_first_activations_cosmetic_id_check");
     for (const item of OWNABLE_COSMETICS) {
-      if (ADDED_BY_0027.has(item.id)) continue;
+      if (ADDED_BY_0027.has(item.id) || ADDED_BY_0028.has(item.id)) continue;
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
       expect(migration).toContain(`('${item.slot}', '${item.id}')`);
     }
@@ -413,7 +422,7 @@ describe("Halloween seasonal cosmetics (release halloween-20261012)", () => {
       availableFrom: "2026-10-12T00:00:00+02:00",
       availableUntil: "2026-11-03T00:00:00+01:00",
     });
-    const seasonal = COIN_COSMETICS.filter((item) => "season" in item);
+    const seasonal = COIN_COSMETICS.filter((item) => "season" in item && item.season.id === "halloween");
     expect(seasonal.map(({ id, slot, coinPrice, name, nameEn }) => ({ id, slot, coinPrice, name, nameEn }))).toEqual([
       { id: "pumpkin_trail", slot: "HUB_TRAIL", coinPrice: 450, name: "Traînée Citrouille", nameEn: "Pumpkin Trail" },
       { id: "witch_spell_victory", slot: "VICTORY_EFFECT", coinPrice: 900, name: "Victoire Sortilège", nameEn: "Witch Spell Victory" },
@@ -431,7 +440,9 @@ describe("Halloween seasonal cosmetics (release halloween-20261012)", () => {
 
   it("lists seasonal coin items only inside their window and keeps permanent ones", () => {
     const permanent = COIN_COSMETICS.filter((item) => !("season" in item)).map((item) => item.id);
-    expect(coinCosmeticsOnSale(opening).map((item) => item.id)).toEqual(COIN_COSMETICS.map((item) => item.id));
+    const halloweenOrPermanent = COIN_COSMETICS
+      .filter((item) => !("season" in item) || item.season.id === "halloween").map((item) => item.id);
+    expect(coinCosmeticsOnSale(opening).map((item) => item.id)).toEqual(halloweenOrPermanent);
     expect(coinCosmeticsOnSale(closing).map((item) => item.id)).toEqual(permanent);
     expect(coinCosmeticsOnSale(before).map((item) => item.id)).toEqual(permanent);
     // Owners keep them: the items stay ownable and resolvable for the inventory.
@@ -442,7 +453,8 @@ describe("Halloween seasonal cosmetics (release halloween-20261012)", () => {
     expect(publicCosmeticCatalog(opening).coinItems.map((item) => item.id)).toContain("pumpkin_trail");
     expect(publicCosmeticCatalog(closing).coinItems.map((item) => item.id)).not.toContain("pumpkin_trail");
     expect(publicCosmeticCatalog(closing).coinItems.map((item) => item.id)).not.toContain("witch_spell_victory");
-    expect(publicCosmeticCatalog(closing).coinItems).toHaveLength(COIN_COSMETICS.length - 2);
+    expect(publicCosmeticCatalog(closing).coinItems.map((item) => item.id))
+      .toEqual(COIN_COSMETICS.filter((item) => !("season" in item)).map((item) => item.id));
   });
 
   it("rewards the Will-o'-the-Wisps trail for the 13 lobby pumpkins and never sells it", () => {
@@ -469,6 +481,7 @@ describe("Halloween theme migration 0027", () => {
     expect(migration).toContain("cosmetic_first_activations_cosmetic_id_check");
     expect(migration).toContain("to_regclass('public.cosmetic_first_activations') IS NOT NULL");
     for (const item of OWNABLE_COSMETICS) {
+      if (ADDED_BY_0028.has(item.id)) continue;
       expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
       expect(migration).toContain(`('${item.slot}', '${item.id}')`);
     }
@@ -522,7 +535,6 @@ describe("Halloween theme migration 0027", () => {
     expect(previous).toMatchObject({ idx: 26, tag: "0026_shop_activation_cosmetics" });
     expect(current).toMatchObject({ idx: 27, version: "7", tag: "0027_halloween_theme", breakpoints: true });
     expect(current!.when).toBe(previous!.when + 1);
-    expect(journal.entries.at(-1)?.tag).toBe("0027_halloween_theme");
   });
 
   it("declares the same constraints and collectible table in the drizzle schema", () => {
@@ -547,5 +559,145 @@ describe("Halloween theme migration 0027", () => {
       "seasonal_collectibles_theme_id_ck",
     ]);
     expect(collectibles.indexes.map((index) => index.config.name)).toEqual(["seasonal_collectibles_theme_found_idx"]);
+  });
+});
+
+describe("Christmas seasonal cosmetics (release christmas-20261107)", () => {
+  const christmas = SEASONAL_THEMES.find((theme) => theme.id === "christmas")!;
+  const before = new Date("2026-11-30T22:59:59.999Z"); // 30 November 23:59:59.999 in Paris
+  const opening = new Date("2026-11-30T23:00:00Z"); // 1 December 00:00 in Paris
+  const lastMinute = new Date("2027-01-04T22:59:59Z"); // 4 January 23:59:59 in Paris
+  const closing = new Date("2027-01-04T23:00:00Z"); // 5 January 00:00 in Paris
+
+  it("sells the snowflake trail and snowstorm victory for coins during Christmas only", () => {
+    expect(christmas).toEqual({
+      id: "christmas",
+      availableFrom: "2026-12-01T00:00:00+01:00",
+      availableUntil: "2027-01-05T00:00:00+01:00",
+    });
+    const seasonal = COIN_COSMETICS.filter((item) => "season" in item && item.season.id === "christmas");
+    expect(seasonal.map(({ id, slot, coinPrice, name, nameEn }) => ({ id, slot, coinPrice, name, nameEn }))).toEqual([
+      { id: "snowflake_trail", slot: "HUB_TRAIL", coinPrice: 450, name: "Traînée Flocons", nameEn: "Snowflake Trail" },
+      { id: "snowstorm_victory", slot: "VICTORY_EFFECT", coinPrice: 900, name: "Victoire Tempête de neige", nameEn: "Snowstorm Victory" },
+    ]);
+    for (const item of seasonal) {
+      expect(item.season).toBe(christmas);
+      expect(item.description).toMatch(/À acheter en jeu avec tes pièces\.$/);
+      expect(item.platformSupport.java.implementation).toContain("SNOWFLAKE");
+      expect(isCoinCosmeticOnSale(item, before)).toBe(false);
+      expect(isCoinCosmeticOnSale(item, opening)).toBe(true);
+      expect(isCoinCosmeticOnSale(item, lastMinute)).toBe(true);
+      expect(isCoinCosmeticOnSale(item, closing)).toBe(false);
+    }
+  });
+
+  it("never sells Halloween and Christmas items at the same time", () => {
+    const onSale = (now: Date) => coinCosmeticsOnSale(now).map((item) => item.id);
+    expect(onSale(opening)).toContain("snowflake_trail");
+    expect(onSale(opening)).not.toContain("pumpkin_trail");
+    expect(onSale(new Date("2026-11-07T12:00:00Z"))).toEqual(
+      COIN_COSMETICS.filter((item) => !("season" in item)).map((item) => item.id),
+    );
+    expect(onSale(closing)).not.toContain("snowstorm_victory");
+    for (const id of ["snowflake_trail", "snowstorm_victory"]) expect(cosmeticById(id)).toBeDefined();
+  });
+
+  it("filters the public catalog API by season", () => {
+    const ids = (now: Date) => publicCosmeticCatalog(now).coinItems.map((item) => item.id);
+    expect(ids(opening)).toEqual(expect.arrayContaining(["snowflake_trail", "snowstorm_victory"]));
+    expect(ids(before)).not.toContain("snowflake_trail");
+    expect(ids(closing)).not.toContain("snowstorm_victory");
+  });
+
+  it("rewards the Candy Cane trail for the 13 lobby presents and never sells it", () => {
+    const candy = REWARD_COSMETICS.find((item) => item.id === "candy_cane_trail")!;
+    expect(candy).toMatchObject({ slot: "HUB_TRAIL", acquisition: "reward", rewardOnly: true, name: "Sucre d'orge", nameEn: "Candy Cane Trail" });
+    expect(candy.description).toContain("13 cadeaux");
+    expect(candy.description).toContain("Jamais vendue");
+    expect(isRewardOnlyCosmetic("candy_cane_trail")).toBe(true);
+    expect(isFreeCosmetic("candy_cane_trail")).toBe(false);
+    expect(grantedByAnyProduct("candy_cane_trail")).toBe(false);
+    expect(COIN_COSMETICS.some((item) => item.id === "candy_cane_trail" as string)).toBe(false);
+    expect(COSMETIC_CATALOG_RESPONSE.items.some((item) => item.id === "candy_cane_trail" as string)).toBe(false);
+  });
+});
+
+describe("Christmas theme migration 0028", () => {
+  const read = (path: string) => readFile(new URL(path, import.meta.url), "utf8");
+  const migrationFile = "../drizzle/0028_christmas_theme.sql";
+
+  it("widens the three cosmetic constraints for every ownable cosmetic, earlier ones included", async () => {
+    const migration = await read(migrationFile);
+    expect(migration).toContain('DROP CONSTRAINT IF EXISTS "cosmetic_entitlements_id_ck"');
+    expect(migration).toContain('DROP CONSTRAINT IF EXISTS "cosmetic_selections_slot_cosmetic_ck"');
+    expect(migration).toContain("cosmetic_first_activations_cosmetic_id_check");
+    expect(migration).toContain("to_regclass('public.cosmetic_first_activations') IS NOT NULL");
+    for (const item of OWNABLE_COSMETICS) {
+      expect(migration.match(new RegExp(`'${item.id}'`, "g"))!.length).toBeGreaterThanOrEqual(3);
+      expect(migration).toContain(`('${item.slot}', '${item.id}')`);
+    }
+    // Nothing from the previous constraint (0027) is dropped.
+    const previous = await read("../drizzle/0027_halloween_theme.sql");
+    for (const id of new Set(previous.match(/'[a-z_]+_(?:trail|victory|badge|burst|cheer|frame|flight|flair)'/g))) {
+      expect(migration.match(new RegExp(id, "g"))!.length).toBeGreaterThanOrEqual(3);
+    }
+    expect(migration).toContain("('HUB_TRAIL', 'snowflake_trail')");
+    expect(migration).toContain("('HUB_TRAIL', 'candy_cane_trail')");
+    expect(migration).toContain("('VICTORY_EFFECT', 'snowstorm_victory')");
+  });
+
+  it("is additive and idempotent, with no new table and no table grant", async () => {
+    const migration = await read(migrationFile);
+    expect(migration).not.toMatch(/CREATE TABLE/i);
+    expect(migration).not.toMatch(/CREATE INDEX (?!IF NOT EXISTS)/);
+    expect(migration).not.toMatch(/DROP (TABLE|VIEW|INDEX|COLUMN|SCHEMA)/i);
+    expect(migration).toContain("CREATE SCHEMA IF NOT EXISTS metrics");
+    expect(migration).not.toMatch(/GRANT\s+[^;]*\s+ON\s+(TABLE\s+)?(public\.)?"?seasonal_collectibles"?\s/i);
+    expect(migration).toContain("REVOKE ALL ON public.seasonal_collectibles FROM cookiebuild_metrics");
+    expect(migration.split("--> statement-breakpoint").length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("recreates the hunt view with the Halloween, Christmas and advent goals", async () => {
+    const migration = await read(migrationFile);
+    expect(migration.match(/CREATE OR REPLACE VIEW metrics\./g)).toHaveLength(1);
+    expect(migration).toContain("CREATE OR REPLACE VIEW metrics.seasonal_collectibles_daily WITH (security_barrier = true)");
+    expect(migration).toContain("VALUES ('halloween-2026'::text, 13),");
+    expect(migration).toContain("('christmas-2026'::text, 13),");
+    expect(migration).toContain("('christmas-2026-advent'::text, 24)");
+    expect(migration).toContain("GRANT SELECT ON metrics.seasonal_collectibles_daily TO cookiebuild_metrics");
+    expect(migration).not.toMatch(/GRANT\s+SELECT\s+ON\s+public\./i);
+    // Same projection as 0027, so CREATE OR REPLACE keeps owner, grants and dependants.
+    const projection = (sql: string) => {
+      const view = sql.slice(sql.indexOf("CREATE OR REPLACE VIEW"), sql.indexOf("GROUP BY 1, 2;"));
+      return view.slice(view.lastIndexOf("SELECT date_trunc"));
+    };
+    expect(projection(migration)).toBe(projection(await read("../drizzle/0027_halloween_theme.sql")));
+    expect(projection(migration)).not.toMatch(/(^|[\s,])ranked\.player_id\s*(,|AS|$)/m);
+  });
+
+  it("is registered in the drizzle journal right after 0027", async () => {
+    const journal = JSON.parse(await read("../drizzle/meta/_journal.json")) as {
+      entries: Array<{ idx: number; tag: string; when: number; breakpoints: boolean }>;
+    };
+    const start = journal.entries.findIndex((entry) => entry.tag === "0027_halloween_theme");
+    const [previous, current] = journal.entries.slice(start, start + 2);
+    expect(previous).toMatchObject({ idx: 27, tag: "0027_halloween_theme" });
+    expect(current).toMatchObject({ idx: 28, version: "7", tag: "0028_christmas_theme", breakpoints: true });
+    expect(current!.when).toBe(previous!.when + 1);
+    expect(journal.entries.at(-1)?.tag).toBe("0028_christmas_theme");
+  });
+
+  it("declares the widened constraints in the drizzle schema", () => {
+    const entitlementCheck = getTableConfig(cosmeticEntitlements).checks
+      .find((check) => check.name === "cosmetic_entitlements_id_ck")!;
+    const selectionCheck = getTableConfig(cosmeticSelections).checks
+      .find((check) => check.name === "cosmetic_selections_slot_cosmetic_ck")!;
+    const sqlText = (check: { value: { queryChunks: unknown[] } }) =>
+      check.value.queryChunks.map((chunk) => (chunk as { value?: string[] }).value?.join("") ?? "").join("");
+    for (const id of ADDED_BY_0028) {
+      const item = cosmeticById(id)!;
+      expect(sqlText(entitlementCheck)).toContain(`'${item.id}'`);
+      expect(sqlText(selectionCheck)).toContain(`('${item.slot}', '${item.id}')`);
+    }
   });
 });
