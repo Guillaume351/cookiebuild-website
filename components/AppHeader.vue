@@ -14,6 +14,7 @@
           />
           <span class="text-xl font-bold text-white">Cookie Build</span>
           <span v-if="seasonalTheme === 'halloween'" aria-hidden="true" class="ml-2 text-lg leading-none">🎃</span>
+          <span v-if="seasonalTheme === 'christmas'" aria-hidden="true" class="ml-2 text-lg leading-none">❄️</span>
         </NuxtLink>
       </div>
       <div class="hidden items-center space-x-4 text-sm xl:flex">
@@ -123,6 +124,11 @@
       v-if="seasonalTheme === 'halloween'"
       aria-hidden="true"
       class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-purple-600/80 via-orange-500 to-purple-600/80"
+    />
+    <div
+      v-if="seasonalTheme === 'christmas'"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-red-600/80 via-amber-200 to-emerald-600/80"
     />
   </nav>
 </template>

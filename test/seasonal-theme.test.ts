@@ -140,6 +140,20 @@ describe("seasonal rendering", () => {
     expect(page).not.toMatch(/<img[^>]+(pumpkin|bat|moon)/i);
     const header = await read("../components/AppHeader.vue");
     expect(header).toContain("v-if=\"seasonalTheme === 'halloween'\"");
+    expect(header).toContain("v-if=\"seasonalTheme === 'christmas'\"");
+  });
+
+  it("adds a date-gated Christmas skin next to the Halloween one, CSS and inline SVG only", async () => {
+    const page = await read("../pages/index.vue");
+    expect(page).toContain('const christmas = computed(() => seasonalTheme.value === "christmas");');
+    expect(page).toContain('v-if="christmas" class="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true"');
+    // Each decoration is gated by its own season: the Halloween one stays off in December.
+    expect(page).toContain('const halloween = computed(() => seasonalTheme.value === "halloween");');
+    expect(page).not.toMatch(/<img[^>]+(snow|christmas|gift|tree)/i);
+    expect(page).toMatch(/christmas: \{\s*hero: "christmas-hero/);
+    expect(page).toContain(':class="seasonal.style.banner"');
+    const reduced = page.slice(page.indexOf("@media (prefers-reduced-motion: reduce)"));
+    expect(reduced).toContain(".christmas-snow, .christmas-bulb, .christmas-flake { animation: none; }");
   });
 
   it("labels limited coin items in the shop and hides them outside their season", async () => {

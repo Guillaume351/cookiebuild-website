@@ -4,7 +4,7 @@
     <section
       aria-labelledby="home-title"
       class="relative overflow-hidden rounded-3xl bg-gray-900 text-center text-white shadow-2xl"
-      :class="halloween ? 'halloween-hero ring-1 ring-orange-500/40' : ''"
+      :class="seasonalHeroClass"
     >
       <img
         src="/lobby-hero-clean-960.webp"
@@ -51,19 +51,69 @@
           <path class="halloween-pumpkin-face" d="M14 21 L17 15 L20 21 Z M28 21 L31 15 L34 21 Z M13 27 Q24 37 35 27 L31 28 L29 26 L27 29 L24 27 L21 29 L19 26 L17 28 Z" fill="#fde047" />
         </svg>
       </div>
+      <!-- Christmas: snowy lobby at dusk, falling snow, a string of warm lights. CSS and inline SVG only. -->
+      <div v-if="christmas" class="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
+        <div class="absolute inset-0 bg-gradient-to-b from-indigo-950/70 via-sky-950/10 to-amber-950/30"></div>
+        <div class="christmas-glow absolute inset-x-0 bottom-0 h-1/2"></div>
+        <div class="christmas-snow christmas-snow-far absolute inset-0"></div>
+        <div class="christmas-snow christmas-snow-near absolute inset-0"></div>
+        <svg class="absolute inset-x-0 top-0 h-10 w-full md:h-14" viewBox="0 0 400 40" preserveAspectRatio="none">
+          <path d="M0 6 Q50 30 100 8 Q150 30 200 8 Q250 30 300 8 Q350 30 400 6" fill="none" stroke="#0f172a" stroke-width="1.5" vector-effect="non-scaling-stroke" />
+        </svg>
+        <div class="absolute inset-x-0 top-0 h-10 md:h-14">
+          <span
+            v-for="bulb in CHRISTMAS_LIGHTS"
+            :key="bulb.id"
+            class="christmas-bulb absolute h-1.5 w-1.5 rounded-full md:h-2 md:w-2"
+            :class="bulb.class"
+            :style="bulb.style"
+          ></span>
+        </div>
+        <svg
+          v-for="flake in CHRISTMAS_FLAKES"
+          :key="flake.id"
+          class="christmas-flake absolute text-sky-100/70"
+          :class="flake.class"
+          :style="flake.style"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+        >
+          <path d="M12 2v20M3.34 7l17.32 10M3.34 17 20.66 7M12 5.5 9.8 3.3M12 5.5l2.2-2.2M12 18.5l-2.2 2.2M12 18.5l2.2 2.2M6.4 8.75 3.4 9.6M6.4 8.75 5.6 5.75M17.6 15.25l3 .85M17.6 15.25l.8 3M6.4 15.25l-3-.85M6.4 15.25l-.8 3M17.6 8.75l3-.85M17.6 8.75l.8-3" />
+        </svg>
+        <svg class="absolute inset-x-0 bottom-0 h-10 w-full md:h-16" viewBox="0 0 400 40" preserveAspectRatio="none">
+          <path d="M0 24 Q30 14 70 22 T150 20 T240 24 T320 18 T400 22 V40 H0 Z" fill="#e0f2fe" fill-opacity=".35" />
+          <path d="M0 30 Q50 22 110 28 T220 27 T330 30 T400 26 V40 H0 Z" fill="#f8fafc" fill-opacity=".8" />
+        </svg>
+        <svg class="christmas-snowman absolute bottom-1 left-[3%] w-10 md:bottom-2 md:w-14" viewBox="0 0 40 56">
+          <circle cx="20" cy="42" r="12" fill="#f8fafc" />
+          <circle cx="20" cy="22" r="9" fill="#f8fafc" />
+          <path d="M11 27 Q20 31 29 27 L29 30 Q20 34 11 30 Z" fill="#dc2626" />
+          <path d="M26 28 L28 36 L24 35 Z" fill="#dc2626" />
+          <circle cx="17" cy="20" r="1.2" fill="#1e293b" />
+          <circle cx="23" cy="20" r="1.2" fill="#1e293b" />
+          <path d="M20 22.5 L26 24 L20 24.5 Z" fill="#f97316" />
+          <circle cx="20" cy="38" r="1.2" fill="#1e293b" />
+          <circle cx="20" cy="44" r="1.2" fill="#1e293b" />
+          <path d="M12 13 H28 V15 H12 Z M15 4 H25 V13 H15 Z" fill="#1e293b" />
+        </svg>
+      </div>
 
       <div class="relative z-20 px-6 py-20 md:py-28">
         <NuxtLink
           v-if="seasonal"
           :to="seasonal.href"
-          class="group mx-auto mb-8 flex max-w-2xl items-start gap-4 rounded-2xl border border-orange-400/50 bg-gradient-to-r from-purple-950/85 via-zinc-950/85 to-orange-950/85 p-4 text-left shadow-[0_0_40px_rgba(147,51,234,.25)] backdrop-blur hover:border-orange-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 md:p-5"
+          class="group mx-auto mb-8 flex max-w-2xl items-start gap-4 rounded-2xl border p-4 text-left backdrop-blur focus-visible:outline-none focus-visible:ring-2 md:p-5"
+          :class="seasonal.style.banner"
         >
-          <span aria-hidden="true" class="shrink-0 text-3xl leading-none md:text-4xl">🎃</span>
+          <span aria-hidden="true" class="shrink-0 text-3xl leading-none md:text-4xl">{{ seasonal.style.icon }}</span>
           <span class="min-w-0">
-            <span class="block text-[11px] font-black uppercase tracking-widest text-orange-300">{{ seasonal.bannerEyebrow }}</span>
+            <span class="block text-[11px] font-black uppercase tracking-widest" :class="seasonal.style.accent">{{ seasonal.bannerEyebrow }}</span>
             <span class="mt-1 block text-lg font-black text-white md:text-xl">{{ seasonal.bannerTitle }}</span>
             <span class="mt-1 block text-sm leading-relaxed text-zinc-200">{{ seasonal.bannerText }}</span>
-            <span class="mt-2 inline-flex items-center text-sm font-black text-orange-300 group-hover:text-orange-200">{{ seasonal.bannerCta }} →</span>
+            <span class="mt-2 inline-flex items-center text-sm font-black" :class="seasonal.style.cta">{{ seasonal.bannerCta }} →</span>
           </span>
         </NuxtLink>
         <p class="mb-4 text-lg font-black uppercase tracking-[0.25em] text-orange-400 drop-shadow">
@@ -492,8 +542,31 @@ const { locale, copy, localizePath } = useSiteLocale();
 // Seasonal skin (e.g. Halloween): decided once at SSR, nothing changes outside the window.
 const { theme: seasonalTheme } = useSeasonalTheme();
 const halloween = computed(() => seasonalTheme.value === "halloween");
+const christmas = computed(() => seasonalTheme.value === "christmas");
+// Per-season hero ring and banner look; the banner text comes from utils/seasonal-copy.
+const SEASONAL_STYLE = {
+  halloween: {
+    hero: "halloween-hero ring-1 ring-orange-500/40",
+    icon: "🎃",
+    banner: "border-orange-400/50 bg-gradient-to-r from-purple-950/85 via-zinc-950/85 to-orange-950/85 shadow-[0_0_40px_rgba(147,51,234,.25)] hover:border-orange-300 focus-visible:ring-orange-400",
+    accent: "text-orange-300",
+    cta: "text-orange-300 group-hover:text-orange-200",
+  },
+  christmas: {
+    hero: "christmas-hero ring-1 ring-sky-200/30",
+    icon: "🎄",
+    banner: "border-amber-200/50 bg-gradient-to-r from-sky-950/85 via-slate-950/85 to-red-950/80 shadow-[0_0_40px_rgba(251,191,36,.18)] hover:border-amber-100 focus-visible:ring-amber-200",
+    accent: "text-sky-200",
+    cta: "text-amber-200 group-hover:text-amber-100",
+  },
+};
+const seasonalHeroClass = computed(() => (seasonalTheme.value ? SEASONAL_STYLE[seasonalTheme.value].hero : ""));
 const seasonal = computed(() => seasonalTheme.value
-  ? { ...seasonalCopy(seasonalTheme.value, locale.value.code), href: localizePath(seasonalUpdatePath(seasonalTheme.value)) }
+  ? {
+      ...seasonalCopy(seasonalTheme.value, locale.value.code),
+      href: localizePath(seasonalUpdatePath(seasonalTheme.value)),
+      style: SEASONAL_STYLE[seasonalTheme.value],
+    }
   : null);
 const HALLOWEEN_BATS = [
   { id: "moon", class: "w-10 md:w-14 right-[9%] top-12 md:right-[12%] md:top-20", style: { animationDelay: "-0.4s" } },
@@ -504,6 +577,23 @@ const HALLOWEEN_PUMPKINS = [
   { id: "left", class: "left-[3%] w-12 md:w-16", style: { animationDelay: "-0.6s" } },
   { id: "left-small", class: "left-[13%] hidden w-9 sm:block md:w-11", style: { animationDelay: "-1.7s" } },
   { id: "right", class: "right-[4%] w-11 md:w-14", style: { animationDelay: "-1.1s" } },
+];
+// Bulbs along the four swags of the light string (y = 8 + 44·t·(1-t) in a 400×40 box).
+const CHRISTMAS_BULB_COLORS = ["bg-amber-300", "bg-red-400", "bg-emerald-400", "bg-amber-50"];
+const CHRISTMAS_LIGHTS = Array.from({ length: 20 }, (_, index) => {
+  const t = [0.1, 0.3, 0.5, 0.7, 0.9][index % 5];
+  const x = Math.floor(index / 5) * 100 + t * 100;
+  const y = 8 + 44 * t * (1 - t);
+  return {
+    id: index,
+    class: [CHRISTMAS_BULB_COLORS[index % 4], index % 2 ? "hidden sm:block" : ""],
+    style: { left: `calc(${x / 4}% - 3px)`, top: `calc(${(y / 40) * 100}% - 1px)`, animationDelay: `${(index % 7) * -0.45}s` },
+  };
+});
+const CHRISTMAS_FLAKES = [
+  { id: "left", class: "left-[6%] top-[16%] w-7 md:w-10", style: { animationDelay: "-2s" } },
+  { id: "right", class: "right-[7%] top-[12%] w-9 md:w-14", style: { animationDelay: "-7s" } },
+  { id: "far", class: "hidden md:block right-[22%] top-[30%] w-6", style: { animationDelay: "-11s" } },
 ];
 const editions = computed(() => [
   { id: "java", label: "Java" },
@@ -746,7 +836,40 @@ useHead(() => ({
 @keyframes halloween-bat-flap { from { transform: scaleY(1); } to { transform: scaleY(.55); } }
 @keyframes halloween-bat-drift { 0%, 100% { translate: 0 0; } 50% { translate: 14px -10px; } }
 @keyframes halloween-flicker { 0%, 100% { opacity: 1; } 40% { opacity: .75; } 45% { opacity: .95; } 70% { opacity: .65; } }
+.christmas-hero { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, .25), 0 0 60px rgba(186, 230, 253, .16); }
+.christmas-glow { background: radial-gradient(ellipse at 50% 100%, rgba(251, 191, 36, .22), transparent 70%); }
+.christmas-snow { background-repeat: repeat; animation: christmas-snowfall linear infinite; }
+.christmas-snow-near {
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 90px 130px, rgba(255, 255, 255, .9) 50%, transparent 51%),
+    radial-gradient(3px 3px at 160px 70px, rgba(255, 255, 255, .85) 50%, transparent 51%),
+    radial-gradient(2px 2px at 220px 180px, #fff 50%, transparent 51%),
+    radial-gradient(2.5px 2.5px at 270px 100px, rgba(255, 255, 255, .9) 50%, transparent 51%);
+  background-size: 300px 220px;
+  --snow-drift: 40px;
+  --snow-fall: 220px;
+  animation-duration: 12s;
+}
+.christmas-snow-far {
+  background-image:
+    radial-gradient(1.5px 1.5px at 30px 50px, rgba(255, 255, 255, .7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 110px 20px, rgba(255, 255, 255, .6) 50%, transparent 51%),
+    radial-gradient(1px 1px at 150px 120px, rgba(255, 255, 255, .7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 60px 140px, rgba(255, 255, 255, .5) 50%, transparent 51%);
+  background-size: 180px 160px;
+  --snow-drift: -20px;
+  --snow-fall: 160px;
+  animation-duration: 20s;
+}
+@keyframes christmas-snowfall { from { background-position: 0 0; } to { background-position: var(--snow-drift) var(--snow-fall); } }
+.christmas-bulb { box-shadow: 0 0 6px 2px currentColor; color: rgba(253, 230, 138, .55); animation: christmas-twinkle 3.2s ease-in-out infinite; }
+.christmas-flake { animation: christmas-flake-spin 18s linear infinite; filter: drop-shadow(0 0 6px rgba(186, 230, 253, .45)); }
+.christmas-snowman { filter: drop-shadow(0 0 10px rgba(251, 191, 36, .25)); }
+@keyframes christmas-twinkle { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+@keyframes christmas-flake-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) {
   .halloween-bat, .halloween-pumpkin-face { animation: none; }
+  .christmas-snow, .christmas-bulb, .christmas-flake { animation: none; }
 }
 </style>
