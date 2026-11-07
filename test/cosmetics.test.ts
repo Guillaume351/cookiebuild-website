@@ -33,6 +33,10 @@ const ADDED_BY_0026 = new Set([
 const ADDED_BY_0027 = new Set(["pumpkin_trail", "witch_spell_victory", "will_o_wisp_trail"]);
 /** Cosmetics introduced by migration 0028 (release christmas-20261107). */
 const ADDED_BY_0028 = new Set(["snowflake_trail", "snowstorm_victory", "candy_cane_trail"]);
+type SeasonalCoinCosmetic = Extract<(typeof COIN_COSMETICS)[number], { season: unknown }>;
+/** Coin items of one season, in catalog order. */
+const coinItemsOfSeason = (seasonId: string) =>
+  COIN_COSMETICS.filter((item): item is SeasonalCoinCosmetic => "season" in item && item.season.id === seasonId);
 const grantedByAnyProduct = (id: string) =>
   COSMETIC_PRODUCTS.some((product) => (product.grants as readonly string[]).includes(id));
 
@@ -422,7 +426,7 @@ describe("Halloween seasonal cosmetics (release halloween-20261012)", () => {
       availableFrom: "2026-10-12T00:00:00+02:00",
       availableUntil: "2026-11-03T00:00:00+01:00",
     });
-    const seasonal = COIN_COSMETICS.filter((item) => "season" in item && item.season.id === "halloween");
+    const seasonal = coinItemsOfSeason("halloween");
     expect(seasonal.map(({ id, slot, coinPrice, name, nameEn }) => ({ id, slot, coinPrice, name, nameEn }))).toEqual([
       { id: "pumpkin_trail", slot: "HUB_TRAIL", coinPrice: 450, name: "Traînée Citrouille", nameEn: "Pumpkin Trail" },
       { id: "witch_spell_victory", slot: "VICTORY_EFFECT", coinPrice: 900, name: "Victoire Sortilège", nameEn: "Witch Spell Victory" },
@@ -575,7 +579,7 @@ describe("Christmas seasonal cosmetics (release christmas-20261107)", () => {
       availableFrom: "2026-12-01T00:00:00+01:00",
       availableUntil: "2027-01-05T00:00:00+01:00",
     });
-    const seasonal = COIN_COSMETICS.filter((item) => "season" in item && item.season.id === "christmas");
+    const seasonal = coinItemsOfSeason("christmas");
     expect(seasonal.map(({ id, slot, coinPrice, name, nameEn }) => ({ id, slot, coinPrice, name, nameEn }))).toEqual([
       { id: "snowflake_trail", slot: "HUB_TRAIL", coinPrice: 450, name: "Traînée Flocons", nameEn: "Snowflake Trail" },
       { id: "snowstorm_victory", slot: "VICTORY_EFFECT", coinPrice: 900, name: "Victoire Tempête de neige", nameEn: "Snowstorm Victory" },
