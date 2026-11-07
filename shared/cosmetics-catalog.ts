@@ -271,9 +271,9 @@ export const COIN_COSMETICS = [
     season: CHRISTMAS_SEASON,
     name: "Traînée Flocons",
     nameEn: "Snowflake Trail",
-    description: "Des flocons de neige et des étincelles blanches et bleu glacier tourbillonnent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
+    description: "De doux flocons de neige tombent derrière toi dans le lobby. À acheter en jeu avec tes pièces.",
     preview: { kind: "trail", label: "Flocons" },
-    platformSupport: LOBBY_TRAIL_SUPPORT("SNOWFLAKE et DUST (blanc et bleu glacier)"),
+    platformSupport: LOBBY_TRAIL_SUPPORT("SNOWFLAKE et DUST (blanc)"),
   },
   {
     id: "cookie_rain_victory",
@@ -339,9 +339,9 @@ export const COIN_COSMETICS = [
     season: CHRISTMAS_SEASON,
     name: "Victoire Tempête de neige",
     nameEn: "Snowstorm Victory",
-    description: "Une tempête de flocons et de boules de neige tourbillonne autour de toi quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
+    description: "Des clochettes et un tourbillon de neige rouge, verte et blanche quand tu gagnes une partie. À acheter en jeu avec tes pièces.",
     preview: { kind: "burst", label: "Tempête de neige" },
-    platformSupport: VICTORY_EFFECT_SUPPORT("SNOWFLAKE, ITEM_SNOWBALL et END_ROD"),
+    platformSupport: VICTORY_EFFECT_SUPPORT("SNOWFLAKE, ITEM_SNOWBALL, DUST, FIREWORK et TOTEM_OF_UNDYING"),
   },
   {
     id: "heart_trail",

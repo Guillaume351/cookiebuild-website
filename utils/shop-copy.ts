@@ -662,7 +662,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Snowflake Trail",
-      "description": "Snowflakes and white and ice-blue sparkles swirl behind you in the lobby"
+      "description": "Soft snowflakes drift down behind you in the lobby"
     },
     "cookie_rain_victory": {
       "name": "Cookie Rain",
@@ -686,7 +686,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Snowstorm Victory",
-      "description": "A storm of snowflakes and snowballs whirls around you when you win a match"
+      "description": "Ringing bells and a whirl of red, green and white snow when you win a match"
     },
     "heart_trail": {
       "name": "Heart trail",
@@ -720,7 +720,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Traînée Flocons",
-      "description": "Des flocons de neige et des étincelles blanches et bleu glacier tourbillonnent derrière toi dans le lobby"
+      "description": "De doux flocons de neige tombent derrière toi dans le lobby"
     },
     "cookie_rain_victory": {
       "name": "Pluie de cookies",
@@ -744,7 +744,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Victoire Tempête de neige",
-      "description": "Une tempête de flocons et de boules de neige tourbillonne autour de toi quand tu gagnes une partie"
+      "description": "Des clochettes et un tourbillon de neige rouge, verte et blanche quand tu gagnes une partie"
     },
     "heart_trail": {
       "name": "Trace de cœurs",
@@ -778,7 +778,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Schneeflockenspur",
-      "description": "Schneeflocken und weiße und eisblaue Funken wirbeln in der Lobby hinter dir"
+      "description": "Sanfte Schneeflocken rieseln in der Lobby hinter dir herab"
     },
     "cookie_rain_victory": {
       "name": "Keksregen",
@@ -802,7 +802,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Schneesturm-Sieg",
-      "description": "Ein Sturm aus Schneeflocken und Schneebällen wirbelt um dich herum, wenn du ein Spiel gewinnst"
+      "description": "Glockenklang und ein Wirbel aus rotem, grünem und weißem Schnee, wenn du eine Partie gewinnst"
     },
     "heart_trail": {
       "name": "Herzspur",
@@ -836,7 +836,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Scia di fiocchi di neve",
-      "description": "Fiocchi di neve e scintille bianche e azzurro ghiaccio volteggiano dietro di te nella lobby"
+      "description": "Morbidi fiocchi di neve cadono dietro di te nella lobby"
     },
     "cookie_rain_victory": {
       "name": "Pioggia di biscotti",
@@ -860,7 +860,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Vittoria Tormenta di neve",
-      "description": "Una tormenta di fiocchi e palle di neve turbina intorno a te quando vinci una partita"
+      "description": "Un suono di campanelle e un vortice di neve rossa, verde e bianca quando vinci una partita"
     },
     "heart_trail": {
       "name": "Scia di cuori",
@@ -894,7 +894,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Следа от снежинки",
-      "description": "Снежинки и бели и ледено сини искри се вихрят след теб в лобито"
+      "description": "Меки снежинки падат зад теб в лобито"
     },
     "cookie_rain_victory": {
       "name": "Дъжд от бисквитки",
@@ -918,7 +918,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Победа Снежна буря",
-      "description": "Буря от снежинки и снежни топки се вихри около теб, когато спечелиш мач"
+      "description": "Звън на камбанки и вихър от червен, зелен и бял сняг, когато спечелиш игра"
     },
     "heart_trail": {
       "name": "Следа от сърца",
@@ -952,7 +952,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Estela de copos de nieve",
-      "description": "Copos de nieve y chispas blancas y azul hielo revolotean detrás de ti en el lobby"
+      "description": "Suaves copos de nieve caen detrás de ti en el lobby"
     },
     "cookie_rain_victory": {
       "name": "Lluvia de galletas",
@@ -976,7 +976,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Victoria Tormenta de nieve",
-      "description": "Una tormenta de copos y bolas de nieve gira a tu alrededor cuando ganas una partida"
+      "description": "Un repique de campanas y un remolino de nieve roja, verde y blanca cuando ganas una partida"
     },
     "heart_trail": {
       "name": "Rastro de corazones",
@@ -1010,7 +1010,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "बर्फ़ के फ़ाहों की ट्रेल",
-      "description": "लॉबी में बर्फ़ के फ़ाहे और सफ़ेद व बर्फ़ीली नीली चमक आपके पीछे घूमती हैं"
+      "description": "लॉबी में आपके पीछे नरम बर्फ़ के फाहे गिरते हैं"
     },
     "cookie_rain_victory": {
       "name": "कुकी की बारिश",
@@ -1034,7 +1034,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "बर्फ़ीले तूफ़ान की जीत",
-      "description": "जब आप मैच जीतते हैं तो बर्फ़ के फ़ाहों और स्नोबॉल का तूफ़ान आपके चारों ओर घूमता है"
+      "description": "मैच जीतने पर घंटियों की आवाज़ और लाल, हरी और सफ़ेद बर्फ़ का भंवर"
     },
     "heart_trail": {
       "name": "दिल ट्रेल",
@@ -1068,7 +1068,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowflake_trail": {
       "name": "Rastro de flocos de neve",
-      "description": "Flocos de neve e faíscas brancas e azul-gelo rodopiam atrás de você no lobby"
+      "description": "Flocos de neve suaves caem atrás de você no lobby"
     },
     "cookie_rain_victory": {
       "name": "Chuva de cookies",
@@ -1092,7 +1092,7 @@ export const COIN_ITEM_COPY = {
     },
     "snowstorm_victory": {
       "name": "Vitória Nevasca",
-      "description": "Uma nevasca de flocos e bolas de neve gira ao seu redor quando você vence uma partida"
+      "description": "Sinos tocando e um redemoinho de neve vermelha, verde e branca quando você vence uma partida"
     },
     "heart_trail": {
       "name": "Rastro de corações",
