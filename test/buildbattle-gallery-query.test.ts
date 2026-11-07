@@ -123,7 +123,7 @@ describe("gallery periods (Europe/Paris)", () => {
 
 describe("gallery localization and links", () => {
   it("localizes theme names from the BuildBattles bundles with an English fallback", () => {
-    expect(Object.keys(BUILDBATTLE_THEME_NAMES).length).toBeGreaterThanOrEqual(56);
+    expect(Object.keys(BUILDBATTLE_THEME_NAMES).length).toBeGreaterThanOrEqual(65);
     expect(localizedThemeName("summer", "Summer", "fr")).toBe("Été");
     expect(localizedThemeName("summer", "Summer", "pt-BR")).toBe(BUILDBATTLE_THEME_NAMES.summer!["pt-BR"]);
     // Italian bundles shipped with the Build Battle build-time vote release.
@@ -133,6 +133,18 @@ describe("gallery localization and links", () => {
       expect(Object.keys(BUILDBATTLE_THEME_NAMES[theme] ?? {}).sort()).toEqual(["bg", "de", "en", "es", "fr", "hi", "it", "pa", "pt-BR"]);
     }
     expect(localizedThemeName("haunted_house", "Haunted House", "fr")).toBe("Maison hantée");
+    // Christmas seasonal themes (release christmas-20261107), keys from GalleryCapturePolicy.themeKey.
+    const christmas = {
+      "Snowman": "snowman", "Christmas Tree": "christmas_tree", "Santa Claus": "santa_claus", "Reindeer": "reindeer",
+      "Gingerbread House": "gingerbread_house", "Gift": "gift", "Sleigh": "sleigh", "Igloo": "igloo",
+      "Penguin": "penguin", "Fireplace": "fireplace",
+    };
+    for (const [english, theme] of Object.entries(christmas)) {
+      expect(Object.keys(BUILDBATTLE_THEME_NAMES[theme] ?? {}).sort()).toEqual(["bg", "de", "en", "es", "fr", "hi", "it", "pa", "pt-BR"]);
+      expect(BUILDBATTLE_THEME_NAMES[theme]!.en).toBe(english);
+    }
+    expect(localizedThemeName("christmas_tree", "Christmas Tree", "fr")).toBe("Sapin de Noël");
+    expect(localizedThemeName("santa_claus", "Santa Claus", "it")).toBe("Babbo Natale");
     expect(localizedThemeName("unknown_theme", "Custom", "fr")).toBe("Custom");
     expect(localizedThemeName("summer", "Summer", null)).toBe("Summer");
     expect(normalizeGalleryLocale("fr-FR")).toBe("fr");

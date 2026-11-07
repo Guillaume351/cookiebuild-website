@@ -100,6 +100,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "pa": "ਕਾਰ",
     "pt-BR": "Carro"
   },
+  "christmas_tree": {
+    "bg": "Коледна елха",
+    "de": "Weihnachtsbaum",
+    "en": "Christmas Tree",
+    "es": "Árbol de Navidad",
+    "fr": "Sapin de Noël",
+    "hi": "क्रिसमस ट्री",
+    "it": "Albero di Natale",
+    "pa": "ਕ੍ਰਿਸਮਸ ਟ੍ਰੀ",
+    "pt-BR": "Árvore de Natal"
+  },
   "clock": {
     "bg": "Часовник",
     "de": "Uhr",
@@ -177,6 +188,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "pa": "ਫ਼ਾਸਟ ਫ਼ੂਡ",
     "pt-BR": "Fast-food"
   },
+  "fireplace": {
+    "bg": "Камина",
+    "de": "Kamin",
+    "en": "Fireplace",
+    "es": "Chimenea",
+    "fr": "Cheminée",
+    "hi": "अंगीठी",
+    "it": "Camino",
+    "pa": "ਅੰਗੀਠੀ",
+    "pt-BR": "Lareira"
+  },
   "free_style": {
     "bg": "Свободен стил",
     "de": "Freestyle",
@@ -209,6 +231,28 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "it": "Ragno gigante",
     "pa": "ਵਿਸ਼ਾਲ ਮੱਕੜੀ",
     "pt-BR": "Aranha gigante"
+  },
+  "gift": {
+    "bg": "Подарък",
+    "de": "Geschenk",
+    "en": "Gift",
+    "es": "Regalo",
+    "fr": "Cadeau",
+    "hi": "तोहफ़ा",
+    "it": "Regalo",
+    "pa": "ਤੋਹਫ਼ਾ",
+    "pt-BR": "Presente"
+  },
+  "gingerbread_house": {
+    "bg": "Джинджифилова къщичка",
+    "de": "Lebkuchenhaus",
+    "en": "Gingerbread House",
+    "es": "Casita de jengibre",
+    "fr": "Maison en pain d'épices",
+    "hi": "जिंजरब्रेड हाउस",
+    "it": "Casa di pan di zenzero",
+    "pa": "ਜਿੰਜਰਬ੍ਰੈੱਡ ਘਰ",
+    "pt-BR": "Casinha de gengibre"
   },
   "graveyard": {
     "bg": "Гробище",
@@ -264,6 +308,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "it": "Gelato",
     "pa": "ਆਈਸਕ੍ਰੀਮ",
     "pt-BR": "Sorvete"
+  },
+  "igloo": {
+    "bg": "Иглу",
+    "de": "Iglu",
+    "en": "Igloo",
+    "es": "Iglú",
+    "fr": "Igloo",
+    "hi": "इग्लू",
+    "it": "Igloo",
+    "pa": "ਇਗਲੂ",
+    "pt-BR": "Iglu"
   },
   "lighthouse": {
     "bg": "Фар",
@@ -331,6 +386,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "pa": "ਨਿਨਟੈਂਡੋ",
     "pt-BR": "Nintendo"
   },
+  "penguin": {
+    "bg": "Пингвин",
+    "de": "Pinguin",
+    "en": "Penguin",
+    "es": "Pingüino",
+    "fr": "Pingouin",
+    "hi": "पेंगुइन",
+    "it": "Pinguino",
+    "pa": "ਪੈਂਗੁਇਨ",
+    "pt-BR": "Pinguim"
+  },
   "pixel_art": {
     "bg": "Пиксел арт",
     "de": "Pixel-Art",
@@ -397,6 +463,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "pa": "ਖ਼ਰਗੋਸ਼",
     "pt-BR": "Coelho"
   },
+  "reindeer": {
+    "bg": "Северен елен",
+    "de": "Rentier",
+    "en": "Reindeer",
+    "es": "Reno",
+    "fr": "Renne",
+    "hi": "रेनडियर",
+    "it": "Renna",
+    "pa": "ਰੇਨਡੀਅਰ",
+    "pt-BR": "Rena"
+  },
   "restaurant": {
     "bg": "Ресторант",
     "de": "Restaurant",
@@ -429,6 +506,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "it": "Rovine",
     "pa": "ਖੰਡਰ",
     "pt-BR": "Ruínas"
+  },
+  "santa_claus": {
+    "bg": "Дядо Коледа",
+    "de": "Weihnachtsmann",
+    "en": "Santa Claus",
+    "es": "Papá Noel",
+    "fr": "Père Noël",
+    "hi": "सांता क्लॉज़",
+    "it": "Babbo Natale",
+    "pa": "ਸਾਂਤਾ ਕਲਾਜ਼",
+    "pt-BR": "Papai Noel"
   },
   "science": {
     "bg": "Наука",
@@ -484,6 +572,17 @@ export const BUILDBATTLE_THEME_NAMES: Readonly<Record<string, Readonly<Record<st
     "it": "Grattacielo",
     "pa": "ਗਗਨਚੁੰਬੀ ਇਮਾਰਤ",
     "pt-BR": "Arranha-céu"
+  },
+  "sleigh": {
+    "bg": "Шейна",
+    "de": "Schlitten",
+    "en": "Sleigh",
+    "es": "Trineo",
+    "fr": "Traîneau",
+    "hi": "स्लेज",
+    "it": "Slitta",
+    "pa": "ਸਲੈਜ",
+    "pt-BR": "Trenó"
   },
   "smartphone": {
     "bg": "Смартфон",
