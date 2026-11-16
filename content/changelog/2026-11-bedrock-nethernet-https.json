@@ -1,0 +1,8 @@
+{
+  "slug": "bedrock-nethernet-https",
+  "contentType": "changelog",
+  "title": "Bedrock : rejoignez Cookie Build sans demande de confiance",
+  "summary": "Minecraft Bedrock peut désormais vérifier l’identité de Cookie Build dès la première connexion. Gardez le serveur que vous avez déjà enregistré.",
+  "body": "- Les connexions Bedrock qui utilisent NetherNet vérifient l’identité de Cookie Build via HTTPS. Minecraft ne demande plus de faire confiance au serveur lors de votre première connexion à son nom de domaine.\n- Continuez à utiliser `play.cookie-build.com` sur le port `19132`. Les adresses `pe.cookie-build.com`, `bd.cookie-build.com` et `page.cookie-build.com` utilisent le même port et fonctionnent toujours.\n- Sur console, le service intermédiaire que vous utilisez pour rejoindre Cookie Build peut afficher sa propre demande de confiance.",
+  "publishedAt": "2026-11-16T16:55:00Z"
+}
